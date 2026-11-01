@@ -1,0 +1,466 @@
+// Greybox testbed for "death leaves a platform".
+// Rooms are text grids below; each character becomes an object on screen.
+// Rule switches toggle live with keys 1-4.
+
+const T = 32;
+
+// Movement feel
+const SPEED = 220, ACCEL = 2000, AIR_ACCEL = 1400;
+const GRAVITY = 1400, JUMP = 550, MAX_FALL = 800; // ~3.4 tiles high, ~5 tiles running jump
+const COYOTE = 0.1, BUFFER = 0.1, RESPAWN_DELAY = 0.35;
+// Slide: S/↓ while running. Jumping mid-slide is a dive (stay flat in the air).
+// Dying while flat leaves a lying body (2 tiles wide, ½ tall) instead of a standing one.
+const SLIDE_SPEED = 320, SLIDE_TIME = 0.4;
+const STAND = [24, 30], FLAT = [40, 14];               // player hitbox
+const BODY_STAND = [30, 32], BODY_LYING = [62, 16];    // body left behind
+
+// Enemies: walkers patrol, turn at walls/bodies/ledges, kill on touch, die when a falling body lands on them.
+const WALKER_SPEED = 60;
+// Boss: floats back and forth too high to reach from the floor. Stomp its top from a body (1 high is
+// right, 2 high puts you in its path). Speeds up per hit. Heals to full whenever you die.
+const BOSS_HP = 3, BOSS_SPEED = 100, BOSS_SPEEDUP = 50;
+
+// Mechanic rules (persist across rooms)
+const rules = {
+  freeze: true,       // [1] body floats where you died (off = falls with gravity)
+  snap: true,         // [2] body snaps to the tile grid
+  max: 3,             // [3] oldest vanishes past this; 0 = unlimited
+  selfDestruct: false, // [4] K/X kills you anywhere (off = only hazards). Planned as a late-game unlock
+};
+const LIMITS = [1, 2, 3, 5, 0];
+
+// '#' wall  '^' spikes  P start  G goal  '_' plate  D door (open while any plate is held)
+// e walker enemy  B boss (goal stays hidden until it's beaten)
+const ROOMS = [
+  ['Climb: stack yourself up the cliff', [
+    '##############################',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                     G      #',
+    '#                 ############',
+    '#                 #          #',
+    '#                 #          #',
+    '#                 #          #',
+    '#  P              #          #',
+    '##############################',
+  ]],
+  ['Spikes: die in the pit to make a stepping stone', [
+    '##############################',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#  P                      G  #',
+    '#########^^^^^^^^#############',
+    '##############################',
+  ]],
+  ['Plate: leave a body on the switch', [
+    '##############################',
+    '#                     #      #',
+    '#                     #      #',
+    '#                     #      #',
+    '#                     #      #',
+    '#                     #      #',
+    '#                     #      #',
+    '#                     #      #',
+    '#                     D      #',
+    '#                     D      #',
+    '#                     D      #',
+    '#  P      _           D   G  #',
+    '##############################',
+  ]],
+  ['Combo: climb, hold the plate, cross the spikes', [
+    '##############################',
+    '#                      #     #',
+    '#                      #     #',
+    '#                      #     #',
+    '#                      #     #',
+    '#           _          #     #',
+    '#        #####         #     #',
+    '#        #             #     #',
+    '#        #             D     #',
+    '#        #             D     #',
+    '#        #             D     #',
+    '#  P     #    ^^^^     D  G  #',
+    '##############################',
+  ]],
+  ['Walker: drop a body on it. Die in the tunnel and you block yourself', [
+    '##############################',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#     P                      #',
+    '## ####################### ###',
+    '#            G      e        #',
+    '##############################',
+  ]],
+  ['Boss: build steps, then stomp it 3 times. Dying heals it', [
+    '##############################',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#  P         B           G   #',
+    '##############################',
+  ]],
+  ['Slide: with 1 body allowed (key 3), only a lying body bridges this', [
+    '##############################',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#  P                      G  #',
+    '#######^^^^^^^^^^^^###########',
+    '##############################',
+  ]],
+];
+
+// Overlap that ignores shared edges (standing next to something isn't touching it).
+const hit = (A, B) => A.x < B.right && A.right > B.x && A.y < B.bottom && A.bottom > B.y;
+const bounds = (o) => o.getBounds();
+
+class Room extends Phaser.Scene {
+  constructor() { super('room'); }
+
+  init(data) { this.index = Phaser.Math.Wrap(data.index ?? 0, 0, ROOMS.length); }
+
+  create() {
+    this.statics = this.physics.add.staticGroup(); // walls, spike bases, doors, bodies
+    this.corpses = [];
+    this.doors = [];
+    this.plates = [];
+    this.spikes = [];
+    this.goals = [];
+    this.enemies = [];
+    this.boss = null;
+    this.dead = 0;
+    this.lying = false;
+    this.face = 1;
+    this.slide = 0;
+    this.coyote = 0;
+    this.buffer = 0;
+
+    const rect = (x, y, w, h, color) => this.add.rectangle(x + w / 2, y + h / 2, w, h, color);
+    ROOMS[this.index][1].forEach((row, ty) => {
+      for (let tx = 0; tx < row.length; tx++) {
+        const x = tx * T, y = ty * T;
+        switch (row[tx]) {
+          case '#': { // merge horizontal runs so the player doesn't snag on seams
+            let w = 1;
+            while (row[tx + w] === '#') w++;
+            this.statics.add(rect(x, y, w * T, T, 0x60606b));
+            tx += w - 1;
+            break;
+          }
+          case '^': // solid lower half, deadly upper half
+            this.statics.add(rect(x, y + 16, T, 16, 0x60606b));
+            this.spikes.push(rect(x + 2, y + 6, T - 4, 10, 0xcd5c5c));
+            break;
+          case '_': this.plates.push(rect(x + 4, y + T - 7, T - 8, 6, 0xffd700)); break;
+          case 'D': { const d = rect(x, y, T, T, 0x8c6640); this.statics.add(d); this.doors.push(d); break; }
+          case 'G': this.goals.push(rect(x + 6, y + 2, T - 12, T - 2, 0x3cb371)); break;
+          case 'e': {
+            const e = rect(x + 4, y + T - 24, 24, 24, 0xd0543c);
+            this.physics.add.existing(e);
+            e.dir = -1;
+            this.enemies.push(e);
+            break;
+          }
+          case 'B': // floats with its underside 2.5 tiles above this tile's floor
+            this.boss = { hp: BOSS_HP, hurt: 0, dir: 1, min: T + 48, max: row.length * T - T - 48,
+              r: rect(x + T / 2 - 48, y + T - 128, 96, 48, 0x9b59b6) };
+            break;
+          case 'P': this.start = { x: x + T / 2, y: y + T - 15 }; break;
+        }
+      }
+    });
+
+    this.physics.add.collider(this.enemies, this.statics);
+    if (this.boss) this.goals.forEach((g) => g.setVisible(false));
+
+    this.player = this.add.rectangle(this.start.x, this.start.y, 24, 30, 0xd9ebff);
+    this.player.setFillStyle(0, 0); // hitbox only; drawn as a figure in drawFigures()
+    this.fx = this.add.graphics().setDepth(5);
+    this.physics.add.existing(this.player);
+    this.player.body.maxVelocity.set(10000, MAX_FALL);
+    // Arcade resolves vertical overlap first, so jumping while pressed into a wall snags on the
+    // seam between stacked blocks and kills the jump. Side contacts get pushed out sideways instead.
+    this.physics.add.collider(this.player, this.statics, null, (_pl, s) => {
+      const a = this.player.body, b = s.body;
+      const ox = Math.min(a.right, b.right) - Math.max(a.x, b.x);
+      const oy = Math.min(a.bottom, b.bottom) - Math.max(a.y, b.y);
+      if (ox >= oy) return true; // floor/ceiling contact: normal handling
+      a.x += a.x + a.halfWidth < b.x + b.halfWidth ? -ox : ox;
+      a.velocity.x = 0;
+      return false;
+    });
+
+    this.keys = this.input.keyboard.addKeys('A,D,LEFT,RIGHT,SPACE,W,UP,K,X,R,N,S,DOWN,ONE,TWO,THREE,FOUR');
+    this.hud = this.add.text(8, 4, '', { fontFamily: 'monospace', fontSize: '13px', color: '#ddd', lineSpacing: 3, backgroundColor: '#000000aa', padding: { x: 6, y: 4 } });
+  }
+
+  die() {
+    if (this.dead > 0) return;
+    const p = this.player;
+    const [w, h] = this.lying ? BODY_LYING : BODY_STAND;
+    // Snap: standing bodies fill one tile, lying bodies span the two tiles nearest you.
+    const x = !rules.snap ? p.x : this.lying ? Math.round(p.x / T) * T : Math.floor(p.x / T) * T + T / 2;
+    const c = this.add.rectangle(x, p.y + p.height / 2 - h / 2, w, h, 0x7399d9); // shares the player's feet
+    c.vy = 0;
+    c.lying = this.lying;
+    c.dir = this.face;
+    c.setFillStyle(0x7399d9, 0.12); // faint hitbox; the soul figure is drawn in drawFigures()
+    this.statics.add(c);
+    this.corpses.push(c);
+    if (rules.max && this.corpses.length > rules.max) this.corpses.shift().destroy();
+
+    // Respawn on top of any bodies sitting on the start point.
+    this.setLying(false);
+    let y = this.start.y;
+    for (const b of [...this.corpses].sort((a, b) => b.y - a.y))
+      if (Math.abs(b.x - this.start.x) < b.width / 2 + 12 && b.y - b.height / 2 < y + 15) y = b.y - b.height / 2 - 15;
+    p.body.reset(this.start.x, y);
+    p.setVisible(false);
+    this.dead = RESPAWN_DELAY;
+    if (this.boss) { this.boss.hp = BOSS_HP; this.boss.hurt = 0; } // your death heals the boss
+  }
+
+  // Bodies fall straight down until they rest on a wall, closed door or another body.
+  // Bottom-up order so a stack falls together when its base vanishes.
+  dropCorpses(dt) {
+    const solids = this.statics.getChildren();
+    for (const c of [...this.corpses].sort((a, b) => b.y - a.y)) {
+      c.vy = Math.min(c.vy + GRAVITY * dt, MAX_FALL);
+      const hw = c.width / 2, hh = c.height / 2, bottom = c.y + hh;
+      const next = new Phaser.Geom.Rectangle(c.x - hw, c.y - hh + c.vy * dt, c.width, c.height);
+      // A body coming down from above an enemy crushes it.
+      this.enemies = this.enemies.filter((e) => {
+        const eb = bounds(e);
+        if (bottom <= eb.y + 2 && hit(next, eb)) { e.destroy(); return false; }
+        return true;
+      });
+      let floor = Infinity;
+      for (const s of solids) {
+        if (s === c || !s.body.enable) continue;
+        const b = bounds(s);
+        if (b.y >= bottom - 0.5 && hit(next, b)) floor = Math.min(floor, b.y);
+      }
+      if (floor < Infinity) { c.y = floor - hh; c.vy = 0; } else c.y += c.vy * dt;
+      c.body.updateFromGameObject();
+    }
+  }
+
+  // Switch hitbox between standing and flat, keeping the feet where they are.
+  setLying(on) {
+    if (this.lying === on) return;
+    const p = this.player, feet = p.y + p.height / 2, [w, h] = on ? FLAT : STAND;
+    p.setSize(w, h);
+    p.body.setSize(w, h);
+    p.y = feet - h / 2;
+    this.lying = on;
+  }
+
+  canStand() {
+    const p = this.player, feet = p.y + p.height / 2;
+    const r = new Phaser.Geom.Rectangle(p.x - STAND[0] / 2, feet - STAND[1], STAND[0], STAND[1]);
+    return !this.statics.getChildren().some((s) => s.body.enable && hit(r, bounds(s)));
+  }
+
+  // Bodies and the player are drawn as figures; their rectangles are only hitboxes.
+  // A soul is a blue, flaming copy of the hero. A lying soul is the hero mid-dive, with a
+  // flame trail filling the rest of its 2-tile hitbox.
+  drawFigures(t) {
+    const g = this.fx;
+    g.clear();
+    for (const c of this.corpses) this.figure(g, c, c.lying, c.dir, t, true);
+    if (this.player.visible) this.figure(g, this.player, this.lying, this.face, t, false);
+  }
+
+  figure(g, r, lying, dir, t, soul) {
+    const cx = r.x, cy = r.y, w = r.width, h = r.height, top = cy - h / 2, bot = cy + h / 2;
+    const P = (x, y) => ({ x, y });
+    if (soul) { g.fillStyle(0x5aa6e6, 0.16); g.fillEllipse(cx, cy, w + 20, h + 20); }
+    g.fillStyle(soul ? 0x9fd8ff : 0xd9ebff, soul ? 0.85 : 1);
+    let flames, chest;
+    if (!lying) {
+      const sway = Math.sin(t * 3 + cx) * 1.5;
+      g.fillCircle(cx + dir, top + 6, 5.5);                                       // head
+      g.fillPoints([P(cx - 6, top + 12), P(cx + 6, top + 12), P(cx + 8, bot - 7), P(cx - 8, bot - 7)], true);
+      g.fillRect(cx - 5, bot - 7, 3.5, 7);                                        // legs
+      g.fillRect(cx + 1.5, bot - 7, 3.5, 7);
+      g.fillTriangle(cx - 5 * dir, top + 12, cx - 6 * dir, bot - 7, cx - 13 * dir + sway, bot - 3); // cloak
+      flames = [P(cx - 6, top + 13), P(cx - 2, top + 2), P(cx + 2, top + 1), P(cx + 6, top + 13)];
+      chest = P(cx + 2 * dir, top + 17);
+    } else {
+      const front = cx + dir * (w / 2), back = cx - dir * (w / 2), hip = front - dir * 30;
+      g.fillCircle(front - dir * 6, bot - 5, 5);                                  // head leads the dive
+      g.fillPoints([P(front - dir * 11, bot - 9), P(hip, bot - 8), P(hip, bot), P(front - dir * 11, bot)], true);
+      if (soul) {                                                                 // flame trail
+        g.fillStyle(0x7cc7ff, 0.55);
+        g.fillTriangle(hip, bot - 9, hip, bot, back, bot - 3 + Math.sin(t * 8 + cx) * 2);
+      }
+      flames = [-8, -14, -20, -26].map((o) => P(front + dir * o, bot - 8));
+      chest = P(front - dir * 15, bot - 5);
+    }
+    if (soul) {
+      flames.forEach((f, i) => {
+        const fh = 5 + Math.sin(t * 7 + i * 1.9 + cx) * 3, lean = Math.sin(t * 5 + i) * 1.5;
+        g.fillStyle(0x7cc7ff, 0.55);
+        g.fillTriangle(f.x - 3, f.y, f.x + 3, f.y, f.x + lean, f.y - fh);
+        g.fillStyle(0xeef8ff, 0.8);
+        g.fillTriangle(f.x - 1.5, f.y, f.x + 1.5, f.y, f.x + lean * 0.5, f.y - fh * 0.55);
+      });
+    } else {                                                                      // the amulet
+      g.fillStyle(0xffd774, 0.3);
+      g.fillCircle(chest.x, chest.y, 5);
+      g.fillStyle(0xffd774, 1);
+      g.fillCircle(chest.x, chest.y, 2);
+    }
+  }
+
+  updateEnemies() {
+    const solids = this.statics.getChildren().filter((s) => s.body.enable).map(bounds);
+    for (const e of this.enemies) {
+      const b = e.body;
+      if (b.blocked.left || b.touching.left) e.dir = 1;
+      else if (b.blocked.right || b.touching.right) e.dir = -1;
+      else if ((b.blocked.down || b.touching.down) && !solids.some((s) => s.contains(e.x + e.dir * 14, e.y + 14)))
+        e.dir *= -1; // ledge ahead
+      b.velocity.x = e.dir * WALKER_SPEED;
+    }
+  }
+
+  updateBoss(dt) {
+    const B = this.boss;
+    if (!B) return;
+    B.hurt -= dt;
+    B.r.x += B.dir * (BOSS_SPEED + (BOSS_HP - B.hp) * BOSS_SPEEDUP) * dt;
+    if (B.r.x < B.min || B.r.x > B.max) { B.r.x = Phaser.Math.Clamp(B.r.x, B.min, B.max); B.dir *= -1; }
+    B.r.setAlpha(B.hurt > 0 ? 0.4 : 1);
+  }
+
+  // Returns true if the player died. Feet in the boss's top sliver is a stomp (also covers the
+  // bounce frames after it); any other touch kills.
+  touchBoss() {
+    const B = this.boss, p = this.player;
+    if (!B || !hit(bounds(p), bounds(B.r))) return false;
+    const top = B.r.y - 24;
+    if (p.y + 15 - top > 14) { this.die(); return true; }
+    p.body.velocity.y = -JUMP * 0.8;
+    if (B.hurt > 0) return false;
+    B.hurt = 0.5;
+    if (--B.hp <= 0) {
+      B.r.destroy();
+      this.boss = null;
+      this.goals.forEach((g) => g.setVisible(true));
+    }
+    return false;
+  }
+
+  update(_t, ms) {
+    const dt = Math.min(ms / 1000, 0.05);
+    const k = this.keys, JD = Phaser.Input.Keyboard.JustDown, p = this.player;
+
+    if (JD(k.R)) return this.scene.restart({ index: this.index });
+    if (JD(k.N)) return this.scene.restart({ index: this.index + 1 });
+    if (JD(k.ONE)) rules.freeze = !rules.freeze;
+    if (JD(k.TWO)) rules.snap = !rules.snap;
+    if (JD(k.THREE)) rules.max = LIMITS[(LIMITS.indexOf(rules.max) + 1) % LIMITS.length];
+    if (JD(k.FOUR)) rules.selfDestruct = !rules.selfDestruct;
+
+    if (!rules.freeze) this.dropCorpses(dt);
+    this.updateEnemies();
+    this.updateBoss(dt);
+    this.drawFigures(this.time.now / 1000);
+
+    const weights = [p, ...this.corpses].map(bounds);
+    const held = this.plates.some((pl) => weights.some((w) => hit(w, bounds(pl))));
+    for (const d of this.doors) { d.body.enable = !held; d.setAlpha(held ? 0.2 : 1); }
+
+    this.updateHud();
+    const dieKey = JD(k.K) | JD(k.X); // read both every frame so neither goes stale
+    const jumpDown = JD(k.SPACE) | JD(k.W) | JD(k.UP);
+    const JU = Phaser.Input.Keyboard.JustUp, jumpUp = JU(k.SPACE) | JU(k.W) | JU(k.UP);
+    const slideKey = JD(k.S) | JD(k.DOWN);
+    if (this.dead > 0) {
+      this.dead -= dt;
+      p.setVisible(this.dead <= 0);
+      p.body.velocity.x = 0;
+      return;
+    }
+    const hazards = [...this.spikes, ...this.enemies];
+    if (hazards.some((h) => hit(bounds(p), bounds(h))) || (rules.selfDestruct && dieKey)) return this.die();
+    if (this.touchBoss()) return;
+    if (!this.boss && this.goals.some((g) => hit(bounds(p), bounds(g)))) return this.scene.restart({ index: this.index + 1 });
+
+    const b = p.body;
+    const grounded = b.blocked.down || b.touching.down;
+    const dir = (k.D.isDown || k.RIGHT.isDown) - (k.A.isDown || k.LEFT.isDown);
+    if (dir) this.face = dir;
+    if (slideKey && grounded && !this.lying && Math.abs(b.velocity.x) > 100) {
+      this.setLying(true);
+      this.slide = SLIDE_TIME;
+      this.slideDir = Math.sign(b.velocity.x);
+    }
+    if (this.lying && grounded) {
+      this.slide -= dt; // only counts down on the ground, so a dive stays flat until you land
+      if (this.slide <= 0 && this.canStand()) this.setLying(false);
+    }
+    if (this.lying && grounded && this.slide > 0) b.velocity.x = this.slideDir * SLIDE_SPEED;
+    else {
+      const diff = dir * SPEED - b.velocity.x, step = (grounded ? ACCEL : AIR_ACCEL) * dt;
+      b.velocity.x += Math.sign(diff) * Math.min(Math.abs(diff), step);
+    }
+    this.coyote = grounded ? COYOTE : this.coyote - dt;
+    this.buffer = jumpDown ? BUFFER : this.buffer - dt;
+    if (this.buffer > 0 && this.coyote > 0) { b.velocity.y = -JUMP; this.buffer = this.coyote = 0; }
+    if (jumpUp && b.velocity.y < 0) b.velocity.y *= 0.5; // short hop on early release
+  }
+
+  updateHud() {
+    const on = (v) => (v ? 'ON' : 'off');
+    this.hud.setText([
+      `Room ${this.index + 1}/${ROOMS.length} — ${ROOMS[this.index][0]}`,
+      'Move A/D or ←/→ · Jump Space · Slide S/↓ while running (jump = dive) · Die K · Reset R · Next room N',
+      `[1] bodies float: ${on(rules.freeze)}   [2] grid snap: ${on(rules.snap)}   ` +
+      `[3] max bodies: ${rules.max || '∞'}   [4] self-destruct: ${on(rules.selfDestruct)}   · bodies: ${this.corpses.length}`,
+      this.boss ? `Boss ${'■'.repeat(this.boss.hp)}${'□'.repeat(BOSS_HP - this.boss.hp)}` : '',
+    ]);
+  }
+}
+
+const game = new Phaser.Game({
+  type: Phaser.AUTO,
+  width: 960,
+  height: 544,
+  backgroundColor: '#1f1f24',
+  physics: { default: 'arcade', arcade: { gravity: { y: GRAVITY } } },
+  scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
+  scene: Room,
+});

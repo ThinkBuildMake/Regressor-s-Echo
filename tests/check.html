@@ -1,0 +1,131 @@
+<!doctype html>
+<!-- Mechanic check: open this file in a browser. Prints RESULT OK or what failed. -->
+<meta charset="utf-8">
+<body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
+<script src="../game.js"></script>
+<script>
+const errors = [];
+window.onerror = (m) => errors.push(m);
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const near = (a, b) => Math.abs(a - b) < 1.5;
+const room = () => game.scene.getScene('room');
+const key = (type, keyCode) => {                     // synthetic key event Phaser will accept
+  const e = new KeyboardEvent(type, { bubbles: true });
+  Object.defineProperty(e, 'keyCode', { get: () => keyCode });
+  window.dispatchEvent(e);
+};
+(async () => {
+  const fails = [];
+  const check = (ok, msg) => ok || fails.push(msg);
+  while (!room()?.player) await wait(100);
+  rules.freeze = false;                              // most checks below cover falling bodies
+  await wait(300);
+  let s = room();
+  const feet = s.player.y + 15;
+  s.die();                                           // die on the start point
+  await wait(600);
+  const a = s.corpses[0];
+  check(near(a.y + 16, feet) && a.x === s.start.x, `body rests on floor (${a.x},${a.y})`);
+  check(s.player.y + 15 <= a.y - 16 + 1.5, `respawn lands on top of body (${s.player.y})`);
+  s.die();                                           // player is now standing on body 1
+  await wait(600);
+  const b = s.corpses[1];
+  check(near(b.y, a.y - 32) && b.x === a.x, `second body stacks (${b.x},${b.y})`);
+  s.corpses.shift().destroy();                       // remove the base
+  await wait(600);
+  check(near(b.y + 16, feet), `stack falls when base vanishes (${b.y})`);
+
+  s.scene.restart({ index: 0 });                     // jump while pressed into a wall, standing on a body
+  await wait(400);
+  s = room();
+  s.player.body.reset(17 * 32 + 16, s.start.y);      // column 17 touches the cliff face
+  s.die();
+  await wait(600);
+  const standY = s.corpses[0].y - 31;                // standing on the body
+  s.player.body.reset(17 * 32 + 16, standY);
+  await wait(200);
+  key('keydown', 39);                                // hold →
+  await wait(150);
+  key('keydown', 32);                                // jump
+  let top = s.player.y;
+  for (let i = 0; i < 20; i++) { await wait(20); top = Math.min(top, s.player.y); }
+  key('keyup', 32); key('keyup', 39);
+  check(standY - top > 80, `full jump against wall (rose ${Math.round(standY - top)}px)`);
+
+  s.scene.restart({ index: 2 });                     // plate room
+  await wait(400);
+  s = room();
+  const plate = s.plates[0];
+  s.player.body.reset(plate.x, plate.y - 12);
+  await wait(400);
+  check(!s.doors[0].body.enable, 'standing on plate opens door');
+  s.die();
+  await wait(600);
+  check(!s.doors[0].body.enable, 'body on plate keeps door open');
+
+  s.scene.restart({ index: 4 });                     // walker
+  await wait(400);
+  s = room();
+  const e = s.enemies[0];
+  const ex = 26 * 32 + 16;                           // under the right-hand hole
+  e.body.reset(ex, e.y); e.dir = 1;
+  s.player.body.reset(ex, 10 * 32 + 15);             // inside the hole, above the walker
+  s.die();
+  await wait(400);
+  check(s.enemies.length === 0, 'falling body crushes walker');
+  s.scene.restart({ index: 4 });
+  await wait(400);
+  s = room();
+  s.player.body.reset(s.enemies[0].x - 40, 11 * 32 + 17); // in the tunnel, in its path
+  await wait(1000);
+  check(s.corpses.length === 1, 'walker kills on touch');
+
+  s.scene.restart({ index: 5 });                     // boss
+  await wait(400);
+  s = room();
+  const B = s.boss;
+  s.player.body.reset(B.r.x + B.dir * 20, B.r.y - 24 - 20); // just above its top
+  await wait(400);
+  check(B.hp === 2, `stomp hurts boss (hp ${B.hp})`);
+  s.die();
+  check(B.hp === 3, 'dying heals boss');
+  await wait(450);                                   // let the respawn delay pass
+  s.player.body.reset(B.r.x, B.r.y + 40);           // under it, jump into its belly
+  s.player.body.velocity.y = -400;
+  await wait(300);
+  check(s.corpses.length === 2, 'touching boss from below kills');
+
+  s.scene.restart({ index: 6 });                     // slide room
+  await wait(400);
+  s = room();
+  key('keydown', 39);                                // run right
+  await wait(250);
+  key('keydown', 83); await wait(50); key('keyup', 83); // S = slide
+  await wait(50);
+  check(s.lying && s.player.height === 14, 'S while running slides flat');
+  key('keyup', 39);
+  await wait(700);
+  check(!s.lying && s.player.height === 30, 'stands back up after slide');
+  s.player.body.reset(13 * 32, 9 * 32);              // over the middle of the spike pit
+  s.setLying(true);
+  s.die();
+  await wait(600);
+  const lb = s.corpses[0];
+  check(lb.width === 62 && near(lb.y - lb.height / 2, 12 * 32), `lying body lands flush with the floor (top ${lb.y - lb.height / 2})`);
+
+  rules.freeze = true;                               // default: bodies float where you died
+  s.scene.restart({ index: 0 });
+  await wait(400);
+  s = room();
+  s.player.body.reset(10 * 32, 6 * 32);              // mid-air
+  s.die();
+  const fy = s.corpses[0].y;
+  await wait(500);
+  check(s.corpses[0].y === fy, 'floating body stays where you died');
+
+  for (let i = 0; i < ROOMS.length; i++) { room().scene.restart({ index: i }); await wait(300); }
+  check(errors.length === 0, 'no errors: ' + errors.join('; '));
+  document.body.insertAdjacentHTML('beforeend', `<pre>RESULT ${fails.length ? 'FAIL ' + fails.join(' | ') : 'OK'}</pre>`);
+})();
+</script>
