@@ -17,6 +17,8 @@ const HERO_SRC = 112;                                  // his typical height in 
 // Run cycle: which frames of assets/hero/run.webp to loop, and how far he moves per frame.
 // Try orders and pacing in tools/preview.html, then copy the settings here.
 const RUN_FRAMES = [6, 7, 8, 9, 10], RUN_STEP = 15; // 11 dropped: it repeats 6
+// Slide: loop the first row of assets/hero/slide.webp so the cape flutters.
+const SLIDE_FRAMES = [0, 1, 2, 3], SLIDE_FPS = 8;
 const BODY_STAND = [30, 32], BODY_LYING = [62, 16];    // body left behind
 
 // Enemies: walkers patrol, turn at walls/bodies/ledges, kill on touch, die when a falling body lands on them.
@@ -229,6 +231,7 @@ class Room extends Phaser.Scene {
       this.load.image('heroSheet', 'assets/hero/sheet.webp'); // 8 frames: run 0-5, jump 6, fall 7
       this.load.image('heroIdle', 'assets/hero/idle.webp');
       this.load.image('heroRun', 'assets/hero/run.webp'); // 12 run frames: top row 0-5, bottom row 6-11
+      this.load.image('heroSlide', 'assets/hero/slide.webp'); // 12 slide frames, 3 rows of 4
     }
   }
 
@@ -312,6 +315,8 @@ class Room extends Phaser.Scene {
       };
       frames('heroSheet', 8);
       if (this.textures.exists('heroRun')) frames('heroRun', 12);
+      this.hasSlide = this.textures.exists('heroSlide');
+      if (this.hasSlide) frames('heroSlide', 12);
       this.heroScale = HERO_HEIGHT / HERO_SRC; // same pixel scale for every hero image
       this.heroSprite = this.add.image(0, 0, 'heroIdle').setOrigin(0.5, 1).setDepth(5.5);
       this.heroFrame = ['heroIdle', undefined];
@@ -375,9 +380,10 @@ class Room extends Phaser.Scene {
     c.lying = this.lying;
     c.dir = this.face;
     c.setFillStyle(0x7399d9, 0.12); // faint hitbox; the soul figure is drawn in drawFigures()
-    if (this.painted && !this.lying) {
+    if (this.painted && (!this.lying || this.hasSlide)) {
       // A soul is the hero's painting, frozen in the pose he died in, glowing blue-white.
-      const [key, frame] = this.heroFrame, feet = c.y + c.height / 2, flip = this.face < 0;
+      const [key, frame] = this.lying ? ['heroSlide', SLIDE_FRAMES[0]] : this.heroFrame; // pose may not be drawn yet
+      const feet = c.y + c.height / 2, flip = this.face < 0;
       const body = this.add.image(c.x, feet, key, frame).setOrigin(0.5, 1).setScale(this.heroScale).setFlipX(flip)
         .setTintFill(0x6fb6ee).setAlpha(0.45).setDepth(4.5);
       const glow = this.add.image(c.x, feet, key, frame).setOrigin(0.5, 1).setScale(this.heroScale).setFlipX(flip)
@@ -453,7 +459,7 @@ class Room extends Phaser.Scene {
     }
     const grounded = b.blocked.down || b.touching.down;
     this.walk = (this.walk || 0) + (grounded ? Math.abs(b.velocity.x) * dt : 0);
-    const usePainting = this.painted && !this.lying;
+    const usePainting = this.painted && (!this.lying || this.hasSlide);
     if (this.painted) this.heroSprite.setVisible(p.visible && usePainting);
     if (!p.visible) return;
     if (!usePainting) {
@@ -462,7 +468,8 @@ class Room extends Phaser.Scene {
     }
     // Pick the frame: in the air, jump or fall; on the ground, run frames timed to distance covered
     // (one frame per RUN_STEP px, so steps match speed), or the standing painting when still.
-    this.heroFrame = !grounded ? ['heroSheet', b.velocity.y < 0 ? 6 : 7]
+    this.heroFrame = this.lying ? ['heroSlide', SLIDE_FRAMES[Math.floor(t * SLIDE_FPS) % SLIDE_FRAMES.length]]
+      : !grounded ? ['heroSheet', b.velocity.y < 0 ? 6 : 7]
       : Math.abs(b.velocity.x) > 20
         ? (this.textures.exists('heroRun') ? ['heroRun', RUN_FRAMES[Math.floor(this.walk / RUN_STEP) % RUN_FRAMES.length]] : ['heroSheet', Math.floor(this.walk / RUN_STEP) % 6])
       : ['heroIdle', undefined];
@@ -476,10 +483,11 @@ class Room extends Phaser.Scene {
 
   // Flames and glow over a painted soul.
   soulFlames(g, c, t) {
-    const top = c.y + c.height / 2 - HERO_HEIGHT * 0.92;
+    const feet = c.y + c.height / 2, tall = c.lying ? 28 : HERO_HEIGHT;
+    const top = feet - tall * 0.92;
     g.fillStyle(0x5aa6e6, 0.14);
-    g.fillEllipse(c.x, c.y + c.height / 2 - HERO_HEIGHT / 2, 46, HERO_HEIGHT + 14);
-    [-7, -2, 3, 8].forEach((o, i) => {
+    g.fillEllipse(c.x, feet - tall / 2, c.lying ? c.width + 14 : 46, tall + 14);
+    (c.lying ? [-20, -10, 0, 10, 20] : [-7, -2, 3, 8]).forEach((o, i) => {
       // his head sits toward the way he faces, so the flames shift that way
       const fx = c.x + o + c.dir * 4, fy = top + Math.abs(o) * 0.6, fh = 6 + Math.sin(t * 7 + i * 1.9 + c.x) * 3, lean = Math.sin(t * 5 + i) * 1.5;
       g.fillStyle(0x7cc7ff, 0.55);
