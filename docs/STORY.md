@@ -49,6 +49,13 @@ Let each line respond to what the other just said or did. Give them room to hesi
 - **Each world adds a rune and a power.** The guide names the new power in a line or two; the next room lets the player try it.
 - **Keep the guide's mischief dry.** "Nope!" and "Where's the fun in that?" are the register: short, smiling, unhelpful at the right moment.
 
+## Story spine
+
+- **The tribe** built the amulet to cheat death. The marks lead through their ruins (World 2) to their pyramid temple. Carvings show many people wearing it, then fewer and fewer: it didn't save them, it used them up.
+- **Deaths have a limit.** The guide believed they didn't. He reached floor 90 of the pyramid, ran out, and became a guide ("must've died one too many times").
+- **The loop:** every guide dies protecting his younger self after the stag, as the guide's own guide did for him. Before that, he hides a note behind a tree.
+- **The game ends** with the hero walking into floor 1 of the pyramid, set on climbing the whole thing.
+
 ## World 1 script
 
 The game's text lives in [dialogue.js](../dialogue.js); this is the source it's written from.
@@ -211,18 +218,88 @@ Blocking the dust with your soul should be taught in an earlier room, so the gui
 
 Let "Nope!" end it. No explanation, no comfort. Keep exchanges like this in World 2 as the strain builds.
 
+## Worlds 2 and 3: key scenes (drafted)
+
+### The guide's crack — *World 2, after the tree guardian*
+> **Hero** [thinking]: Hey. Can I ask you something?  
+> **Guide** [wry]: You're going to anyway.  
+> **Hero** [thinking]: In your timeline. Did you ever get it off?  
+> *(A beat.)*  
+> **Guide** [solemn]: …No.  
+> **Guide** [thinking]: I followed the marks, same as you. All the way to the temple. A pyramid. Floor after floor.  
+> **Hero** [curious]: How far did you get?  
+> **Guide** [weary]: Ninety.  
+> **Hero** [startled]: NINETY?  
+> **Guide** [wry]: Don't look so impressed. It's not the top.  
+> **Guide** [solemn]: I figured the deaths didn't have a limit. That I could just keep going until I got it right.  
+> **Hero** [scared]: …They do?  
+> **Guide** [sad]: Must. I'm here, aren't I?  
+> **Hero** [sad]: …  
+> **Guide** [mischievous]: Anyway! Better odds this time. You've got me.
+
+### The promise — *World 3, by an old tree before the stag*
+> *(The guide stops. The hero walks a few steps before noticing.)*  
+> **Hero** [curious]: What? You never stop.  
+> **Guide** [thinking]: Can you promise me something?  
+> **Hero** [annoyed]: …That depends.  
+> **Guide** [warm]: After the next fight, go take a look behind this tree.  
+> **Hero** [curious]: What's back there?  
+> **Guide** [amused]: Nope! Not yet. No peeking.  
+> **Hero** [annoyed]: You're doing the mysterious thing again.  
+> **Guide** [warm]: Promise me.  
+> **Hero** [exhausted]: …Fine. I promise.
+
+### The guide's last stand — *after the stag*
+> **Hero** [excited]: We did it! Did you see that? Three stomps, and I barely—  
+> **Guide** [amused]: You died eleven times.  
+> **Hero** [cocky]: Twelve. But who's counting?  
+> **Guide** [warm]: Me. It was always me.  
+> *(The stag's remains flicker blue. A beam gathers.)*  
+> **Guide** [warning]: LOOK OUT!  
+> *(The guide throws himself in front. A soul is a soul: his blocks it, but this beam breaks souls. He cracks like glass.)*  
+> **Hero** [shouting]: NO—!  
+> **Guide** [pained]: Ugh… I knew it would come to this.  
+> **Guide** [weary]: Same thing happened last time. My guide did exactly this.  
+> **Hero** [shouting]: You KNEW? Then why would you—  
+> **Guide** [warm]: Because I knew.  
+> **Guide** [warm]: I've watched over you. You're already doing better than I did. You'll get further.  
+> **Guide** [solemn]: Just remember… the deaths aren't free. Count every one.  
+> **Hero** [sad]: Don't— you can't just—  
+> **Guide** [wry]: Hey.  
+> **Guide** [warm]: I was never alive in the first place, right?  
+> *(He fades.)*
+
+### The note — *behind the tree*
+*(He keeps his promise. Behind the tree, a folded note in his own handwriting.)*
+> If you're reading this… then it must mean I've kicked the bucket.  
+> Don't make that face. I can see it from here. Well. Could.  
+> Here's what I didn't tell you, because you'd have argued, and I'd have lost. We always lose to ourselves.  
+> The deaths have a limit. I don't know the number. I found it on floor ninety.  
+> So don't spend them like I did. Think first. Die second.  
+> Thanks for putting up with me. I know I'm not great company. I'd know.  
+> Go get further than I did.  
+> — You  
+> P.S. The amulet's still not worth anything. I checked.
+
+### Floor one — *the pyramid's entrance; the game ends*
+> **Hero** [sad]: …Idiot.  
+> **Hero** [determined]: Ninety floors, huh.  
+> **Hero** [determined]: Then I'm not stopping at ninety.  
+> *(He walks in. Floor 1.)*
+
 ## Later story direction
 
 - **The amulet grows stronger each world** (one rune per boss), not one big awakening: World 1, it brings him back (1 echo). After the moth, the 2nd rune: 2 echoes and self-destruct. After the tree, the 3rd rune: 3 echoes and recall.
 - **World 2 — Overgrown ruins:** He can now choose when he dies, and it's worse than being killed. His frustration and exhaustion build, and the banter continues. He gets better at spotting the guide's half-truths and answering back. Give him space to challenge the guide's assumptions and learn what happened in the guide's timeline. Let a specific discovery or conflict earn a serious conversation; reveal that history through incidents rather than a single long explanation.
 - **World 3 — Sanctum:** The third rune lets him recall his echoes, so a mistake no longer costs him more deaths. His growing control should come through planning and decisions; the pain remains real. The spectral stag tests everything he has learned.
-- **Ending:** Preserve the planned image of the hero meeting a new version of himself and asking, “Which death are you currently on?” Before scripting it, settle what happens to the treasure, whether the amulet can be removed, and why he chooses or is forced to become the next guide.
+- **Ending:** Decided (see the key scenes above): the guide dies blocking the stag's soul-breaking beam, the hero reads his note, and walks into the pyramid's first floor.
 
 ## Open questions
 
 - **Respawn versus timelines:** Normal play returns him to a checkpoint and leaves an echo. How that relates to the guide's other timeline needs one clear rule before anyone explains it. Avoid "your body forgets" as a substitute.
 - **What the guide knows:** He met his own guide once; being the guide is new. Decide what differed in his timeline and what he can't predict, so his knowledge has a consistent basis (he forgot the moth, he's sure about the pit).
-- **The tribe:** The shrines carry the amulet's symbol. Decide what the tribe is and what he finds out about them in World 2.
+- **The tribe's carvings:** Where in World 2 he finds them, and how much they show.
+- **When the guide wrote the note:** He's a soul, yet he can block a beam, so he can touch things a little. Decide whether that's ever shown or hinted earlier.
 - **Save for later:** "How many times have you done this?" / "I stopped counting." fits a quieter moment, probably World 2.
 
 Related: [ideas](IDEAS.md), [level plan](LEVELS.md), [in-game dialogue](../dialogue.js).
