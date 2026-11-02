@@ -78,9 +78,31 @@ ChatGPT can make transparent backgrounds. If it won't, use the magenta backgroun
 
 These are animated in code (floating, swaying, charging, squash and stretch), so one image per boss is enough.
 
-## Not needed from image tools
+## Hero (AI Studio, Nano Banana Pro)
 
-The hero, the souls and the ghost guide are drawn in code, so they always match and animate smoothly.
+Save to `assets/raw/hero/`. Attach the World 1 reference image for the brushwork, and from step 2 on, also attach the hero image from step 1.
+
+**Hero style block (paste before each hero prompt):**
+
+> Hand-painted 2D game character, painterly, soft brush edges, matching the attached forest painting. A young treasure hunter: deep teal-grey hooded cloak with the hood up, face mostly in shadow except one softly glowing pale eye, a long rust-red scarf, a worn brown leather satchel on a strap across the chest, a small gold amulet on the chest, slim build, boots. Simple, readable silhouette. Side view facing right. Isolated on a flat solid magenta #FF00FF background. No text, no ground, no shadow. Do not use bright blue-white anywhere.
+
+1. **The hero → `hero.png`**
+   > Full body, standing in a relaxed neutral pose, arms at his sides. Square 1:1, centered, the character filling about 80% of the height.
+
+   Regenerate until you love him. Every later image copies this one.
+
+2. **Sprite sheet → `sheet.png`**
+   > Using the attached character exactly (same proportions, colors, scarf and satchel), paint an animation sprite sheet in one horizontal row of 8 evenly spaced frames, all the same size, all with feet on the same baseline: frames 1–6 a running cycle, frame 7 jumping upward with legs tucked, frame 8 falling with the cloak and scarf lifted. Wide 21:9.
+
+3. **Slide → `slide.png`**
+   > Using the attached character exactly, paint him sliding feet first along the ground, body low and leaning back, one leg extended forward, scarf and cloak streaming behind him. Wide 21:9, character centered.
+
+**Fallback, if the frames don't match each other → `parts.png`:**
+   > Using the attached character exactly, paint the same character separated into parts for cut-out animation, each part apart from the others: hooded head, torso with cloak front, back cloak flap, scarf tail, left arm, right arm, left leg with boot, right leg with boot, satchel. Same scale and colors as the attached image. Wide 21:9.
+
+## Drawn in code
+
+The souls (the hero's frames tinted blue, with flames), the ghost guide, light beams and glows.
 
 ## Tips
 

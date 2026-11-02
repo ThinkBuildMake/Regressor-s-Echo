@@ -466,13 +466,14 @@ class Room extends Phaser.Scene {
       flames = [P(cx - 6, top + 13), P(hx - 2, top + 2), P(hx + 2, top + 1), P(cx + 6, top + 13)];
       chest = P(cx + lean + 2 * dir, top + 17);
     } else {
+      dir = -dir; // slides go feet first: draw the body facing backwards, so the head trails
       const front = cx + dir * (w / 2), back = cx - dir * (w / 2), hip = front - dir * 30;
       g.lineStyle(3.2, C.dark, C.a);                                                  // legs trail behind
       g.lineBetween(hip, bot - 4, hip - dir * 7, bot - 2);
       g.lineBetween(hip, bot - 6, hip - dir * 8, bot - 6);
       g.fillStyle(C.cloak, C.a);
       g.fillPoints([P(front - dir * 11, bot - 9), P(hip, bot - 8), P(hip, bot), P(front - dir * 11, bot)], true);
-      g.fillCircle(front - dir * 6, bot - 5, 5.5);                                    // hood leads the dive
+      g.fillCircle(front - dir * 6, bot - 5, 5.5);                                    // hood, trailing
       g.fillStyle(C.face, C.a);
       g.fillEllipse(front - dir * 4, bot - 4.5, 5, 6);
       g.lineStyle(2.4, C.scarf, C.a);                                                 // scarf streams up and back
