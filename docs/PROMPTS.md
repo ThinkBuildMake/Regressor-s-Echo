@@ -125,6 +125,43 @@ On the earthquake the moth bursts through the arena wall. Save to `assets/raw/wo
 2. **Broken wall edge → `wall-break.png`**
    > A tall vertical strip of this earth bank's broken edge, as if something burst through it: a jagged, crumbled outline with snapped roots poking out, loose clods and a few stones on the break, darker inside the break. The left side is the clean solid earth face (so it joins the wall), the right side is the ragged broken edge. The strip fills the full height of the image so it can repeat top to bottom. Centered, about a quarter of the image wide.
 
+## World 1 props (Flow, Nano Banana 2.1)
+
+Save to `assets/raw/world1/`. Attach `anchor.png` (brushwork) and, for anything made of earth, `ground.jpg`. With `ground.jpg` attached, add *"no soil strip along the bottom, the prop floats on magenta"* (otherwise Flow paints one). One image per run, x1. Gold appears only on the amulet, its runes and the shrine's mark (the colour rule in IDEAS.md).
+
+**World 1 prop style block:**
+> Hand-painted 2D game prop for a misty forest platformer, painterly, soft brush edges, matching the attached painting: muted teal-green and moss palette, soft light from the upper left. Side view, level horizon. Isolated on a flat solid magenta #FF00FF background, the whole prop inside the frame with space around it. No dust, no mist, no glow effects, no particles, no text, no ground line, no shadow. Do not use bright blue-white anywhere.
+
+1. **Shrine, dormant → `shrine.png`** (square 1:1)
+   > A small ancient waystone shrine at the forest edge: a single weathered standing stone about chest height to a person, mossy at the base and the top, with one carved symbol on its face: a simple circular mark with three short rays, the grooves dark and empty. A few roots and ferns at its foot. Old, quiet, a little sacred.
+
+2. **Shrine, activated → `shrine-lit.png`** (edit `shrine.png`, don't regenerate)
+   > Edit the attached image. Keep everything exactly as it is. Only make this change: the carved symbol's grooves are filled with warm soft gold light, as if lit from inside. No glow spilling outside the grooves, no rays, no particles.
+
+3. **Amulet → `amulet.png`** (square 1:1; attach `hero.jpg` too, for the amulet he wears)
+   > A small round gold amulet on a short broken leather cord, lying flat, seen straight on, the same amulet the attached hero wears: a worn gold disc with the same carved circular mark with three short rays, and three small empty rune slots around the rim. Slightly tarnished, ancient. Centered, filling about half the frame.
+
+4. **Amulet, runes lit → `amulet-rune1.png`, `amulet-rune2.png`, `amulet-rune3.png`** (edit `amulet.png` each time)
+   > Edit the attached image. Keep everything exactly as it is. Only make this change: the top rune slot (then: the top two; then: all three) is filled with a small warm gold-lit rune. Nothing else changes.
+
+5. **Spikes → `spikes.png`** (wide 16:9)
+   > A long horizontal strip of sharp hazard spikes for a forest platformer: a row of dark, splintered, thorn-like wooden stakes and old iron points jutting up from a thin mossy base, evenly spaced, all the same height, clearly dangerous. The strip runs the full width of the image and is the same all the way across so it can repeat left to right.
+
+6. **Spiky vine wall → `thorns.png`** (square 1:1)
+   > A square tile of dense thorny bramble vines for a forest platformer hazard wall: tangled dark-green and brown vines covered in long sharp thorns, filling the whole square edge to edge so the tile can repeat in every direction, evenly dense, no gaps, no flowers. Clearly painful to touch.
+
+7. **Vine barrier → `vine-barrier.png`** (tall 9:16)
+   > A thick barrier of living woven vines blocking a doorway-sized gap: heavy twisted green vines and roots knotted tightly together from top to bottom, a few leaves, no thorns, the weave filling a tall rectangle that touches the top and bottom edges of the image. It looks like it could wither and pull apart.
+
+8. **Pressure plate → `plate.png`, then `plate-down.png`** (wide 16:9; down = edit)
+   > A flat ancient pressure plate set into mossy forest ground: a wide, low, square-edged slab of weathered grey stone with the same carved circular mark with three rays, raised a finger's width above a thin strip of soil, seen from the side and slightly above. *(Down: "Edit the attached image. Only change: the slab is pressed down flush with the soil.")*
+
+9. **Root gate → `gate.png`** (tall 9:16)
+   > A gate of interlocking thick old tree roots and a weathered wooden frame, closing a doorway-sized gap in an earth wall, roots woven like bars from top to bottom, touching the top and bottom edges of the image. Heavy, old, closed.
+
+10. **White ghost → `ghost-white.png`** (square 1:1; attach `hero.jpg`)
+   > The attached young treasure hunter as a ghostly apparition: exactly his face, hair, cloak, scarf and satchel, but his whole figure is pure soft white, like pale porcelain light, slightly see-through, no other colours. He floats in the air, body upright and relaxed, legs hanging loosely with toes pointed down, arms at his sides, facing right. Calm, eerie. No glow halo, no particles.
+
 ## Hero (AI Studio, Nano Banana Pro)
 
 Save to `assets/raw/hero/`. Attach the World 1 reference image for the brushwork, and from step 2 on, also attach the hero image from step 1.

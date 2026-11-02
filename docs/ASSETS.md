@@ -76,6 +76,42 @@ bottom-left corner. The name card is text drawn in code, not an asset.
 | Spring (World 2) | idle / compressed / launch, 3 frames | | | | | |
 | Moving platform (World 2 room 7) | — | | | — | | |
 
+## Story assets (requested by the story chat, 2026-11-02)
+
+Script: [STORY.md](STORY.md); § = the scene each asset serves. Done in priority order.
+
+**Priority 1: portraits** (used throughout World 1 and every world after)
+
+| Asset | Notes | Prompt | Ref | Sheet | Sized | In game |
+|---|---|---|---|---|---|---|
+| Hero expressions 2 → `assets/portraits/hero2.webp` | curious, annoyed, excited, scared, shouting, cocky (= `FACES2.hero` order in dialogue.js). Attach `hero.jpg` + the first sheet (`raw/portraits/hero-faces.jpg`) so face and framing match. Cut: `sheet.mjs <raw> <out> --grid --frames=3 --rows=2 --height=192` | ✅ PROMPTS item 3 | — | | | |
+| Guide expressions 2 → `assets/portraits/guide2.webp` | smug, mischievous, teasing, exasperated, warning, surprised (= `FACES2.guide`). Attach the first guide sheet so the ghost look matches. Same cut | ✅ PROMPTS item 4 | — | | | |
+
+**Priority 2: World 1 scene sounds** (in the game now, silent). Prompts in the Audio section below.
+
+| For | § | Done |
+|---|---|---|
+| Satchel clink (tools and a metal cup) | W1 §2 | |
+| Gold flash chime, warm and magical, as he puts the amulet on | W1 §2 | |
+| Ghost fading in, soft and airy | W1 §2 | |
+| Amulet refusing to come off: a low gold pulse | W1 §3 | |
+| Guide's quiet snicker "…heh" | W1 §4 | |
+| Guide's tired sigh | W1 §3 | |
+| Earthquake rumble, ~1.5 s (the moth arrives) | W1 §11 | |
+| Boss dissolving into light motes that get absorbed: shimmer into a whoosh | W1 §13 | |
+| Faint pen scratching on paper in the dark, during the nap (he's secretly writing the note; keep it subtle) | W1 §14 | |
+
+**Priority 3: Worlds 2 and 3 story scenes** (not built yet)
+
+| Asset | § | Notes | Prompt | Ref | Sized | In game |
+|---|---|---|---|---|---|---|
+| Carved wall relief | W2 §6 | reads left to right: a crowd of figures, each with a gold circle on its chest; then fewer; then a handful; then one. Ruins stone, as a background layer behind room 7 | | | | |
+| Pyramid backdrop | W3 §1 | a huge stepped pyramid, its top lost in cloud; a far parallax layer for the Sanctum | | | | |
+| The old tree | W3 §5 | by the stag's arena, with a hiding spot behind it (where the note is) | | | | |
+| The guide's note | W3 §9 | a folded, worn paper, for a close-up the note's text sits on | | | | |
+| Sound: the guide cracking like glass as the beam hits him | W3 §8 | sad, not violent | | — | | |
+| Music: the last-stand cue | W3 §8 | later | | — | | |
+
 ## Backgrounds (prompts already in PROMPTS.md)
 
 | Asset | Prompt | Ref | Sized | In game |
@@ -114,6 +150,16 @@ game adds room sound. Rows marked *(3 takes)* repeat often, so make 2–3 variat
 | Hazards | Plate up | The same stone tile rising back up, a lighter clunk with a tiny grit rattle, close, dry, 0.3 s | |
 | Hazards | Door opens | A heavy stone slab door grinding upward in a stone groove, steady scrape, ends in a soft knock, medium distance, 1.2 s | |
 | Hazards | Door closes | A heavy stone slab dropping down a stone groove and landing with a deep thud and dust trickle, medium distance, 0.9 s | |
+| Story | Satchel clink (W1 §2) | A leather shoulder bag set down on a mossy log: a soft thud, then small metal tools and a tin cup clinking together inside it, close, dry, 0.7 s | |
+| Story | Gold flash as he puts the amulet on (W1 §2) | A small brass bell and a glass wind chime struck together once, warm and bright, with a soft rising shimmer of a finger circling a wine-glass rim, close, 2 s, natural decay | |
+| Story | Ghost fading in (W1 §2) | A long, soft breath of air through a slightly open window, with a faint airy hum like a bowed glass, swelling gently and settling, quiet, 2 s | |
+| Story | Amulet refusing to come off (W1 §3) | One low, dull hum of a large brass singing bowl touched by a palm, short and muffled, with a faint warm throb, close, 1 s | |
+| Story | Guide's quiet snicker "…heh" (W1 §4) | A young man's single quiet, amused breath-laugh through the nose, "heh", close, dry, 0.5 s | |
+| Story | Guide's tired sigh (W1 §3) | A young man's long, tired sigh out through the mouth, close, dry, 1.2 s | |
+| Story | Earthquake rumble (W1 §11) | A deep ground rumble of rocks shifting under a forest, low and rolling, with a few small stones and twigs rattling, outdoors, 1.5 s, fades out | |
+| Story | Boss dissolving into light, absorbed (W1 §13) | Fine glass beads poured slowly onto a metal tray, rising into a shimmer of finger-on-glass tones, then a quick soft rush of air drawn in through a narrow gap, 2.5 s | |
+| Story | Pen scratching in the dark (W1 §14) | A pencil writing slowly on rough paper in a quiet room, faint and slow, a few strokes with pauses, very quiet, close, 4 s | |
+| Story | Guide cracking like glass (W3 §8) | A thin pane of glass slowly splintering under pressure, soft crackles spreading, then a faint high ring fading out, sad and gentle, not a smash, close, 2 s | |
 | Bosses | Moth bursts through the wall | A dry earth bank collapsing as something heavy smashes through it: a sharp crack, then a rumble of clods and stones tumbling and scattering on the ground, outdoors, close, 2 s | |
 | Bosses | Name card appears (all bosses) | One deep low drum hit with a large gong swelling behind it, in a stone hall, 2 s, natural decay | |
 | Hazards | Laser hum (loop) | Steady electrical hum of a fluorescent tube, mid-pitch, close, constant level, seamless loop, 2 s | |
