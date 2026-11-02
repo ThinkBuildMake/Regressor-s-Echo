@@ -12,6 +12,7 @@ const COYOTE = 0.1, BUFFER = 0.1, RESPAWN_DELAY = 0.35;
 // Dying while flat leaves a lying body (2 tiles wide, ½ tall) instead of a standing one.
 const SLIDE_SPEED = 320, SLIDE_TIME = 0.4;
 const STAND = [24, 30], FLAT = [40, 14];               // player hitbox
+const HERO_HEIGHT = 46;                                // painted hero's on-screen height (hair pokes above the hitbox)
 const BODY_STAND = [30, 32], BODY_LYING = [62, 16];    // body left behind
 
 // Enemies: walkers patrol, turn at walls/bodies/ledges, kill on touch, die when a falling body lands on them.
@@ -218,7 +219,13 @@ class Room extends Phaser.Scene {
 
   init(data) { this.index = Phaser.Math.Wrap(data.index ?? START_ROOM, 0, ROOMS.length); }
 
-  preload() { Art.preload(this); }
+  preload() {
+    Art.preload(this);
+    if (!this.textures.exists('heroSheet')) {
+      this.load.image('heroSheet', 'assets/hero/sheet.webp'); // 8 frames: run 0-5, jump 6, fall 7
+      this.load.image('heroIdle', 'assets/hero/idle.webp');
+    }
+  }
 
   create() {
     this.statics = this.physics.add.staticGroup(); // walls, spike bases, doors, bodies
@@ -291,6 +298,15 @@ class Room extends Phaser.Scene {
     this.player = this.add.rectangle(this.start.x, this.start.y, 24, 30, 0xd9ebff);
     this.player.setFillStyle(0, 0); // hitbox only; drawn as a figure in drawFigures()
     this.fx = this.add.graphics().setDepth(5);
+    // Painted hero, if the art is present (otherwise the code-drawn figure is used).
+    this.painted = this.textures.exists('heroSheet') && this.textures.exists('heroIdle');
+    if (this.painted) {
+      const tex = this.textures.get('heroSheet'), img = tex.getSourceImage(), fw = img.width / 8;
+      if (!tex.has(0)) for (let i = 0; i < 8; i++) tex.add(i, 0, i * fw, 0, fw, img.height);
+      this.heroScale = HERO_HEIGHT / img.height;
+      this.heroSprite = this.add.image(0, 0, 'heroIdle').setOrigin(0.5, 1).setDepth(5.5);
+      this.heroFrame = ['heroIdle', undefined];
+    }
     this.physics.add.existing(this.player);
     this.player.body.maxVelocity.set(10000, MAX_FALL);
     // Arcade resolves vertical overlap first, so jumping while pressed into a wall snags on the
@@ -350,6 +366,16 @@ class Room extends Phaser.Scene {
     c.lying = this.lying;
     c.dir = this.face;
     c.setFillStyle(0x7399d9, 0.12); // faint hitbox; the soul figure is drawn in drawFigures()
+    if (this.painted && !this.lying) {
+      // A soul is the hero's painting, frozen in the pose he died in, glowing blue-white.
+      const [key, frame] = this.heroFrame, feet = c.y + c.height / 2, flip = this.face < 0;
+      const body = this.add.image(c.x, feet, key, frame).setOrigin(0.5, 1).setScale(this.heroScale).setFlipX(flip)
+        .setTintFill(0x6fb6ee).setAlpha(0.45).setDepth(4.5);
+      const glow = this.add.image(c.x, feet, key, frame).setOrigin(0.5, 1).setScale(this.heroScale).setFlipX(flip)
+        .setTint(0xbfe6ff).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.9).setDepth(4.6);
+      c.sprites = [body, glow];
+      c.on('destroy', () => c.sprites.forEach((sp) => sp.destroy()));
+    }
     this.statics.add(c);
     this.corpses.push(c);
     if (rules.max && this.corpses.length > rules.max) this.corpses.shift().destroy();
@@ -410,14 +436,49 @@ class Room extends Phaser.Scene {
   // The hero is a hooded explorer (cloak, scarf, satchel) lit from the upper left. A soul is the
   // same figure in blue flame; a lying soul is him mid-dive, with a flame trail filling its hitbox.
   drawFigures(t, dt) {
-    const g = this.fx, b = this.player.body;
+    const g = this.fx, b = this.player.body, p = this.player;
     g.clear();
-    for (const c of this.corpses) this.figure(g, c, { lying: c.lying, dir: c.dir, t, soul: true });
+    for (const c of this.corpses) {
+      if (c.sprites) this.soulFlames(g, c, t);
+      else this.figure(g, c, { lying: c.lying, dir: c.dir, t, soul: true });
+    }
     const grounded = b.blocked.down || b.touching.down;
     this.walk = (this.walk || 0) + (grounded ? Math.abs(b.velocity.x) * dt : 0);
-    if (this.player.visible)
-      this.figure(g, this.player, { lying: this.lying, dir: this.face, t, vx: b.velocity.x, air: !grounded, walk: this.walk });
+    const usePainting = this.painted && !this.lying;
+    if (this.painted) this.heroSprite.setVisible(p.visible && usePainting);
+    if (!p.visible) return;
+    if (!usePainting) {
+      this.figure(g, p, { lying: this.lying, dir: this.face, t, vx: b.velocity.x, air: !grounded, walk: this.walk });
+      return;
+    }
+    // Pick the frame: in the air, jump or fall; on the ground, run frames timed to distance covered
+    // (one frame per 9px, so steps match speed), or the standing painting when still.
+    this.heroFrame = !grounded ? ['heroSheet', b.velocity.y < 0 ? 6 : 7]
+      : Math.abs(b.velocity.x) > 20 ? ['heroSheet', Math.floor(this.walk / 9) % 6]
+      : ['heroIdle', undefined];
+    const [key, frame] = this.heroFrame;
+    this.heroSprite.setTexture(key, frame).setScale(this.heroScale).setFlipX(this.face < 0)
+      .setPosition(p.x, p.y + p.height / 2 + 1);
+    // the amulet's glow, on his chest
+    g.fillStyle(0xffd774, 0.25 + Math.sin(t * 3) * 0.08);
+    g.fillCircle(p.x + this.face * 2, p.y + p.height / 2 - HERO_HEIGHT * 0.5, 4);
   }
+
+  // Flames and glow over a painted soul.
+  soulFlames(g, c, t) {
+    const top = c.y + c.height / 2 - HERO_HEIGHT * 0.92;
+    g.fillStyle(0x5aa6e6, 0.14);
+    g.fillEllipse(c.x, c.y + c.height / 2 - HERO_HEIGHT / 2, 46, HERO_HEIGHT + 14);
+    [-7, -2, 3, 8].forEach((o, i) => {
+      // his head sits toward the way he faces, so the flames shift that way
+      const fx = c.x + o + c.dir * 4, fy = top + Math.abs(o) * 0.6, fh = 6 + Math.sin(t * 7 + i * 1.9 + c.x) * 3, lean = Math.sin(t * 5 + i) * 1.5;
+      g.fillStyle(0x7cc7ff, 0.55);
+      g.fillTriangle(fx - 3, fy, fx + 3, fy, fx + lean, fy - fh);
+      g.fillStyle(0xeef8ff, 0.8);
+      g.fillTriangle(fx - 1.5, fy, fx + 1.5, fy, fx + lean * 0.5, fy - fh * 0.55);
+    });
+  }
+
 
   figure(g, r, { lying, dir, t, soul = false, vx = 0, air = false, walk = 0 }) {
     const cx = r.x, w = r.width, h = r.height, top = r.y - h / 2, bot = r.y + h / 2;
