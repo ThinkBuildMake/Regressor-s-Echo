@@ -4,7 +4,7 @@
 // Note: browsers block image files opened via file://, so real art needs a local server
 // (e.g. `python3 -m http.server` in this folder, then open http://localhost:8000).
 const Art = {
-  FILES: ['sky', 'far', 'mid', 'near', 'ground', 'moss'],
+  FILES: ['sky', 'far', 'mid', 'midAlt', 'near', 'nearTop', 'nearBottom', 'ground', 'moss'],
   W: 960,
   H: 544,
 
@@ -111,13 +111,19 @@ const Art = {
   // the less it moves. Draw order: sky, far, light shafts, mid, mist, [level], near, dust, vignette.
   backdrop(scene) {
     // Each plane repeats sideways and scrolls at a fraction of the camera's speed.
-    const layer = (key, depth, f) => {
-      const ts = scene.add.tileSprite(0, 0, this.W, this.H, key).setOrigin(0).setDepth(depth).setScrollFactor(0);
-      const s = this.H / scene.textures.get(key).getSourceImage().height;
+    // A strip h tall, at the top of the screen or the bottom, drawn at `scale` (default: fit the screen height).
+    const layer = (key, depth, f, h = this.H, atBottom = false, scale) => {
+      const ts = scene.add.tileSprite(0, atBottom ? this.H - h : 0, this.W, h, key).setOrigin(0).setDepth(depth).setScrollFactor(0);
+      const s = scale ?? this.H / scene.textures.get(key).getSourceImage().height;
       ts.setTileScale(s, s);
       return { ts, f };
     };
-    const a = (scene.art = { layers: [layer('sky', -100, 0.03), layer('far', -90, 0.12), layer('mid', -80, 0.3), layer('near', 10, 1.25)] });
+    // Painted foreground comes as two strips: branches hanging from the top, and only the tips of the
+    // ferns along the bottom, so foliage never hides the hero on the floor.
+    const near = scene.textures.exists('nearTop')
+      ? [layer('nearTop', 10, 1.25, 190, false, 0.5), layer('nearBottom', 10, 1.25, 44, true, 0.5)]
+      : [layer('near', 10, 1.25)];
+    const a = (scene.art = { layers: [layer('sky', -100, 0.03), layer('far', -90, 0.12), layer('mid', -80, 0.3), ...near] });
 
     a.shafts = scene.add.graphics().setDepth(-85).setBlendMode(Phaser.BlendModes.ADD).setScrollFactor(0);
     for (let i = 0; i < 4; i++) {
