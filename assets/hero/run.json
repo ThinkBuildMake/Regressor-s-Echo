@@ -1,0 +1,54 @@
+{
+ "frameWidth": 99,
+ "frameHeight": 112,
+ "frames": [
+  {
+   "head": 68,
+   "feet": 93
+  },
+  {
+   "head": 68,
+   "feet": 83
+  },
+  {
+   "head": 68,
+   "feet": 77
+  },
+  {
+   "head": 68,
+   "feet": 80
+  },
+  {
+   "head": 68,
+   "feet": 77
+  },
+  {
+   "head": 68,
+   "feet": 80
+  },
+  {
+   "head": 68,
+   "feet": 89
+  },
+  {
+   "head": 68,
+   "feet": 76
+  },
+  {
+   "head": 68,
+   "feet": 91
+  },
+  {
+   "head": 68,
+   "feet": 86
+  },
+  {
+   "head": 68,
+   "feet": 78
+  },
+  {
+   "head": 68,
+   "feet": 90
+  }
+ ]
+}

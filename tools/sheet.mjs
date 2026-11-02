@@ -1,21 +1,23 @@
-// Cuts a sprite sheet painted on magenta into equal-size frames, aligned by the feet.
-//   node tools/sheet.mjs <sheet.png|jpg> <out.webp> [--height=112] [--frames=8] [--rows=1]
-// --frames is per row; with --rows=2 the rows are cut apart first and frames come out in reading order.
-// --normalize scales every frame to the same height (for run cycles, where the model drew him at
-//             slightly different sizes from frame to frame).
-// Frames are lined up by the middle of the head, not the outline, so a flaring scarf can't make
-// the body jitter. Frames are found by the empty magenta columns between figures (or, with --frames=N, as N equal-width
-// cells when figures overlap). Each frame is cut to its own
-// bounds, scaled by one shared factor (so sizes stay consistent), centered sideways, and placed
-// with its feet on the bottom edge. The median frame is <height> px tall (so every sheet shares one
-// pixel scale); the output is as tall as the tallest frame and each cell as wide as the widest. Prints the frame size for Phaser's spritesheet loader.
+// Cuts a sprite sheet painted on magenta into equal-size frames, aligned by the head and the feet.
+//   node tools/sheet.mjs <sheet.png|jpg> <out.webp> [--height=112] [--frames=8] [--rows=1] [--normalize]
+// --frames     figures per row (default 1). --rows: rows of figures; frames come out in reading order.
+// --height     the median figure's height in output pixels, so every sheet shares one pixel scale.
+// --normalize  scale every frame to that height (for run cycles, where the model drew him at slightly
+//              different sizes from frame to frame).
+//
+// Each figure is found as a connected shape, not by cutting straight lines between figures, because
+// figures overlap side to side (feet under the next figure's cape). The biggest connected shapes are
+// the figures; smaller detached pieces (a scarf tip) join the nearest figure, and specks are dropped.
+// Frames are lined up by the middle of the head and by the feet, so a flaring cape can't make him jitter.
+// Also writes <out>.json with each frame's head and feet x, for anchoring poses in the game.
 import { chromium } from 'playwright';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { KEYER } from './keyer.mjs';
 
 const [inPath, outPath, ...flags] = process.argv.slice(2);
+if (!inPath || !outPath) { console.error('usage: node tools/sheet.mjs <sheet> <out.webp> [--height=112] [--frames=N] [--rows=R] [--normalize]'); process.exit(1); }
 const num = (name, d) => Number(flags.find((f) => f.startsWith(`--${name}=`))?.split('=')[1] ?? d);
-const opt = { height: num('height', 112), frames: num('frames', 0), rows: num('rows', 1), normalize: flags.includes('--normalize') };
+const opt = { height: num('height', 112), frames: num('frames', 1), rows: num('rows', 1), normalize: flags.includes('--normalize') };
 const mime = /\.jpe?g$/i.test(inPath) ? 'image/jpeg' : 'image/png';
 const src = `data:${mime};base64,${readFileSync(inPath).toString('base64')}`;
 
@@ -33,116 +35,113 @@ const res = await page.evaluate(async ({ src, opt }) => {
   g.drawImage(img, 0, 0);
   const d = g.getImageData(0, 0, W, H), p = d.data;
   keyMagenta(p); // shared with tools/art.mjs
-  g.putImageData(d, 0, 0);
-  const solid = (x, y) => p[(y * W + x) * 4 + 3] > 40;
-  // The main body of a 1-D profile: runs of non-empty entries (gaps up to 3 px bridged), keep the one
-  // with the most pixels. Drops stray specks such as a watermark or a neighbour's clipped scarf tip.
-  const mainRun = (counts) => {
-    let best = null, cur = null, gap = 0;
-    counts.forEach((n, i) => {
-      if (n > 1) { if (!cur) cur = { a: i, b: i, mass: 0 }; cur.b = i; cur.mass += n; gap = 0; }
-      else if (cur && ++gap > 3) { if (!best || cur.mass > best.mass) best = cur; cur = null; gap = 0; }
-    });
-    if (cur && (!best || cur.mass > best.mass)) best = cur;
-    return best ?? { a: 0, b: counts.length - 1 };
-  };
-  // Rows: cut the sheet into horizontal bands at the emptiest row near each expected boundary.
-  const rowMass = Array.from({ length: H }, (_, y) => { let m = 0; for (let x = 0; x < W; x++) m += solid(x, y); return m; });
-  const bandCuts = [0];
-  for (let i = 1; i < opt.rows; i++) {
-    const mid = Math.round((i * H) / opt.rows), span = Math.round(H / opt.rows / 3);
-    let best = mid;
-    for (let y = mid - span; y <= mid + span; y++) if (rowMass[y] < rowMass[best]) best = y;
-    bandCuts.push(best);
-  }
-  bandCuts.push(H);
-  const cells = [];
-  for (let bi = 0; bi < opt.rows; bi++) {
-    const Y0 = bandCuts[bi], Y1 = bandCuts[bi + 1] - 1;
-    // Columns that contain any figure pixels, grouped into runs = frames.
-    const used = Array.from({ length: W }, (_, x) => { for (let y = Y0; y <= Y1; y++) if (solid(x, y)) return true; return false; });
-    let runs = [];
-    for (let x = 0; x < W; x++) {
-      if (!used[x]) continue;
-      let e = x;
-      while (e + 1 < W && used[e + 1]) e++;
-      runs.push([x, e]);
-      x = e;
-    }
-    runs = runs.filter(([a, b]) => b - a > 8);
-    // Figures whose scarves or cloaks overlap merge into one run. If the expected frame count is given
-    // and doesn't match, cut between neighbours at the emptiest column near each expected boundary.
-    if (opt.frames && runs.length !== opt.frames) {
-      const n = opt.frames, mass = Array.from({ length: W }, (_, x) => { let m = 0; for (let y = Y0; y <= Y1; y++) m += solid(x, y); return m; });
-      const cuts = [0];
-      for (let i = 1; i < n; i++) {
-        const mid = Math.round((i * W) / n), span = Math.round(W / n / 3);
-        let best = mid;
-        for (let x = mid - span; x <= mid + span; x++) if (mass[x] < mass[best]) best = x;
-        cuts.push(best);
+  // Shapes are found from solid pixels only, so figures whose soft edges touch stay separate.
+  const solid = (k) => p[k * 4 + 3] > 200;
+
+  // Label connected shapes (8-connected) across the whole sheet.
+  const label = new Int32Array(W * H), comps = [null];
+  for (let k = 0; k < W * H; k++) {
+    if (label[k] || !solid(k)) continue;
+    const id = comps.length, stack = [k], comp = { id, n: 0, x0: W, x1: 0, y0: H, y1: 0, sx: 0, sy: 0 };
+    label[k] = id;
+    while (stack.length) {
+      const q = stack.pop(), x = q % W, y = (q - x) / W;
+      comp.n++; comp.sx += x; comp.sy += y;
+      comp.x0 = Math.min(comp.x0, x); comp.x1 = Math.max(comp.x1, x); comp.y0 = Math.min(comp.y0, y); comp.y1 = Math.max(comp.y1, y);
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+        const nx = x + dx, ny = y + dy;
+        if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
+        const nk = ny * W + nx;
+        if (!label[nk] && solid(nk)) { label[nk] = id; stack.push(nk); }
       }
-      cuts.push(W);
-      runs = cuts.slice(0, -1).map((c, i) => [c, cuts[i + 1] - 1]);
     }
-    for (const r of runs) cells.push([r[0], r[1], Y0, Y1]);
+    comps.push(comp);
   }
-  // In each cell, erase floating bits (a neighbour's clipped scarf tip, watermark specks): keep the
-  // largest connected piece and any piece at least 20% its size (a detached scarf end), clear the rest.
-  for (const [x0, x1, Y0, Y1] of cells) {
-    const cw = x1 - x0 + 1, CH = Y1 - Y0 + 1, label = new Int32Array(cw * CH), sizes = [0];
-    for (let y = 0; y < CH; y++) for (let x = 0; x < cw; x++) {
-      if (label[y * cw + x] || !solid(x0 + x, Y0 + y)) continue;
-      const id = sizes.length, stack = [y * cw + x];
-      label[y * cw + x] = id;
-      let n = 0;
-      while (stack.length) {
-        const k = stack.pop(), kx = k % cw, ky = (k - kx) / cw;
-        n++;
-        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
-          const nx = kx + dx, ny = ky + dy;
-          if (nx < 0 || ny < 0 || nx >= cw || ny >= CH) continue;
-          const nk = ny * cw + nx;
-          if (!label[nk] && solid(x0 + nx, Y0 + ny)) { label[nk] = id; stack.push(nk); }
-        }
+  // Hand the soft edge pixels back to the shape next to them (a few passes of growing outward).
+  for (let pass = 0; pass < 4; pass++) {
+    const grow = [];
+    for (let k = 0; k < W * H; k++) {
+      if (label[k] || p[k * 4 + 3] === 0) continue;
+      const x = k % W, y = (k - x) / W;
+      for (const nk of [k - 1, k + 1, k - W, k + W]) {
+        if (nk < 0 || nk >= W * H || (nk % W === 0 && x === W - 1) || (x === 0 && nk % W === W - 1)) continue;
+        if (label[nk]) { grow.push(k, label[nk]); break; }
       }
-      sizes.push(n);
     }
-    const biggest = Math.max(...sizes);
-    for (let y = 0; y < CH; y++) for (let x = 0; x < cw; x++) {
-      const k = y * cw + x, i = ((Y0 + y) * W + x0 + x) * 4;
-      if (sizes[label[k]] < biggest * 0.2 || (!label[k] && p[i + 3] > 0)) p[i + 3] = 0; // also faint pixels off the figure
+    if (!grow.length) break;
+    for (let i = 0; i < grow.length; i += 2) {
+      const k = grow[i], id = grow[i + 1], x = k % W, y = (k - x) / W, cp = comps[id];
+      label[k] = id;
+      cp.x0 = Math.min(cp.x0, x); cp.x1 = Math.max(cp.x1, x); cp.y0 = Math.min(cp.y0, y); cp.y1 = Math.max(cp.y1, y);
     }
   }
-  g.putImageData(d, 0, 0);
-  // Bounding box of each frame's main figure: rows first, then columns within those rows.
-  const boxes = cells.map(([x0, x1, Y0, Y1]) => {
-    const rows = Array.from({ length: Y1 - Y0 + 1 }, (_, i) => { let n = 0; for (let x = x0; x <= x1; x++) n += solid(x, Y0 + i); return n; });
-    const r = mainRun(rows), ya = Y0 + r.a, yb = Y0 + r.b;
-    const cols = Array.from({ length: x1 - x0 + 1 }, (_, i) => { let n = 0; for (let y = ya; y <= yb; y++) n += solid(x0 + i, y); return n; });
-    const c = mainRun(cols);
-    // Anchor: the middle of his head (the top quarter of the figure), so a flaring scarf or
-    // cloak doesn't shift the body from frame to frame.
+  const all = comps.slice(1).sort((a, b) => b.n - a.n);
+  const count = opt.frames * opt.rows;
+  const figures = all.slice(0, count);
+  if (figures.length < count) return { error: `found ${figures.length} figures, expected ${count}` };
+  // Reading order: group into rows by vertical centre, then left to right.
+  figures.forEach((f) => { f.cx = f.sx / f.n; f.cy = f.sy / f.n; f.parts = [f.id]; });
+  figures.sort((a, b) => a.cy - b.cy);
+  const ordered = Array.from({ length: opt.rows }, (_, r) => figures.slice(r * opt.frames, (r + 1) * opt.frames).sort((a, b) => a.cx - b.cx)).flat();
+  // Detached pieces at least 0.5% of the smallest figure join the figure whose box is nearest.
+  const minFig = Math.min(...ordered.map((f) => f.n));
+  const gap = (a, b) => Math.max(0, a.x0 - b.x1, b.x0 - a.x1) + Math.max(0, a.y0 - b.y1, b.y0 - a.y1);
+  for (const piece of all.slice(count)) {
+    if (piece.n < minFig * 0.005) continue;
+    const near = ordered.reduce((best, f) => (gap(piece, f) < gap(piece, best) ? f : best));
+    if (gap(piece, near) > 40) continue;
+    near.parts.push(piece.id);
+    near.x0 = Math.min(near.x0, piece.x0); near.x1 = Math.max(near.x1, piece.x1);
+    near.y0 = Math.min(near.y0, piece.y0); near.y1 = Math.max(near.y1, piece.y1);
+  }
+  // Head anchor: centre of the figure's own pixels in its top quarter.
+  for (const f of ordered) {
+    const own = new Set(f.parts);
     let sx = 0, sn = 0;
-    for (let y = ya; y <= ya + (yb - ya) * 0.25; y++) for (let x = x0 + c.a; x <= x0 + c.b; x++) if (solid(x, y)) { sx += x; sn++; }
-    return { x0: x0 + c.a, x1: x0 + c.b, y0: ya, y1: yb, hx: sn ? sx / sn : (x0 + c.a + x0 + c.b) / 2 };
-  });
-  // Scale so the typical (median) frame is --height px tall. Using the median, not the tallest, keeps
-  // the hero the same size across sheets; a jump frame with a flying scarf just ends up taller.
-  const heights = boxes.map((b) => b.y1 - b.y0 + 1).sort((a, b) => a - b);
+    for (let y = f.y0; y <= f.y0 + (f.y1 - f.y0) * 0.25; y++) for (let x = f.x0; x <= f.x1; x++) if (own.has(label[y * W + x])) { sx += x; sn++; }
+    f.hx = sn ? sx / sn : (f.x0 + f.x1) / 2;
+  }
+
+  // Scale: the median figure is opt.height tall (or every figure, with --normalize).
+  const heights = ordered.map((f) => f.y1 - f.y0 + 1).sort((a, b) => a - b);
   const shared = opt.height / heights[Math.floor(heights.length / 2)];
-  const scaleOf = (b) => (opt.normalize ? opt.height / (b.y1 - b.y0 + 1) : shared);
+  const scaleOf = (f) => (opt.normalize ? opt.height / (f.y1 - f.y0 + 1) : shared);
   const fh = opt.normalize ? opt.height : Math.ceil(heights[heights.length - 1] * shared);
-  const left = Math.max(...boxes.map((b) => (b.hx - b.x0) * scaleOf(b))), right = Math.max(...boxes.map((b) => (b.x1 - b.hx) * scaleOf(b)));
+  const left = Math.max(...ordered.map((f) => (f.hx - f.x0) * scaleOf(f)));
+  const right = Math.max(...ordered.map((f) => (f.x1 - f.hx) * scaleOf(f)));
   const fw = Math.ceil(left + right) + 4, anchor = left + 2; // head x within every cell
+
   const out = document.createElement('canvas');
-  out.width = fw * boxes.length; out.height = fh;
+  out.width = fw * ordered.length; out.height = fh;
   const o = out.getContext('2d');
-  boxes.forEach((b, i) => {
-    const s = scaleOf(b), w = (b.x1 - b.x0 + 1) * s, h = (b.y1 - b.y0 + 1) * s;
-    o.drawImage(c, b.x0, b.y0, b.x1 - b.x0 + 1, b.y1 - b.y0 + 1, i * fw + anchor - (b.hx - b.x0) * s, fh - h, w, h);
+  ordered.forEach((f, i) => {
+    // Copy only this figure's own pixels, so a neighbour's cape can't leak in.
+    const bw = f.x1 - f.x0 + 1, bh = f.y1 - f.y0 + 1, own = new Set(f.parts);
+    const part = document.createElement('canvas');
+    part.width = bw; part.height = bh;
+    const pg = part.getContext('2d'), pd = pg.createImageData(bw, bh);
+    for (let y = 0; y < bh; y++) for (let x = 0; x < bw; x++) {
+      const k = (f.y0 + y) * W + f.x0 + x;
+      if (!own.has(label[k])) continue;
+      const si = k * 4, di = (y * bw + x) * 4;
+      pd.data[di] = p[si]; pd.data[di + 1] = p[si + 1]; pd.data[di + 2] = p[si + 2]; pd.data[di + 3] = p[si + 3];
+    }
+    pg.putImageData(pd, 0, 0);
+    const s = scaleOf(f), w = bw * s, h = bh * s;
+    o.drawImage(part, i * fw + anchor - (f.hx - f.x0) * s, fh - h, w, h);
   });
-  return { url: out.toDataURL('image/webp', 0.9), frames: boxes.length, fw, fh };
+  // Where each frame's head and feet are (x within the frame): the head is the alignment anchor,
+  // the feet are the rightmost solid pixel in the bottom 30% (used to anchor feet-first slides).
+  const od = o.getImageData(0, 0, out.width, fh).data, meta = [];
+  for (let i = 0; i < ordered.length; i++) {
+    let feet = 0;
+    for (let y = Math.floor(fh * 0.7); y < fh; y++) for (let x = 0; x < fw; x++) if (od[(y * out.width + i * fw + x) * 4 + 3] > 120) feet = Math.max(feet, x);
+    meta.push({ head: Math.round(anchor), feet });
+  }
+  return { url: out.toDataURL('image/webp', 0.9), frames: ordered.length, fw, fh, meta };
 }, { src, opt });
 await browser.close();
+if (res.error) { console.error(res.error); process.exit(1); }
 writeFileSync(outPath, Buffer.from(res.url.split(',')[1], 'base64'));
+writeFileSync(outPath.replace(/\.webp$/, '.json'), JSON.stringify({ frameWidth: res.fw, frameHeight: res.fh, frames: res.meta }, null, 1));
 console.log(`${outPath}: ${res.frames} frames, ${res.fw}x${res.fh} each`);

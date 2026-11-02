@@ -232,6 +232,7 @@ class Room extends Phaser.Scene {
       this.load.image('heroIdle', 'assets/hero/idle.webp');
       this.load.image('heroRun', 'assets/hero/run.webp'); // 12 run frames: top row 0-5, bottom row 6-11
       this.load.image('heroSlide', 'assets/hero/slide.webp'); // 12 slide frames, 3 rows of 4
+      this.load.json('heroSlideMeta', 'assets/hero/slide.json');  // each frame's head and feet x
     }
   }
 
@@ -476,14 +477,23 @@ class Room extends Phaser.Scene {
     const [key, frame] = this.heroFrame;
     // Standing frames center on him. The slide is anchored by its feet (the frame's leading edge),
     // a little ahead of center, so the body trails behind and getting up moves him forward.
-    const flip = this.face < 0, slide = key === 'heroSlide';
+    // Position from the physics body, which has already moved this frame (the rectangle only catches
+    // up after drawing, so using it made the painting trail one frame behind the body).
+    const flip = this.face < 0, slide = key === 'heroSlide', bx = b.center.x, feet = b.bottom;
     this.heroSprite.setTexture(key, frame).setScale(this.heroScale).setFlipX(flip)
-      .setOrigin(slide ? (flip ? 0.03 : 0.97) : 0.5, 1)
-      .setPosition(p.x + (slide ? this.face * 12 : 0), p.y + p.height / 2 + 1);
+      .setOrigin(slide ? this.slideOrigin(frame, flip) : 0.5, 1)
+      .setPosition(bx + (slide ? this.face * 12 : 0), feet + 1);
     // the amulet's glow, on his chest (only placed for upright poses)
     if (slide) return;
     g.fillStyle(0xffd774, 0.25 + Math.sin(t * 3) * 0.08);
-    g.fillCircle(p.x + this.face * 2, p.y + p.height / 2 - HERO_HEIGHT * 0.5, 4);
+    g.fillCircle(bx + this.face * 2, feet - HERO_HEIGHT * 0.5, 4);
+  }
+
+  // Origin for a slide frame: its feet (from tools/sheet.mjs's metadata), mirrored when facing left.
+  slideOrigin(frame, flip) {
+    const meta = this.cache.json.get('heroSlideMeta'), fw = this.textures.get('heroSlide').get(frame).width;
+    const feet = meta ? meta.frames[frame].feet / fw : 0.97;
+    return flip ? 1 - feet : feet;
   }
 
   // Flames and glow over a painted soul.
@@ -675,11 +685,12 @@ class Room extends Phaser.Scene {
     const b = p.body;
     const grounded = b.blocked.down || b.touching.down;
     const dir = (k.D.isDown || k.RIGHT.isDown) - (k.A.isDown || k.LEFT.isDown);
-    if (dir) this.face = dir;
+    if (dir && !(this.lying && this.slide > 0)) this.face = dir; // can't turn mid-slide
     if (slideKey && grounded && !this.lying && Math.abs(b.velocity.x) > 100) {
       this.setLying(true);
       this.slide = SLIDE_TIME;
       this.slideDir = Math.sign(b.velocity.x);
+      this.face = this.slideDir; // he faces the way he slides, even if no key is held
     }
     if (this.lying && grounded) {
       this.slide -= dt; // only counts down on the ground, so a dive stays flat until you land

@@ -1,0 +1,38 @@
+{
+ "frameWidth": 122,
+ "frameHeight": 140,
+ "frames": [
+  {
+   "head": 68,
+   "feet": 90
+  },
+  {
+   "head": 68,
+   "feet": 88
+  },
+  {
+   "head": 68,
+   "feet": 83
+  },
+  {
+   "head": 68,
+   "feet": 87
+  },
+  {
+   "head": 68,
+   "feet": 93
+  },
+  {
+   "head": 68,
+   "feet": 81
+  },
+  {
+   "head": 68,
+   "feet": 84
+  },
+  {
+   "head": 68,
+   "feet": 94
+  }
+ ]
+}
