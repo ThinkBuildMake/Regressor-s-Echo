@@ -147,7 +147,7 @@ const Art = {
   platform(scene, x, y, w, h, mossTop) {
     const tex = scene.textures.get('ground').getSourceImage();
     const ts = scene.add.tileSprite(x, y, w, h, 'ground').setOrigin(0).setDepth(1);
-    ts.setTileScale(128 / tex.height).setTilePosition(x / ts.tileScaleX, y / ts.tileScaleY);
+    ts.setTileScale(256 / tex.height).setTilePosition(x / ts.tileScaleX, y / ts.tileScaleY); // one repeat = 256px on screen
     const shade = scene.add.graphics().setDepth(1); // darker toward the bottom, for weight
     shade.fillGradientStyle(0x000000, 0x000000, 0x000000, 0x000000, 0, 0, 0.35, 0.35);
     shade.fillRect(x, y, w, h);
