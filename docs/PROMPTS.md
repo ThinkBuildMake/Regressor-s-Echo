@@ -91,7 +91,7 @@ Save to `assets/raw/hero/`. Attach the World 1 reference image for the brushwork
 
 **Hero style block (paste before each hero prompt):**
 
-> Hand-painted 2D game character, painterly, soft brush edges, matching the attached forest painting. A young treasure hunter: deep teal-grey hooded cloak with the hood up, face mostly in shadow except one softly glowing pale eye, a long rust-red scarf, a worn brown leather satchel on a strap across the chest, a small gold amulet on the chest, slim build, boots. Simple, readable silhouette. Side view facing right. Isolated on a flat solid magenta #FF00FF background. No text, no ground, no shadow. Do not use bright blue-white anywhere.
+> Hand-painted 2D game character, painterly, soft brush edges, matching the attached forest painting. A young treasure hunter in the spirit of a forest outlaw: tousled blond hair, a friendly determined face, a deep forest-green hooded cloak worn with the hood down (darker than the trees in the background), a long wavy red scarf that flows behind him, a brown leather jerkin, a worn leather satchel on a strap across the chest, a small gold amulet on the chest, slim build, leather boots. No sword, no bow, no pointed cap. Simple, readable silhouette. Side view facing right. Isolated on a flat solid magenta #FF00FF background. No text, no ground, no shadow. Do not use bright blue-white anywhere.
 
 1. **The hero → `hero.png`**
    > Full body, standing in a relaxed neutral pose, arms at his sides. Square 1:1, centered, the character filling about 80% of the height.
@@ -99,7 +99,7 @@ Save to `assets/raw/hero/`. Attach the World 1 reference image for the brushwork
    Regenerate until you love him. Every later image copies this one.
 
 2. **Sprite sheet → `sheet.png`**
-   > Using the attached character exactly (same proportions, colors, scarf and satchel), paint an animation sprite sheet in one horizontal row of 8 evenly spaced frames, all the same size, all with feet on the same baseline: frames 1–6 a running cycle, frame 7 jumping upward with legs tucked, frame 8 falling with the cloak and scarf lifted. Wide 21:9.
+   > Using the attached character exactly (same proportions, hair, colors, scarf and satchel), paint an animation sprite sheet in one horizontal row of 8 evenly spaced frames, all the same size, all with feet on the same baseline: frames 1–6 a running cycle, frame 7 jumping upward with legs tucked, frame 8 falling with the cloak and scarf lifted. Wide 21:9.
 
 3. **Slide → `slide.png`**
    > Using the attached character exactly, paint him sliding feet first along the ground, body low and leaning back, one leg extended forward, scarf and cloak streaming behind him. Wide 21:9, character centered.

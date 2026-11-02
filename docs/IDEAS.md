@@ -52,7 +52,7 @@ Every idea raised so far, so we can decide what to build. Status:
 | Dying mid-fight ruins your setup (your oldest body vanishes, and the new one lands somewhere unhelpful) | Built | Follows from the body limit and physics |
 | Stomp the boss from a body; 3 hits; it speeds up each hit | Built | A 1-high step is safe; 2-high puts you in its path |
 | The three bosses | Decided | World 1: **great moth spirit** (floats, wing-dust shots, can't destroy souls). World 2: **tree guardian** with a stone mask face (stationary, branch swings and seed pods, can smash souls). World 3: **spectral stag** (charges, destroys souls it hits, has attacks you can't dodge) |
-| Hero look | Decided | Hooded explorer: hooded cloak, long scarf, satchel. Drawn in code with painted shading, not AI frames |
+| Hero look | Decided (changed) | Robin Hood–style treasure hunter: blond, deep forest-green cloak (hood down, darker than the trees), long wavy red scarf, leather jerkin and satchel, gold amulet. No sword, bow or pointed cap, to stay clear of Link (Zelda). Painted with Nano Banana Pro as a sprite sheet; the code-drawn hooded figure is a placeholder |
 | Boss passes through bodies vs. is blocked by them | Undecided | Passing through now. Blocking would let players trap it |
 | Boss projectiles that bodies block | Proposed | Bodies become shields as well as steps |
 | Some attacks can't be dodged; you need a body to block them | Proposed | Forces body placement as part of the fight, not just the setup |
