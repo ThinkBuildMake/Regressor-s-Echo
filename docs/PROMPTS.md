@@ -13,11 +13,16 @@ Why magenta, not green: the forest is green, so cutting out a green background w
 
 ## Style block (paste into every prompt)
 
-> Hand-painted 2D game background, painterly digital matte painting, soft brush edges, no hard outlines. Muted teal-green and moss palette with soft warm light, gentle atmospheric mist and depth haze, low contrast. Light comes from the upper left. Calm, slightly melancholy mood. Side-on view for a 2D platformer, level horizon, no perspective tilt. No people, no animals, no text, no logo, no watermark, no border.
+> Hand-painted 2D game background, painterly digital matte painting, soft brush edges, no hard outlines. Muted teal-green and moss palette with soft warm light, gentle atmospheric mist and depth haze, low contrast. Soft, diffuse light comes from the upper left, shaping the forms gently. No visible light beams, sun rays or lens glow. Calm, slightly melancholy mood. Side-on view for a 2D platformer, level horizon, no perspective tilt. No people, no animals, no text, no logo, no watermark, no border.
+
+## Lighting: what's painted vs. what's added in code
+
+- **Painted into the images:** the light direction (upper left), soft shading and misty depth. This is what makes it look painted, and it matches the hero's rim light.
+- **Added in code, not painted:** visible light beams and sun rays (they move and breathe), the glow of your souls and the amulet, and any per-room lighting changes. Painting beams in would double them up and freeze them in place.
 
 ## 1. Reference image → `anchor.png`
 
-> A quiet forest edge in the early morning. Tall old trees fading into mist, soft beams of light from the upper left, ferns and mossy roots in the foreground, distant layers of trees getting paler with distance. Wide 21:9 image.
+> A quiet forest edge in the early morning. Tall old trees fading into mist, soft diffuse light from the upper left, ferns and mossy roots in the foreground, distant layers of trees getting paler with distance. Wide 21:9 image.
 
 ## 2. Sky → `sky.png`
 
