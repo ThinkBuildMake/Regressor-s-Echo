@@ -25,8 +25,7 @@ const H = (face, text) => ({ who: 'hero', face, text });
 const G = (face, text) => ({ who: 'guide', face, text });
 
 // Story text. Keys are triggered by rooms (on first entry) or by events (amulet, firstDeath).
-// The guide: playful, mischievous, witty. The jokes are how he copes after thousands of deaths;
-// the armor slips at most once per world. He teases more than he explains, so puzzles stay yours.
+// Character voices: see docs/STORY.md.
 const SCRIPT = {
   clearing: [H('cocky', 'Three days in these woods and nothing but mushrooms. Some treasure hunter I am.')],
   amulet: [

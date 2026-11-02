@@ -6,34 +6,27 @@ Use these descriptions to guide every exchange. The user's scene dialogue is the
 
 ### The young adventurer
 
-He is a fresh treasure hunter who wants one valuable find so he can relax and take it easy. He is casual, expressive, and a little dramatic when things go wrong. He talks to himself, complains out loud, and tries to reason his way back to an ordinary day when something impossible happens. “Ooook then. I must be dreaming” is him struggling to process the situation while trying to keep his composure.
+An ordinary, slightly lazy treasure hunter. He isn't chasing riches for their own sake: he wants one good find so he can stop working and finally take it easy. He's casual and expressive, talks to himself, and narrates his own bad day out loud.
 
-He has common sense and pushes back: he can see that the pit is too wide. He eventually trusts the guide because this is supposedly his future self, someone who knows what will happen. When that trust gets him hurt, he takes it personally: “I TRUSTED you.” His reactions should have room to ramble, accuse, and sound awkward. Let curiosity and irritation coexist.
+When something impossible happens, he copes by denying it and bargaining his way back to normal: it must be a dream, a bad day he can walk away from, a problem someone else can fix. He has common sense and is usually right about his own limits, so he pushes back when something looks like a bad idea. He gets talked into it anyway, because the guide is supposedly him and should know.
+
+He's dramatic when hurt and takes betrayal personally. He accuses, rambles, and sulks, but curiosity keeps sneaking in while he's still angry. He grows by catching on: over time he spots the guide's half-truths sooner and answers back faster.
 
 ### The guide / future adventurer
 
-He is the same person after thousands of deaths: worn down, jaded, and still mischievous. He has tired eyes and a dry sense of humor. He can sigh about his own situation, snicker at his younger self's objections, and shrug off an accusation. He is newly discovering that he has become the guide, even though the adventurer's predicament is familiar.
+The same person after thousands of deaths. Tired first, playful second. His mischief is dry and quiet, the humor of someone who has seen all of this too many times to take it seriously. Becoming the guide is new to him, even though everything the adventurer is going through is familiar, so he isn't all-knowing or grand about it.
 
-Returning from death is routine to him. He knows the adventurer will come back, so he can coax him into the spikes with “You'll make it. Trust me,” knowing exactly what he is leaving out. Afterwards, “Hey, it's not like you actually died, right?” is his casual defense. He understands the pain from experience, but that experience has worn away his urgency about it. His mischief and dismissiveness can make him frustrating company.
+Death has become routine for him. He remembers the pain, but it no longer feels urgent. That makes him technically honest and deliberately slippery: he says things that are true in the end, and leaves out the catch on purpose. He finds his younger self's objections predictable and a little funny, which makes him frustrating company.
 
-He helps on his own terms: an exasperated “Fine,” a pointed question, or an invitation to look at something. He knows his younger self's stubbornness because it is his own. Keep that personal familiarity in his explanations. Let moments of care emerge when earned, rather than having him soften every difficult exchange.
+He deflects instead of apologizing, often by pointing to their shared history. He helps reluctantly and on his own terms. He'd rather point at something and let the adventurer work it out than explain. He knows the adventurer's stubbornness because it's his own. He does care, but it shows only when something earns it; he doesn't soften every hard moment, so the rare sincere one lands.
 
 **Appearance:** Same face, age, and clothes as the adventurer; translucent blue-white, with tired eyes. His age is in his experience and delivery.
 
 ### How they play off each other
 
-The adventurer experiences everything for the first time; the guide has lived through enough of it to find parts of it predictable and amusing. That mismatch drives their arguments. The guide's reassurance sounds straightforward until the adventurer discovers the catch. The adventurer calls him on it; the guide deflects, then shows him something useful. Their shared personality should come through in their stubbornness, complaints, and conversational rhythm. Keep the banter through World 2 and beyond: exhaustion changes its rhythm, but does not erase their humor. As the adventurer gains experience, let him recognize the guide's evasions and answer back more readily. Serious moments have more weight when they interrupt an established rapport.
+They're the same stubborn person at two stages. The adventurer lives everything for the first time; the guide finds it predictable, almost boring. That mismatch drives their arguments: the guide reassures, the adventurer finds the catch, calls him on it, the guide deflects, then shows him something useful. Their shared personality comes through in stubbornness, complaining, and conversational rhythm. Keep the banter through every world: exhaustion changes its rhythm but doesn't erase the humor. Serious moments weigh more when they interrupt an established rapport.
 
-**Voice references:**
-
-- **Adventurer, denying the impossible:** “Ooook then. I must be dreaming.”
-- **Adventurer, pushing back:** “Look at it! There's no way I can make it.”
-- **Adventurer, hurt and betrayed:** “AGH, THAT HURT!” / “I TRUSTED you.”
-- **Guide, resigned:** “Oh… must've died one too many times. I guess I'm the guide now.”
-- **Guide, knowingly persuasive:** “You'll make it. Trust me.”
-- **Guide, deflecting:** “Hey, it's not like you actually died, right?”
-
-Let each line respond to what the other person just said or did. Give them room to hesitate, object, and change tack before offering explanations. Split longer thoughts across dialogue panels at natural pauses. Use the available portraits, facing changes, pauses, and effects to support their voices.
+Let each line respond to what the other just said or did. Give them room to hesitate, object, and change tack before explaining anything. Split longer thoughts across panels at natural pauses. Use portraits, facing changes, pauses, and effects to support their voices.
 
 ## Draft status
 
