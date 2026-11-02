@@ -10,50 +10,69 @@ const FACES = {
   hero: ['neutral', 'startled', 'pained', 'exhausted', 'determined', 'relieved', 'thinking', 'sad'],
   guide: ['wry', 'amused', 'solemn', 'sad', 'weary', 'skeptical', 'thinking', 'warm'], // painted facing right; mirrored
 };
+// Second expression sheets (assets/portraits/hero2.webp, guide2.webp). Until they exist, each of
+// these faces borrows the closest face from the first sheet.
+const FACES2 = {
+  hero: ['curious', 'annoyed', 'excited', 'scared', 'shouting', 'cocky'],
+  guide: ['smug', 'mischievous', 'teasing', 'exasperated', 'warning', 'surprised'],
+};
+const FALLBACK = {
+  curious: 'thinking', annoyed: 'determined', excited: 'relieved', scared: 'startled', shouting: 'pained', cocky: 'neutral',
+  smug: 'amused', mischievous: 'wry', teasing: 'amused', exasperated: 'weary', warning: 'solemn', surprised: 'skeptical',
+};
 const NAMES = { hero: 'You', guide: '???' };
 const H = (face, text) => ({ who: 'hero', face, text });
 const G = (face, text) => ({ who: 'guide', face, text });
 
 // Story text. Keys are triggered by rooms (on first entry) or by events (amulet, firstDeath).
+// The guide: playful, mischievous, witty. The jokes are how he copes after thousands of deaths;
+// the armor slips at most once per world. He teases more than he explains, so puzzles stay yours.
 const SCRIPT = {
-  clearing: [H('neutral', "Three days in these woods. Treasure hunting's slow this season…")],
+  clearing: [H('cocky', 'Three days in these woods and nothing but mushrooms. Some treasure hunter I am.')],
   amulet: [
-    H('thinking', "What's this? An amulet… it's warm."),
+    H('curious', "Hm? What's this…"),
+    H('excited', "Gold. Old gold. That's worth a fortune!"),
+    H('relieved', 'Finally, something worth the trip.'),
     H('startled', '…Did it just pulse?'),
   ],
   ghost: [
-    G('wry', 'Which death are you currently on?'),
+    G('mischievous', 'Well, well. Which death are you currently on?'),
     H('startled', "Death? I'm on?"),
-    G('wry', 'First timer, then. …Well. Introductions are in order.'),
-    { ...G('solemn', "I'm you. A few thousand deaths from now."), reveal: true }, // from here on he's named
-    H('startled', 'You… you look exactly like me.'),
+    G('amused', 'Oh, a first-timer! This is my favorite part.'),
+    { ...G('smug', "Introductions, then. I'm you. Give or take a few thousand deaths."), reveal: true }, // from here on he's named
+    H('annoyed', "You're me? I'm way better looking."),
+    G('teasing', 'Same face. Same hair. Same bad decisions.'),
     G('wry', "Every death sends you back. Your body forgets. You don't."),
-    G('solemn', "That amulet won't let you stay dead. You'll wish it would."),
-    H('thinking', '…And the treasure?'),
-    G('amused', 'Still out there. Keep walking.'),
+    H('excited', "So this amulet makes me immortal? What's it worth?"),
+    G('amused', 'Nope! Not telling.'),
+    G('warning', "…It won't let you stay dead. One day you'll wish it would."),
+    G('mischievous', "Anyway! Treasure's that way. Try not to die. …Actually, do. It's the only way through."),
   ],
   firstPit: [
-    G('wry', 'Too wide to jump. Go on. Jump in.'),
-    H('startled', 'Into the spikes?!'),
-    G('solemn', "Trust me. I'd know."),
+    G('mischievous', 'Too wide to jump. Go on, jump in.'),
+    H('scared', 'Into the spikes?!'),
+    G('teasing', "Trust me. I've done this part a lot."),
   ],
   firstDeath: [
-    H('pained', 'Agh—! That… that hurt.'),
-    G('solemn', "It doesn't stop hurting. But look."),
-    G('wry', "You're still there. Use it."),
+    H('shouting', 'AGH! THAT HURT!'),
+    G('wry', "It's not like you actually died, right?"),
+    H('annoyed', 'I literally just died.'),
+    G('smug', 'And yet, here you are. Look, you left yourself behind. Go stand on him.'),
   ],
   thorns: [
-    G('thinking', "Too high to reach. The thorns can lift you."),
-    G('wry', 'Not too high, though. You still have to climb yourself.'),
+    H('annoyed', 'Let me guess. Die on the thorns.'),
+    G('amused', "Look at you, learning! Not too high, though. You still have to climb yourself."),
   ],
   patrol: [
-    G('wry', 'Sometimes you let the forest do it for you.'),
-    H('exhausted', "You say that like it's easy."),
+    G('mischievous', 'See the switch? See the fellow pacing over it? Let him do the work.'),
+    H('annoyed', 'You want me to get killed on purpose.'),
+    G('smug', 'I want you to get killed efficiently.'),
   ],
   chain: [
-    G('thinking', 'One soul, two problems. The shrine will hold your place.'),
     H('exhausted', 'How many times have you done this?'),
-    G('sad', 'Enough to stop counting.'),
+    G('teasing', 'Today? Or ever?'),
+    H('annoyed', 'Ever.'),
+    G('weary', '…Fine. Enough to stop counting. The shrine will hold your place.'),
   ],
 };
 
@@ -61,8 +80,10 @@ const Dialogue = {
   seen: new Set(), // survives room restarts, so lines don't repeat
 
   preload(scene) {
-    for (const who of ['hero', 'guide'])
+    for (const who of ['hero', 'guide']) {
       if (!scene.textures.exists(`portrait-${who}`)) scene.load.image(`portrait-${who}`, `assets/portraits/${who}.webp`);
+      if (!scene.textures.exists(`portrait-${who}2`)) scene.load.image(`portrait-${who}2`, `assets/portraits/${who}2.webp`);
+    }
   },
 
   create(scene) {
@@ -77,8 +98,12 @@ const Dialogue = {
     const portrait = (x, who) => {
       const key = `portrait-${who}`;
       if (scene.textures.exists(key)) {
-        const tex = scene.textures.get(key), img = tex.getSourceImage(), n = FACES[who].length, fw = img.width / n;
-        if (!tex.has(0)) for (let i = 0; i < n; i++) tex.add(i, 0, i * fw, 0, fw, img.height);
+        for (const [k, list] of [[key, FACES[who]], [`${key}2`, FACES2[who]]]) {
+          if (!scene.textures.exists(k)) continue;
+          const tex = scene.textures.get(k), im = tex.getSourceImage(), fw = im.width / list.length;
+          if (!tex.has(0)) for (let i = 0; i < list.length; i++) tex.add(i, 0, i * fw, 0, fw, im.height);
+        }
+        const img = scene.textures.get(key).getSourceImage();
         return scene.add.image(x, 119, key, 0).setOrigin(0.5, 1).setScale(100 / img.height) // bust sits on the slot's floor
           .setFlipX(who === 'guide'); // he faces the hero, across the panel
       }
@@ -121,7 +146,12 @@ const Dialogue = {
       t.name.setText(NAMES[speaking]);
       const pic = t[speaking];
       if (pic.placeholder) pic.placeholder.setText(t.line.face);
-      else pic.setFrame(Math.max(0, FACES[speaking].indexOf(t.line.face)));
+      else {
+        // Second-sheet face if that sheet exists, otherwise the closest face from the first sheet.
+        const face = t.line.face, key = `portrait-${speaking}`;
+        if (FACES2[speaking].includes(face) && scene.textures.exists(`${key}2`)) pic.setTexture(`${key}2`, FACES2[speaking].indexOf(face));
+        else pic.setTexture(key, Math.max(0, FACES[speaking].indexOf(FALLBACK[face] ?? face)));
+      }
       pic.setAlpha(1);
       t[other].setAlpha(0.3);
       return true;

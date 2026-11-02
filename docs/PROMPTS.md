@@ -121,6 +121,12 @@ One image per character with every expression in a grid, so the face stays consi
 2. **The guide (his ghost from another timeline) → `guide-faces.png`**
    > An expression sheet of the ghost of the attached young treasure hunter, from a timeline where he has died countless times. Every death sent him back in time, so he looks exactly the same as the attached character: the same age, face, blond hair, green cloak, wavy red scarf and gold amulet, with no scars or wear. The only differences: his whole figure is a translucent blue-white ghost with a faint soft glow, the same blue-white as a soul, and his eyes are tired, knowing and slightly hollow, the look of someone who has seen this all before. 8 portraits in a grid of 4 columns and 2 rows, in this order: 1. wry and knowing, half smile; 2. amused; 3. solemn; 4. quietly sad; 5. weary, eyes down; 6. skeptical, one eye narrowed, hand at his jaw; 7. thinking, hand at his jaw; 8. warm and encouraging smile. Wide 2:1. (He's mirrored in the game to face the hero.)
 
+3. **Hero, extra faces → `hero-faces-2.png`** (same style block, attach `hero.png`)
+   > An expression sheet of the attached young treasure hunter (blond, deep green cloak, wavy red scarf, gold amulet), 6 portraits in a grid of 3 columns and 2 rows, in this order: 1. curious, one eyebrow raised, intrigued; 2. annoyed, a flat unimpressed look; 3. excited, a wide greedy grin, eyes lit up; 4. scared, eyes wide, leaning back; 5. shouting in pain, mouth wide open, eyes squeezed shut; 6. a cocky, confident smirk. Wide 3:2.
+
+4. **The guide, extra faces → `guide-faces-2.png`** (same style block, attach the guide sheet so the ghost look matches)
+   > An expression sheet of the attached translucent blue-white ghost (the same character, playful and mischievous), 6 portraits in a grid of 3 columns and 2 rows, in this order: 1. a smug grin; 2. mischievous, a scheming grin with narrowed eyes; 3. teasing, a playful wink; 4. exasperated, rolling his eyes; 5. a serious warning, stern, no smile; 6. genuinely surprised, eyes wide. Wide 3:2.
+
 ## Drawn in code
 
 The souls (the hero's frames tinted blue, with flames), the ghost guide, light beams and glows.

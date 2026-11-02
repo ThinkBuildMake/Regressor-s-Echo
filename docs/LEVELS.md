@@ -24,15 +24,21 @@ After the moth: the amulet grows stronger and you earn a **2nd soul**, leading i
 
 ## Opening conversation (room 2)
 
-> **Guide:** Which death are you currently on?
+The dialogue lives in [dialogue.js](../dialogue.js). The guide is playful, mischievous and witty; the one serious line is marked.
+
+> **Guide** *(mischievous)*: Well, well. Which death are you currently on?
 > **Hero** *(startled)*: Death? I'm on?
-> **Guide** *(wry)*: First timer, then. …Well. Introductions are in order.
-> **Guide:** I'm you. A few thousand deaths from now.
-> **Hero:** You… you look exactly like me.
-> **Guide:** Every death sends you back. Your body forgets. You don't.
-> **Guide** *(solemn)*: That amulet won't let you stay dead. You'll wish it would.
-> **Hero** *(thinking)*: …And the treasure?
-> **Guide** *(amused)*: Still out there. Keep walking.
+> **Guide** *(amused)*: Oh, a first-timer! This is my favorite part.
+> **Guide** *(smug)*: Introductions, then. I'm you. Give or take a few thousand deaths.
+> **Hero** *(annoyed)*: You're me? I'm way better looking.
+> **Guide** *(teasing)*: Same face. Same hair. Same bad decisions.
+> **Guide** *(wry)*: Every death sends you back. Your body forgets. You don't.
+> **Hero** *(excited)*: So this amulet makes me immortal? What's it worth?
+> **Guide** *(amused)*: Nope! Not telling.
+> **Guide** *(warning, the armor slips)*: …It won't let you stay dead. One day you'll wish it would.
+> **Guide** *(mischievous)*: Anyway! Treasure's that way. Try not to die. …Actually, do. It's the only way through.
+
+First death: **Hero** *(shouting)*: AGH! THAT HURT! · **Guide** *(wry)*: It's not like you actually died, right? · **Hero** *(annoyed)*: I literally just died.
 
 ## Worlds 2 and 3
 To be planned once World 1 plays well. World 2 (Overgrown Ruins): 2 souls, the slide, lasers, boss 2 (tree guardian, smashes souls). World 3 (Sanctum): 3 souls, the amulet awakens (die anywhere), boss 3 (spectral stag, attacks you can't dodge).
