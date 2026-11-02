@@ -48,6 +48,7 @@ Generate **one** image per run. Show the user the image and the critic's verdict
 
 - **Reference already in the project:** ⋮ (or right-click) on the image → **Add to prompt**.
 - **Picker search:** + ("Add ingredients") → type in "Search assets" → click the result to preview it → press **Add to prompt**. Remove leftover attachments (their x) before an edit so only the image being edited is attached.
+- **Every attached image tends to get pasted in.** Attach only what the step needs, say *"Do not include the attached <X> itself"*, and expect one cleanup edit. Right-click → Add to prompt replaces earlier attachments.
 - **Earth/ground references** (`ground.jpg`) make Flow paint a soil band along the bottom: add *"no soil strip along the bottom, the prop floats on magenta"*.
 - **Reference from the repo, not yet in Flow:** "Upload media" opens a native file dialog you can't drive. Instead open the prompt's + ("Add ingredients") picker, then run this, then `find` the file input and `file_upload` the repo path:
   ```js

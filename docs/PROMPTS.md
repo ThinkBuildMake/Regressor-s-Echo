@@ -141,8 +141,9 @@ Save to `assets/raw/world1/`. Attach `anchor.png` (brushwork) and, for anything 
 3. **Amulet → `amulet.png`** (square 1:1; attach `hero.jpg` too, for the amulet he wears)
    > A small round gold amulet on a short broken leather cord, lying flat, seen straight on, the same amulet the attached hero wears: a worn gold disc with the same carved circular mark with three short rays, and three small empty rune slots around the rim. Slightly tarnished, ancient. Centered, filling about half the frame.
 
-4. **Amulet, runes lit → `amulet-rune1.png`, `amulet-rune2.png`, `amulet-rune3.png`** (edit `amulet.png` each time)
-   > Edit the attached image. Keep everything exactly as it is. Only make this change: the top rune slot (then: the top two; then: all three) is filled with a small warm gold-lit rune. Nothing else changes.
+4. **Amulet, runes lit → `amulet-rune1.png`, `amulet-rune2.png`, `amulet-rune3.png`** (edit each from the previous one)
+   Flow paints the amulet with the central mark and **two** rim slots (at about 4 and 8 o'clock), so the three runes are: 1 = the central mark (World 1: it brings him back), 2 = the 8 o'clock slot (after the moth), 3 = the 4 o'clock slot (after the tree).
+   > Edit the attached image. Keep everything exactly as it is. Only make this change: the carved central mark (the ring and its three rays) is filled with warm soft gold light. *(rune2, edit rune1: "…the small rune slot at the lower left (8 o'clock) is filled with a small warm gold-lit rune." rune3, edit rune2: same for the lower right (4 o'clock).)* No glow spilling outside the grooves, no rays, no particles.
 
 5. **Spikes → `spikes.png`** (wide 16:9)
    > A long horizontal strip of sharp hazard spikes for a forest platformer: a row of dark, splintered, thorn-like wooden stakes and old iron points jutting up from a thin mossy base, evenly spaced, all the same height, clearly dangerous. The strip runs the full width of the image and is the same all the way across so it can repeat left to right.
