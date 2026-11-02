@@ -36,9 +36,11 @@ const rules = {
   selfDestruct: false, // [4] K/X kills you anywhere (off = only hazards). Planned as a late-game unlock
 };
 const LIMITS = [1, 2, 3, 5, 0];
+let showHud = false; // test HUD and rule switches; H toggles
 
 // '#' wall  '^' spikes  P start  G goal  '_' plate  D door (open while any plate is held)
 // e walker enemy  B boss (goal stays hidden until it's beaten)  x thorns (kill on touch, not solid)
+// A the amulet  C shrine (touch: respawn here)  g the guide's ghost
 // Rooms carry an optional [x, y] world position in tiles. Rooms that touch connect: walk through a gap
 // in the shared wall and the camera slides over. Rooms without a position are spread out so they don't
 // touch (the old test rooms). Every room is padded to at least one screen (30x17 tiles).
@@ -214,8 +216,124 @@ const ROOMS = [
     '  P            e          G  #',
     '##############################',
   ], [60, 48]],
+  // ---------------- World 1: Forest Edge (see docs/LEVELS.md) ----------------
+  ['The clearing', [
+    '##############################',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                             ',
+    '#                  ##         ',
+    '#  P       A      ###         ',
+    '##############################',
+  ], [0, 100], { world: 1, enter: 'clearing' }],
+  ['The ghost', [
+    '##############################',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '                              ',
+    '                              ',
+    '  P            g              ',
+    '##############################',
+  ], [30, 100], { world: 1, enter: 'ghost' }],
+  ['First death', [
+    '##############################',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '                              ',
+    '                              ',
+    '  P                           ',
+    '##########^^^^^^^^############',
+  ], [60, 100], { world: 1, enter: 'firstPit' }],
+  ['The thorn wall', [
+    '##############################',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                             ',
+    '#                             ',
+    '#                             ',
+    '#               ##############',
+    '#               x#############',
+    '#               x#############',
+    '                x#############',
+    '                x#############',
+    '  P             x#############',
+    '##############################',
+  ], [90, 100], { world: 1, enter: 'thorns' }],
+  ['The patrol', [
+    '##############################',
+    '#                       #    #',
+    '#                       #    #',
+    '#                       #    #',
+    '#                       #    #',
+    '#                       #    #',
+    '#                       #    #',
+    '#                       #    #',
+    '#                       #    #',
+    '#                       #    #',
+    '#                       #    #',
+    '#                       D    #',
+    '#                       D    #',
+    '                        D     ',
+    '                        D     ',
+    '  P         _     e     D     ',
+    '##############################',
+  ], [120, 94], { world: 1, enter: 'patrol' }],
+  ['The chain', [
+    '##############################',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                          G #',
+    '#                     ########',
+    '#                     x#######',
+    '#                     x#######',
+    '                      x#######',
+    '                      x#######',
+    '  P              C    x#######',
+    '######^^^^^^^^################',
+  ], [150, 94], { world: 1, enter: 'chain' }],
 ];
-const START_ROOM = ROOMS.findIndex((r) => r[0].startsWith('Forest 1'));
+const WORLD_SOULS = { 1: 1, 2: 2, 3: 3 }; // souls allowed per world; rooms without a world keep 3
+const START_ROOM = ROOMS.findIndex((r) => r[0] === 'The clearing');
 
 // Overlap that ignores shared edges (standing next to something isn't touching it).
 const hit = (A, B) => A.x < B.right && A.right > B.x && A.y < B.bottom && A.bottom > B.y;
@@ -228,6 +346,7 @@ class Room extends Phaser.Scene {
 
   preload() {
     Art.preload(this);
+    Dialogue.preload(this);
     if (!this.textures.exists('heroSheet')) {
       this.load.image('heroSheet', 'assets/hero/sheet.webp'); // 8 frames: run 0-5, jump 6, fall 7
       this.load.image('heroIdle', 'assets/hero/idle.webp');
@@ -256,12 +375,15 @@ class Room extends Phaser.Scene {
     Art.ensure(this);
     Art.backdrop(this);
     const rect = (x, y, w, h, color) => this.add.rectangle(x + w / 2, y + h / 2, w, h, color);
-    this.rooms = ROOMS.map(([name, raw, pos], ri) => {
+    this.amulets = [];
+    this.shrines = [];
+    this.ghosts = [];
+    this.rooms = ROOMS.map(([name, raw, pos, extra = {}], ri) => {
       const [ox, oy] = pos ?? [ri * 31, 0];
       const width = Math.max(30, ...raw.map((r) => r.length));
       const rows = raw.map((r) => r.padEnd(width, '#'));
       while (rows.length < 17) rows.push('#'.repeat(width));
-      const room = { name, rect: new Phaser.Geom.Rectangle(ox * T, oy * T, width * T, rows.length * T), spawns: [] };
+      const room = { name, ...extra, rect: new Phaser.Geom.Rectangle(ox * T, oy * T, width * T, rows.length * T), spawns: [] };
       rows.forEach((row, ty) => {
         for (let tx = 0; tx < row.length; tx++) {
           const x = (ox + tx) * T, y = (oy + ty) * T;
@@ -295,12 +417,24 @@ class Room extends Phaser.Scene {
                 r: rect(x + T / 2 - 48, y + T - 128, 96, 48, 0x9b59b6) };
               break;
             case 'P': room.spawns.push({ x: x + T / 2, y: y + T - 15 }); break;
+            case 'A': this.amulets.push(this.add.circle(x + T / 2, y + T - 10, 6, 0xffd774).setStrokeStyle(2, 0xb07a22).setDepth(3)); break;
+            case 'C': { // shrine: a mossy stone with a gold rune; touching it moves your respawn here
+              const sh = this.add.rectangle(x + T / 2, y + T - 14, 16, 28, 0x56605a).setStrokeStyle(1, 0x2b322e).setDepth(3);
+              sh.rune = this.add.circle(x + T / 2, y + T - 18, 3, 0xe8b44a).setAlpha(0.35).setDepth(3);
+              sh.spawn = { x: x + T / 2, y: y + T - 15 };
+              this.shrines.push(sh);
+              break;
+            }
+            case 'g': this.ghosts.push({ x: x + T / 2, feet: y + T, room: ri }); break;
           }
         }
       });
       return room;
     });
     this.start = this.rooms[this.index].spawns[0];
+    rules.max = WORLD_SOULS[this.rooms[this.index].world] ?? 3;
+    Dialogue.create(this);
+    Dialogue.play(this, this.rooms[this.index].enter);
 
     this.physics.add.collider(this.enemies, this.statics);
     if (this.boss) this.goals.filter((g) => g.room === this.boss.room).forEach((g) => g.setVisible(false));
@@ -322,6 +456,10 @@ class Room extends Phaser.Scene {
       this.heroScale = HERO_HEIGHT / HERO_SRC; // same pixel scale for every hero image
       this.heroSprite = this.add.image(0, 0, 'heroIdle').setOrigin(0.5, 1).setDepth(5.5);
       this.heroFrame = ['heroIdle', undefined];
+      // The guide: the hero's own painting as a see-through, flameless blue-white ghost, facing him.
+      for (const gh of this.ghosts)
+        gh.img = this.add.image(gh.x, gh.feet, 'heroIdle').setOrigin(0.5, 1).setScale(this.heroScale).setFlipX(true)
+          .setTint(0xcfeaff).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.7).setDepth(4.4);
     }
     this.physics.add.existing(this.player);
     this.player.body.maxVelocity.set(10000, MAX_FALL);
@@ -337,8 +475,8 @@ class Room extends Phaser.Scene {
       return false;
     });
 
-    this.keys = this.input.keyboard.addKeys('A,D,LEFT,RIGHT,SPACE,W,UP,K,X,R,N,S,DOWN,SHIFT,ONE,TWO,THREE,FOUR');
-    this.hud = this.add.text(8, 4, '', { fontFamily: 'monospace', fontSize: '13px', color: '#ddd', lineSpacing: 3, backgroundColor: '#000000aa', padding: { x: 6, y: 4 } }).setDepth(30).setScrollFactor(0);
+    this.keys = this.input.keyboard.addKeys('A,D,LEFT,RIGHT,SPACE,W,UP,K,X,R,N,S,DOWN,SHIFT,ENTER,E,H,ONE,TWO,THREE,FOUR');
+    this.hud = this.add.text(8, 4, '', { fontFamily: 'monospace', fontSize: '13px', color: '#ddd', lineSpacing: 3, backgroundColor: '#000000aa', padding: { x: 6, y: 4 } }).setDepth(30).setScrollFactor(0).setVisible(showHud);
     const cam = this.cameras.main, R = this.rooms[this.index].rect;
     cam.setBounds(R.x, R.y, R.width, R.height);
     cam.startFollow(this.player, true, 0.12, 0.12);
@@ -351,6 +489,8 @@ class Room extends Phaser.Scene {
   enterRoom(i) {
     const p = this.player, R = this.rooms[i].rect, cam = this.cameras.main;
     this.index = i;
+    rules.max = WORLD_SOULS[this.rooms[i].world] ?? rules.max;
+    Dialogue.play(this, this.rooms[i].enter);
     this.corpses.forEach((c) => c.destroy());
     this.corpses = [];
     this.start = this.rooms[i].spawns.reduce((a, b) => (Phaser.Math.Distance.Between(p.x, p.y, b.x, b.y) < Phaser.Math.Distance.Between(p.x, p.y, a.x, a.y) ? b : a));
@@ -406,6 +546,7 @@ class Room extends Phaser.Scene {
     p.setVisible(false);
     this.dead = RESPAWN_DELAY;
     if (this.boss) { this.boss.hp = BOSS_HP; this.boss.hurt = 0; } // your death heals the boss
+    if (this.rooms[this.index].world) Dialogue.play(this, 'firstDeath'); // only the first time
   }
 
   // Bodies fall straight down until they rest on a wall, closed door or another body.
@@ -647,6 +788,7 @@ class Room extends Phaser.Scene {
     if (JD(k.TWO)) rules.snap = !rules.snap;
     if (JD(k.THREE)) rules.max = LIMITS[(LIMITS.indexOf(rules.max) + 1) % LIMITS.length];
     if (JD(k.FOUR)) rules.selfDestruct = !rules.selfDestruct;
+    if (JD(k.H)) { showHud = !showHud; this.hud.setVisible(showHud); }
 
     if (!rules.freeze) this.dropCorpses(dt);
     this.updateEnemies();
@@ -669,9 +811,15 @@ class Room extends Phaser.Scene {
       p.body.reset(this.start.x, this.start.y); // fell out of the world
     }
     const dieKey = JD(k.K) | JD(k.X); // read both every frame so neither goes stale
-    const jumpDown = JD(k.SPACE) | JD(k.W) | JD(k.UP);
+    const space = JD(k.SPACE), jumpDown = space | JD(k.W) | JD(k.UP), talkKey = space | JD(k.ENTER) | JD(k.E);
     const JU = Phaser.Input.Keyboard.JustUp, jumpUp = JU(k.SPACE) | JU(k.W) | JU(k.UP);
     const slideKey = JD(k.S) | JD(k.DOWN) | JD(k.SHIFT);
+    // The guide's ghost bobs gently, and fades away once he has said his piece.
+    for (const gh of this.ghosts) if (gh.img) {
+      gh.img.y = gh.feet - 3 + Math.sin(this.time.now / 600) * 3;
+      if (Dialogue.seen.has('ghost') && !this.talk.line && !this.talk.queue.length) gh.img.setAlpha(Math.max(0, gh.img.alpha - dt * 0.6));
+    }
+    if (this.dead <= 0 && Dialogue.update(this, dt, talkKey)) { p.body.velocity.x = 0; return; } // talking: hold still
     if (this.dead > 0) {
       this.dead -= dt;
       p.setVisible(this.dead <= 0);
@@ -682,6 +830,17 @@ class Room extends Phaser.Scene {
     if (hazards.some((h) => hit(bounds(p), bounds(h))) || (rules.selfDestruct && dieKey)) return this.die();
     if (this.touchBoss()) return;
     if (!this.boss && this.goals.some((g) => hit(bounds(p), bounds(g)))) return this.scene.restart({ index: this.index + 1 });
+    this.amulets = this.amulets.filter((a) => {
+      if (!hit(bounds(p), bounds(a))) return true;
+      a.destroy();
+      this.cameras.main.flash(400, 255, 220, 140);
+      Dialogue.play(this, 'amulet');
+      return false;
+    });
+    for (const sh of this.shrines) if (hit(bounds(p), bounds(sh)) && this.start !== sh.spawn) {
+      this.start = sh.spawn;
+      this.shrines.forEach((o) => o.rune.setAlpha(o === sh ? 1 : 0.35));
+    }
 
     const b = p.body;
     const grounded = b.blocked.down || b.touching.down;
@@ -716,7 +875,7 @@ class Room extends Phaser.Scene {
     const on = (v) => (v ? 'ON' : 'off');
     this.hud.setText([
       `Room ${this.index + 1}/${ROOMS.length} — ${this.rooms[this.index].name}`,
-      'Move A/D or ←/→ · Jump Space · Slide Shift, S or ↓ while running (jump = dive) · Die K · Reset R · Next room N',
+      'Move A/D or ←/→ · Jump Space · Slide Shift, S or ↓ while running (jump = dive) · Die K · Reset R · Next room N · Hide H',
       `[1] bodies float: ${on(rules.freeze)}   [2] grid snap: ${on(rules.snap)}   ` +
       `[3] max bodies: ${rules.max || '∞'}   [4] self-destruct: ${on(rules.selfDestruct)}   · bodies: ${this.corpses.length}`,
       this.boss?.room === this.index ? `Boss ${'■'.repeat(this.boss.hp)}${'□'.repeat(BOSS_HP - this.boss.hp)}` : '',

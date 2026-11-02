@@ -4,6 +4,7 @@
 <body>
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
 <script src="../art.js"></script>
+<script src="../dialogue.js"></script>
 <script src="../game.js"></script>
 <script>
 const errors = [];
@@ -130,7 +131,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   check(s.corpses[0].y === fy, 'floating body stays where you died');
 
   rules.freeze = true;
-  s = await go(START_ROOM);            // forest 1 → forest 2 through the gap
+  s = await go(ROOMS.findIndex((r) => r[0].startsWith('Forest 1')));            // forest 1 → forest 2 through the gap
   s.player.body.reset(O().x + 5 * 32, O().y + 10 * 32);
   s.die();                                           // leave a soul in forest 1
   await wait(450);
