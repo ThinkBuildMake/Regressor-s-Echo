@@ -30,7 +30,10 @@ const rules = {
 const LIMITS = [1, 2, 3, 5, 0];
 
 // '#' wall  '^' spikes  P start  G goal  '_' plate  D door (open while any plate is held)
-// e walker enemy  B boss (goal stays hidden until it's beaten)
+// e walker enemy  B boss (goal stays hidden until it's beaten)  x thorns (kill on touch, not solid)
+// Rooms carry an optional [x, y] world position in tiles. Rooms that touch connect: walk through a gap
+// in the shared wall and the camera slides over. Rooms without a position are spread out so they don't
+// touch (the old test rooms). Every room is padded to at least one screen (30x17 tiles).
 const ROOMS = [
   ['Climb: stack yourself up the cliff', [
     '##############################',
@@ -139,7 +142,72 @@ const ROOMS = [
     '#######^^^^^^^^^^^^###########',
     '##############################',
   ]],
+  ['Forest 1: die in the pit to cross it', [
+    '##############################',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                             ',
+    '#                             ',
+    '#  P                          ',
+    '##########^^^^^^^^############',
+  ], [0, 60]],
+  ['Forest 2: die on the thorns to build a stair (camera scrolls)', [
+    '##############################',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                             ',
+    '#                             ',
+    '#                             ',
+    '#                 ############',
+    '#                 x          #',
+    '#                 x          #',
+    '#                 x          #',
+    '#                 x          #',
+    '#                 x          #',
+    '#                 x          #',
+    '#                 x          #',
+    '#                 x          #',
+    '                  x          #',
+    '                  x          #',
+    '  P               x          #',
+    '##############################',
+  ], [30, 53]],
+  ['Forest 3: past the walker to the goal', [
+    '##############################',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '                             #',
+    '                             #',
+    '  P            e          G  #',
+    '##############################',
+  ], [60, 48]],
 ];
+const START_ROOM = ROOMS.findIndex((r) => r[0].startsWith('Forest 1'));
 
 // Overlap that ignores shared edges (standing next to something isn't touching it).
 const hit = (A, B) => A.x < B.right && A.right > B.x && A.y < B.bottom && A.bottom > B.y;
@@ -148,7 +216,9 @@ const bounds = (o) => o.getBounds();
 class Room extends Phaser.Scene {
   constructor() { super('room'); }
 
-  init(data) { this.index = Phaser.Math.Wrap(data.index ?? 0, 0, ROOMS.length); }
+  init(data) { this.index = Phaser.Math.Wrap(data.index ?? START_ROOM, 0, ROOMS.length); }
+
+  preload() { Art.preload(this); }
 
   create() {
     this.statics = this.physics.add.staticGroup(); // walls, spike bases, doors, bodies
@@ -166,43 +236,57 @@ class Room extends Phaser.Scene {
     this.coyote = 0;
     this.buffer = 0;
 
+    Art.ensure(this);
+    Art.backdrop(this);
     const rect = (x, y, w, h, color) => this.add.rectangle(x + w / 2, y + h / 2, w, h, color);
-    ROOMS[this.index][1].forEach((row, ty) => {
-      for (let tx = 0; tx < row.length; tx++) {
-        const x = tx * T, y = ty * T;
-        switch (row[tx]) {
-          case '#': { // merge horizontal runs so the player doesn't snag on seams
-            let w = 1;
-            while (row[tx + w] === '#') w++;
-            this.statics.add(rect(x, y, w * T, T, 0x60606b));
-            tx += w - 1;
-            break;
+    this.rooms = ROOMS.map(([name, raw, pos], ri) => {
+      const [ox, oy] = pos ?? [ri * 31, 0];
+      const width = Math.max(30, ...raw.map((r) => r.length));
+      const rows = raw.map((r) => r.padEnd(width, '#'));
+      while (rows.length < 17) rows.push('#'.repeat(width));
+      const room = { name, rect: new Phaser.Geom.Rectangle(ox * T, oy * T, width * T, rows.length * T), spawns: [] };
+      rows.forEach((row, ty) => {
+        for (let tx = 0; tx < row.length; tx++) {
+          const x = (ox + tx) * T, y = (oy + ty) * T;
+          switch (row[tx]) {
+            case '#': { // merge horizontal runs so the player doesn't snag on seams
+              let w = 1;
+              while (row[tx + w] === '#') w++;
+              this.statics.add(rect(x, y, w * T, T, 0).setVisible(false)); // hitbox; painted below
+              Art.platform(this, x, y, w * T, T, Array.from({ length: w }, (_, i) => !'#^'.includes(rows[ty - 1]?.[tx + i] ?? '#')));
+              tx += w - 1;
+              break;
+            }
+            case '^': // solid lower half, deadly upper half
+              this.statics.add(rect(x, y + 16, T, 16, 0).setVisible(false));
+              Art.platform(this, x, y + 16, T, 16, [false]);
+              this.spikes.push(rect(x + 2, y + 6, T - 4, 10, 0xcd5c5c));
+              break;
+            case 'x': this.spikes.push(rect(x + 4, y + 2, T - 8, T - 4, 0x7a3550)); break;
+            case '_': this.plates.push(Object.assign(rect(x + 4, y + T - 7, T - 8, 6, 0xffd700), { room: ri })); break;
+            case 'D': { const d = Object.assign(rect(x, y, T, T, 0x8c6640), { room: ri }); this.statics.add(d); this.doors.push(d); break; }
+            case 'G': this.goals.push(Object.assign(rect(x + 6, y + 2, T - 12, T - 2, 0x3cb371), { room: ri })); break;
+            case 'e': {
+              const e = rect(x + 4, y + T - 24, 24, 24, 0xd0543c);
+              this.physics.add.existing(e);
+              e.dir = -1;
+              this.enemies.push(e);
+              break;
+            }
+            case 'B': // floats with its underside 2.5 tiles above this tile's floor
+              this.boss = { hp: BOSS_HP, hurt: 0, dir: 1, room: ri, min: ox * T + T + 48, max: (ox + width) * T - T - 48,
+                r: rect(x + T / 2 - 48, y + T - 128, 96, 48, 0x9b59b6) };
+              break;
+            case 'P': room.spawns.push({ x: x + T / 2, y: y + T - 15 }); break;
           }
-          case '^': // solid lower half, deadly upper half
-            this.statics.add(rect(x, y + 16, T, 16, 0x60606b));
-            this.spikes.push(rect(x + 2, y + 6, T - 4, 10, 0xcd5c5c));
-            break;
-          case '_': this.plates.push(rect(x + 4, y + T - 7, T - 8, 6, 0xffd700)); break;
-          case 'D': { const d = rect(x, y, T, T, 0x8c6640); this.statics.add(d); this.doors.push(d); break; }
-          case 'G': this.goals.push(rect(x + 6, y + 2, T - 12, T - 2, 0x3cb371)); break;
-          case 'e': {
-            const e = rect(x + 4, y + T - 24, 24, 24, 0xd0543c);
-            this.physics.add.existing(e);
-            e.dir = -1;
-            this.enemies.push(e);
-            break;
-          }
-          case 'B': // floats with its underside 2.5 tiles above this tile's floor
-            this.boss = { hp: BOSS_HP, hurt: 0, dir: 1, min: T + 48, max: row.length * T - T - 48,
-              r: rect(x + T / 2 - 48, y + T - 128, 96, 48, 0x9b59b6) };
-            break;
-          case 'P': this.start = { x: x + T / 2, y: y + T - 15 }; break;
         }
-      }
+      });
+      return room;
     });
+    this.start = this.rooms[this.index].spawns[0];
 
     this.physics.add.collider(this.enemies, this.statics);
-    if (this.boss) this.goals.forEach((g) => g.setVisible(false));
+    if (this.boss) this.goals.filter((g) => g.room === this.boss.room).forEach((g) => g.setVisible(false));
 
     this.player = this.add.rectangle(this.start.x, this.start.y, 24, 30, 0xd9ebff);
     this.player.setFillStyle(0, 0); // hitbox only; drawn as a figure in drawFigures()
@@ -222,7 +306,37 @@ class Room extends Phaser.Scene {
     });
 
     this.keys = this.input.keyboard.addKeys('A,D,LEFT,RIGHT,SPACE,W,UP,K,X,R,N,S,DOWN,ONE,TWO,THREE,FOUR');
-    this.hud = this.add.text(8, 4, '', { fontFamily: 'monospace', fontSize: '13px', color: '#ddd', lineSpacing: 3, backgroundColor: '#000000aa', padding: { x: 6, y: 4 } });
+    this.hud = this.add.text(8, 4, '', { fontFamily: 'monospace', fontSize: '13px', color: '#ddd', lineSpacing: 3, backgroundColor: '#000000aa', padding: { x: 6, y: 4 } }).setDepth(30).setScrollFactor(0);
+    const cam = this.cameras.main, R = this.rooms[this.index].rect;
+    cam.setBounds(R.x, R.y, R.width, R.height);
+    cam.startFollow(this.player, true, 0.12, 0.12);
+    cam.centerOn(this.player.x, this.player.y);
+    this.transit = false;
+  }
+
+  // Walked into a neighbouring room: souls stay behind (cleared), respawn moves to the nearest
+  // entrance, and the camera slides over while the game holds still, Celeste-style.
+  enterRoom(i) {
+    const p = this.player, R = this.rooms[i].rect, cam = this.cameras.main;
+    this.index = i;
+    this.corpses.forEach((c) => c.destroy());
+    this.corpses = [];
+    this.start = this.rooms[i].spawns.reduce((a, b) => (Phaser.Math.Distance.Between(p.x, p.y, b.x, b.y) < Phaser.Math.Distance.Between(p.x, p.y, a.x, a.y) ? b : a));
+    cam.stopFollow();
+    cam.removeBounds();
+    this.transit = true;
+    this.physics.world.pause();
+    this.tweens.add({
+      targets: cam, duration: 450, ease: 'Sine.easeInOut',
+      scrollX: Phaser.Math.Clamp(p.x - cam.width / 2, R.x, R.right - cam.width),
+      scrollY: Phaser.Math.Clamp(p.y - cam.height / 2, R.y, R.bottom - cam.height),
+      onComplete: () => {
+        cam.setBounds(R.x, R.y, R.width, R.height);
+        cam.startFollow(p, true, 0.12, 0.12);
+        this.physics.world.resume();
+        this.transit = false;
+      },
+    });
   }
 
   die() {
@@ -398,12 +512,22 @@ class Room extends Phaser.Scene {
     this.updateEnemies();
     this.updateBoss(dt);
     this.drawFigures(this.time.now / 1000);
+    Art.update(this, this.time.now / 1000);
 
     const weights = [p, ...this.corpses].map(bounds);
-    const held = this.plates.some((pl) => weights.some((w) => hit(w, bounds(pl))));
-    for (const d of this.doors) { d.body.enable = !held; d.setAlpha(held ? 0.2 : 1); }
+    for (const d of this.doors) {
+      const held = this.plates.some((pl) => pl.room === d.room && weights.some((w) => hit(w, bounds(pl))));
+      d.body.enable = !held;
+      d.setAlpha(held ? 0.2 : 1);
+    }
 
     this.updateHud();
+    if (this.transit) return;
+    if (!this.rooms[this.index].rect.contains(p.x, p.y)) {
+      const next = this.rooms.findIndex((r) => r.rect.contains(p.x, p.y));
+      if (next >= 0) return this.enterRoom(next);
+      p.body.reset(this.start.x, this.start.y); // fell out of the world
+    }
     const dieKey = JD(k.K) | JD(k.X); // read both every frame so neither goes stale
     const jumpDown = JD(k.SPACE) | JD(k.W) | JD(k.UP);
     const JU = Phaser.Input.Keyboard.JustUp, jumpUp = JU(k.SPACE) | JU(k.W) | JU(k.UP);
@@ -446,11 +570,11 @@ class Room extends Phaser.Scene {
   updateHud() {
     const on = (v) => (v ? 'ON' : 'off');
     this.hud.setText([
-      `Room ${this.index + 1}/${ROOMS.length} — ${ROOMS[this.index][0]}`,
+      `Room ${this.index + 1}/${ROOMS.length} — ${this.rooms[this.index].name}`,
       'Move A/D or ←/→ · Jump Space · Slide S/↓ while running (jump = dive) · Die K · Reset R · Next room N',
       `[1] bodies float: ${on(rules.freeze)}   [2] grid snap: ${on(rules.snap)}   ` +
       `[3] max bodies: ${rules.max || '∞'}   [4] self-destruct: ${on(rules.selfDestruct)}   · bodies: ${this.corpses.length}`,
-      this.boss ? `Boss ${'■'.repeat(this.boss.hp)}${'□'.repeat(BOSS_HP - this.boss.hp)}` : '',
+      this.boss?.room === this.index ? `Boss ${'■'.repeat(this.boss.hp)}${'□'.repeat(BOSS_HP - this.boss.hp)}` : '',
     ]);
   }
 }

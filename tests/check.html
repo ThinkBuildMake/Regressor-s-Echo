@@ -3,6 +3,7 @@
 <meta charset="utf-8">
 <body>
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
+<script src="../art.js"></script>
 <script src="../game.js"></script>
 <script>
 const errors = [];
@@ -10,6 +11,7 @@ window.onerror = (m) => errors.push(m);
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const near = (a, b) => Math.abs(a - b) < 1.5;
 const room = () => game.scene.getScene('room');
+const O = () => room().rooms[room().index].rect; // current room's top-left in the world
 const key = (type, keyCode) => {                     // synthetic key event Phaser will accept
   const e = new KeyboardEvent(type, { bubbles: true });
   Object.defineProperty(e, 'keyCode', { get: () => keyCode });
@@ -20,6 +22,8 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   const check = (ok, msg) => ok || fails.push(msg);
   while (!room()?.player) await wait(100);
   rules.freeze = false;                              // most checks below cover falling bodies
+  room().scene.restart({ index: 0 });
+  await wait(400);
   await wait(300);
   let s = room();
   const feet = s.player.y + 15;
@@ -39,11 +43,11 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   s.scene.restart({ index: 0 });                     // jump while pressed into a wall, standing on a body
   await wait(400);
   s = room();
-  s.player.body.reset(17 * 32 + 16, s.start.y);      // column 17 touches the cliff face
+  s.player.body.reset(O().x + 17 * 32 + 16, s.start.y); // column 17 touches the cliff face
   s.die();
   await wait(600);
   const standY = s.corpses[0].y - 31;                // standing on the body
-  s.player.body.reset(17 * 32 + 16, standY);
+  s.player.body.reset(O().x + 17 * 32 + 16, standY);
   await wait(200);
   key('keydown', 39);                                // hold →
   await wait(150);
@@ -67,17 +71,17 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   s.scene.restart({ index: 4 });                     // walker
   await wait(400);
   s = room();
-  const e = s.enemies[0];
-  const ex = 26 * 32 + 16;                           // under the right-hand hole
+  const e = s.enemies.find((en) => O().contains(en.x, en.y));
+  const ex = O().x + 26 * 32 + 16;                   // under the right-hand hole
   e.body.reset(ex, e.y); e.dir = 1;
-  s.player.body.reset(ex, 10 * 32 + 15);             // inside the hole, above the walker
+  s.player.body.reset(ex, O().y + 10 * 32 + 15);     // inside the hole, above the walker
   s.die();
   await wait(400);
-  check(s.enemies.length === 0, 'falling body crushes walker');
+  check(!s.enemies.includes(e), 'falling body crushes walker');
   s.scene.restart({ index: 4 });
   await wait(400);
   s = room();
-  s.player.body.reset(s.enemies[0].x - 40, 11 * 32 + 17); // in the tunnel, in its path
+  s.player.body.reset(s.enemies.find((e) => O().contains(e.x, e.y)).x - 40, O().y + 11 * 32 + 17); // in the tunnel, in its path
   await wait(1000);
   check(s.corpses.length === 1, 'walker kills on touch');
 
@@ -107,22 +111,38 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   key('keyup', 39);
   await wait(700);
   check(!s.lying && s.player.height === 30, 'stands back up after slide');
-  s.player.body.reset(13 * 32, 9 * 32);              // over the middle of the spike pit
+  s.player.body.reset(O().x + 13 * 32, O().y + 9 * 32); // over the middle of the spike pit
   s.setLying(true);
   s.die();
   await wait(600);
   const lb = s.corpses[0];
-  check(lb.width === 62 && near(lb.y - lb.height / 2, 12 * 32), `lying body lands flush with the floor (top ${lb.y - lb.height / 2})`);
+  check(lb.width === 62 && near(lb.y - lb.height / 2, O().y + 12 * 32), `lying body lands flush with the floor (top ${lb.y - lb.height / 2})`);
 
   rules.freeze = true;                               // default: bodies float where you died
   s.scene.restart({ index: 0 });
   await wait(400);
   s = room();
-  s.player.body.reset(10 * 32, 6 * 32);              // mid-air
+  s.player.body.reset(O().x + 10 * 32, O().y + 6 * 32); // mid-air
   s.die();
   const fy = s.corpses[0].y;
   await wait(500);
   check(s.corpses[0].y === fy, 'floating body stays where you died');
+
+  rules.freeze = true;
+  s.scene.restart({ index: START_ROOM });            // forest 1 → forest 2 through the gap
+  await wait(400);
+  s = room();
+  s.player.body.reset(O().x + 5 * 32, O().y + 10 * 32);
+  s.die();                                           // leave a soul in forest 1
+  await wait(450);
+  const f1 = s.index;
+  s.player.body.reset(O().right - 20, O().y + 15 * 32 + 17); // at the gap in the right wall
+  key('keydown', 39);                                // walk right through it
+  await wait(900);
+  key('keyup', 39);
+  check(s.index === f1 + 1 && !s.transit, `walking through the gap enters the next room (room ${s.index})`);
+  check(s.corpses.length === 0, 'souls stay behind when you change rooms');
+  check(near(s.cameras.main.scrollX, O().x), `camera slid to the new room (${Math.round(s.cameras.main.scrollX)} vs ${O().x})`);
 
   for (let i = 0; i < ROOMS.length; i++) { room().scene.restart({ index: i }); await wait(300); }
   check(errors.length === 0, 'no errors: ' + errors.join('; '));

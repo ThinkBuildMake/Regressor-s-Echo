@@ -1,4 +1,4 @@
-# Art Prompts: World 1 (Forest Edge)
+# Art Prompts
 
 Use **Gemini** (the app, Pro plan). This is the one-hour test: if these layers look like one painting, the painted style works.
 
@@ -44,6 +44,38 @@ The middle stays empty so foliage never covers the player or the puzzle.
 ## 7. Moss edge → `moss.png`
 
 > Match the style and palette of the attached image. A long horizontal strip of thick moss and short grass growing along the top of a ledge, side view, the same thickness all the way across so it can repeat left to right. Isolated on a flat solid magenta #FF00FF background above and below. Wide 21:9.
+
+## Worlds 2 and 3: same layers, different setting
+
+Make each layer for all three worlds in one sitting (World 1 far trees, then World 2 far trees, then World 3), with the World 1 reference image attached each time. Keep the style block and layer prompt word for word, and add the world's setting sentence at the end. Save to `assets/raw/world2/` and `assets/raw/world3/` with the same file names.
+
+- **World 2, Overgrown ruins:** *"Setting: overcast dusk among mossy grey stone ruins overgrown with vines, broken pillars and arches between the trees. Muted olive and slate palette with soft amber light from the upper left."*
+- **World 3, Sanctum:** *"Setting: night in an ancient sanctuary deep in the forest, carved stone shrines and tall standing stones. Moonlit blue-violet palette with a pale silver glow. Light from the upper left."*
+
+Keep gold and blue-white out of the backgrounds: gold is reserved for the amulet, and blue-white for your souls.
+
+## Bosses (use ChatGPT for these)
+
+ChatGPT can make transparent backgrounds. If it won't, use the magenta background instead. Save to `assets/raw/bosses/` as `moth.png`, `tree.png` and `stag.png`. Attach the World 1 reference image so the brushwork matches.
+
+**Character style block (paste before each boss prompt):**
+
+> Hand-painted 2D game boss art, painterly, soft brush edges, matching the attached misty painted forest. Side view, full body, facing left, centered with space around it. Isolated on a transparent background (if transparency isn't possible, a flat solid magenta #FF00FF background). No text, no ground, no shadow underneath. Do not use gold or bright blue-white anywhere.
+
+1. **World 1, Great moth spirit → `moth.png`**
+   > A huge ancient moth spirit, guardian of the forest edge. Broad soft wings patterned like bark and pale lichen, with large pale-green glowing eyespots, a fuzzy ash-grey body, long feathered antennae, faint luminous dust drifting off the wings. Wings spread wide, hovering. Majestic and eerie, not cute.
+
+2. **World 2, Tree guardian → `tree.png`**
+   > An ancient tree guardian rising out of overgrown stone ruins. A thick twisted trunk with a weathered stone mask set into it as a face, two long gnarled branch arms, roots spreading like legs, moss and vines hanging from it, faint pale-green light in the mask's eyes.
+
+3. **World 3, Spectral stag → `stag.png`**
+   > A spectral great stag, guardian of a moonlit forest sanctuary. Tall and translucent with a pale silver body, enormous branching antlers wrapped in faint violet light, mist streaming from its legs, head lowered as if about to charge.
+
+These are animated in code (floating, swaying, charging, squash and stretch), so one image per boss is enough.
+
+## Not needed from image tools
+
+The hero, the souls and the ghost guide are drawn in code, so they always match and animate smoothly.
 
 ## Tips
 

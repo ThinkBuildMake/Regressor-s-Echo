@@ -51,6 +51,8 @@ Every idea raised so far, so we can decide what to build. Status:
 | Boss heals to full whenever you die | Built | Setup phase (die to place bodies), then a fight where you must not die |
 | Dying mid-fight ruins your setup (your oldest body vanishes, and the new one lands somewhere unhelpful) | Built | Follows from the body limit and physics |
 | Stomp the boss from a body; 3 hits; it speeds up each hit | Built | A 1-high step is safe; 2-high puts you in its path |
+| The three bosses | Decided | World 1: **great moth spirit** (floats, wing-dust shots, can't destroy souls). World 2: **tree guardian** with a stone mask face (stationary, branch swings and seed pods, can smash souls). World 3: **spectral stag** (charges, destroys souls it hits, has attacks you can't dodge) |
+| Hero look | Decided | Hooded explorer: hooded cloak, long scarf, satchel. Drawn in code with painted shading, not AI frames |
 | Boss passes through bodies vs. is blocked by them | Undecided | Passing through now. Blocking would let players trap it |
 | Boss projectiles that bodies block | Proposed | Bodies become shields as well as steps |
 | Some attacks can't be dodged; you need a body to block them | Proposed | Forces body placement as part of the fight, not just the setup |
@@ -65,7 +67,7 @@ Every idea raised so far, so we can decide what to build. Status:
 ## Story and theme
 
 **Given:**
-- An adventurer travels through a forest in search of a treasure or herb.
+- A treasure hunter travels through a forest in search of treasure (decided).
 - He finds an amulet on the ground and puts it on.
 - He meets a ghost of himself from another timeline, who asks: *"Which death are you currently on?"*
   - Adventurer: *"Death? I'm on?"*
@@ -74,8 +76,19 @@ Every idea raised so far, so we can decide what to build. Status:
 - After the first death, the amulet brings him back to life.
 - He feels every death, and the dialogue shows the mental strain building.
 
+**Story arc (decided): a power that looks like a curse turns out to be strength.**
+
+| World | Hero's state | What happens |
+|---|---|---|
+| 1. Forest edge | Fear and denial: every death hurts, and he hates the amulet | The guide teaches him to use his deaths |
+| 2. Overgrown ruins | Enduring: numb, worn down, the strain dialogue peaks | Learns the guide's own history |
+| 3. Sanctum | Acceptance: the amulet awakens and he chooses his death | Uses it deliberately against the final boss |
+| Ending | | Finds the treasure, meets a new version of himself, and asks *"Which death are you currently on?"* |
+
+Dialogue gets written last, once the rooms exist. The dialogue system gets built early with placeholder lines.
+
 **Suggestions (undecided):**
-- **Make it an herb, for someone.** A sick sibling or a dying village gives a stronger reason to keep going through repeated deaths than treasure does.
+- ~~Make it an herb, for someone.~~ Decided against: he's a treasure hunter. Could still give the treasure a personal reason later (what he needs it for).
 - **The story and mechanic pull against each other, and that's the theme.** The mechanic needs you to die; the story says every death hurts. The boss rule backs this up: careless deaths ruin you.
 - **Pace the strain dialogue by death count.** Lines at deaths 1, 3, 10, 25 and so on, not after every death. Short lines that don't stop play, so dying doesn't become a chore.
 - **Show the strain without words too.** The hero gets wearier (slower idle, drooping pose), and the colors fade slightly as the death count rises.
@@ -85,6 +98,21 @@ Every idea raised so far, so we can decide what to build. Status:
 - **Color rule (decided):** blue/white = your soul (flames, floating bodies, the hero's death). Gold = the amulet and its runes. Keep both colors for those uses only, so they stay meaningful.
 - **Visual tone:** bodies as translucent blue soul-husks, not gore. This matches the blue/gold palette in the design doc and keeps the forest setting gentle.
 - **Setting:** forest overgrown with ruins, so both the forest idea and the design doc's "magical ruins" fit.
+
+## Level structure (decided, Celeste-style)
+
+| Decision | Choice |
+|---|---|
+| Room size | Mostly one screen, so the whole puzzle is visible. A few bigger rooms (climbs, boss arenas) where the camera follows you. **Built** |
+| Moving between rooms | Walk through a gap and the camera slides to the next room while the game holds still. **Built** |
+| Respawn | At the entrance nearest to where you came in. **Built** |
+| Souls when you leave a room | They clear. The soul limit is per room, so each room is a fresh puzzle. **Built** |
+| Going back | Main path is one-way. Optional side rooms (for artifacts) open back to the room you came from. Set per room by where the gaps are |
+| Building levels | Text grids while greyboxing, Tiled (free visual editor) for final levels |
+| Screen and tile size | Keep 960×544 with 32px tiles |
+| Between worlds | Chapter select after the title screen; progress saves per world |
+| Death counter | Per world, shown on screen (answers the guide's question) |
+| Collectibles | **Artifacts**, since the hero is a treasure hunter. Idea: each belonged to a past version of you from another timeline and reveals how that version died. Only if time allows |
 
 ## Art direction
 
