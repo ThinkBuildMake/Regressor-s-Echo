@@ -13,6 +13,7 @@ Key: ✅ done · 🟡 started · blank = to do · — = not needed (a single ima
 |---|---|---|---|---|---|---|
 | Hero: idle, run, jump, fall, slide | (done) | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Hero idle (animated) | standing still while hair, scarf and cape sway in a breeze, ~4–6 frames looping. Replaces the single `idle.webp` | | ✅ `raw/hero/hero.jpg` | | | |
+| Hero wall slide + wall jump (coming with wall jump) | slide: clinging to a wall with one hand and one boot, body facing out, sliding down; scarf and cloak lifted upward by the slide, 2–3 frames looping. Kick-off: 1 frame pushing away from the wall. Facing right (the wall on his right); the game mirrors it | | ✅ `raw/hero/hero.jpg` | | | |
 | Hero death | arcade-style burst: he flashes pure white, then breaks apart into square pixels that fly outward, ~4–5 frames (white flash → white silhouette → breaking into pixels). The scattering pixels after the last frame are code particles | | — | | | |
 | Hero respawn | soul light gathers to the respawn point: pixels fly inward (code particles) → white silhouette → the hero. Plays the **death sheet in reverse**, so no new sheet unless it looks wrong | | — | — | | |
 | White ghost (appears when he picks up the amulet) | — single image: the hero entirely white, floating, legs hanging, toes pointed down. Glow and bob in code | | | — | | |
@@ -33,6 +34,9 @@ Key: ✅ done · 🟡 started · blank = to do · — = not needed (a single ima
 | Asset | Sheet (animations) | Prompt | Ref | Sheet | Sized | In game |
 |---|---|---|---|---|---|---|
 | Walker (red beetle) | walk (2 poses + code bob) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Flyer (coming) | a small flying enemy: flap loop, 4 frames | | | | | |
+| Projectile enemy (coming) | idle + shoot, ~4 frames; its shot is code or one small image | | | | | |
+| Stomping enemy (coming) | idle + raise + slam, ~4 frames | | | | | |
 
 ## Bosses
 
@@ -75,6 +79,9 @@ bottom-left corner. The name card is text drawn in code, not an asset.
 | Laser emitter (World 2) | — (beam in code) | | | — | | |
 | Spring (World 2) | idle / compressed / launch, 3 frames | | | | | |
 | Moving platform (World 2 room 7) | — | | | — | | |
+| Saw blade (coming) | — one round blade image, spun in code | | | — | | |
+| Crumbling platform (coming) | intact → cracked → breaking, 3 frames (or the platform art plus code cracks and falling chunks) | | | | | |
+| Falling spike (coming) | — one hanging stalactite/thorn spike, shakes then drops in code | | | — | | |
 
 ## Story assets (requested by the story chat, 2026-11-02)
 
@@ -84,8 +91,8 @@ Script: [STORY.md](STORY.md); § = the scene each asset serves. Done in priority
 
 | Asset | Notes | Prompt | Ref | Sheet | Sized | In game |
 |---|---|---|---|---|---|---|
-| Hero expressions 2 → `assets/portraits/hero2.webp` | curious, annoyed, excited, scared, shouting, cocky (= `FACES2.hero` order in dialogue.js). Attach `hero.jpg` + the first sheet (`raw/portraits/hero-faces.jpg`) so face and framing match. Cut: `sheet.mjs <raw> <out> --grid --frames=3 --rows=2 --height=192` | ✅ PROMPTS item 3 | — | | | |
-| Guide expressions 2 → `assets/portraits/guide2.webp` | smug, mischievous, teasing, exasperated, warning, surprised (= `FACES2.guide`). Attach the first guide sheet so the ghost look matches. Same cut | ✅ PROMPTS item 4 | — | | | |
+| Hero expressions 2 → `assets/portraits/hero2.webp` | curious, annoyed, excited, scared, shouting, cocky (= `FACES2.hero` order in dialogue.js). Attach `hero.jpg` + the first sheet (`raw/portraits/hero-faces.jpg`) so face and framing match. Cut: `sheet.mjs <raw> <out> --grid --frames=3 --rows=2 --height=192` | ✅ PROMPTS item 3 | — | ✅ | ✅ | ✅ |
+| Guide expressions 2 → `assets/portraits/guide2.webp` | smug, mischievous, teasing, exasperated, warning, surprised (= `FACES2.guide`). Attach the first guide sheet so the ghost look matches. Same cut | ✅ PROMPTS item 4 | — | ✅ | ✅ | ✅ |
 
 **Priority 2: World 1 scene sounds** (in the game now, silent). Prompts in the Audio section below.
 

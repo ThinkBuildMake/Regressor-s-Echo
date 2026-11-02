@@ -182,6 +182,9 @@ Save to `assets/raw/hero/`. Attach the World 1 reference image for the brushwork
 3. **Slide → `slide.png`**
    > Using the attached character exactly, paint him sliding feet first along the ground, body low and leaning back, one leg extended forward, scarf and cloak streaming behind him. Wide 21:9, character centered.
 
+4. **Wall slide → `wall-slide.png`** (wide 16:9, attach `hero.jpg`; one-shot sheet, follow the sheet rules in the skill)
+   > Using the attached character exactly (same proportions, hair, colours, scarf and satchel), paint a wall-slide sprite sheet in one horizontal row of 4 evenly spaced frames, all the same size, on flat magenta: frames 1–3 he clings to a vertical wall on his right with one hand and the sole of one boot, body turned out to the left, knees bent, sliding down, his scarf and cloak lifted upward by the slide (slightly different in each frame so it flutters); frame 4 he kicks off the wall, pushing away up and to the left, arms out. Do not paint the wall itself. Every frame the same character size, nothing touching, no effects.
+
 **Fallback, if the frames don't match each other → `parts.png`:**
    > Using the attached character exactly, paint the same character separated into parts for cut-out animation, each part apart from the others: head with blond hair, torso with cloak front, back cloak flap, scarf tail, left arm, right arm, left leg with boot, right leg with boot, satchel. Same scale and colors as the attached image. Wide 21:9.
 
