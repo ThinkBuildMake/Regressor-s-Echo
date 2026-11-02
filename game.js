@@ -366,7 +366,8 @@ class Room extends Phaser.Scene {
     this.plates = [];
     this.spikes = [];
     this.goals = [];
-    this.enemies = [];
+    this.enemies = []; // only the current room's walkers exist (Celeste-style)
+    this.walkerSpawns = [];
     this.boss = null;
     this.dead = 0;
     this.lying = false;
@@ -408,20 +409,7 @@ class Room extends Phaser.Scene {
             case '_': this.plates.push(Object.assign(rect(x + 4, y + T - 7, T - 8, 6, 0xffd700), { room: ri })); break;
             case 'D': { const d = Object.assign(rect(x, y, T, T, 0x8c6640), { room: ri }); this.statics.add(d); this.doors.push(d); break; }
             case 'G': this.goals.push(Object.assign(rect(x + 6, y + 2, T - 12, T - 2, 0x3cb371), { room: ri })); break;
-            case 'e': {
-              const e = rect(x + 4, y + T - 24, 24, 24, 0xd0543c);
-              this.physics.add.existing(e);
-              e.dir = -1;
-              if (this.textures.exists('walker')) {
-                const tex = this.textures.get('walker'), img = tex.getSourceImage(), fw = img.width / 6;
-                if (!tex.has(0)) for (let i = 0; i < 6; i++) tex.add(i, 0, i * fw, 0, fw, img.height);
-                e.setFillStyle(0, 0); // hitbox only
-                e.img = this.add.image(e.x, e.y, 'walker', 0).setOrigin(0.5, 1).setScale(WALKER_HEIGHT / WALKER_SRC);
-                e.on('destroy', () => e.img.destroy());
-              }
-              this.enemies.push(e);
-              break;
-            }
+            case 'e': this.walkerSpawns.push({ x, y, room: ri }); break; // created when you enter the room
             case 'B': // floats with its underside 2.5 tiles above this tile's floor
               this.boss = { hp: BOSS_HP, hurt: 0, dir: 1, room: ri, min: ox * T + T + 48, max: (ox + width) * T - T - 48,
                 r: rect(x + T / 2 - 48, y + T - 128, 96, 48, 0x9b59b6) };
@@ -446,6 +434,7 @@ class Room extends Phaser.Scene {
     Dialogue.create(this);
     Dialogue.play(this, this.rooms[this.index].enter);
 
+    this.spawnWalkers(this.index);
     this.physics.add.collider(this.enemies, this.statics);
     if (this.boss) this.goals.filter((g) => g.room === this.boss.room).forEach((g) => g.setVisible(false));
 
@@ -496,6 +485,29 @@ class Room extends Phaser.Scene {
 
   // Walked into a neighbouring room: souls stay behind (cleared), respawn moves to the nearest
   // entrance, and the camera slides over while the game holds still, Celeste-style.
+  // Celeste-style: walkers belong to a room. Entering a room clears the old room's walkers and puts
+  // this room's back where they started (crushed ones too). The array is kept, since the collider holds it.
+  spawnWalkers(i) {
+    for (const e of this.enemies) e.destroy();
+    this.enemies.length = 0;
+    const rect = (x, y, w, h, color) => this.add.rectangle(x + w / 2, y + h / 2, w, h, color);
+    for (const { x, y, room } of this.walkerSpawns) {
+      if (room !== i) continue;
+      const e = rect(x + 4, y + T - 24, 24, 24, 0xd0543c);
+      this.physics.add.existing(e);
+      e.dir = -1;
+      if (this.textures.exists('walker')) {
+        const tex = this.textures.get('walker'), img = tex.getSourceImage(), fw = img.width / 6;
+        if (!tex.has(0)) for (let i = 0; i < 6; i++) tex.add(i, 0, i * fw, 0, fw, img.height);
+        e.setFillStyle(0, 0); // hitbox only
+        e.img = this.add.image(e.x, e.y, 'walker', 0).setOrigin(0.5, 1).setScale(WALKER_HEIGHT / WALKER_SRC);
+        e.on('destroy', () => e.img.destroy());
+      }
+      e.room = this.rooms[i].rect;
+      this.enemies.push(e);
+    }
+  }
+
   enterRoom(i) {
     const p = this.player, R = this.rooms[i].rect, cam = this.cameras.main;
     this.index = i;
@@ -503,6 +515,7 @@ class Room extends Phaser.Scene {
     Dialogue.play(this, this.rooms[i].enter);
     this.corpses.forEach((c) => c.destroy());
     this.corpses = [];
+    this.spawnWalkers(i);
     this.start = this.rooms[i].spawns.reduce((a, b) => (Phaser.Math.Distance.Between(p.x, p.y, b.x, b.y) < Phaser.Math.Distance.Between(p.x, p.y, a.x, a.y) ? b : a));
     cam.stopFollow();
     cam.removeBounds();
@@ -568,11 +581,9 @@ class Room extends Phaser.Scene {
       const hw = c.width / 2, hh = c.height / 2, bottom = c.y + hh;
       const next = new Phaser.Geom.Rectangle(c.x - hw, c.y - hh + c.vy * dt, c.width, c.height);
       // A body coming down from above an enemy crushes it.
-      this.enemies = this.enemies.filter((e) => {
-        const eb = bounds(e);
-        if (bottom <= eb.y + 2 && hit(next, eb)) { e.destroy(); return false; }
-        return true;
-      });
+      for (const e of [...this.enemies]) {
+        if (bottom <= bounds(e).y + 2 && hit(next, bounds(e))) { e.destroy(); this.enemies.splice(this.enemies.indexOf(e), 1); }
+      }
       let floor = Infinity;
       for (const s of solids) {
         if (s === c || !s.body.enable) continue;
@@ -753,8 +764,8 @@ class Room extends Phaser.Scene {
     const solids = this.statics.getChildren().filter((s) => s.body.enable).map(bounds);
     for (const e of this.enemies) {
       const b = e.body;
-      if (b.blocked.left || b.touching.left) e.dir = 1;
-      else if (b.blocked.right || b.touching.right) e.dir = -1;
+      if (b.blocked.left || b.touching.left || e.x < e.room.x + 16) e.dir = 1; // walls and the room's edges turn it
+      else if (b.blocked.right || b.touching.right || e.x > e.room.right - 16) e.dir = -1;
       else if ((b.blocked.down || b.touching.down) && !solids.some((s) => s.contains(e.x + e.dir * 14, e.y + 14)))
         e.dir *= -1; // ledge ahead
       b.velocity.x = e.dir * WALKER_SPEED;

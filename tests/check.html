@@ -152,6 +152,16 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   await wait(200);
   check(room().index === 1, `touching the goal moves on (room ${room().index})`);
 
+  s = await go(ROOMS.findIndex(([n]) => n.startsWith('Walker')));  // walkers belong to their room
+  const wi = s.index, home = s.walkerSpawns.find((w) => w.room === wi).x + 16;
+  s.enemies[0].destroy(); s.enemies.length = 0;      // as if crushed
+  s.enterRoom(0);
+  check(s.enemies.length === 0, 'leaving a room removes its walkers');
+  s.enterRoom(wi);
+  check(s.enemies.length === 1 && s.enemies[0].x === home, 'coming back puts the walker where it started');
+  await wait(600);
+  check(s.enemies.every((e) => s.rooms[wi].rect.contains(e.x, e.y)), 'walker stays inside its room');
+
   for (let i = 0; i < ROOMS.length; i++) { room().scene.restart({ index: i }); await wait(300); }
   check(errors.length === 0, 'no errors: ' + errors.join('; '));
   document.body.insertAdjacentHTML('beforeend', `<pre>RESULT ${fails.length ? 'FAIL ' + fails.join(' | ') : 'OK'}</pre>`);
