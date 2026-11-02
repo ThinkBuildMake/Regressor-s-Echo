@@ -212,15 +212,102 @@ Blocking the dust with your soul should be taught in an earlier room, so the gui
 > **Hero** [curious]: Let go of what?  
 > **Guide** [wry]: Yourself. Trust me, it's worse when you choose it.
 
-## World 2 opening — *Into the ruins, a few steps in*
+### 14. The nap — *straight on from 13*
+He writes the note here, while the hero sleeps. Nothing gives it away until World 3.
+> **Hero** [exhausted]: I need… a minute. Or a hundred.  
+> **Guide** [wry]: Go on. I'll keep watch. Not like I sleep.  
+> **Hero** [exhausted]: Wake me if anything else falls out of the sky.  
+> *(He lies down. The screen dims. The ghost watches him for a long moment.)*  
+> **Guide** [thinking]: …  
+> **Guide** [sad]: …  
+> *(In the dark, a faint scratching sound.)*  
+> *(Morning. The screen brightens.)*  
+> **Hero** [curious]: Did you just… sit there all night?  
+> **Guide** [wry]: Floated. There's a difference.
+
+## World 2 script: Overgrown Ruins
+
+Rooms are in [LEVELS.md](LEVELS.md). Silent rooms: 3 Above the jump, 5 The spring, 6 The race.
+
+### 1. Into the ruins — *a few steps in*
 > **Hero** [thinking]: Will it hurt any less?  
 > **Guide** [amused]: Nope!
 
-Let "Nope!" end it. No explanation, no comfort. Keep exchanges like this in World 2 as the strain builds.
+Let "Nope!" end it. No explanation, no comfort.
 
-## Worlds 2 and 3: key scenes (drafted)
+### 2. Let go — *on entry (room 1)*
+His first chosen death. Keys come from an on-screen prompt, not from the guide.
+> **Hero** [thinking]: No spikes. No thorns. No bugs. …Why does that make it worse?  
+> **Guide** [thinking]: Because this time, nothing's going to do it for you.  
+> **Hero** [scared]: You mean I have to… on my own?  
+> **Guide** [solemn]: Hold on to it. Feel it build. Let go early if you change your mind.  
+> **Hero** [scared]: And if I don't let go?  
+> **Guide** [wry]: Then you'll have something to stand on.
 
-### The guide's crack — *World 2, after the tree guardian*
+### 3. After the first chosen death — *he comes back*
+> *(A beat.)*  
+> **Hero** [sad]: …You were right. That's worse.  
+> **Guide** [sad]: I know.  
+> **Guide** [wry]: It gets easier. That's the bad part.
+
+### 4. Off the edge — *on entry (room 2)*
+> **Guide** [mischievous]: You know you don't have to stand still while you do it.  
+> **Hero** [curious]: …Wait. I can keep going while it builds?  
+> **Guide** [amused]: Took me forty tries to figure that out. You're welcome.
+
+### 5. The beam — *on entry (room 4)*
+> **Hero** [startled]: Whoa! What is THAT?  
+> **Guide** [thinking]: The tribe's handiwork. Burns anything living that crosses it.  
+> **Hero** [thinking]: Anything living.  
+> **Guide** [wry]: You're catching on faster these days. It's unsettling.
+
+### 6. The carvings — *The moving ledge (room 7), partway in*
+The wall behind the room is carved; it needs its own background art.
+> **Hero** [curious]: Hey. Look at the wall.  
+> *(Carvings: a crowd of figures, each with a gold circle on its chest.)*  
+> **Hero** [thinking]: They're all wearing it. The amulet.  
+> **Guide** [solemn]: Keep going.  
+> *(Further along: fewer figures. Then a handful. Then one.)*  
+> **Hero** [scared]: Where'd everyone go?  
+> **Guide** [solemn]: …  
+> **Hero** [thinking]: It didn't save them. Did it.  
+> **Guide** [sad]: It kept them going. That's not the same thing.  
+> **Hero** [sad]: …  
+> **Hero** [determined]: Well. I'm not ending up as a carving.  
+> **Guide** [wry]: That's the spirit. Ha. Spirit.
+
+### 7. Wrong order — *only after his 3rd death first erases a soul he needed (room 8)*
+> **Guide** [amused]: Oldest goes first. Bit late now.  
+> **Hero** [annoyed]: You could've mentioned that.  
+> **Guide** [wry]: I could've.
+
+### 8. The tree guardian arrives — *room 9, partway in*
+> **Hero** [thinking]: Big tree. Old tree. Very… still tree.  
+> **Guide** [warning]: Don't.  
+> **Hero** [annoyed]: Don't what?  
+> **Guide** [warning]: Don't say it's just a tree.  
+> *(Its eyes open.)*  
+> **Hero** [scared]: …It's not just a tree.
+
+### 9. The slam — *after his 2nd and 5th deaths in the fight*
+> **Hero** [shouting]: It smashed me! The other me! It keeps smashing me!  
+> **Guide** [thinking]: Watch where it looks before it swings.
+
+*After the 5th:*
+> **Guide** [thinking]: It always goes for the one closest to you. Use that.
+
+### 10. The tree falls — *on the last stomp; same staging as the moth*
+> **Hero** [exhausted]: Is it…  
+> **Hero** [annoyed]: Don't you dare get back up.  
+> *(It glows white and dissolves into motes that stream into him. He flashes white.)*  
+> **Hero** [startled]: Again?!  
+> **Guide** [thinking]: Third mark.  
+> **Hero** [curious]: Three of me now. And…?  
+> **Guide** [thinking]: And you can take them back. All of them, at once. Without dying.  
+> **Hero** [relieved]: Finally. One that doesn't hurt.  
+> **Guide** [wry]: Don't get used to it.
+
+### 11. The guide's crack — *straight on from 10*
 > **Hero** [thinking]: Hey. Can I ask you something?  
 > **Guide** [wry]: You're going to anyway.  
 > **Hero** [thinking]: In your timeline. Did you ever get it off?  
@@ -237,7 +324,37 @@ Let "Nope!" end it. No explanation, no comfort. Keep exchanges like this in Worl
 > **Hero** [sad]: …  
 > **Guide** [mischievous]: Anyway! Better odds this time. You've got me.
 
-### The promise — *World 3, by an old tree before the stag*
+## World 3 script: Sanctum
+
+The grounds outside the tribe's pyramid. Silent rooms: 1 Three high, 3 The drop, 4 Three jobs, 5 Spring tower. The guide is quieter here; his care shows a little more.
+
+### 1. The pyramid — *a few steps in*
+The pyramid needs to be visible in the background, its top lost in cloud.
+> **Hero** [startled]: …Whoa.  
+> **Hero** [thinking]: That's it, isn't it. The temple.  
+> **Guide** [solemn]: That's it.  
+> **Hero** [thinking]: How many floors?  
+> **Guide** [wry]: More than ninety.  
+> **Hero** [determined]: …Then let's get to the front door.
+
+### 2. In my own way — *on entry (room 2)*
+> **Hero** [annoyed]: Great. My bridge is in my way.  
+> **Guide** [amused]: Your bridge is you.  
+> **Hero** [thinking]: …And I can take me back. Right.
+
+### 3. Almost competent — *Everything (room 6), at its shrine*
+> **Hero** [thinking]: You've been quiet.  
+> **Guide** [wry]: Savoring it. You're almost competent.  
+> **Hero** [cocky]: Almost?  
+> **Guide** [warm]: …More than I was.
+
+### 4. The breaking beam — *The rehearsal (room 7), after the beam first breaks a soul*
+> **Hero** [startled]: It broke it! It broke my soul!  
+> **Guide** [solemn]: Those beams don't push. They break. Whatever they hit doesn't come back.  
+> **Hero** [scared]: Whatever?  
+> **Guide** [thinking]: Keep it pointed away from what you need.
+
+### 5. The promise — *by an old tree before the stag's arena*
 > *(The guide stops. The hero walks a few steps before noticing.)*  
 > **Hero** [curious]: What? You never stop.  
 > **Guide** [thinking]: Can you promise me something?  
@@ -249,7 +366,19 @@ Let "Nope!" end it. No explanation, no comfort. Keep exchanges like this in Worl
 > **Guide** [warm]: Promise me.  
 > **Hero** [exhausted]: …Fine. I promise.
 
-### The guide's last stand — *after the stag*
+### 6. The stag arrives — *room 8, partway in*
+> *(Silence. Then hoofbeats, from everywhere at once.)*  
+> **Hero** [scared]: Tell me you remember this one.  
+> **Guide** [solemn]: I remember this one.  
+> *(The spectral stag steps out of the light.)*  
+> **Hero** [determined]: …Okay. Wall first. Then stomps.  
+> **Guide** [warm]: Look at you, with a plan.
+
+### 7. A nudge — *after his 3rd death in the fight*
+> **Guide** [thinking]: You did this an hour ago. Lead it away.
+
+### 8. The guide's last stand — *on the last stomp*
+"Eleven" and "Twelve" use the real death count for this fight (the guide's number, then one more).
 > **Hero** [excited]: We did it! Did you see that? Three stomps, and I barely—  
 > **Guide** [amused]: You died eleven times.  
 > **Hero** [cocky]: Twelve. But who's counting?  
@@ -269,7 +398,7 @@ Let "Nope!" end it. No explanation, no comfort. Keep exchanges like this in Worl
 > **Guide** [warm]: I was never alive in the first place, right?  
 > *(He fades.)*
 
-### The note — *behind the tree*
+### 9. The note — *behind the tree*
 *(He keeps his promise. Behind the tree, a folded note in his own handwriting.)*
 > If you're reading this… then it must mean I've kicked the bucket.  
 > Don't make that face. I can see it from here. Well. Could.  
@@ -281,7 +410,7 @@ Let "Nope!" end it. No explanation, no comfort. Keep exchanges like this in Worl
 > — You  
 > P.S. The amulet's still not worth anything. I checked.
 
-### Floor one — *the pyramid's entrance; the game ends*
+### 10. Floor one — *the pyramid's entrance; the game ends*
 > **Hero** [sad]: …Idiot.  
 > **Hero** [determined]: Ninety floors, huh.  
 > **Hero** [determined]: Then I'm not stopping at ninety.  
@@ -292,14 +421,13 @@ Let "Nope!" end it. No explanation, no comfort. Keep exchanges like this in Worl
 - **The amulet grows stronger each world** (one rune per boss), not one big awakening: World 1, it brings him back (1 echo). After the moth, the 2nd rune: 2 echoes and self-destruct. After the tree, the 3rd rune: 3 echoes and recall.
 - **World 2 — Overgrown ruins:** He can now choose when he dies, and it's worse than being killed. His frustration and exhaustion build, and the banter continues. He gets better at spotting the guide's half-truths and answering back. Give him space to challenge the guide's assumptions and learn what happened in the guide's timeline. Let a specific discovery or conflict earn a serious conversation; reveal that history through incidents rather than a single long explanation.
 - **World 3 — Sanctum:** The third rune lets him recall his echoes, so a mistake no longer costs him more deaths. His growing control should come through planning and decisions; the pain remains real. The spectral stag tests everything he has learned.
-- **Ending:** Decided (see the key scenes above): the guide dies blocking the stag's soul-breaking beam, the hero reads his note, and walks into the pyramid's first floor.
+- **Ending:** Decided (see the World 3 script): the guide dies blocking the stag's soul-breaking beam, the hero reads his note, and walks into the pyramid's first floor.
 
 ## Open questions
 
 - **Respawn versus timelines:** Normal play returns him to a checkpoint and leaves an echo. How that relates to the guide's other timeline needs one clear rule before anyone explains it. Avoid "your body forgets" as a substitute.
 - **What the guide knows:** He met his own guide once; being the guide is new. Decide what differed in his timeline and what he can't predict, so his knowledge has a consistent basis (he forgot the moth, he's sure about the pit).
-- **The tribe's carvings:** Where in World 2 he finds them, and how much they show.
-- **When the guide wrote the note:** He's a soul, yet he can block a beam, so he can touch things a little. Decide whether that's ever shown or hinted earlier.
+- **To build for the story:** the carved wall (World 2 room 7), the pyramid backdrop (World 3), a scratching sound for the nap, an on-screen "hold" prompt for self-destruct, the stag's death count in the last stand, and triggers for "after a mistake" moments (a soul erased, a soul broken).
 - **Save for later:** "How many times have you done this?" / "I stopped counting." fits a quieter moment, probably World 2.
 
 Related: [ideas](IDEAS.md), [level plan](LEVELS.md), [in-game dialogue](../dialogue.js).

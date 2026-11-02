@@ -585,6 +585,12 @@ class Room extends Phaser.Scene {
     const g = this.guide, p = this.player;
     if (name === 'wear') this.wearing = true;
     if (name === 'flash') this.cameras.main.flash(600, 255, 215, 120);
+    if (name === 'dim' || name === 'undim') { // night falls / morning comes (under the dialogue panel)
+      this.dimmer ??= this.add.rectangle(480, 272, 960, 544, 0x020610).setScrollFactor(0).setDepth(39).setAlpha(0);
+      this.tweens.killTweensOf(this.dimmer);
+      this.tweens.add({ targets: this.dimmer, alpha: name === 'dim' ? 0.88 : 0, duration: 1100 });
+      this.guide.setDepth(name === 'dim' ? 39.5 : 4.4); // the ghost still glows in the dark
+    }
     if (name === 'pulse') this.cameras.main.flash(250, 255, 215, 120);
     if (name === 'ghost' && g && !g.on) { // fades in right beside him
       g.on = g.fading = true;
