@@ -94,7 +94,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
 
   s = await go(5);                     // boss
   const B = s.boss;
-  s.player.body.reset(B.r.x + B.dir * 20, B.r.y - 24 - 20); // just above its top
+  s.player.body.reset(B.r.x + B.dir * 20, B.r.y - B.r.height / 2 - 16); // feet 1px above its top (a longer fall can sink past the stomp sliver in one slow frame)
   await wait(400);
   check(B.hp === 2, `stomp hurts boss (hp ${B.hp})`);
   s.die();
@@ -178,7 +178,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   key('keydown', 39); await wait(900); key('keyup', 39);
   check(s.rooms[s.index].name === 'The moth', `top right of The chain leads to the moth (${s.rooms[s.index].name})`);
 
-  Dialogue.seen.delete('moth');                      // the moth: hidden until its intro drops it in
+  Dialogue.seen.delete('moth');                      // the moth: hidden until its intro brings it in
   s = await go(ROOMS.findIndex(([n]) => n === 'The moth'));
   check(s.boss?.hidden && !s.boss.r.visible, 'moth hidden before its intro');
   check(!s.talk.queue.length && !s.talk.line, 'no talking until you walk in');
@@ -186,10 +186,11 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   await wait(200);
   check(s.talk.line || s.talk.queue.length, 'walking partway in starts the shaking');
   for (let i = 0; i < 6 && (s.talk.line || s.talk.queue.length); i++) { Dialogue.update(s, 0, true); Dialogue.update(s, 0, true); }
-  await wait(1000);
+  for (let t = 0; t < 40 && s.boss?.hidden; t++) await wait(100); // bursts out, flies in, screams
   check(s.boss && !s.boss.hidden && s.boss.r.visible, 'moth arrives during the intro');
+  check(!s.textures.exists('mothFly') || s.boss?.img?.active, 'the moth is painted once it arrives');
   const M = s.boss, mi = s.index;
-  for (let n = 0; n < 3; n++) { s.player.body.reset(M.r.x + M.dir * 20, M.r.y - 44); await wait(600); }
+  for (let n = 0; n < 3; n++) { s.player.body.reset(M.r.x + M.dir * 20, M.r.y - M.r.height / 2 - 16); await wait(600); }
   check(!s.boss && s.gates.every((g) => !g.active || g.room !== mi), `beating the moth opens the vines (hp ${M.hp})`);
   s.player.body.reset(s.rooms[mi].rect.right - 20, s.rooms[mi].rect.y + 15 * 32 + 17);
   key('keydown', 39); await wait(900); key('keyup', 39);

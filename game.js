@@ -30,7 +30,13 @@ const WALKER_FRAMES = [0, 1], WALKER_FPS = 8, WALKER_HEIGHT = 26, WALKER_SRC = 5
 // right, 2 high puts you in its path). Speeds up per hit. Heals to full whenever you die.
 const BOSS_HP = 3, BOSS_SPEED = 100, BOSS_SPEEDUP = 50;
 // Painted moth (assets/bosses/moth-fly.webp, 4 frames facing left: wings up, flat, down, flat) over the boss hitbox.
-const MOTH_FRAMES = [0, 1, 2, 1], MOTH_FPS = 8, MOTH_SCALE = 0.243; // frames are full size (700 px tall); frame 2 reused for 4 so the loop can't shimmer
+// MOTH_SIZE grows painting and hitbox together. Its top stays 4 tiles up: out of jump reach from the
+// floor (~3.4 tiles), in reach from one soul, so stomping it always takes a death.
+const MOTH_SIZE = 1.3, BOSS_W = 96 * MOTH_SIZE, BOSS_H = 48 * MOTH_SIZE;
+const MOTH_FRAMES = [0, 1, 2, 1], MOTH_FPS = 8, MOTH_SCALE = 0.243 * MOTH_SIZE; // frames are full size (700 px tall); frame 2 reused for 4 so the loop can't shimmer
+// Its intro: it bursts out of the right wall at these rows (top, bottom) of its room. The hole is only
+// painted; the wall keeps its colliders, so the arena stays closed.
+const MOTH_HOLE = [2, 9];
 
 // Mechanic rules (persist across rooms)
 const rules = {
@@ -399,6 +405,8 @@ class Room extends Phaser.Scene {
     }
     if (!this.textures.exists('walker')) this.load.image('walker', 'assets/enemies/walker.webp');
     if (!this.textures.exists('mothFly')) this.load.image('mothFly', 'assets/bosses/moth-fly.webp');
+    if (!this.textures.exists('rocks')) this.load.image('rocks', 'assets/world1/rocks.webp'); // 6 earth chunks
+    if (!this.textures.exists('wallBreak')) this.load.image('wallBreak', 'assets/world1/wall-break.webp');
   }
 
   create() {
@@ -451,9 +459,9 @@ class Room extends Phaser.Scene {
             case 'D': { const d = Object.assign(rect(x, y, T, T, 0x8c6640), { room: ri }); this.statics.add(d); this.doors.push(d); break; }
             case 'e': this.walkerSpawns.push({ x, y, room: ri }); break; // created when you enter the room
             case 'B': // floats with its underside 2.5 tiles above this tile's floor
-              this.bosses.push({ hp: BOSS_HP, hurt: 0, dir: 1, room: ri, min: ox * T + T + 48, max: (ox + width) * T - T - 48,
-                r: rect(x + T / 2 - 48, y + T - 128, 96, 48, 0x9b59b6),
-                hidden: extra.enter === 'moth' && !Dialogue.seen.has('moth') }); // drops in during its intro
+              this.bosses.push({ hp: BOSS_HP, hurt: 0, dir: 1, room: ri, min: ox * T + T + BOSS_W / 2, max: (ox + width) * T - T - BOSS_W / 2,
+                r: rect(x + T / 2 - BOSS_W / 2, y + T - 128, BOSS_W, BOSS_H, 0x9b59b6),
+                hidden: extra.enter === 'moth' && !Dialogue.seen.has('moth') }); // bursts in during its intro
               this.bosses.at(-1).r.setVisible(!this.bosses.at(-1).hidden);
               if (this.textures.exists('mothFly')) {
                 const B = this.bosses.at(-1), tex = this.textures.get('mothFly'), fw = tex.getSourceImage().width / 4;
@@ -480,6 +488,7 @@ class Room extends Phaser.Scene {
     });
     this.start = this.rooms[this.index].spawns[0];
     this.boss = this.bosses.find((b) => b.room === this.index) ?? null;
+    this.bosses.filter((b) => this.rooms[b.room].enter === 'moth' && !b.hidden).forEach((b) => this.breakWall(b)); // already broken on replays
     rules.max = WORLD_SOULS[this.rooms[this.index].world] ?? 3;
     Dialogue.create(this);
     this.wearing = Dialogue.seen.has('amulet');
@@ -602,11 +611,63 @@ class Room extends Phaser.Scene {
       this.time.delayedCall(1600, () => { g.looking = false; });
     }
     if (name === 'shake') this.cameras.main.shake(1400, 0.006);
-    if (name === 'moth' && this.boss?.hidden) { // drops down from the canopy
-      const B = this.boss, y = B.r.y;
-      B.r.setVisible(true).y = y - 300;
-      this.tweens.add({ targets: B.r, y, duration: 700, ease: 'Bounce.easeOut', onComplete: () => { B.hidden = false; } });
+    if (name === 'moth' && this.boss?.hidden) { // bursts out of the wall, flies to its patrol spot, screams
+      const B = this.boss, { x, y } = B.r, h = this.breakWall(B, true);
+      B.dir = -1;
+      B.r.setVisible(true).setPosition(h.x, h.y);
+      B.img?.setScale(MOTH_SCALE * 0.5);
+      if (B.img) this.tweens.add({ targets: B.img, scale: MOTH_SCALE, duration: 900 });
+      this.tweens.add({ targets: B.r, x, y, duration: 900, ease: 'Sine.easeOut', onComplete: () => this.mothScream(() => { B.hidden = false; }) });
     }
+  }
+
+  // Paints the moth's hole in its room's right wall; with fling, rock chunks and dust burst out of it.
+  // Returns the hole's centre.
+  breakWall(B, fling) {
+    const R = this.rooms[B.room].rect, [r0, r1] = MOTH_HOLE, x = R.right - T, top = R.y + r0 * T, h = (r1 - r0 + 1) * T;
+    const c = { x: x + T / 2, y: top + h / 2 };
+    this.add.rectangle(x, top, T, h, 0x120c08).setOrigin(0).setDepth(1); // the tunnel it came through
+    if (this.textures.exists('wallBreak')) { // ragged earth edge facing into the room
+      const src = this.textures.get('wallBreak').getSourceImage();
+      this.add.image(x + T, top - 12, 'wallBreak').setOrigin(1, 0).setFlipX(true).setDisplaySize(T * 2.2 * src.width / 800, h + 24).setDepth(1);
+    }
+    if (!fling) return c;
+    this.cameras.main.shake(400, 0.012);
+    const tex = this.textures.exists('rocks') && this.textures.get('rocks');
+    if (tex && !tex.has(0)) for (let i = 0; i < 6; i++) tex.add(i, 0, i * 514, 0, 514, 525);
+    for (let i = 0; i < 16; i++) { // chunks fly into the room and fall off-screen
+      const dx = -Phaser.Math.Between(150, 650), dy = Phaser.Math.Between(-250, 150), rock = tex
+        ? this.add.image(c.x, c.y + Phaser.Math.Between(-h / 3, h / 3), 'rocks', i % 6).setScale(Phaser.Math.FloatBetween(0.05, 0.12))
+        : this.add.rectangle(c.x, c.y, 10, 10, 0x4a3a2a);
+      rock.setDepth(6).setAngle(Phaser.Math.Between(0, 360));
+      this.tweens.add({ targets: rock, x: rock.x + dx, duration: 1600, onComplete: () => rock.destroy() });
+      this.tweens.add({ targets: rock, y: rock.y + dy - 200, duration: 450, ease: 'Quad.easeOut',
+        onComplete: () => this.tweens.add({ targets: rock, y: rock.y + 900, duration: 1150, ease: 'Quad.easeIn' }) });
+      this.tweens.add({ targets: rock, angle: rock.angle + Phaser.Math.Between(-540, 540), duration: 1600 });
+    }
+    for (let i = 0; i < 14; i++) { // dust puffs drift out and fade
+      const d = this.add.circle(c.x, c.y + Phaser.Math.Between(-h / 2, h / 2), Phaser.Math.Between(10, 24), 0x8a7f72, 0.55).setDepth(5.8);
+      this.tweens.add({ targets: d, x: d.x - Phaser.Math.Between(20, 160), y: d.y + Phaser.Math.Between(-40, 40), scale: 2.2, alpha: 0,
+        duration: Phaser.Math.Between(900, 1700), ease: 'Sine.easeOut', onComplete: () => d.destroy() });
+    }
+    return c;
+  }
+
+  // The moth's roar (it has no mouth): wings beat up then spread wide and hold, while sound-wave rings
+  // push out from it. Plays at the end of its intro; meant to play again before each wing-dust attack.
+  mothScream(done) {
+    const B = this.boss;
+    if (!B) return done?.();
+    B.pose = 0;
+    this.time.delayedCall(150, () => { B.pose = 1; this.cameras.main.shake(500, 0.008); });
+    for (let i = 0; i < 6; i++) this.time.delayedCall(150 + i * 160, () => {
+      for (const [w, col, a] of [[10, 0x2a2018, 0.35], [4, 0xffffff, 0.95]]) { // pale wave with a dark halo, readable on any backdrop
+        const ring = this.add.circle(B.r.x, B.r.y, 50).setStrokeStyle(w, col, a).setDepth(5.9);
+        this.tweens.add({ targets: ring, radius: 420, duration: 900, ease: 'Cubic.easeOut', onComplete: () => ring.destroy() });
+        this.tweens.add({ targets: ring, alpha: 0, duration: 900, ease: 'Quad.easeIn' }); // stays bright most of the way out
+      }
+    });
+    this.time.delayedCall(1150, () => { B.pose = null; done?.(); });
   }
 
   enterRoom(i) {
@@ -883,7 +944,7 @@ class Room extends Phaser.Scene {
   updateBoss(dt) {
     const B = this.boss;
     if (B?.img) B.img.setPosition(B.r.x, B.r.y).setVisible(B.r.visible).setAlpha(B.r.alpha).setFlipX(B.dir > 0) // sheet faces left
-      .setFrame(MOTH_FRAMES[Math.floor((this.time.now / 1000) * MOTH_FPS) % MOTH_FRAMES.length]);
+      .setFrame(B.pose ?? MOTH_FRAMES[Math.floor((this.time.now / 1000) * MOTH_FPS) % MOTH_FRAMES.length]);
     if (!B || B.hidden) return;
     B.hurt -= dt;
     B.r.x += B.dir * (BOSS_SPEED + (BOSS_HP - B.hp) * BOSS_SPEEDUP) * dt;
@@ -896,7 +957,7 @@ class Room extends Phaser.Scene {
   touchBoss() {
     const B = this.boss, p = this.player;
     if (!B || B.hidden || !hit(bounds(p), bounds(B.r))) return false;
-    const top = B.r.y - 24;
+    const top = B.r.y - BOSS_H / 2;
     if (p.y + 15 - top > 14) { this.die(); return true; }
     p.body.velocity.y = -JUMP * 0.8;
     if (B.hurt > 0) return false;
