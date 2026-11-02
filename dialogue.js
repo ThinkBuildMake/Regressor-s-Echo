@@ -26,38 +26,65 @@ const G = (face, text) => ({ who: 'guide', face, text });
 
 // Story text. Keys are triggered by rooms (on first entry) or by events (amulet, firstDeath).
 // Character voices: see docs/STORY.md.
-// A line can carry a `cue` the room acts on when the line appears (screen shake, the boss arriving).
+// A line can carry a `cue` the room acts on when it starts (screen shake, the boss arriving).
+const W = (wait, cue) => ({ wait, cue }); // a silent beat: the panel hides for `wait` seconds
+// Scenes 1–3 follow docs/STORY.md. The rest are older drafts, due for rewriting from STORY.md.
 const SCRIPT = {
-  clearing: [H('cocky', 'Three days in these woods and nothing but mushrooms. Some treasure hunter I am.')],
-  amulet: [
-    H('curious', "Hm? What's this…"),
-    H('excited', "Gold. Old gold. That's worth a fortune!"),
-    H('relieved', 'Finally, something worth the trip.'),
-    H('startled', '…Did it just pulse?'),
+  clearing: [
+    W(0.6),
+    H('neutral', "Mannn… treasure hunting's slow these days."),
+    H('thinking', "One good find. That's all I need. Then I could relax. Take it easy for once."),
   ],
-  ghost: [
-    G('mischievous', 'Well, well. Which death are you currently on?'),
-    H('startled', "Death? I'm on?"),
-    G('amused', 'Oh, a first-timer! This is my favorite part.'),
-    { ...G('smug', "Introductions, then. I'm you. Give or take a few thousand deaths."), reveal: true }, // from here on he's named
-    H('annoyed', "You're me? I'm way better looking."),
-    G('teasing', 'Same face. Same hair. Same bad decisions.'),
-    G('wry', "Every death sends you back. Your body forgets. You don't."),
-    H('excited', "So this amulet makes me immortal? What's it worth?"),
-    G('amused', 'Nope! Not telling.'),
-    G('warning', "…It won't let you stay dead. One day you'll wish it would."),
-    G('mischievous', "Anyway! Treasure's that way. Try not to die. …Actually, do. It's the only way through."),
+  amulet: [ // Scenes 1 and 2: the find, the flash, and the ghost appearing beside him
+    H('thinking', 'Hmm? What do we have here?'),
+    H('thinking', 'An… amulet?'),
+    H('relieved', 'If this is pure gold, it could fetch me a pretty penny.'),
+    W(0.8),
+    H('thinking', "It'll get scratched to bits in there."),
+    { ...H('neutral', "Welp. I'll wear it for now."), cue: 'wear' },
+    W(0.7, 'flash'),
+    W(1.2, 'ghost'),
+    W(0.4, 'lookaround'),
+    G('thinking', 'Where am I?'),
+    W(0.9),
+    G('wry', "Oh… must've died one too many times. I guess I'm the guide now."),
+    G('weary', '…'),
+    G('wry', 'Anyways, enough about me moping. Which death are you on right now?'),
+    H('startled', 'Wh—! Where did you come from?'),
+    H('thinking', 'Wait. Which death?'),
+    G('wry', 'First timer, then. Well. Introductions are in order.'),
+    H('startled', 'You look like me.'),
+    { ...G('solemn', 'I am you. From another timeline. A few thousand deaths ahead.'), reveal: true }, // named from here on
+    W(1.2),
+    H('startled', 'Ooook then. I must be dreaming.'),
+    H('thinking', 'Must be this blasted amulet. I should never have put it on.'),
+    H('neutral', "I'll just leave it where I found it and call it a day."),
+    { ...H('startled', "Why won't it come off?"), cue: 'pulse' },
+    G('solemn', "It won't let go. And it won't let you stay dead."),
+    H('determined', "Well, someone must know how to get it off. I'm not keeping it."),
+    G('weary', "Fine. If you must take it off, I'd start with the tribe that created the thing."),
+    { ...G('thinking', 'Look. See that symbol on it?'), cue: 'pulse' },
+    H('thinking', 'What about it?'),
+    G('thinking', 'Go a little farther in. You should see a very similar one before long.'),
+    H('neutral', "All right. I'll have a look. But if this is a waste of time, I'm going home."),
   ],
-  firstPit: [
-    G('mischievous', 'Too wide to jump. Go on, jump in.'),
-    H('scared', 'Into the spikes?!'),
-    G('teasing', "Trust me. I've done this part a lot."),
+  firstPit: [ // Scene 3, at the edge of the pit
+    H('thinking', "I'm not going to make it."),
+    G('amused', '…heh.'),
+    G('wry', "No, you'll be able to make it."),
+    H('startled', "Look at it! There's no way I can make it. This gap is like twice the length I can jump."),
+    G('wry', "Trust me. I'm you from the future. I already know what's gonna happen."),
+    G('amused', "You'll make it. Trust me."),
+    H('determined', 'All right… here goes nothing.'),
   ],
   firstDeath: [
-    H('shouting', 'AGH! THAT HURT!'),
-    G('wry', "It's not like you actually died, right?"),
-    H('annoyed', 'I literally just died.'),
-    G('smug', 'And yet, here you are. Look, you left yourself behind. Go stand on him.'),
+    H('pained', 'AGH, THAT HURT!'),
+    H('pained', "It's like my soul was ripped in half."),
+    H('determined', 'I TRUSTED you.'),
+    W(0.6),
+    G('wry', "Hey, it's not like you actually died, right?"),
+    G('thinking', 'Besides, it feels like your soul was ripped in half because it actually was.'),
+    G('wry', 'Take a look at this.'),
   ],
   thorns: [
     H('annoyed', 'Let me guess. Die on the thorns.'),
@@ -125,7 +152,7 @@ const Dialogue = {
     const hero = portrait(60, 'hero'), guide = portrait(W - 60, 'guide');
     const name = scene.add.text(130, 20, '', { fontFamily: 'Georgia, serif', fontSize: '15px', color: '#e8b44a', fontStyle: 'bold' });
     const text = scene.add.text(130, 44, '', { fontFamily: 'Georgia, serif', fontSize: '18px', color: '#e4ece6', wordWrap: { width: 700 }, lineSpacing: 4 });
-    const hint = scene.add.text(838, 104, '▸ Space', { fontFamily: 'Georgia, serif', fontSize: '11px', color: '#9db0a4' }).setOrigin(1, 0.5);
+    const hint = scene.add.text(838, 104, '▸ Space   ·   Esc skip', { fontFamily: 'Georgia, serif', fontSize: '11px', color: '#9db0a4' }).setOrigin(1, 0.5);
     ui.add([panel, hero, guide, name, text, hint]);
     scene.talk = { ui, hero, guide, name, text, hint, queue: [], line: null, shown: 0 };
   },
@@ -134,8 +161,20 @@ const Dialogue = {
   play(scene, key) {
     if (!SCRIPT[key] || this.seen.has(key)) return false;
     this.seen.add(key);
-    scene.talk.queue.push(...SCRIPT[key]);
+    scene.talk.queue.push(...SCRIPT[key].map((l) => ({ ...l })));
     return true;
+  },
+
+  // Esc: jump to the end of the conversation, still firing its cues (the ghost appears, the boss arrives).
+  skip(scene) {
+    const t = scene.talk;
+    if (!t.line && !t.queue.length) return;
+    for (const l of t.queue) {
+      if (l.reveal) NAMES.guide = 'Yourself';
+      if (l.cue) scene.cue?.(l.cue);
+    }
+    t.queue.length = 0;
+    t.line = null;
   },
 
   // Call every frame. Returns true while a conversation is open (the hero should not move).
@@ -145,9 +184,10 @@ const Dialogue = {
       if (!t.queue.length) { t.ui.setVisible(false); return false; }
       t.line = t.queue.shift();
       t.shown = 0;
-      t.ui.setVisible(true);
       if (t.line.reveal) NAMES.guide = 'Yourself';
       if (t.line.cue) scene.cue?.(t.line.cue);
+      t.ui.setVisible(!t.line.wait);
+      if (t.line.wait) return true;
       const speaking = t.line.who, other = speaking === 'hero' ? 'guide' : 'hero';
       t.name.setText(NAMES[speaking]);
       const pic = t[speaking];
@@ -160,6 +200,10 @@ const Dialogue = {
       }
       pic.setAlpha(1);
       t[other].setAlpha(0.3);
+      return true;
+    }
+    if (t.line.wait) { // silent beat: no panel, no input, just time passing
+      if ((t.line.wait -= dt) <= 0) t.line = null;
       return true;
     }
     const full = t.line.text.length;

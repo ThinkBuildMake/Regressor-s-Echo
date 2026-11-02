@@ -42,7 +42,7 @@ let showHud = false; // test HUD and rule switches; H toggles
 
 // '#' wall  '^' spikes  P start  '_' plate  D door (open while any plate is held)
 // e walker enemy  B boss  V vines (open when the room's boss is beaten)  x thorns (kill on touch, not solid)
-// A the amulet  C shrine (touch: respawn here)  g the guide's ghost
+// A the amulet  C shrine (touch: respawn here)
 // Rooms carry an optional [x, y] world position in tiles. Rooms that touch connect: walk through a gap
 // in the shared wall and the camera slides over. Rooms without a position are spread out so they don't
 // touch (the old test rooms). Every room is padded to at least one screen (30x17 tiles).
@@ -254,9 +254,9 @@ const ROOMS = [
     '#                            #',
     '                              ',
     '                              ',
-    '  P            g              ',
+    '  P                           ',
     '##############################',
-  ], [30, 100], { world: 1, enter: 'ghost' }],
+  ], [30, 100], { world: 1 }],
   ['First death', [
     '##############################',
     '#                            #',
@@ -275,7 +275,7 @@ const ROOMS = [
     '                              ',
     '  P                           ',
     '##########^^^^^^^^############',
-  ], [60, 100], { world: 1, enter: 'firstPit' }],
+  ], [60, 100], { world: 1, enter: 'firstPit', enterAt: 8 }], // at the pit's edge
   ['The thorn wall', [
     '##############################',
     '#                            #',
@@ -420,7 +420,6 @@ class Room extends Phaser.Scene {
     const rect = (x, y, w, h, color) => this.add.rectangle(x + w / 2, y + h / 2, w, h, color);
     this.amulets = [];
     this.shrines = [];
-    this.ghosts = [];
     this.rooms = ROOMS.map(([name, raw, pos, extra = {}], ri) => {
       const [ox, oy] = pos ?? [ri * 31, 0];
       const width = Math.max(30, ...raw.map((r) => r.length));
@@ -464,7 +463,6 @@ class Room extends Phaser.Scene {
               this.shrines.push(sh);
               break;
             }
-            case 'g': this.ghosts.push({ x: x + T / 2, feet: y + T, room: ri }); break;
           }
         }
       });
@@ -474,6 +472,7 @@ class Room extends Phaser.Scene {
     this.boss = this.bosses.find((b) => b.room === this.index) ?? null;
     rules.max = WORLD_SOULS[this.rooms[this.index].world] ?? 3;
     Dialogue.create(this);
+    this.wearing = Dialogue.seen.has('amulet');
     this.showWorld(this.rooms[this.index].world);
     if (this.rooms[this.index].enterAt == null) Dialogue.play(this, this.rooms[this.index].enter);
 
@@ -497,11 +496,14 @@ class Room extends Phaser.Scene {
       this.heroScale = HERO_HEIGHT / HERO_SRC; // same pixel scale for every hero image
       this.heroSprite = this.add.image(0, 0, 'heroIdle').setOrigin(0.5, 1).setDepth(5.5);
       this.heroFrame = ['heroIdle', undefined];
-      // The guide: the hero's own painting as a see-through, flameless blue-white ghost, facing him.
-      for (const gh of this.ghosts)
-        gh.img = this.add.image(gh.x, gh.feet, 'heroIdle').setOrigin(0.5, 1).setScale(this.heroScale).setFlipX(true)
-          .setTint(0xcfeaff).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.7).setDepth(4.4);
     }
+    // The guide: the hero's own painting as a see-through, flameless blue-white ghost (a plain shape
+    // without the art). He appears in the amulet cutscene, then follows the hero everywhere.
+    if (!this.painted && !this.textures.exists('guideStandIn'))
+      this.make.graphics({ add: false }).fillStyle(0xffffff).fillRoundedRect(0, 0, 22, 40, 10).generateTexture('guideStandIn', 22, 40).destroy();
+    this.guide = this.add.image(this.start.x + 60, this.start.y, this.painted ? 'heroIdle' : 'guideStandIn').setOrigin(0.5, 1)
+      .setScale(this.painted ? this.heroScale : 1).setTint(0xcfeaff).setBlendMode(Phaser.BlendModes.ADD).setDepth(4.4).setAlpha(0);
+    this.guide.on = Dialogue.seen.has('amulet');
     this.physics.add.existing(this.player);
     this.player.body.maxVelocity.set(10000, MAX_FALL);
     // Arcade resolves vertical overlap first, so jumping while pressed into a wall snags on the
@@ -516,7 +518,7 @@ class Room extends Phaser.Scene {
       return false;
     });
 
-    this.keys = this.input.keyboard.addKeys('A,D,LEFT,RIGHT,SPACE,W,UP,K,X,R,N,S,DOWN,SHIFT,ENTER,E,H,ONE,TWO,THREE,FOUR');
+    this.keys = this.input.keyboard.addKeys('A,D,LEFT,RIGHT,SPACE,W,UP,K,X,R,N,S,DOWN,SHIFT,ENTER,E,ESC,H,ONE,TWO,THREE,FOUR');
     this.hud = this.add.text(8, 4, '', { fontFamily: 'monospace', fontSize: '13px', color: '#ddd', lineSpacing: 3, backgroundColor: '#000000aa', padding: { x: 6, y: 4 } }).setDepth(30).setScrollFactor(0).setVisible(showHud);
     const cam = this.cameras.main, R = this.rooms[this.index].rect;
     cam.setBounds(R.x, R.y, R.width, R.height);
@@ -559,8 +561,36 @@ class Room extends Phaser.Scene {
     this.tweens.add({ targets: t, alpha: 1, duration: 900, hold: 1600, yoyo: true, onComplete: () => t.destroy() });
   }
 
+  // The guide floats a little behind the hero, bobbing. While they talk he stays put and faces him.
+  followGuide(dt) {
+    const g = this.guide, p = this.player;
+    if (!g.on) return;
+    if (g.alpha < 0.7 && !g.fading) g.setAlpha(0.7);
+    const talking = this.talk.line || this.talk.queue.length, feet = p.y + 15 - 10 + Math.sin(this.time.now / 600) * 3;
+    if (!talking) {
+      const k = Math.min(1, dt * 3);
+      g.x += (p.x - this.face * 44 - g.x) * k;
+      g.y += (feet - g.y) * k;
+      g.setFlipX(this.face < 0);
+    } else if (!g.looking) g.setFlipX(g.x > p.x);
+  }
+
   // Staging cues fired by dialogue lines (see `cue` in dialogue.js).
   cue(name) {
+    const g = this.guide, p = this.player;
+    if (name === 'wear') this.wearing = true;
+    if (name === 'flash') this.cameras.main.flash(600, 255, 215, 120);
+    if (name === 'pulse') this.cameras.main.flash(250, 255, 215, 120);
+    if (name === 'ghost' && g && !g.on) { // fades in right beside him
+      g.on = g.fading = true;
+      g.setPosition(p.x + 48, p.y + 5).setFlipX(true);
+      this.tweens.add({ targets: g, alpha: 0.7, duration: 900, onComplete: () => { g.fading = false; } });
+    }
+    if (name === 'lookaround' && g) { // surveys the clearing, then settles on the hero
+      g.looking = true;
+      [0, 500, 1000].forEach((ms, i) => this.time.delayedCall(ms, () => g.setFlipX(i % 2 === 0 ? false : true)));
+      this.time.delayedCall(1600, () => { g.looking = false; });
+    }
     if (name === 'shake') this.cameras.main.shake(1400, 0.006);
     if (name === 'moth' && this.boss?.hidden) { // drops down from the canopy
       const B = this.boss, y = B.r.y;
@@ -710,7 +740,7 @@ class Room extends Phaser.Scene {
       .setOrigin(slide ? this.slideOrigin(frame, flip) : 0.5, 1)
       .setPosition(bx + (slide ? this.face * 12 : 0), feet + 1);
     // the amulet's glow, on his chest (only placed for upright poses)
-    if (slide) return;
+    if (slide || !this.wearing) return;
     g.fillStyle(0xffd774, 0.25 + Math.sin(t * 3) * 0.08);
     g.fillCircle(bx + this.face * 2, feet - HERO_HEIGHT * 0.5, 4);
   }
@@ -879,6 +909,7 @@ class Room extends Phaser.Scene {
     if (JD(k.TWO)) rules.snap = !rules.snap;
     if (JD(k.THREE)) rules.max = LIMITS[(LIMITS.indexOf(rules.max) + 1) % LIMITS.length];
     if (JD(k.FOUR)) rules.selfDestruct = !rules.selfDestruct;
+    if (JD(k.ESC)) Dialogue.skip(this);
     if (JD(k.H)) { showHud = !showHud; this.hud.setVisible(showHud); }
 
     if (!rules.freeze) this.dropCorpses(dt);
@@ -907,11 +938,7 @@ class Room extends Phaser.Scene {
     const space = JD(k.SPACE), jumpDown = space | JD(k.W) | JD(k.UP), talkKey = space | JD(k.ENTER) | JD(k.E);
     const JU = Phaser.Input.Keyboard.JustUp, jumpUp = JU(k.SPACE) | JU(k.W) | JU(k.UP);
     const slideKey = JD(k.S) | JD(k.DOWN) | JD(k.SHIFT);
-    // The guide's ghost bobs gently, and fades away once he has said his piece.
-    for (const gh of this.ghosts) if (gh.img) {
-      gh.img.y = gh.feet - 3 + Math.sin(this.time.now / 600) * 3;
-      if (Dialogue.seen.has('ghost') && !this.talk.line && !this.talk.queue.length) gh.img.setAlpha(Math.max(0, gh.img.alpha - dt * 0.6));
-    }
+    this.followGuide(dt);
     if (this.dead <= 0 && Dialogue.update(this, dt, talkKey)) { p.body.velocity.x = 0; return; } // talking: hold still
     if (this.dead > 0) {
       this.dead -= dt;
@@ -924,8 +951,7 @@ class Room extends Phaser.Scene {
     if (this.touchBoss()) return;
     this.amulets = this.amulets.filter((a) => {
       if (!hit(bounds(p), bounds(a))) return true;
-      a.destroy();
-      this.cameras.main.flash(400, 255, 220, 140);
+      a.destroy(); // the gold flash comes later, once he puts it on
       Dialogue.play(this, 'amulet');
       return false;
     });

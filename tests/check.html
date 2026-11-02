@@ -155,6 +155,22 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   await wait(600);
   check(s.enemies.every((e) => s.rooms[wi].rect.contains(e.x, e.y)), 'walker stays inside its room');
 
+  Dialogue.seen.delete('amulet'); NAMES.guide = '???';  // the amulet cutscene, skipped with Esc
+  s = await go(ROOMS.findIndex(([n]) => n === 'The clearing'));
+  Dialogue.skip(s);                                  // the clearing's opening lines
+  await wait(100);
+  const am = s.amulets[0];
+  s.player.body.reset(am.x, am.y - 4);
+  await wait(200);
+  check(!s.guide.on && (s.talk.line || s.talk.queue.length), 'picking up the amulet starts the cutscene');
+  key('keydown', 27); await wait(80); key('keyup', 27);
+  await wait(1200);
+  check(s.guide.on && s.wearing && NAMES.guide === 'Yourself' && !s.talk.line && !s.talk.queue.length,
+    'Esc skips the cutscene, and the ghost still appears');
+  s.player.body.reset(O().x + 20 * 32, O().y + 15 * 32 + 17);
+  await wait(1500);
+  check(Math.abs(s.guide.x - (s.player.x - s.face * 44)) < 12, `the guide follows the hero (${Math.round(s.guide.x)} vs ${Math.round(s.player.x)})`);
+
   Dialogue.seen.add('chain');
   s = await go(ROOMS.findIndex(([n]) => n === 'The chain'));  // the way out of The chain is at the top right
   await alive();
