@@ -2,13 +2,13 @@
 // right, a name, and text that types out. Space, Enter or E continues (pressing early shows the whole
 // line). While it's open the hero can't move. Each script plays once per session.
 //
-// Portraits: assets/portraits/hero.webp (8 faces) and guide.webp (6 faces), cut from the expression
+// Portraits: assets/portraits/hero.webp and guide.webp (8 faces each), cut from the expression
 // sheets with: node tools/sheet.mjs <sheet> assets/portraits/hero.webp --grid --frames=4 --rows=2 --height=192
-// (guide: --frames=3 --rows=2). Until they exist, a placeholder circle shows the face's name.
+// (same for the guide). Until they exist, a placeholder circle shows the face's name.
 
 const FACES = {
   hero: ['neutral', 'startled', 'pained', 'exhausted', 'determined', 'relieved', 'thinking', 'sad'],
-  guide: ['wry', 'amused', 'solemn', 'sad', 'thinking', 'warm'],
+  guide: ['wry', 'amused', 'solemn', 'sad', 'weary', 'skeptical', 'thinking', 'warm'], // painted facing right; mirrored
 };
 const NAMES = { hero: 'You', guide: '???' };
 const H = (face, text) => ({ who: 'hero', face, text });
@@ -79,7 +79,8 @@ const Dialogue = {
       if (scene.textures.exists(key)) {
         const tex = scene.textures.get(key), img = tex.getSourceImage(), n = FACES[who].length, fw = img.width / n;
         if (!tex.has(0)) for (let i = 0; i < n; i++) tex.add(i, 0, i * fw, 0, fw, img.height);
-        return scene.add.image(x, 119, key, 0).setOrigin(0.5, 1).setScale(100 / img.height); // bust sits on the slot's floor
+        return scene.add.image(x, 119, key, 0).setOrigin(0.5, 1).setScale(100 / img.height) // bust sits on the slot's floor
+          .setFlipX(who === 'guide'); // he faces the hero, across the panel
       }
       // Placeholder: a framed circle in the character's colours, with the face name.
       const g = scene.add.graphics();
