@@ -42,13 +42,20 @@ Why magenta, not green: the forest is green, so cutting out a green background w
 
 The middle stays empty so foliage never covers the player or the puzzle.
 
-## 6. Ground texture → `ground.png`
+## 6–8. Platforms: top lip, front face, end cap
 
-> Match the style and palette of the attached image. Seamless tileable texture: side-view cross-section of forest soil, dark earth with small roots and stones. Flat even lighting, no shadows, no horizon line, fills the whole square evenly. Square 1:1.
+Platforms are built from three painted pieces. The camera stays side-on, but the top lip shows the surface seen slightly from above, which gives the ground a sense of depth (the way Hollow Knight and Ori do it). Don't squash or tilt the whole platform.
 
-## 7. Moss edge → `moss.png`
+### 6. Top lip → `lip.png`
+> Match the style and palette of the attached image. A long horizontal strip for the top edge of a 2D platformer ledge: the mossy top surface of forest ground seen slightly from above (a thin, foreshortened band of moss, small plants and soil, lighter where the light from the upper left hits it), with moss, grass tufts and small roots spilling over the front edge. The same thickness all the way across so it can repeat left to right. Isolated on a flat solid magenta #FF00FF background above and below. Wide 21:9.
 
-> Match the style and palette of the attached image. A long horizontal strip of thick moss and short grass growing along the top of a ledge, side view, the same thickness all the way across so it can repeat left to right. Isolated on a flat solid magenta #FF00FF background above and below. Wide 21:9.
+### 7. Front face → `ground.png`
+> Match the style and palette of the attached image. Seamless tileable texture: the front face of a forest earth bank, seen straight on. Dark packed soil with roots, small stones and patches of moss, getting slightly darker toward the bottom. Even, soft lighting, no horizon line, no top edge, fills the whole square. Square 1:1.
+
+### 8. End cap → `cap.png`
+> Match the style and palette of the attached image. The left end of a 2D platformer forest ledge, side view: the rounded, mossy corner where the ground ends, with roots and moss curling over the edge and the earth face continuing down. The right side of the image is plain earth face so it can join the rest of the platform. Isolated on a flat solid magenta #FF00FF background. Square 1:1.
+
+I mirror the end cap for right-hand ends.
 
 ## Worlds 2 and 3: same layers, different setting
 
