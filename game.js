@@ -30,7 +30,7 @@ const WALKER_FRAMES = [0, 1], WALKER_FPS = 8, WALKER_HEIGHT = 26, WALKER_SRC = 5
 // right, 2 high puts you in its path). Speeds up per hit. Heals to full whenever you die.
 const BOSS_HP = 3, BOSS_SPEED = 100, BOSS_SPEEDUP = 50;
 // Painted moth (assets/bosses/moth-fly.webp, 4 frames facing left: wings up, flat, down, flat) over the boss hitbox.
-const MOTH_FRAMES = [0, 1, 2, 1], MOTH_FPS = 8, MOTH_SCALE = 0.85; // frame 2 reused for 4 so the loop can't shimmer
+const MOTH_FRAMES = [0, 1, 2, 1], MOTH_FPS = 8, MOTH_SCALE = 0.243; // frames are full size (700 px tall); frame 2 reused for 4 so the loop can't shimmer
 
 // Mechanic rules (persist across rooms)
 const rules = {
