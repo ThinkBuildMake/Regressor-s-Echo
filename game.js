@@ -16,7 +16,7 @@ const HERO_HEIGHT = 46;                                // painted hero's on-scre
 const HERO_SRC = 112;                                  // his typical height in the processed images (tools/sheet.mjs --height)
 // Run cycle: which frames of assets/hero/run.webp to loop, and how far he moves per frame.
 // Try orders and pacing in tools/preview.html, then copy the settings here.
-const RUN_FRAMES = [6, 7, 8, 9, 10], RUN_STEP = 14; // 11 dropped: it repeats 6
+const RUN_FRAMES = [6, 7, 8, 9, 10], RUN_STEP = 15; // 11 dropped: it repeats 6
 const BODY_STAND = [30, 32], BODY_LYING = [62, 16];    // body left behind
 
 // Enemies: walkers patrol, turn at walls/bodies/ledges, kill on touch, die when a falling body lands on them.
