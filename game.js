@@ -474,9 +474,14 @@ class Room extends Phaser.Scene {
         ? (this.textures.exists('heroRun') ? ['heroRun', RUN_FRAMES[Math.floor(this.walk / RUN_STEP) % RUN_FRAMES.length]] : ['heroSheet', Math.floor(this.walk / RUN_STEP) % 6])
       : ['heroIdle', undefined];
     const [key, frame] = this.heroFrame;
-    this.heroSprite.setTexture(key, frame).setScale(this.heroScale).setFlipX(this.face < 0)
-      .setPosition(p.x, p.y + p.height / 2 + 1);
-    // the amulet's glow, on his chest
+    // Standing frames center on him. The slide is anchored by its feet (the frame's leading edge),
+    // a little ahead of center, so the body trails behind and getting up moves him forward.
+    const flip = this.face < 0, slide = key === 'heroSlide';
+    this.heroSprite.setTexture(key, frame).setScale(this.heroScale).setFlipX(flip)
+      .setOrigin(slide ? (flip ? 0.03 : 0.97) : 0.5, 1)
+      .setPosition(p.x + (slide ? this.face * 12 : 0), p.y + p.height / 2 + 1);
+    // the amulet's glow, on his chest (only placed for upright poses)
+    if (slide) return;
     g.fillStyle(0xffd774, 0.25 + Math.sin(t * 3) * 0.08);
     g.fillCircle(p.x + this.face * 2, p.y + p.height / 2 - HERO_HEIGHT * 0.5, 4);
   }
