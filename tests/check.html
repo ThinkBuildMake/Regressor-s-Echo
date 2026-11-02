@@ -145,6 +145,13 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   check(s.corpses.length === 0, 'souls stay behind when you change rooms');
   check(near(s.cameras.main.scrollX, O().x), `camera slid to the new room (${Math.round(s.cameras.main.scrollX)} vs ${O().x})`);
 
+  s = await go(0);                                   // goals work while a boss lives in another room
+  await alive();
+  const g = s.goals.find((g) => g.room === 0);
+  s.player.body.reset(g.x, g.y);
+  await wait(200);
+  check(room().index === 1, `touching the goal moves on (room ${room().index})`);
+
   for (let i = 0; i < ROOMS.length; i++) { room().scene.restart({ index: i }); await wait(300); }
   check(errors.length === 0, 'no errors: ' + errors.join('; '));
   document.body.insertAdjacentHTML('beforeend', `<pre>RESULT ${fails.length ? 'FAIL ' + fails.join(' | ') : 'OK'}</pre>`);

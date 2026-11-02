@@ -24,6 +24,8 @@ const BODY_STAND = [30, 32], BODY_LYING = [62, 16];    // body left behind
 
 // Enemies: walkers patrol, turn at walls/bodies/ledges, kill on touch, die when a falling body lands on them.
 const WALKER_SPEED = 60;
+// Painted walker (assets/enemies/walker.webp, 6 frames facing left): loops two leg poses with a small bob.
+const WALKER_FRAMES = [0, 1], WALKER_FPS = 8, WALKER_HEIGHT = 26, WALKER_SRC = 56; // SRC = sheet.mjs --height
 // Boss: floats back and forth too high to reach from the floor. Stomp its top from a body (1 high is
 // right, 2 high puts you in its path). Speeds up per hit. Heals to full whenever you die.
 const BOSS_HP = 3, BOSS_SPEED = 100, BOSS_SPEEDUP = 50;
@@ -354,6 +356,7 @@ class Room extends Phaser.Scene {
       this.load.image('heroSlide', 'assets/hero/slide.webp'); // 12 slide frames, 3 rows of 4
       this.load.json('heroSlideMeta', 'assets/hero/slide.json');  // each frame's head and feet x
     }
+    if (!this.textures.exists('walker')) this.load.image('walker', 'assets/enemies/walker.webp');
   }
 
   create() {
@@ -409,6 +412,13 @@ class Room extends Phaser.Scene {
               const e = rect(x + 4, y + T - 24, 24, 24, 0xd0543c);
               this.physics.add.existing(e);
               e.dir = -1;
+              if (this.textures.exists('walker')) {
+                const tex = this.textures.get('walker'), img = tex.getSourceImage(), fw = img.width / 6;
+                if (!tex.has(0)) for (let i = 0; i < 6; i++) tex.add(i, 0, i * fw, 0, fw, img.height);
+                e.setFillStyle(0, 0); // hitbox only
+                e.img = this.add.image(e.x, e.y, 'walker', 0).setOrigin(0.5, 1).setScale(WALKER_HEIGHT / WALKER_SRC);
+                e.on('destroy', () => e.img.destroy());
+              }
               this.enemies.push(e);
               break;
             }
@@ -748,6 +758,11 @@ class Room extends Phaser.Scene {
       else if ((b.blocked.down || b.touching.down) && !solids.some((s) => s.contains(e.x + e.dir * 14, e.y + 14)))
         e.dir *= -1; // ledge ahead
       b.velocity.x = e.dir * WALKER_SPEED;
+      if (e.img) {
+        const step = Math.floor((this.time.now / 1000) * WALKER_FPS);
+        e.img.setPosition(e.x, e.y + 12 - (step % 2)).setFlipX(e.dir > 0) // sheet faces left; 1px bob
+          .setFrame(WALKER_FRAMES[step % WALKER_FRAMES.length]);
+      }
     }
   }
 
@@ -829,7 +844,7 @@ class Room extends Phaser.Scene {
     const hazards = [...this.spikes, ...this.enemies];
     if (hazards.some((h) => hit(bounds(p), bounds(h))) || (rules.selfDestruct && dieKey)) return this.die();
     if (this.touchBoss()) return;
-    if (!this.boss && this.goals.some((g) => hit(bounds(p), bounds(g)))) return this.scene.restart({ index: this.index + 1 });
+    if (this.goals.some((g) => g.room !== this.boss?.room && hit(bounds(p), bounds(g)))) return this.scene.restart({ index: this.index + 1 });
     this.amulets = this.amulets.filter((a) => {
       if (!hit(bounds(p), bounds(a))) return true;
       a.destroy();
