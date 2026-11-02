@@ -4,7 +4,7 @@
 // Note: browsers block image files opened via file://, so real art needs a local server
 // (e.g. `python3 -m http.server` in this folder, then open http://localhost:8000).
 const Art = {
-  FILES: ['sky', 'far', 'mid', 'midAlt', 'near', 'nearTop', 'nearBottom', 'ground', 'moss'],
+  FILES: ['sky', 'far', 'mid', 'midAlt', 'near', 'nearTop', 'nearBottom', 'ground', 'moss', 'lip'],
   W: 960,
   H: 544,
 
@@ -151,6 +151,19 @@ const Art = {
     const shade = scene.add.graphics().setDepth(1); // darker toward the bottom, for weight
     shade.fillGradientStyle(0x000000, 0x000000, 0x000000, 0x000000, 0, 0, 0.35, 0.35);
     shade.fillRect(x, y, w, h);
+    if (scene.textures.exists('lip')) {
+      // Painted top lip: one continuous strip per run of open tiles. Grass pokes ~12px above the
+      // surface, moss hangs over the front; it repeats by world position so neighbours line up.
+      for (let i = 0; i < mossTop.length; i++) {
+        if (!mossTop[i]) continue;
+        let n = 1;
+        while (mossTop[i + n]) n++;
+        const lx = x + i * 32 - 3, m = scene.add.tileSprite(lx, y - 12, n * 32 + 6, 48, 'lip').setOrigin(0).setDepth(2);
+        m.setTileScale(0.5).setTilePosition(lx / 0.5, 0);
+        i += n - 1;
+      }
+      return;
+    }
     mossTop.forEach((open, i) => {
       if (!open) return;
       const m = scene.add.tileSprite(x + i * 32 - 2, y - 7, 36, 20, 'moss').setOrigin(0).setDepth(2);
