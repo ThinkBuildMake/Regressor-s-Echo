@@ -168,9 +168,12 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   await wait(1200);
   check(s.guide.on && s.wearing && NAMES.guide === 'Yourself' && !s.talk.line && !s.talk.queue.length,
     'Esc skips the cutscene, and the ghost still appears');
-  s.player.body.reset(O().x + 20 * 32, O().y + 15 * 32 + 17);
-  await wait(1500);
-  check(Math.abs(s.guide.x - (s.player.x - s.face * 44)) < 12, `the guide follows the hero (${Math.round(s.guide.x)} vs ${Math.round(s.player.x)})`);
+  await wait(2500);
+  check(s.guide.alpha === 0, `the guide fades away after the conversation (alpha ${s.guide.alpha})`);
+  Dialogue.seen.delete('thorns'); Dialogue.play(s, 'thorns');
+  await wait(1000);
+  check(s.guide.alpha > 0.3, `the guide comes back for his next conversation (alpha ${s.guide.alpha})`);
+  Dialogue.skip(s);
 
   Dialogue.seen.add('chain');
   s = await go(ROOMS.findIndex(([n]) => n === 'The chain'));  // the way out of The chain is at the top right

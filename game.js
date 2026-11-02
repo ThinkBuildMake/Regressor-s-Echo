@@ -541,12 +541,14 @@ class Room extends Phaser.Scene {
       this.heroFrame = ['heroIdle', undefined];
     }
     // The guide: the hero's own painting as a see-through, flameless blue-white ghost (a plain shape
-    // without the art). He appears in the amulet cutscene, then follows the hero everywhere.
+    // without the art). He appears in the amulet cutscene, then only for conversations he's in.
     if (!this.painted && !this.textures.exists('guideStandIn'))
       this.make.graphics({ add: false }).fillStyle(0xffffff).fillRoundedRect(0, 0, 22, 40, 10).generateTexture('guideStandIn', 22, 40).destroy();
     this.guide = this.add.image(this.start.x + 60, this.start.y, this.painted ? 'heroIdle' : 'guideStandIn').setOrigin(0.5, 1)
       .setScale(this.painted ? this.heroScale : 1).setTint(0xcfeaff).setBlendMode(Phaser.BlendModes.ADD).setDepth(4.4).setAlpha(0);
     this.guide.on = Dialogue.seen.has('amulet');
+    this.guide.hoverY = this.guide.y;
+    this.guide.away = 0;
     this.physics.add.existing(this.player);
     this.player.body.maxVelocity.set(10000, MAX_FALL);
     // Arcade resolves vertical overlap first, so jumping while pressed into a wall snags on the
@@ -611,23 +613,21 @@ class Room extends Phaser.Scene {
     this.gates.filter((g) => g.room === B.room).forEach((g) => g.destroy()); // the way on opens
   }
 
-  // The guide floats a little behind the hero, bobbing. While they talk he stays put and faces him.
-  followGuide(dt) {
-    const g = this.guide, p = this.player;
-    if (!g.on) return;
-    if (g.alpha < 0.7 && !g.fading) g.setAlpha(0.7);
-    const talking = this.talk.line || this.talk.queue.length, feet = p.y + 15 - 10 + Math.sin(this.time.now / 600) * 3;
-    if (!talking) {
-      const k = Math.min(1, dt * 3);
-      g.x += (p.x - this.face * 44 - g.x) * k;
-      g.y += (feet - g.y) * k;
-      g.setFlipX(this.face < 0);
-      g.hoverY = null;
-    } else {
-      g.hoverY ??= g.y; // holds his spot, bobbing
-      g.y = g.hoverY + Math.sin(this.time.now / 600) * 3;
+  // The guide shows up only for conversations he's part of: he fades in at the hero's upper right,
+  // hovers facing him, and fades away a moment after the conversation ends.
+  showGuide(dt) {
+    const g = this.guide, p = this.player, t = this.talk;
+    if (!g.on || g.fading) return;
+    const talking = t.line || t.queue.length;
+    if (talking && [t.line, ...t.queue].some((l) => l?.who === 'guide')) g.inTalk = true;
+    if (!talking) g.inTalk = false;
+    if (g.inTalk) {
+      if (g.alpha === 0) { g.setPosition(p.x + 40, p.y - 34); g.hoverY = g.y; }
+      g.setAlpha(Math.min(0.7, g.alpha + dt * 1.2));
+      g.away = 0;
       if (!g.looking) g.setFlipX(g.x > p.x);
-    }
+    } else if (g.alpha > 0 && (g.away += dt) > 0.6) g.setAlpha(Math.max(0, g.alpha - dt * 0.9)); // lingers, then fades
+    g.y = g.hoverY + Math.sin(this.time.now / 600) * 3;
   }
 
   // Staging cues fired by dialogue lines (see `cue` in dialogue.js).
@@ -649,6 +649,8 @@ class Room extends Phaser.Scene {
     if (name === 'ghost' && g && !g.on) { // fades in right beside him
       g.on = g.fading = true;
       g.setPosition(p.x + 40, p.y - 34).setFlipX(true); // floating at his upper right
+      g.hoverY = g.y;
+      g.inTalk = true;
       this.tweens.add({ targets: g, alpha: 0.7, duration: 900, onComplete: () => { g.fading = false; } });
     }
     const B = this.bosses.find((b) => b.room === this.index && b.story);
@@ -1028,7 +1030,7 @@ class Room extends Phaser.Scene {
     const space = JD(k.SPACE), jumpDown = space | JD(k.W) | JD(k.UP), talkKey = space | JD(k.ENTER) | JD(k.E);
     const JU = Phaser.Input.Keyboard.JustUp, jumpUp = JU(k.SPACE) | JU(k.W) | JU(k.UP);
     const slideKey = JD(k.S) | JD(k.DOWN) | JD(k.SHIFT);
-    this.followGuide(dt);
+    this.showGuide(dt);
     if (this.dead <= 0 && Dialogue.update(this, dt, talkKey)) { p.body.velocity.x = 0; return; } // talking: hold still
     if (this.dead > 0) {
       this.dead -= dt;

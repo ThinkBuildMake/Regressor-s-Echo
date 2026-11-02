@@ -41,6 +41,7 @@ Let each line respond to what the other just said or did. Give them room to hesi
 - **The author's lines are a framework, not final text.** They show the beat and the intent. Rewrite them so they sound natural in the characters' voices, keep the beats, and keep only the lines the author marks as wanted word for word.
 - **Pace it.** Not every room talks. A scene earns its place by teaching a mechanic or moving the story.
 - **Don't rush big moments.** The first death needed room: pain, confusion, the accusation, the deflection. Give reactions a few lines before moving on.
+- **React in the moment.** A surprise gets a reaction right away, not after the other character has finished talking. People interrupt, talk over each other's confusion, and ignore each other when they're preoccupied.
 - **Transitions are smooth, not abrupt.** The guide eases into things ("Oh, by the way…") rather than announcing them.
 - **Suspicion is earned.** Once the guide has tricked him, the hero questions the guide's suggestions. Let that history colour later scenes.
 - **Don't explain what the player can see.** Nobody says the moth heals; the player watches it happen. Leave mechanics unsaid when the room already shows them (a soul is solid, so it can weigh down a plate).
@@ -74,16 +75,20 @@ The game's text lives in [dialogue.js](../dialogue.js); this is the source it's 
 > *(It appears on his chest and flashes gold. A beat later, a blue-white ghost fades in, floating at his upper right.)*
 
 ### 3. A familiar stranger — *straight on from 2*
-> *(The ghost looks one way, then the other.)*  
+> **Hero** [startled]: WAH—!  
+> **Hero** [scared]: Wh— where did you come from?!  
+> *(The ghost looks one way, then the other, ignoring him.)*  
 > **Guide** [thinking]: Where am I?  
+> **Hero** [startled]: You're asking ME?  
 > *(His eyes settle on the hero. A beat.)*  
-> **Guide** [wry]: Oh… must've died one too many times. I guess I'm the guide now.  
+> **Guide** [solemn]: …Oh.  
+> **Guide** [wry]: Oh, no. Must've died one too many times. I guess I'm the guide now.  
+> **Hero** [thinking]: Died? Guide? What are you talking about?  
 > **Guide** [weary]: …  
 > **Guide** [wry]: Anyways, enough about me moping. Which death are you on right now?  
-> **Hero** [startled]: Wh—! Where did you come from?  
-> **Hero** [thinking]: Wait. Which death?  
+> **Hero** [thinking]: Which… death?  
 > **Guide** [wry]: First timer, then. Well. Introductions are in order.  
-> **Hero** [startled]: You look like me.  
+> **Hero** [startled]: Hang on. You look like me.  
 > **Guide** [solemn]: I am you. From another timeline. A few thousand deaths ahead.  
 > *(A long beat.)*  
 > **Hero** [startled]: Ooook then. I must be dreaming.  
@@ -100,7 +105,7 @@ The game's text lives in [dialogue.js](../dialogue.js); this is the source it's 
 > **Guide** [thinking]: Go a little farther in. You should see a very similar one before long.  
 > **Hero** [neutral]: All right. I'll have a look. But if this is a waste of time, I'm going home.
 
-From here the ghost floats along behind him.
+From here the guide appears only for conversations he's part of: he fades in at the hero's upper right and fades away once they're done.
 
 ### 4. The pit — *First death, at the pit's edge*
 > **Hero** [thinking]: I'm not going to make it.  
@@ -419,7 +424,7 @@ The pyramid needs to be visible in the background, its top lost in cloud.
 ## Content warning and ending card (in game)
 
 **Content warning** (first screen; any key or click continues):
-> This game shows a character dying many times, sometimes by his own choice, and deals with grief and self-sacrifice. Death is a puzzle mechanic here and is shown without gore.
+> This game shows a character dying many times, sometimes by his own choice, and deals with grief and self-sacrifice. Death is a puzzle mechanic here and is shown without gore.  
 > If you're going through a hard time, please reach out to someone you trust or a local support line.
 
 **Ending card** (after Floor one; the dialogue cue `theEnd` fades to it): "Floor 1" alone, then the title, "Deaths: N" (the whole run), "Count every one.", "Thank you for playing.", credits, and any key to play again.
