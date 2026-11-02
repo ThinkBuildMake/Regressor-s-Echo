@@ -1,12 +1,12 @@
 # Art Prompts
 
-Use **Gemini** (the app, Pro plan). This is the one-hour test: if these layers look like one painting, the painted style works.
+Use **AI Studio** with the **Nano Banana Pro** image model (included in your Google AI Pro plan), at **2K** resolution, 21:9. Not "Build": that writes an app instead of painting. Download as PNG if offered.
 
 ## How to use
 
 1. Make the **reference image** first. Regenerate until you like it, since every other image copies its look.
 2. For every image after that: **attach the reference image**, then paste the **style block** followed by the specific prompt.
-3. Save each result into `assets/raw/world1/` with the file name given below. I'll cut out the backgrounds, make the layers tile, and put them in the game.
+3. Save each result into `assets/raw/world1/` with the file name given below (any image format is fine). I'll cut out the backgrounds, make the layers tile, and put them in the game.
 4. Check the bottom-right corner for a sparkle watermark. If there is one, mention it and I'll crop it.
 
 Why magenta, not green: the forest is green, so cutting out a green background would also eat the leaves. Magenta (#FF00FF) never appears in the scene.
@@ -30,15 +30,15 @@ Why magenta, not green: the forest is green, so cutting out a green background w
 
 ## 3. Far trees → `far.png`
 
-> Match the style, palette and lighting of the attached image exactly. Only a dense row of many small, very distant trees (at least 15), pale and hazy, nearly lost in mist, low detail, spread evenly across the full width at similar heights, each tree small in the frame. The trunks continue straight down to the bottom edge of the image with no fading. Isolated on a flat solid magenta #FF00FF background. No sky, no ground. Wide 21:9.
+> Match the style, palette and lighting of the attached image exactly. Only a dense row of many small, very distant trees (at least 15), pale and hazy, nearly lost in mist, low detail, spread evenly across the full width at similar heights, each tree small in the frame. The trunks continue straight down to the bottom edge of the image with no fading. Isolated on a flat solid magenta #FF00FF background. Leave a little empty magenta space at the far left and right edges so the layer can repeat sideways. No sky, no ground. Wide 21:9.
 
 ## 4. Middle trees → `mid.png`
 
-> Match the style, palette and lighting of the attached image exactly. Only a row of mid-distance forest trees: visible trunks and canopy shapes, medium detail, lighter and softer than a foreground would be, 6 to 8 trees spaced evenly across the full width. The trunks continue straight down to the bottom edge of the image with no fading. Isolated on a flat solid magenta #FF00FF background. No sky, no ground. Wide 21:9.
+> Match the style, palette and lighting of the attached image exactly. Only a row of mid-distance forest trees: visible trunks and canopy shapes, medium detail, lighter and softer than a foreground would be, 6 to 8 trees spaced evenly across the full width. The trunks continue straight down to the bottom edge of the image with no fading. Isolated on a flat solid magenta #FF00FF background. Leave a little empty magenta space at the far left and right edges so the layer can repeat sideways. No sky, no ground. Wide 21:9.
 
 ## 5. Near foliage → `near.png`
 
-> Match the style, palette and lighting of the attached image exactly. Only close foreground foliage framing the edges: dark leafy branches and hanging moss along the top edge, and a few ferns and tall grass clumps along the bottom edge. The middle of the image is completely empty. Dark shapes with a soft rim of light from the upper left. Isolated on a flat solid magenta #FF00FF background. Wide 21:9.
+> Match the style, palette and lighting of the attached image exactly. Only close foreground foliage framing the edges: dark leafy branches and hanging moss along the top edge, and a few ferns and tall grass clumps along the bottom edge. The middle of the image is completely empty. Dark shapes with a soft rim of light from the upper left. Isolated on a flat solid magenta #FF00FF background. Leave a little empty magenta space at the far left and right edges so the layer can repeat sideways. Wide 21:9.
 
 The middle stays empty so foliage never covers the player or the puzzle.
 
