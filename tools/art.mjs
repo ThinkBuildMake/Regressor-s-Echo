@@ -3,6 +3,7 @@
 // --key     remove the magenta background, keeping soft edges (see tools/keyer.mjs).
 // --mirror  append a flipped copy so the layer repeats sideways with no visible seam.
 // --crop    keep only this rectangle of the source (in source pixels), e.g. to trim a border.
+// --bg=#hex flatten onto this color: a preview of the keyed art against the game's background (for the critic).
 // Output is scaled to --height (1088 = the game's 544px screen at double resolution).
 import { chromium } from 'playwright';
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -12,7 +13,8 @@ const [inPath, outPath, ...flags] = process.argv.slice(2);
 if (!inPath || !outPath) { console.error('usage: node tools/art.mjs <in> <out.webp> [--key] [--mirror] [--height=1088]'); process.exit(1); }
 const opt = { key: flags.includes('--key'), mirror: flags.includes('--mirror'),
   height: Number(flags.find((f) => f.startsWith('--height='))?.split('=')[1] ?? 1088),
-  crop: flags.find((f) => f.startsWith('--crop='))?.split('=')[1].split(',').map(Number) };
+  crop: flags.find((f) => f.startsWith('--crop='))?.split('=')[1].split(',').map(Number),
+  bg: flags.find((f) => f.startsWith('--bg='))?.split('=')[1] };
 const mime = /\.jpe?g$/i.test(inPath) ? 'image/jpeg' : 'image/png';
 const src = `data:${mime};base64,${readFileSync(inPath).toString('base64')}`;
 
@@ -35,6 +37,7 @@ const out = await page.evaluate(async ({ src, opt }) => {
     keyMagenta(d.data);
     g.putImageData(d, 0, 0);
   }
+  if (opt.bg) { g.save(); g.globalCompositeOperation = 'destination-over'; g.fillStyle = opt.bg; g.fillRect(0, 0, c.width, h); g.restore(); }
   if (opt.mirror) { g.save(); g.translate(w * 2, 0); g.scale(-1, 1); g.drawImage(c, 0, 0, w, h, 0, 0, w, h); g.restore(); }
   return c.toDataURL('image/webp', 0.85);
 }, { src, opt });

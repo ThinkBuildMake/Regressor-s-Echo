@@ -5,7 +5,10 @@
 // --normalize  scale every frame to that height (for run cycles, where the model drew him at slightly
 //              different sizes from frame to frame).
 // --grid       cut equal cells (frames columns x rows) without tracing figures: for portrait sheets,
-//              where every face is framed the same way. --height is then the cell height.
+//              where every face is framed the same way. --height is then the cell height. Pieces that
+//              touch a cell's edge and aren't its biggest shape (a neighbour's wingtip) are dropped.
+// --shift=a,b,c  with --grid: move each frame right by this many output pixels (negative = left), to
+//              line up a body the model drew at slightly different spots (measure on an enlarged view).
 //
 // Each figure is found as a connected shape, not by cutting straight lines between figures, because
 // figures overlap side to side (feet under the next figure's cape). The biggest connected shapes are
@@ -19,7 +22,8 @@ import { KEYER } from './keyer.mjs';
 const [inPath, outPath, ...flags] = process.argv.slice(2);
 if (!inPath || !outPath) { console.error('usage: node tools/sheet.mjs <sheet> <out.webp> [--height=112] [--frames=N] [--rows=R] [--normalize]'); process.exit(1); }
 const num = (name, d) => Number(flags.find((f) => f.startsWith(`--${name}=`))?.split('=')[1] ?? d);
-const opt = { height: num('height', 112), frames: num('frames', 1), rows: num('rows', 1), normalize: flags.includes('--normalize'), grid: flags.includes('--grid') };
+const opt = { height: num('height', 112), frames: num('frames', 1), rows: num('rows', 1), normalize: flags.includes('--normalize'), grid: flags.includes('--grid'),
+  shift: (flags.find((f) => f.startsWith('--shift='))?.split('=')[1] ?? '').split(',').filter(Boolean).map(Number) };
 const mime = /\.jpe?g$/i.test(inPath) ? 'image/jpeg' : 'image/png';
 const src = `data:${mime};base64,${readFileSync(inPath).toString('base64')}`;
 
@@ -43,8 +47,31 @@ const res = await page.evaluate(async ({ src, opt }) => {
     const out = document.createElement('canvas');
     out.width = fw * opt.frames * opt.rows; out.height = opt.height;
     const o = out.getContext('2d');
-    for (let r = 0; r < opt.rows; r++) for (let f = 0; f < opt.frames; f++)
-      o.drawImage(c, f * cw, r * ch, cw, ch, (r * opt.frames + f) * fw, 0, fw, opt.height);
+    for (let r = 0; r < opt.rows; r++) for (let f = 0; f < opt.frames; f++) {
+      const i = r * opt.frames + f, dx = opt.shift[i] ?? 0;
+      o.save(); o.beginPath(); o.rect(i * fw, 0, fw, opt.height); o.clip();
+      o.drawImage(c, f * cw, r * ch, cw, ch, i * fw + dx, 0, fw, opt.height); o.restore();
+    }
+    // Drop edge-touching pieces that aren't a cell's biggest shape: bleed from the neighbouring frame.
+    const OW = out.width, OH = opt.height, od = o.getImageData(0, 0, OW, OH), q = od.data;
+    for (let i = 0; i < opt.frames * opt.rows; i++) {
+      const x0 = i * fw, x1 = x0 + fw, seen = new Uint8Array(fw * OH), parts = [];
+      for (let y = 0; y < OH; y++) for (let x = x0; x < x1; x++) {
+        const k = y * fw + (x - x0); if (seen[k] || q[(y * OW + x) * 4 + 3] < 20) continue;
+        const px = [], st = [[x, y]]; let edge = false; seen[k] = 1;
+        while (st.length) {
+          const [cx, cy] = st.pop(); px.push(cy * OW + cx); if (cx === x0 || cx === x1 - 1) edge = true;
+          for (let dy = -1; dy <= 1; dy++) for (let ddx = -1; ddx <= 1; ddx++) {
+            const nx = cx + ddx, ny = cy + dy; if (nx < x0 || nx >= x1 || ny < 0 || ny >= OH) continue;
+            const nk = ny * fw + (nx - x0); if (!seen[nk] && q[(ny * OW + nx) * 4 + 3] >= 20) { seen[nk] = 1; st.push([nx, ny]); }
+          }
+        }
+        parts.push({ px, edge });
+      }
+      parts.sort((a, b) => b.px.length - a.px.length);
+      for (const pt of parts.slice(1)) if (pt.edge) for (const k of pt.px) q[k * 4 + 3] = 0;
+    }
+    o.putImageData(od, 0, 0);
     return { url: out.toDataURL('image/webp', 0.9), frames: opt.frames * opt.rows, fw, fh: opt.height, meta: [] };
   }
   // Shapes are found from solid pixels only, so figures whose soft edges touch stay separate.

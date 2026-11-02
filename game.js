@@ -29,6 +29,8 @@ const WALKER_FRAMES = [0, 1], WALKER_FPS = 8, WALKER_HEIGHT = 26, WALKER_SRC = 5
 // Boss: floats back and forth too high to reach from the floor. Stomp its top from a body (1 high is
 // right, 2 high puts you in its path). Speeds up per hit. Heals to full whenever you die.
 const BOSS_HP = 3, BOSS_SPEED = 100, BOSS_SPEEDUP = 50;
+// Painted moth (assets/bosses/moth-fly.webp, 4 frames facing left: wings up, flat, down, flat) over the boss hitbox.
+const MOTH_FRAMES = [0, 1, 2, 1], MOTH_FPS = 8, MOTH_SCALE = 0.85; // frame 2 reused for 4 so the loop can't shimmer
 
 // Mechanic rules (persist across rooms)
 const rules = {
@@ -396,6 +398,7 @@ class Room extends Phaser.Scene {
       this.load.json('heroSlideMeta', 'assets/hero/slide.json');  // each frame's head and feet x
     }
     if (!this.textures.exists('walker')) this.load.image('walker', 'assets/enemies/walker.webp');
+    if (!this.textures.exists('mothFly')) this.load.image('mothFly', 'assets/bosses/moth-fly.webp');
   }
 
   create() {
@@ -452,6 +455,13 @@ class Room extends Phaser.Scene {
                 r: rect(x + T / 2 - 48, y + T - 128, 96, 48, 0x9b59b6),
                 hidden: extra.enter === 'moth' && !Dialogue.seen.has('moth') }); // drops in during its intro
               this.bosses.at(-1).r.setVisible(!this.bosses.at(-1).hidden);
+              if (this.textures.exists('mothFly')) {
+                const B = this.bosses.at(-1), tex = this.textures.get('mothFly'), fw = tex.getSourceImage().width / 4;
+                if (!tex.has(0)) for (let i = 0; i < 4; i++) tex.add(i, 0, i * fw, 0, fw, tex.getSourceImage().height);
+                B.r.setFillStyle(0, 0); // hitbox only
+                B.img = this.add.image(B.r.x, B.r.y, 'mothFly', 0).setScale(MOTH_SCALE).setDepth(4);
+                B.r.on('destroy', () => B.img.destroy());
+              }
               break;
             case 'V': this.gates.push(Object.assign(rect(x, y, T, T, 0x4a6b3a), { room: ri })); this.statics.add(this.gates.at(-1)); break;
             case 'P': room.spawns.push({ x: x + T / 2, y: y + T - 15 }); break;
@@ -872,6 +882,8 @@ class Room extends Phaser.Scene {
 
   updateBoss(dt) {
     const B = this.boss;
+    if (B?.img) B.img.setPosition(B.r.x, B.r.y).setVisible(B.r.visible).setAlpha(B.r.alpha).setFlipX(B.dir > 0) // sheet faces left
+      .setFrame(MOTH_FRAMES[Math.floor((this.time.now / 1000) * MOTH_FPS) % MOTH_FRAMES.length]);
     if (!B || B.hidden) return;
     B.hurt -= dt;
     B.r.x += B.dir * (BOSS_SPEED + (BOSS_HP - B.hp) * BOSS_SPEEDUP) * dt;

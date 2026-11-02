@@ -2,6 +2,7 @@
 
 Due **Thursday at midnight**. Run `npm test` after every change, and commit each working feature.
 Decisions and their reasons live in [IDEAS.md](IDEAS.md); this page is only what's left to do.
+Art to make is tracked in [ASSETS.md](ASSETS.md).
 
 ## Sunday
 - [x] Floating souls, slide and dive, connected rooms with camera slides, parallax, painted stand-ins

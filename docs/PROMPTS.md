@@ -83,7 +83,35 @@ ChatGPT can make transparent backgrounds. If it won't, use the magenta backgroun
 3. **World 3, Spectral stag → `stag.png`**
    > A spectral great stag, guardian of a moonlit forest sanctuary. Tall and translucent with a pale silver body, enormous branching antlers wrapped in faint violet light, mist streaming from its legs, head lowered as if about to charge.
 
-These are animated in code (floating, swaying, charging, squash and stretch), so one image per boss is enough.
+Each boss image above is the **reference**. The animation sheets come from it (attach the approved reference). Sheets never have effects: dust, mist, glow and particles are added in code.
+
+**Sheet rules (append to every sheet prompt):**
+> Every frame faces LEFT with the head on the left side, exactly like the reference, never mirrored. All frames the same size and scale, clear magenta gaps between frames. No dust, no mist, no glow, no particles, no special effects: only the creature itself, with clean edges on flat magenta #FF00FF.
+
+**Clean base (one per boss, before any sheet).** Attach the approved reference, wide 16:9:
+> Using the attached creature exactly (same shapes, patterns and colors), paint it as a clean game sprite: a true side view in profile, facing left, in a neutral pose, the whole creature inside the frame with space around it. Do NOT include the reference image itself. No dust, no mist, no glow, no particles, no special effects: only the creature, with clean edges on flat magenta #FF00FF.
+
+For the moth add: *"Hovering with wings raised, both wings visible, legs visible below the body."* Save as `moth-base.png`. **Every moth sheet below attaches `moth-base.png`, never `moth.png`.**
+
+4. **Moth flying → `moth-fly.png`** (attach the approved `moth-base.png`, wide 16:9)
+   > Using the attached moth exactly (same wings, patterns, eyespots, body and antennae), paint a flying animation sprite sheet: one horizontal row of 4 evenly spaced frames of a looping wing-flap while hovering. Frame 1: wings raised high above the body. Frames 2 and 4: identical, wings straight out horizontal. Frame 3: wings swept down below the body. The body is exactly the same in every frame: same size, same angle, same height, legs visible; only the wings move. No haze or smudges anywhere.
+
+5. **Moth screaming → `moth-scream.png`** (attach the approved `moth-base.png`, wide 16:9)
+   > Using the attached moth exactly, paint an attack wind-up sprite sheet: one horizontal row of 4 evenly spaced frames: hovering normally; rearing back, wings lifting; wings flared wide open and head thrown forward, screaming; holding the scream at full flare.
+
+## Enemies (Flow, Nano Banana 2.1)
+
+Save to `assets/raw/enemies/`. Attach the World 1 reference image (`anchor.png`) for the brushwork.
+
+**Enemy style block (paste before each enemy prompt):**
+
+> Hand-painted 2D game enemy sprite, painterly, soft brush edges, matching the attached misty painted forest. Side view, full body, facing left, centered with space around it, the whole creature inside the frame. Simple, readable silhouette that stands out against a green forest. Isolated on a flat solid magenta #FF00FF background. No text, no ground, no shadow underneath. Do not use gold or bright blue-white anywhere.
+
+1. **Walker → `walker.png`**
+   > A small hostile forest beetle about knee height to a person: a round, glossy deep-red shell with darker crimson markings, six short dark legs, a low blunt head with small curved mandibles, faint dull-orange glints on the shell edge. Squat and sturdy, clearly dangerous to touch, but small. Square 1:1.
+
+2. **Walker sheet → `walker-sheet.png`** (attach the approved `walker.png`)
+   > Using the attached creature exactly (same shell, colors, legs and proportions), paint a walking animation sprite sheet in one horizontal row of 6 evenly spaced frames, all the same size, all with feet on the same baseline, facing left: a looping six-legged scuttle cycle. Every frame faces LEFT with the head on the left side, exactly like the reference, never mirrored. The legs move in an alternating tripod gait with clearly different foot positions in each frame. Clear magenta gaps between frames. Wide 21:9.
 
 ## Hero (AI Studio, Nano Banana Pro)
 
