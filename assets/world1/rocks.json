@@ -1,0 +1,30 @@
+{
+ "frameWidth": 514,
+ "frameHeight": 525,
+ "frames": [
+  {
+   "head": 255,
+   "feet": 424
+  },
+  {
+   "head": 255,
+   "feet": 466
+  },
+  {
+   "head": 255,
+   "feet": 424
+  },
+  {
+   "head": 255,
+   "feet": 381
+  },
+  {
+   "head": 255,
+   "feet": 413
+  },
+  {
+   "head": 255,
+   "feet": 331
+  }
+ ]
+}

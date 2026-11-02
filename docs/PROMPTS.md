@@ -96,8 +96,7 @@ For the moth add: *"Hovering with wings raised, both wings visible, legs visible
 4. **Moth flying → `moth-fly.png`** (attach the approved `moth-base.png`, wide 16:9)
    > Using the attached moth exactly (same wings, patterns, eyespots, body and antennae), paint a flying animation sprite sheet: one horizontal row of 4 evenly spaced frames of a looping wing-flap while hovering. Frame 1: wings raised high above the body. Frames 2 and 4: identical, wings straight out horizontal. Frame 3: wings swept down below the body. The body is exactly the same in every frame: same size, same angle, same height, legs visible; only the wings move. No haze or smudges anywhere.
 
-5. **Moth screaming → `moth-scream.png`** (attach the approved `moth-base.png`, wide 16:9)
-   > Using the attached moth exactly, paint an attack wind-up sprite sheet: one horizontal row of 4 evenly spaced frames: hovering normally; rearing back, wings lifting; wings flared wide open and head thrown forward, screaming; holding the scream at full flare.
+5. **Moth screaming:** no sheet. The scream reuses the flying frames (wings spread) with code sound-wave rings; the moth has no mouth to open.
 
 ## Enemies (Flow, Nano Banana 2.1)
 
@@ -112,6 +111,19 @@ Save to `assets/raw/enemies/`. Attach the World 1 reference image (`anchor.png`)
 
 2. **Walker sheet → `walker-sheet.png`** (attach the approved `walker.png`)
    > Using the attached creature exactly (same shell, colors, legs and proportions), paint a walking animation sprite sheet in one horizontal row of 6 evenly spaced frames, all the same size, all with feet on the same baseline, facing left: a looping six-legged scuttle cycle. Every frame faces LEFT with the head on the left side, exactly like the reference, never mirrored. The legs move in an alternating tripod gait with clearly different foot positions in each frame. Clear magenta gaps between frames. Wide 21:9.
+
+## Props for the moth's entrance (Flow, Nano Banana 2.1)
+
+On the earthquake the moth bursts through the arena wall. Save to `assets/raw/world1/`. Attach `ground.jpg` (the earth front face) so the material matches the wall, plus `anchor.png` for the brushwork. Wide 16:9, x1.
+
+**Prop style block:**
+> Hand-painted 2D game prop, painterly, soft brush edges, matching the attached forest earth texture exactly: dark packed soil with roots, small stones and patches of moss, soft light from the upper left. Side view. Isolated on a flat solid magenta #FF00FF background. No dust, no mist, no particles, no motion blur, no text, no ground line, no shadow.
+
+1. **Rock chunks → `rocks.png`**
+   > Six separate broken chunks of this earth bank, as if smashed out of a wall: three large, two medium, one small, each a chunky irregular lump of packed soil with a stone or two, a root end and a bit of moss on top. Arranged in two rows of three, every chunk well apart from the others with wide magenta gaps, none touching, none touching the image edges.
+
+2. **Broken wall edge → `wall-break.png`**
+   > A tall vertical strip of this earth bank's broken edge, as if something burst through it: a jagged, crumbled outline with snapped roots poking out, loose clods and a few stones on the break, darker inside the break. The left side is the clean solid earth face (so it joins the wall), the right side is the ragged broken edge. The strip fills the full height of the image so it can repeat top to bottom. Centered, about a quarter of the image wide.
 
 ## Hero (AI Studio, Nano Banana Pro)
 

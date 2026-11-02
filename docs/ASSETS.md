@@ -16,14 +16,15 @@ Key: ✅ done · 🟡 started · blank = to do · — = not needed (a single ima
 | Hero death | arcade-style burst: he flashes pure white, then breaks apart into square pixels that fly outward, ~4–5 frames (white flash → white silhouette → breaking into pixels). The scattering pixels after the last frame are code particles | | — | | | |
 | Hero respawn | soul light gathers to the respawn point: pixels fly inward (code particles) → white silhouette → the hero. Plays the **death sheet in reverse**, so no new sheet unless it looks wrong | | — | — | | |
 | White ghost (appears when he picks up the amulet) | — single image: the hero entirely white, floating, legs hanging, toes pointed down. Glow and bob in code | | | — | | |
-| Hero release (World 3, die anywhere) | flames growing over 0.75 s wind-up, ~4 frames, or code flames over the idle pose | | — | | | |
+| Hero self-destruct (World 2 on, hold) | blue-white flames grow over the ~0.75 s hold while he keeps moving: code flames over his current frame, no sheet. Letting go cancels | — | — | — | — | |
+| Recall (World 3) | a soul fades back into the hero, newest first: code effect (the respawn gather, reused), no sheet | — | — | — | — | |
 
 ## Story objects
 
 | Asset | Sheet (animations) | Prompt | Ref | Sheet | Sized | In game |
 |---|---|---|---|---|---|---|
 | Amulet: in the world (pickup) | — (glow and bob in code) | | | — | | |
-| Amulet: awakened (rune lit) | — (second image, same framing) | | | — | | |
+| Amulet: runes lit (1, 2, 3) | — one image per state, same framing: a rune lights after each boss (2nd after the moth, 3rd after the tree) | | | — | | |
 | Shrine: dormant | — | | | — | | |
 | Shrine: activated | — (same shrine, lit; glow pulse in code) | | | — | | |
 
@@ -43,8 +44,11 @@ bottom-left corner. The name card is text drawn in code, not an asset.
 |---|---|---|---|---|---|---|
 | **Moth** (World 1) | | ✅ | ✅ `raw/bosses/moth.jpg` | | | |
 | Moth: flying | wing-flap loop, 4 frames (up, flat, 45° down, flat) | ✅ | ✅ `moth-base.jpg` | ✅ `moth-fly.jpg` | ✅ | 🟡 playtest |
-| Moth: screaming (= its intro) | rear back, wings flared, mouth open, ~3–4 frames. Plays as the intro and before the wing-dust attack | | | | | |
-| Moth: wing-dust shot | — (single projectile image, or code particles) | | | — | | |
+| Moth: screaming (= its intro, and before each wing-dust attack) | no new sheet, and no mouth (moths don't have one): reuse the flying frames, beat from raised (1) to fully spread (2) and hold the spread, while code draws sound-wave rings pushing out in all directions, plus camera shake and the scream sound | — | — | — | — | |
+| Moth: intro (crash through the wall) | no new sheet: on the earthquake the moth bursts through the arena wall (flying frames + code movement), rocks fly, then it screams. Needs the two rows below | — | — | — | — | |
+| Rock chunks (wall burst debris) | — 6 chunks cut into `assets/world1/rocks.webp` (6 frames, natural sizes), flung by code; dust puffs are code particles | ✅ | ✅ `raw/world1/rocks.jpg` | — | ✅ | |
+| Broken wall edge (the hole the moth leaves) | — `assets/world1/wall-break.webp` (cropped: Flow painted a forest floor under the strip). Clean left side joins the wall, ragged right side; not seamless top-to-bottom, so mask or cap its ends in code | ✅ | ✅ `raw/world1/wall-break.jpg` | — | ✅ | |
+| Moth: wing dust (its attack) | — code particles. Room 11: you hide behind your soul from it; it can't break souls | — | — | — | — | |
 | **Tree guardian** (World 2) | | ✅ | 🟡 `raw/bosses/tree.jpg`, top clipped, faces front | | | |
 | Tree: intro | mask eyes open, rises out of the ruins, arms spread, ~4 frames | | | | | |
 | Tree: idle | slow sway, ~3–4 frames | | | | | |
@@ -67,9 +71,10 @@ bottom-left corner. The name card is text drawn in code, not an asset.
 | Spiky vine wall (the `x` tile) | — (static, tileable) | | | — | | |
 | Pressure plate: up / down | — (two images) | | | — | | |
 | Gate (held open by a pressure plate) | — one image per world (root gate, stone slab, carved shrine door); slides open in code | | | — | | |
+| Vine barrier (`V`, opens when the room's boss is beaten) | — one tileable image; it withers open in code | | | — | | |
 | Laser emitter (World 2) | — (beam in code) | | | — | | |
 | Spring (World 2) | idle / compressed / launch, 3 frames | | | | | |
-| Moving platform (World 3) | — | | | — | | |
+| Moving platform (World 2 room 7) | — | | | — | | |
 
 ## Backgrounds (prompts already in PROMPTS.md)
 
@@ -109,6 +114,7 @@ game adds room sound. Rows marked *(3 takes)* repeat often, so make 2–3 variat
 | Hazards | Plate up | The same stone tile rising back up, a lighter clunk with a tiny grit rattle, close, dry, 0.3 s | |
 | Hazards | Door opens | A heavy stone slab door grinding upward in a stone groove, steady scrape, ends in a soft knock, medium distance, 1.2 s | |
 | Hazards | Door closes | A heavy stone slab dropping down a stone groove and landing with a deep thud and dust trickle, medium distance, 0.9 s | |
+| Bosses | Moth bursts through the wall | A dry earth bank collapsing as something heavy smashes through it: a sharp crack, then a rumble of clods and stones tumbling and scattering on the ground, outdoors, close, 2 s | |
 | Bosses | Name card appears (all bosses) | One deep low drum hit with a large gong swelling behind it, in a stone hall, 2 s, natural decay | |
 | Hazards | Laser hum (loop) | Steady electrical hum of a fluorescent tube, mid-pitch, close, constant level, seamless loop, 2 s | |
 | Hazards | Laser blocked by soul | Water flicked onto a hot iron pan, a short sizzle and hiss, close, dry, 0.4 s | |
