@@ -1,6 +1,8 @@
 // Cuts a sprite sheet painted on magenta into equal-size frames, aligned by the feet.
 //   node tools/sheet.mjs <sheet.png|jpg> <out.webp> [--height=112] [--frames=8] [--rows=1]
 // --frames is per row; with --rows=2 the rows are cut apart first and frames come out in reading order.
+// --normalize scales every frame to the same height (for run cycles, where the model drew him at
+//             slightly different sizes from frame to frame).
 // Frames are lined up by the middle of the head, not the outline, so a flaring scarf can't make
 // the body jitter. Frames are found by the empty magenta columns between figures (or, with --frames=N, as N equal-width
 // cells when figures overlap). Each frame is cut to its own
@@ -13,7 +15,7 @@ import { KEYER } from './keyer.mjs';
 
 const [inPath, outPath, ...flags] = process.argv.slice(2);
 const num = (name, d) => Number(flags.find((f) => f.startsWith(`--${name}=`))?.split('=')[1] ?? d);
-const opt = { height: num('height', 112), frames: num('frames', 0), rows: num('rows', 1) };
+const opt = { height: num('height', 112), frames: num('frames', 0), rows: num('rows', 1), normalize: flags.includes('--normalize') };
 const mime = /\.jpe?g$/i.test(inPath) ? 'image/jpeg' : 'image/png';
 const src = `data:${mime};base64,${readFileSync(inPath).toString('base64')}`;
 
@@ -127,15 +129,16 @@ const res = await page.evaluate(async ({ src, opt }) => {
   // Scale so the typical (median) frame is --height px tall. Using the median, not the tallest, keeps
   // the hero the same size across sheets; a jump frame with a flying scarf just ends up taller.
   const heights = boxes.map((b) => b.y1 - b.y0 + 1).sort((a, b) => a - b);
-  const s = opt.height / heights[Math.floor(heights.length / 2)];
-  const fh = Math.ceil(heights[heights.length - 1] * s);
-  const left = Math.max(...boxes.map((b) => b.hx - b.x0)) * s, right = Math.max(...boxes.map((b) => b.x1 - b.hx)) * s;
+  const shared = opt.height / heights[Math.floor(heights.length / 2)];
+  const scaleOf = (b) => (opt.normalize ? opt.height / (b.y1 - b.y0 + 1) : shared);
+  const fh = opt.normalize ? opt.height : Math.ceil(heights[heights.length - 1] * shared);
+  const left = Math.max(...boxes.map((b) => (b.hx - b.x0) * scaleOf(b))), right = Math.max(...boxes.map((b) => (b.x1 - b.hx) * scaleOf(b)));
   const fw = Math.ceil(left + right) + 4, anchor = left + 2; // head x within every cell
   const out = document.createElement('canvas');
   out.width = fw * boxes.length; out.height = fh;
   const o = out.getContext('2d');
   boxes.forEach((b, i) => {
-    const w = (b.x1 - b.x0 + 1) * s, h = (b.y1 - b.y0 + 1) * s;
+    const s = scaleOf(b), w = (b.x1 - b.x0 + 1) * s, h = (b.y1 - b.y0 + 1) * s;
     o.drawImage(c, b.x0, b.y0, b.x1 - b.x0 + 1, b.y1 - b.y0 + 1, i * fw + anchor - (b.hx - b.x0) * s, fh - h, w, h);
   });
   return { url: out.toDataURL('image/webp', 0.9), frames: boxes.length, fw, fh };
