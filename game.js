@@ -14,6 +14,9 @@ const SLIDE_SPEED = 320, SLIDE_TIME = 0.4;
 const STAND = [24, 30], FLAT = [40, 14];               // player hitbox
 const HERO_HEIGHT = 46;                                // painted hero's on-screen height (hair pokes above the hitbox)
 const HERO_SRC = 112;                                  // his typical height in the processed images (tools/sheet.mjs --height)
+// Run cycle: which frames of assets/hero/run.webp to loop, and how far he moves per frame.
+// Try orders and pacing in tools/preview.html, then copy the settings here.
+const RUN_FRAMES = [6, 7, 8, 9, 10, 11], RUN_STEP = 14;
 const BODY_STAND = [30, 32], BODY_LYING = [62, 16];    // body left behind
 
 // Enemies: walkers patrol, turn at walls/bodies/ledges, kill on touch, die when a falling body lands on them.
@@ -225,6 +228,7 @@ class Room extends Phaser.Scene {
     if (!this.textures.exists('heroSheet')) {
       this.load.image('heroSheet', 'assets/hero/sheet.webp'); // 8 frames: run 0-5, jump 6, fall 7
       this.load.image('heroIdle', 'assets/hero/idle.webp');
+      this.load.image('heroRun', 'assets/hero/run.webp'); // 12 run frames: top row 0-5, bottom row 6-11
     }
   }
 
@@ -302,8 +306,12 @@ class Room extends Phaser.Scene {
     // Painted hero, if the art is present (otherwise the code-drawn figure is used).
     this.painted = this.textures.exists('heroSheet') && this.textures.exists('heroIdle');
     if (this.painted) {
-      const tex = this.textures.get('heroSheet'), img = tex.getSourceImage(), fw = img.width / 8;
-      if (!tex.has(0)) for (let i = 0; i < 8; i++) tex.add(i, 0, i * fw, 0, fw, img.height);
+      const frames = (key, n) => {
+        const tex = this.textures.get(key), img = tex.getSourceImage(), fw = img.width / n;
+        if (!tex.has(0)) for (let i = 0; i < n; i++) tex.add(i, 0, i * fw, 0, fw, img.height);
+      };
+      frames('heroSheet', 8);
+      if (this.textures.exists('heroRun')) frames('heroRun', 12);
       this.heroScale = HERO_HEIGHT / HERO_SRC; // same pixel scale for every hero image
       this.heroSprite = this.add.image(0, 0, 'heroIdle').setOrigin(0.5, 1).setDepth(5.5);
       this.heroFrame = ['heroIdle', undefined];
@@ -453,9 +461,10 @@ class Room extends Phaser.Scene {
       return;
     }
     // Pick the frame: in the air, jump or fall; on the ground, run frames timed to distance covered
-    // (one frame per 9px, so steps match speed), or the standing painting when still.
+    // (one frame per RUN_STEP px, so steps match speed), or the standing painting when still.
     this.heroFrame = !grounded ? ['heroSheet', b.velocity.y < 0 ? 6 : 7]
-      : Math.abs(b.velocity.x) > 20 ? ['heroSheet', Math.floor(this.walk / 9) % 6]
+      : Math.abs(b.velocity.x) > 20
+        ? (this.textures.exists('heroRun') ? ['heroRun', RUN_FRAMES[Math.floor(this.walk / RUN_STEP) % RUN_FRAMES.length]] : ['heroSheet', Math.floor(this.walk / RUN_STEP) % 6])
       : ['heroIdle', undefined];
     const [key, frame] = this.heroFrame;
     this.heroSprite.setTexture(key, frame).setScale(this.heroScale).setFlipX(this.face < 0)

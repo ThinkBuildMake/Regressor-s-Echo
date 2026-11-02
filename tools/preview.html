@@ -1,0 +1,100 @@
+<!doctype html>
+<!-- Run-cycle preview. With the local server running: http://127.0.0.1:8765/tools/preview.html
+     Pick a frame order and speed, watch it at game size and zoomed, then copy the settings line. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Run Cycle Preview</title>
+<style>
+  body { margin: 0; padding: 20px; background: #1d2721; color: #dfe8e2; font: 15px/1.5 system-ui, sans-serif; display: grid; gap: 16px; }
+  .row { display: flex; flex-wrap: wrap; gap: 16px; align-items: end; }
+  label { display: grid; gap: 4px; font-size: 13px; color: #a8b8ad; }
+  input, select, button { font: inherit; padding: 6px 8px; border-radius: 6px; border: 1px solid #3b4a40; background: #26322b; color: #dfe8e2; }
+  input[type=text] { width: 260px; }
+  canvas { background: linear-gradient(#b9c9b4, #8fa596); border-radius: 6px; image-rendering: auto; }
+  #strip canvas { background: #2b3a33; }
+  #strip { display: flex; flex-wrap: wrap; gap: 6px; }
+  .frame { display: grid; justify-items: center; font-size: 12px; color: #a8b8ad; }
+  code { background: #26322b; padding: 6px 10px; border-radius: 6px; user-select: all; }
+</style>
+</head>
+<body>
+<div class="row">
+  <label>Sheet
+    <select id="sheet">
+      <option value="../assets/hero/run.webp|12">run.webp (12 frames: top row 0–5, bottom row 6–11)</option>
+      <option value="../assets/hero/sheet.webp|8">sheet.webp (8 frames: run 0–5, jump 6, fall 7)</option>
+    </select>
+  </label>
+  <label>Frame order (comma separated)
+    <input id="order" type="text" value="6,7,8,9,10,11">
+  </label>
+  <label>Pixels moved per frame (lower = faster legs)
+    <input id="step" type="range" min="6" max="30" value="14">
+  </label>
+  <label>Run speed (px/s, the game uses 220)
+    <input id="speed" type="range" min="60" max="320" value="220">
+  </label>
+  <button id="top">Top row</button>
+  <button id="bottom">Bottom row</button>
+</div>
+<div class="row">
+  <div><div>Game size</div><canvas id="small" width="480" height="90"></canvas></div>
+  <div><div>Zoomed ×3, in place</div><canvas id="big" width="300" height="400"></canvas></div>
+</div>
+<div>Settings: <code id="out"></code></div>
+<div id="strip"></div>
+<script>
+const $ = (id) => document.getElementById(id);
+const HERO_HEIGHT = 46, SRC = 112;
+let img = new Image(), n = 12, fw = 0;
+function load() {
+  const [src, count] = $('sheet').value.split('|');
+  n = Number(count);
+  img = new Image();
+  img.onload = () => { fw = img.width / n; strip(); };
+  img.src = src + '?v=' + Date.now();
+}
+function order() {
+  return $('order').value.split(',').map((x) => parseInt(x, 10)).filter((x) => x >= 0 && x < n);
+}
+function strip() {
+  $('strip').innerHTML = '';
+  for (let i = 0; i < n; i++) {
+    const c = document.createElement('canvas'), s = 90 / img.height;
+    c.width = fw * s; c.height = 90;
+    c.getContext('2d').drawImage(img, i * fw, 0, fw, img.height, 0, 0, c.width, c.height);
+    const d = document.createElement('div');
+    d.className = 'frame';
+    d.append(c, String(i));
+    $('strip').append(d);
+  }
+}
+let x = 0, walk = 0, last = performance.now();
+function frame(now) {
+  const dt = Math.min((now - last) / 1000, 0.05);
+  last = now;
+  const o = order();
+  if (fw && o.length) {
+    const speed = Number($('speed').value), step = Number($('step').value);
+    x = (x + speed * dt) % 520;
+    walk += speed * dt;
+    const f = o[Math.floor(walk / step) % o.length];
+    const s = HERO_HEIGHT / SRC, small = $('small').getContext('2d');
+    small.clearRect(0, 0, 480, 90);
+    small.drawImage(img, f * fw, 0, fw, img.height, x - 30, 80 - img.height * s, fw * s, img.height * s);
+    const big = $('big').getContext('2d'), b = 3 * s;
+    big.clearRect(0, 0, 300, 400);
+    big.drawImage(img, f * fw, 0, fw, img.height, 150 - (fw * b) / 2, 380 - img.height * b, fw * b, img.height * b);
+    $('out').textContent = `sheet=${$('sheet').value.split('|')[0].split('/').pop()} order=${o.join(',')} step=${step}`;
+  }
+  requestAnimationFrame(frame);
+}
+$('sheet').onchange = load;
+$('top').onclick = () => { $('sheet').selectedIndex = 0; $('order').value = '0,1,2,3,4,5'; load(); };
+$('bottom').onclick = () => { $('sheet').selectedIndex = 0; $('order').value = '6,7,8,9,10,11'; load(); };
+load();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
