@@ -107,6 +107,20 @@ Save to `assets/raw/hero/`. Attach the World 1 reference image for the brushwork
 **Fallback, if the frames don't match each other → `parts.png`:**
    > Using the attached character exactly, paint the same character separated into parts for cut-out animation, each part apart from the others: head with blond hair, torso with cloak front, back cloak flap, scarf tail, left arm, right arm, left leg with boot, right leg with boot, satchel. Same scale and colors as the attached image. Wide 21:9.
 
+## Dialogue portraits (AI Studio, Nano Banana Pro)
+
+One image per character with every expression in a grid, so the face stays consistent. I slice the grid into separate portraits. Save to `assets/raw/portraits/`. Attach `hero.png` (and the World 1 reference for the brushwork).
+
+**Portrait style block:**
+
+> Hand-painted character portrait for a 2D game's dialogue box, painterly, soft brush edges, matching the attached character exactly (same face, hair and clothing). Head and shoulders, three-quarter view facing right, the same framing, size and position in every cell. Soft light from the upper left. Each cell isolated on a flat solid magenta #FF00FF background, with clear magenta gaps between cells. No text, no labels, no borders.
+
+1. **Hero → `hero-faces.png`**
+   > An expression sheet of the attached young treasure hunter (blond, deep green cloak, wavy red scarf, gold amulet), 6 portraits in a grid of 3 columns and 2 rows, in this order: 1. calm neutral; 2. startled and confused; 3. in pain, wincing, shaken; 4. exhausted and numb, eyes heavy; 5. determined, jaw set; 6. relieved, a soft tired smile. Wide 3:2.
+
+2. **The guide (his ghost from another timeline) → `guide-faces.png`**
+   > An expression sheet of the ghost of the attached young treasure hunter, from a timeline where he has died countless times: the same face but older and weathered, a thin scar, hair faded from blond to ash, his green cloak frayed and tattered, his red scarf faded to grey, a cracked gold amulet. His body is translucent pale silver-green with a faint soft glow. 4 portraits in a grid of 2 columns and 2 rows, facing left, in this order: 1. wry and knowing, half smile; 2. amused; 3. solemn; 4. quietly sad. Do not use bright blue-white. Square 1:1.
+
 ## Drawn in code
 
 The souls (the hero's frames tinted blue, with flames), the ghost guide, light beams and glows.
