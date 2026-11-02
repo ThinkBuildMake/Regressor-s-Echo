@@ -165,6 +165,10 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   Dialogue.seen.delete('moth');                      // the moth: hidden until its intro drops it in
   s = await go(ROOMS.findIndex(([n]) => n === 'The moth'));
   check(s.boss?.hidden && !s.boss.r.visible, 'moth hidden before its intro');
+  check(!s.talk.queue.length && !s.talk.line, 'no talking until you walk in');
+  s.player.body.reset(O().x + 8 * 32, O().y + 9 * 32 + 17);
+  await wait(200);
+  check(s.talk.line || s.talk.queue.length, 'walking partway in starts the shaking');
   for (let i = 0; i < 6 && (s.talk.line || s.talk.queue.length); i++) { Dialogue.update(s, 0, true); Dialogue.update(s, 0, true); }
   await wait(1000);
   check(s.boss && !s.boss.hidden && s.boss.r.visible, 'moth arrives during the intro');

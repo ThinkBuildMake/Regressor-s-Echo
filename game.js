@@ -344,14 +344,14 @@ const ROOMS = [
     '#                            #',
     '                             #',
     ' P                           #',
-    '####                         #',
+    '##########                   #',
     '#                            #',
     '#                            #',
     '#                            V',
     '#                            V',
     '#             B              V',
     '##############################',
-  ], [180, 94], { world: 1, enter: 'moth' }],
+  ], [180, 94], { world: 1, enter: 'moth', enterAt: 7 }], // the shaking starts 7 tiles in, while you walk
   ['Into the ruins', [ // World 2 starts here (rooms still to be built)
     '##############################',
     '#                            #',
@@ -475,7 +475,7 @@ class Room extends Phaser.Scene {
     rules.max = WORLD_SOULS[this.rooms[this.index].world] ?? 3;
     Dialogue.create(this);
     this.showWorld(this.rooms[this.index].world);
-    Dialogue.play(this, this.rooms[this.index].enter);
+    if (this.rooms[this.index].enterAt == null) Dialogue.play(this, this.rooms[this.index].enter);
 
     this.spawnWalkers(this.index);
     this.physics.add.collider(this.enemies, this.statics);
@@ -573,7 +573,7 @@ class Room extends Phaser.Scene {
     const p = this.player, R = this.rooms[i].rect, cam = this.cameras.main;
     this.index = i;
     rules.max = WORLD_SOULS[this.rooms[i].world] ?? rules.max;
-    Dialogue.play(this, this.rooms[i].enter);
+    if (this.rooms[i].enterAt == null) Dialogue.play(this, this.rooms[i].enter); // else when you reach enterAt
     this.corpses.forEach((c) => c.destroy());
     this.corpses = [];
     this.spawnWalkers(i);
@@ -896,6 +896,8 @@ class Room extends Phaser.Scene {
 
     this.updateHud();
     if (this.transit) return;
+    const here = this.rooms[this.index]; // a room's script can wait until you've walked partway in
+    if (here.enterAt != null && p.x > here.rect.x + here.enterAt * T) Dialogue.play(this, here.enter);
     if (!this.rooms[this.index].rect.contains(p.x, p.y)) {
       const next = this.rooms.findIndex((r) => r.rect.contains(p.x, p.y));
       if (next >= 0) return this.enterRoom(next);
