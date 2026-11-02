@@ -12,12 +12,12 @@ Rooms connect Celeste-style (walk through a gap, the camera slides over). Each r
 
 | # | Room | What it teaches | Story beat |
 |---|---|---|---|
-| 1 | The clearing | Moving and jumping. He finds the amulet and puts it on | "Treasure hunting's slow this season…" |
+| 1 | The clearing | Moving and jumping. He finds the amulet and puts it on | Cocky grumbling, then the curious eyebrow raise and a greedy grin at the amulet |
 | 2 | The ghost | The guide appears | The opening conversation (below) |
 | 3 | First death | A spike pit too wide to jump. Jump in: you die, come back, and your soul floats over the spikes as a stepping stone | First death: pained face, "That… hurt." |
 | 4 | The thorn wall | Height: die against thorns at the top of a jump to make a step | The guide teaches timing |
-| 5 | The patrol | A switch holds a door open; a walker patrols over it. Let it kill you on the switch, so your soul holds it down | Guide: "Sometimes you let the forest do it for you." |
-| 6 | The chain | Two placements with a shrine between: bridge a pit, reach the shrine, die again to make a step up | Exhaustion starts creeping in |
+| 5 | The patrol | A switch holds a door open; a walker patrols over it. Let it kill you on the switch, so your soul holds it down | Guide: "I want you to get killed *efficiently*." |
+| 6 | The chain | Two placements with a shrine between: bridge a pit, reach the shrine, die again to make a step up | "How many times have you done this?" "Today? Or ever?" …"Fine." |
 | 7 | The moth | Boss 1: a wing-dust attack you only survive behind your soul; stomp it 3 times; dying heals it | Guide, quietly: "Careful. It remembers too." |
 
 After the moth: the amulet grows stronger and you earn a **2nd soul**, leading into World 2.
