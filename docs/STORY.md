@@ -414,7 +414,15 @@ The pyramid needs to be visible in the background, its top lost in cloud.
 > **Hero** [sad]: …Idiot.  
 > **Hero** [determined]: Ninety floors, huh.  
 > **Hero** [determined]: Then I'm not stopping at ninety.  
-> *(He walks in. Floor 1.)*
+> *(He walks in. Fade to the ending card.)*
+
+## Content warning and ending card (in game)
+
+**Content warning** (first screen; any key or click continues):
+> This game shows a character dying many times, sometimes by his own choice, and deals with grief and self-sacrifice. Death is a puzzle mechanic here and is shown without gore.
+> If you're going through a hard time, please reach out to someone you trust or a local support line.
+
+**Ending card** (after Floor one; the dialogue cue `theEnd` fades to it): "Floor 1" alone, then the title, "Deaths: N" (the whole run), "Count every one.", "Thank you for playing.", credits, and any key to play again.
 
 ## Later story direction
 

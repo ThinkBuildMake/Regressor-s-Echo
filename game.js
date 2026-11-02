@@ -363,6 +363,56 @@ const START_ROOM = ROOMS.findIndex((r) => r[0] === 'The clearing');
 const hit = (A, B) => A.x < B.right && A.right > B.x && A.y < B.bottom && A.bottom > B.y;
 const bounds = (o) => o.getBounds();
 
+const stats = { deaths: 0 }; // the whole run's deaths, shown on the ending card
+const FONT = { fontFamily: 'Georgia, serif', align: 'center' };
+
+// First screen: the content warning. Any key or click continues (that click also lets the browser play audio).
+class Warning extends Phaser.Scene {
+  constructor() { super('warning'); }
+  create() {
+    if (window.SKIP_WARNING) return this.scene.start('room'); // the test page
+    const t = (y, text, size, color, wrap = 640) =>
+      this.add.text(480, y, text, { ...FONT, fontSize: size, color, wordWrap: { width: wrap }, lineSpacing: 6 }).setOrigin(0.5);
+    t(150, 'Content warning', '30px', '#f1e3b8');
+    t(250, 'This game shows a character dying many times, sometimes by his own choice, and deals with grief and self-sacrifice. ' +
+      'Death is a puzzle mechanic here and is shown without gore.', '19px', '#dfe8e2');
+    t(345, "If you're going through a hard time, please reach out to someone you trust or a local support line.", '16px', '#a8b8ad');
+    const go = t(440, 'Click or press any key to continue', '15px', '#e8b44a');
+    this.tweens.add({ targets: go, alpha: 0.35, duration: 900, yoyo: true, repeat: -1 });
+    const next = () => this.scene.start('room');
+    this.input.keyboard.once('keydown', next);
+    this.input.once('pointerdown', next);
+  }
+}
+
+// The last screen, after he walks into the pyramid: "Floor 1", the title, the run's deaths, thanks and credits.
+class End extends Phaser.Scene {
+  constructor() { super('end'); }
+  create() {
+    const t = (y, text, size, color, at) => {
+      const o = this.add.text(480, y, text, { ...FONT, fontSize: size, color }).setOrigin(0.5).setAlpha(0);
+      this.tweens.add({ targets: o, alpha: 1, duration: 1200, delay: at });
+      return o;
+    };
+    const floor = t(272, 'Floor 1', '44px', '#f1e3b8', 600);
+    this.tweens.add({ targets: floor, alpha: 0, duration: 1200, delay: 4200 });
+    t(170, 'Reincarnation Echo', '46px', '#f1e3b8', 6000);
+    t(245, `Deaths: ${stats.deaths}`, '22px', '#cfeaff', 7400);
+    t(280, 'Count every one.', '16px', '#9fb8c8', 8400);
+    t(350, 'Thank you for playing.', '20px', '#dfe8e2', 9600);
+    t(400, 'A game by Michael Chuang · Made for Game Week', '14px', '#a8b8ad', 10400);
+    t(422, 'Art, music and sound made with generative AI tools', '13px', '#7f9086', 10400);
+    const again = t(490, 'Press any key to play again', '14px', '#e8b44a', 12000);
+    this.time.delayedCall(12000, () => this.input.keyboard.once('keydown', () => {
+      stats.deaths = 0;
+      Dialogue.seen.clear();
+      NAMES.guide = '???';
+      this.scene.start('room', { index: START_ROOM });
+    }));
+    again.setDepth(1);
+  }
+}
+
 class Room extends Phaser.Scene {
   constructor() { super('room'); }
 
@@ -585,6 +635,10 @@ class Room extends Phaser.Scene {
     const g = this.guide, p = this.player;
     if (name === 'wear') this.wearing = true;
     if (name === 'flash') this.cameras.main.flash(600, 255, 215, 120);
+    if (name === 'theEnd') { // he walks into the pyramid: fade out to the ending card
+      this.cameras.main.fadeOut(1500, 0, 0, 0);
+      this.cameras.main.once('camerafadeoutcomplete', () => this.scene.start('end'));
+    }
     if (name === 'dim' || name === 'undim') { // night falls / morning comes (under the dialogue panel)
       this.dimmer ??= this.add.rectangle(480, 272, 960, 544, 0x020610).setScrollFactor(0).setDepth(39).setAlpha(0);
       this.tweens.killTweensOf(this.dimmer);
@@ -658,6 +712,7 @@ class Room extends Phaser.Scene {
 
   die() {
     if (this.dead > 0) return;
+    stats.deaths++;
     const p = this.player;
     const [w, h] = this.lying ? BODY_LYING : BODY_STAND;
     // Snap: standing bodies fill one tile, lying bodies span the two tiles nearest you.
@@ -1043,5 +1098,5 @@ const game = new Phaser.Game({
   backgroundColor: '#1f1f24',
   physics: { default: 'arcade', arcade: { gravity: { y: GRAVITY } } },
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
-  scene: Room,
+  scene: [Warning, Room, End],
 });
