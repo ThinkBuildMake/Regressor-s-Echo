@@ -240,25 +240,6 @@ const ROOMS = [
     '#  P       A      ###         ',
     '##############################',
   ], [0, 100], { world: 1, enter: 'clearing' }],
-  ['The ghost', [
-    '##############################',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '                              ',
-    '                              ',
-    '  P                           ',
-    '##############################',
-  ], [30, 100], { world: 1 }],
   ['First death', [
     '##############################',
     '#                            #',
@@ -277,7 +258,7 @@ const ROOMS = [
     '                              ',
     '  P                           ',
     '##########^^^^^^^^############',
-  ], [60, 100], { world: 1, enter: 'firstPit', enterAt: 8 }], // at the pit's edge
+  ], [30, 100], { world: 1, spots: [[8, 'firstPit'], [8, 'soul', 'firstDeath']] }], // talk at the pit's edge
   ['The thorn wall', [
     '##############################',
     '#                            #',
@@ -296,7 +277,7 @@ const ROOMS = [
     '                x#############',
     '  P             x#############',
     '##############################',
-  ], [90, 100], { world: 1, enter: 'thorns' }],
+  ], [60, 100], { world: 1, enter: 'thorns' }],
   ['The patrol', [
     '##############################',
     '#                       #    #',
@@ -315,7 +296,7 @@ const ROOMS = [
     '                        D     ',
     '  P         _     e     D     ',
     '##############################',
-  ], [120, 94], { world: 1, enter: 'patrol' }],
+  ], [90, 94], { world: 1, enter: 'patrol' }],
   ['The chain', [
     '##############################',
     '#                            #',
@@ -334,7 +315,7 @@ const ROOMS = [
     '                      x#######',
     '  P              C    x#######',
     '######^^^^^^^^################',
-  ], [150, 94], { world: 1, enter: 'chain' }],
+  ], [120, 94], { world: 1, enter: 'chain' }],
   ['The moth', [
     '##############################',
     '#                            #',
@@ -353,7 +334,7 @@ const ROOMS = [
     '#                            V',
     '#             B              V',
     '##############################',
-  ], [180, 94], { world: 1, enter: 'moth', enterAt: 7 }], // the shaking starts 7 tiles in, while you walk
+  ], [150, 94], { world: 1, spots: [[7, 'moth']], deathTalk: { 2: 'dust', 5: 'dust2' } }], // the shaking starts 7 tiles in
   ['Into the ruins', [ // World 2 starts here (rooms still to be built)
     '##############################',
     '#                            #',
@@ -372,7 +353,7 @@ const ROOMS = [
     '                             #',
     '  P                          #',
     '##############################',
-  ], [210, 94], { world: 2 }],
+  ], [180, 94], { world: 2, spots: [[6, 'ruins']] }],
 ];
 const WORLD_NAMES = { 1: 'Forest Edge', 2: 'Overgrown Ruins', 3: 'Sanctum' }; // fades in when you enter a new world
 const WORLD_SOULS = { 1: 1, 2: 2, 3: 3 }; // souls allowed per world; rooms without a world keep 3
@@ -453,7 +434,8 @@ class Room extends Phaser.Scene {
             case 'B': // floats with its underside 2.5 tiles above this tile's floor
               this.bosses.push({ hp: BOSS_HP, hurt: 0, dir: 1, room: ri, min: ox * T + T + 48, max: (ox + width) * T - T - 48,
                 r: rect(x + T / 2 - 48, y + T - 128, 96, 48, 0x9b59b6),
-                hidden: extra.enter === 'moth' && !Dialogue.seen.has('moth') }); // drops in during its intro
+                hidden: !!extra.spots?.some((sp) => sp[1] === 'moth') && !Dialogue.seen.has('moth'),
+                story: extra.spots?.some((sp) => sp[1] === 'moth') ? 'mothDown' : null }); // drops in during its intro
               this.bosses.at(-1).r.setVisible(!this.bosses.at(-1).hidden);
               if (this.textures.exists('mothFly')) {
                 const B = this.bosses.at(-1), tex = this.textures.get('mothFly'), fw = tex.getSourceImage().width / 4;
@@ -483,8 +465,9 @@ class Room extends Phaser.Scene {
     rules.max = WORLD_SOULS[this.rooms[this.index].world] ?? 3;
     Dialogue.create(this);
     this.wearing = Dialogue.seen.has('amulet');
+    this.roomDeaths = 0;
     this.showWorld(this.rooms[this.index].world);
-    if (this.rooms[this.index].enterAt == null) Dialogue.play(this, this.rooms[this.index].enter);
+    Dialogue.play(this, this.rooms[this.index].enter);
 
     this.spawnWalkers(this.index);
     this.physics.add.collider(this.enemies, this.statics);
@@ -571,6 +554,13 @@ class Room extends Phaser.Scene {
     this.tweens.add({ targets: t, alpha: 1, duration: 900, hold: 1600, yoyo: true, onComplete: () => t.destroy() });
   }
 
+  bossDefeated(B) {
+    B.r.destroy();
+    this.bosses.splice(this.bosses.indexOf(B), 1);
+    if (this.boss === B) this.boss = null;
+    this.gates.filter((g) => g.room === B.room).forEach((g) => g.destroy()); // the way on opens
+  }
+
   // The guide floats a little behind the hero, bobbing. While they talk he stays put and faces him.
   followGuide(dt) {
     const g = this.guide, p = this.player;
@@ -582,7 +572,12 @@ class Room extends Phaser.Scene {
       g.x += (p.x - this.face * 44 - g.x) * k;
       g.y += (feet - g.y) * k;
       g.setFlipX(this.face < 0);
-    } else if (!g.looking) g.setFlipX(g.x > p.x);
+      g.hoverY = null;
+    } else {
+      g.hoverY ??= g.y; // holds his spot, bobbing
+      g.y = g.hoverY + Math.sin(this.time.now / 600) * 3;
+      if (!g.looking) g.setFlipX(g.x > p.x);
+    }
   }
 
   // Staging cues fired by dialogue lines (see `cue` in dialogue.js).
@@ -593,8 +588,25 @@ class Room extends Phaser.Scene {
     if (name === 'pulse') this.cameras.main.flash(250, 255, 215, 120);
     if (name === 'ghost' && g && !g.on) { // fades in right beside him
       g.on = g.fading = true;
-      g.setPosition(p.x + 48, p.y + 5).setFlipX(true);
+      g.setPosition(p.x + 40, p.y - 34).setFlipX(true); // floating at his upper right
       this.tweens.add({ targets: g, alpha: 0.7, duration: 900, onComplete: () => { g.fading = false; } });
+    }
+    const B = this.bosses.find((b) => b.room === this.index && b.story);
+    if (name === 'glow' && B) { // the fallen boss turns white and pulses
+      B.r.setFillStyle(0xffffff);
+      this.tweens.add({ targets: B.r, alpha: 0.4, duration: 220, yoyo: true, repeat: 4 });
+    }
+    if (name === 'absorb' && B) { // dissolves into motes that stream into the hero, who flashes white
+      if (!this.textures.exists('spark'))
+        this.make.graphics({ add: false }).fillStyle(0xffffff).fillCircle(3, 3, 3).generateTexture('spark', 6, 6).destroy();
+      const em = this.add.particles(B.r.x, B.r.y, 'spark', {
+        x: { min: -48, max: 48 }, y: { min: -24, max: 24 }, moveToX: p.x, moveToY: p.y, lifespan: 900,
+        scale: { start: 1.2, end: 0.4 }, tint: [0xffffff, 0xcfeaff], blendMode: 'ADD', emitting: false,
+      }).setDepth(6);
+      em.explode(60);
+      this.time.delayedCall(1200, () => em.destroy());
+      this.time.delayedCall(850, () => this.cameras.main.flash(350, 255, 255, 255));
+      this.bossDefeated(B);
     }
     if (name === 'lookaround' && g) { // surveys the clearing, then settles on the hero
       g.looking = true;
@@ -613,7 +625,8 @@ class Room extends Phaser.Scene {
     const p = this.player, R = this.rooms[i].rect, cam = this.cameras.main;
     this.index = i;
     rules.max = WORLD_SOULS[this.rooms[i].world] ?? rules.max;
-    if (this.rooms[i].enterAt == null) Dialogue.play(this, this.rooms[i].enter); // else when you reach enterAt
+    Dialogue.play(this, this.rooms[i].enter);
+    this.roomDeaths = 0;
     this.corpses.forEach((c) => c.destroy());
     this.corpses = [];
     this.spawnWalkers(i);
@@ -673,6 +686,8 @@ class Room extends Phaser.Scene {
     this.dead = RESPAWN_DELAY;
     if (this.boss) { this.boss.hp = BOSS_HP; this.boss.hurt = 0; } // your death heals the boss
     if (this.rooms[this.index].world) Dialogue.play(this, 'firstDeath'); // only the first time
+    const hint = this.rooms[this.index].deathTalk?.[++this.roomDeaths]; // hints after repeated deaths in a room
+    if (hint) Dialogue.play(this, hint);
   }
 
   // Bodies fall straight down until they rest on a wall, closed door or another body.
@@ -901,11 +916,11 @@ class Room extends Phaser.Scene {
     p.body.velocity.y = -JUMP * 0.8;
     if (B.hurt > 0) return false;
     B.hurt = 0.5;
-    if (--B.hp <= 0) {
-      B.r.destroy();
-      this.bosses.splice(this.bosses.indexOf(B), 1);
-      this.boss = null;
-      this.gates.filter((g) => g.room === B.room).forEach((g) => g.destroy()); // the way on opens
+    if (--B.hp <= 0 && B.story) { // a story boss stops still; its script dissolves it (cue 'absorb')
+      B.hidden = true;
+      Dialogue.play(this, B.story);
+    } else if (B.hp <= 0) {
+      this.bossDefeated(B);
       this.cameras.main.flash(500, 255, 220, 140);
     }
     return false;
@@ -939,8 +954,10 @@ class Room extends Phaser.Scene {
 
     this.updateHud();
     if (this.transit) return;
-    const here = this.rooms[this.index]; // a room's script can wait until you've walked partway in
-    if (here.enterAt != null && p.x > here.rect.x + here.enterAt * T) Dialogue.play(this, here.enter);
+    // Spots: [column, script, after] plays a script once you walk past that column (after another script, if given).
+    if (!this.talk.line && !this.talk.queue.length)
+      for (const [col, key, after] of this.rooms[this.index].spots ?? [])
+        if (p.x > this.rooms[this.index].rect.x + col * T && (!after || Dialogue.seen.has(after)) && Dialogue.play(this, key)) break;
     if (!this.rooms[this.index].rect.contains(p.x, p.y)) {
       const next = this.rooms.findIndex((r) => r.rect.contains(p.x, p.y));
       if (next >= 0) return this.enterRoom(next);

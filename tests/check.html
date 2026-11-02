@@ -190,6 +190,9 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   check(s.boss && !s.boss.hidden && s.boss.r.visible, 'moth arrives during the intro');
   const M = s.boss, mi = s.index;
   for (let n = 0; n < 3; n++) { s.player.body.reset(M.r.x + M.dir * 20, M.r.y - 44); await wait(600); }
+  check(M.hidden && s.talk.queue.length > 0, 'the last stomp starts the moth ending scene');
+  Dialogue.skip(s);                                  // skipping still dissolves it
+  await wait(200);
   check(!s.boss && s.gates.every((g) => !g.active || g.room !== mi), `beating the moth opens the vines (hp ${M.hp})`);
   s.player.body.reset(s.rooms[mi].rect.right - 20, s.rooms[mi].rect.y + 15 * 32 + 17);
   key('keydown', 39); await wait(900); key('keyup', 39);
