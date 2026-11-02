@@ -13,6 +13,7 @@ const COYOTE = 0.1, BUFFER = 0.1, RESPAWN_DELAY = 0.35;
 const SLIDE_SPEED = 320, SLIDE_TIME = 0.4;
 const STAND = [24, 30], FLAT = [40, 14];               // player hitbox
 const HERO_HEIGHT = 46;                                // painted hero's on-screen height (hair pokes above the hitbox)
+const HERO_SRC = 112;                                  // his typical height in the processed images (tools/sheet.mjs --height)
 const BODY_STAND = [30, 32], BODY_LYING = [62, 16];    // body left behind
 
 // Enemies: walkers patrol, turn at walls/bodies/ledges, kill on touch, die when a falling body lands on them.
@@ -303,7 +304,7 @@ class Room extends Phaser.Scene {
     if (this.painted) {
       const tex = this.textures.get('heroSheet'), img = tex.getSourceImage(), fw = img.width / 8;
       if (!tex.has(0)) for (let i = 0; i < 8; i++) tex.add(i, 0, i * fw, 0, fw, img.height);
-      this.heroScale = HERO_HEIGHT / img.height;
+      this.heroScale = HERO_HEIGHT / HERO_SRC; // same pixel scale for every hero image
       this.heroSprite = this.add.image(0, 0, 'heroIdle').setOrigin(0.5, 1).setDepth(5.5);
       this.heroFrame = ['heroIdle', undefined];
     }

@@ -3,8 +3,8 @@
 // Frames are found by the empty magenta columns between figures (or, with --frames=N, as N equal-width
 // cells when figures overlap). Each frame is cut to its own
 // bounds, scaled by one shared factor (so sizes stay consistent), centered sideways, and placed
-// with its feet on the bottom edge. Output: one row of frames, each <height> tall and as wide as
-// the widest frame. Prints the frame size for Phaser's spritesheet loader.
+// with its feet on the bottom edge. The median frame is <height> px tall (so every sheet shares one
+// pixel scale); the output is as tall as the tallest frame and each cell as wide as the widest. Prints the frame size for Phaser's spritesheet loader.
 import { chromium } from 'playwright';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { KEYER } from './keyer.mjs';
@@ -43,9 +43,19 @@ const res = await page.evaluate(async ({ src, opt }) => {
   }
   runs = runs.filter(([a, b]) => b - a > 8);
   // Figures whose scarves or cloaks overlap merge into one run. If the expected frame count is given
-  // and doesn't match, assume evenly spaced frames and cut equal-width cells instead.
-  if (opt.frames && runs.length !== opt.frames)
-    runs = Array.from({ length: opt.frames }, (_, i) => [Math.round((i * W) / opt.frames), Math.round(((i + 1) * W) / opt.frames) - 1]);
+  // and doesn't match, cut between neighbours at the emptiest column near each expected boundary.
+  if (opt.frames && runs.length !== opt.frames) {
+    const n = opt.frames, mass = Array.from({ length: W }, (_, x) => { let m = 0; for (let y = 0; y < H; y++) m += solid(x, y); return m; });
+    const cuts = [0];
+    for (let i = 1; i < n; i++) {
+      const mid = Math.round((i * W) / n), span = Math.round(W / n / 3);
+      let best = mid;
+      for (let x = mid - span; x <= mid + span; x++) if (mass[x] < mass[best]) best = x;
+      cuts.push(best);
+    }
+    cuts.push(W);
+    runs = cuts.slice(0, -1).map((c, i) => [c, cuts[i + 1] - 1]);
+  }
   // The main body of a 1-D profile: runs of non-empty entries (gaps up to 3 px bridged), keep the one
   // with the most pixels. Drops stray specks such as a watermark or a neighbour's clipped scarf tip.
   const mainRun = (counts) => {
@@ -93,17 +103,20 @@ const res = await page.evaluate(async ({ src, opt }) => {
     const c = mainRun(cols);
     return { x0: x0 + c.a, x1: x0 + c.b, y0: r.a, y1: r.b };
   });
-  const tallest = Math.max(...boxes.map((b) => b.y1 - b.y0 + 1));
-  const s = opt.height / tallest;
+  // Scale so the typical (median) frame is --height px tall. Using the median, not the tallest, keeps
+  // the hero the same size across sheets; a jump frame with a flying scarf just ends up taller.
+  const heights = boxes.map((b) => b.y1 - b.y0 + 1).sort((a, b) => a - b);
+  const s = opt.height / heights[Math.floor(heights.length / 2)];
+  const fh = Math.ceil(heights[heights.length - 1] * s);
   const fw = Math.ceil(Math.max(...boxes.map((b) => b.x1 - b.x0 + 1)) * s) + 4;
   const out = document.createElement('canvas');
-  out.width = fw * boxes.length; out.height = opt.height;
+  out.width = fw * boxes.length; out.height = fh;
   const o = out.getContext('2d');
   boxes.forEach((b, i) => {
     const w = (b.x1 - b.x0 + 1) * s, h = (b.y1 - b.y0 + 1) * s;
-    o.drawImage(c, b.x0, b.y0, b.x1 - b.x0 + 1, b.y1 - b.y0 + 1, i * fw + (fw - w) / 2, opt.height - h, w, h);
+    o.drawImage(c, b.x0, b.y0, b.x1 - b.x0 + 1, b.y1 - b.y0 + 1, i * fw + (fw - w) / 2, fh - h, w, h);
   });
-  return { url: out.toDataURL('image/webp', 0.9), frames: boxes.length, fw, fh: opt.height };
+  return { url: out.toDataURL('image/webp', 0.9), frames: boxes.length, fw, fh };
 }, { src, opt });
 await browser.close();
 writeFileSync(outPath, Buffer.from(res.url.split(',')[1], 'base64'));
