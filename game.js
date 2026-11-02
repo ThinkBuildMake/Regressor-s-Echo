@@ -6,6 +6,7 @@ const T = 32;
 
 // Movement feel
 const SPEED = 220, ACCEL = 2000, AIR_ACCEL = 1400;
+const AIR_DRAG = 220; // in the air with no key held, momentum fades slowly, so jumps arc
 const GRAVITY = 1400, JUMP = 550, MAX_FALL = 800; // ~3.4 tiles high, ~5 tiles running jump
 const COYOTE = 0.1, BUFFER = 0.1, RESPAWN_DELAY = 0.35;
 // Slide: S/↓ while running. Jumping mid-slide is a dive (stay flat in the air).
@@ -336,7 +337,7 @@ class Room extends Phaser.Scene {
       return false;
     });
 
-    this.keys = this.input.keyboard.addKeys('A,D,LEFT,RIGHT,SPACE,W,UP,K,X,R,N,S,DOWN,ONE,TWO,THREE,FOUR');
+    this.keys = this.input.keyboard.addKeys('A,D,LEFT,RIGHT,SPACE,W,UP,K,X,R,N,S,DOWN,SHIFT,ONE,TWO,THREE,FOUR');
     this.hud = this.add.text(8, 4, '', { fontFamily: 'monospace', fontSize: '13px', color: '#ddd', lineSpacing: 3, backgroundColor: '#000000aa', padding: { x: 6, y: 4 } }).setDepth(30).setScrollFactor(0);
     const cam = this.cameras.main, R = this.rooms[this.index].rect;
     cam.setBounds(R.x, R.y, R.width, R.height);
@@ -670,7 +671,7 @@ class Room extends Phaser.Scene {
     const dieKey = JD(k.K) | JD(k.X); // read both every frame so neither goes stale
     const jumpDown = JD(k.SPACE) | JD(k.W) | JD(k.UP);
     const JU = Phaser.Input.Keyboard.JustUp, jumpUp = JU(k.SPACE) | JU(k.W) | JU(k.UP);
-    const slideKey = JD(k.S) | JD(k.DOWN);
+    const slideKey = JD(k.S) | JD(k.DOWN) | JD(k.SHIFT);
     if (this.dead > 0) {
       this.dead -= dt;
       p.setVisible(this.dead <= 0);
@@ -697,7 +698,11 @@ class Room extends Phaser.Scene {
       if (this.slide <= 0 && this.canStand()) this.setLying(false);
     }
     if (this.lying && grounded && this.slide > 0) b.velocity.x = this.slideDir * SLIDE_SPEED;
-    else {
+    else if (!grounded && (dir === 0 || (dir === Math.sign(b.velocity.x) && Math.abs(b.velocity.x) > SPEED))) {
+      // Airborne and not steering (or steering with momentum already past running speed, e.g. a dive
+      // out of a slide): keep the momentum, fading it only by light air drag.
+      b.velocity.x -= Math.sign(b.velocity.x) * Math.min(Math.abs(b.velocity.x), AIR_DRAG * dt);
+    } else {
       const diff = dir * SPEED - b.velocity.x, step = (grounded ? ACCEL : AIR_ACCEL) * dt;
       b.velocity.x += Math.sign(diff) * Math.min(Math.abs(diff), step);
     }
@@ -711,7 +716,7 @@ class Room extends Phaser.Scene {
     const on = (v) => (v ? 'ON' : 'off');
     this.hud.setText([
       `Room ${this.index + 1}/${ROOMS.length} — ${this.rooms[this.index].name}`,
-      'Move A/D or ←/→ · Jump Space · Slide S/↓ while running (jump = dive) · Die K · Reset R · Next room N',
+      'Move A/D or ←/→ · Jump Space · Slide Shift, S or ↓ while running (jump = dive) · Die K · Reset R · Next room N',
       `[1] bodies float: ${on(rules.freeze)}   [2] grid snap: ${on(rules.snap)}   ` +
       `[3] max bodies: ${rules.max || '∞'}   [4] self-destruct: ${on(rules.selfDestruct)}   · bodies: ${this.corpses.length}`,
       this.boss?.room === this.index ? `Boss ${'■'.repeat(this.boss.hp)}${'□'.repeat(BOSS_HP - this.boss.hp)}` : '',
