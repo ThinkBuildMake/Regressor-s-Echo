@@ -353,7 +353,7 @@ const ROOMS = [
     '                             #',
     '  P                          #',
     '##############################',
-  ], [180, 94], { world: 2, spots: [[6, 'ruins']] }],
+  ], [180, 94], { world: 2 }],
 ];
 const WORLD_NAMES = { 1: 'Forest Edge', 2: 'Overgrown Ruins', 3: 'Sanctum' }; // fades in when you enter a new world
 const WORLD_SOULS = { 1: 1, 2: 2, 3: 3 }; // souls allowed per world; rooms without a world keep 3

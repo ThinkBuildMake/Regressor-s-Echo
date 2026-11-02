@@ -168,6 +168,9 @@ const SCRIPT = {
     G('thinking', 'Means you can leave two of yourself behind now.'),
     H('exhausted', 'Wonderful. Twice the dying.'),
     G('wry', 'Twice the options.'),
+    H('thinking', '…Will it hurt any less?'),
+    G('amused', 'Nope!'),
+    W(0.8),
     G('thinking', 'And one more thing. You can let go now, whenever you like.'),
     H('curious', 'Let go of what?'),
     G('wry', "Yourself. Trust me, it's worse when you choose it."),
@@ -182,10 +185,6 @@ const SCRIPT = {
     W(1.2, 'undim'),
     H('curious', 'Did you just… sit there all night?'),
     G('wry', "Floated. There's a difference."),
-  ],
-  ruins: [ // World 2, a few steps in
-    H('thinking', 'Will it hurt any less?'),
-    G('amused', 'Nope!'),
   ],
 };
 
