@@ -145,13 +145,6 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   check(s.corpses.length === 0, 'souls stay behind when you change rooms');
   check(near(s.cameras.main.scrollX, O().x), `camera slid to the new room (${Math.round(s.cameras.main.scrollX)} vs ${O().x})`);
 
-  s = await go(0);                                   // goals work while a boss lives in another room
-  await alive();
-  const g = s.goals.find((g) => g.room === 0);
-  s.player.body.reset(g.x, g.y);
-  await wait(200);
-  check(room().index === 1, `touching the goal moves on (room ${room().index})`);
-
   s = await go(ROOMS.findIndex(([n]) => n.startsWith('Walker')));  // walkers belong to their room
   const wi = s.index, home = s.walkerSpawns.find((w) => w.room === wi).x + 16;
   s.enemies[0].destroy(); s.enemies.length = 0;      // as if crushed
@@ -161,6 +154,26 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   check(s.enemies.length === 1 && s.enemies[0].x === home, 'coming back puts the walker where it started');
   await wait(600);
   check(s.enemies.every((e) => s.rooms[wi].rect.contains(e.x, e.y)), 'walker stays inside its room');
+
+  Dialogue.seen.add('chain');
+  s = await go(ROOMS.findIndex(([n]) => n === 'The chain'));  // the way out of The chain is at the top right
+  await alive();
+  s.player.body.reset(O().right - 40, O().y + 9 * 32 + 17);
+  key('keydown', 39); await wait(900); key('keyup', 39);
+  check(s.rooms[s.index].name === 'The moth', `top right of The chain leads to the moth (${s.rooms[s.index].name})`);
+
+  Dialogue.seen.delete('moth');                      // the moth: hidden until its intro drops it in
+  s = await go(ROOMS.findIndex(([n]) => n === 'The moth'));
+  check(s.boss?.hidden && !s.boss.r.visible, 'moth hidden before its intro');
+  for (let i = 0; i < 6 && (s.talk.line || s.talk.queue.length); i++) { Dialogue.update(s, 0, true); Dialogue.update(s, 0, true); }
+  await wait(1000);
+  check(s.boss && !s.boss.hidden && s.boss.r.visible, 'moth arrives during the intro');
+  const M = s.boss, mi = s.index;
+  for (let n = 0; n < 3; n++) { s.player.body.reset(M.r.x + M.dir * 20, M.r.y - 44); await wait(600); }
+  check(!s.boss && s.gates.every((g) => !g.active || g.room !== mi), `beating the moth opens the vines (hp ${M.hp})`);
+  s.player.body.reset(s.rooms[mi].rect.right - 20, s.rooms[mi].rect.y + 15 * 32 + 17);
+  key('keydown', 39); await wait(900); key('keyup', 39);
+  check(s.rooms[s.index].name === 'Into the ruins' && rules.max === 2, `walking on reaches World 2 with 2 souls (${s.rooms[s.index].name}, ${rules.max})`);
 
   for (let i = 0; i < ROOMS.length; i++) { room().scene.restart({ index: i }); await wait(300); }
   check(errors.length === 0, 'no errors: ' + errors.join('; '));

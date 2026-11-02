@@ -26,6 +26,7 @@ const G = (face, text) => ({ who: 'guide', face, text });
 
 // Story text. Keys are triggered by rooms (on first entry) or by events (amulet, firstDeath).
 // Character voices: see docs/STORY.md.
+// A line can carry a `cue` the room acts on when the line appears (screen shake, the boss arriving).
 const SCRIPT = {
   clearing: [H('cocky', 'Three days in these woods and nothing but mushrooms. Some treasure hunter I am.')],
   amulet: [
@@ -66,6 +67,11 @@ const SCRIPT = {
     G('mischievous', 'See the switch? See the fellow pacing over it? Let him do the work.'),
     H('annoyed', 'You want me to get killed on purpose.'),
     G('smug', 'I want you to get killed efficiently.'),
+  ],
+  moth: [
+    { ...H('startled', "What's with this shaking… is this an earthquake?"), cue: 'shake' },
+    G('surprised', "Oh shoot, it's been so long that I forgot. Be careful! Watch out for…"),
+    { ...G('wry', '…that.'), cue: 'moth' },
   ],
   chain: [
     H('exhausted', 'How many times have you done this?'),
@@ -141,6 +147,7 @@ const Dialogue = {
       t.shown = 0;
       t.ui.setVisible(true);
       if (t.line.reveal) NAMES.guide = 'Yourself';
+      if (t.line.cue) scene.cue?.(t.line.cue);
       const speaking = t.line.who, other = speaking === 'hero' ? 'guide' : 'hero';
       t.name.setText(NAMES[speaking]);
       const pic = t[speaking];

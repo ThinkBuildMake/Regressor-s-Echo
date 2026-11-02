@@ -40,8 +40,8 @@ const rules = {
 const LIMITS = [1, 2, 3, 5, 0];
 let showHud = false; // test HUD and rule switches; H toggles
 
-// '#' wall  '^' spikes  P start  G goal  '_' plate  D door (open while any plate is held)
-// e walker enemy  B boss (goal stays hidden until it's beaten)  x thorns (kill on touch, not solid)
+// '#' wall  '^' spikes  P start  '_' plate  D door (open while any plate is held)
+// e walker enemy  B boss  V vines (open when the room's boss is beaten)  x thorns (kill on touch, not solid)
 // A the amulet  C shrine (touch: respawn here)  g the guide's ghost
 // Rooms carry an optional [x, y] world position in tiles. Rooms that touch connect: walk through a gap
 // in the shared wall and the camera slides over. Rooms without a position are spread out so they don't
@@ -55,7 +55,7 @@ const ROOMS = [
     '#                            #',
     '#                            #',
     '#                            #',
-    '#                     G      #',
+    '#                            #',
     '#                 ############',
     '#                 #          #',
     '#                 #          #',
@@ -75,7 +75,7 @@ const ROOMS = [
     '#                            #',
     '#                            #',
     '#                            #',
-    '#  P                      G  #',
+    '#  P                         #',
     '#########^^^^^^^^#############',
     '##############################',
   ]],
@@ -91,7 +91,7 @@ const ROOMS = [
     '#                     D      #',
     '#                     D      #',
     '#                     D      #',
-    '#  P      _           D   G  #',
+    '#  P      _           D      #',
     '##############################',
   ]],
   ['Combo: climb, hold the plate, cross the spikes', [
@@ -106,7 +106,7 @@ const ROOMS = [
     '#        #             D     #',
     '#        #             D     #',
     '#        #             D     #',
-    '#  P     #    ^^^^     D  G  #',
+    '#  P     #    ^^^^     D     #',
     '##############################',
   ]],
   ['Walker: drop a body on it. Die in the tunnel and you block yourself', [
@@ -121,7 +121,7 @@ const ROOMS = [
     '#                            #',
     '#     P                      #',
     '## ####################### ###',
-    '#            G      e        #',
+    '#                   e        #',
     '##############################',
   ]],
   ['Boss: build steps, then stomp it 3 times. Dying heals it', [
@@ -135,7 +135,7 @@ const ROOMS = [
     '#                            #',
     '#                            #',
     '#                            #',
-    '#  P         B           G   #',
+    '#  P         B               #',
     '##############################',
   ]],
   ['Slide: with 1 body allowed (key 3), only a lying body bridges this', [
@@ -150,7 +150,7 @@ const ROOMS = [
     '#                            #',
     '#                            #',
     '#                            #',
-    '#  P                      G  #',
+    '#  P                         #',
     '#######^^^^^^^^^^^^###########',
     '##############################',
   ]],
@@ -199,7 +199,7 @@ const ROOMS = [
     '  P               x          #',
     '##############################',
   ], [30, 53]],
-  ['Forest 3: past the walker to the goal', [
+  ['Forest 3: past the walker', [
     '##############################',
     '#                            #',
     '#                            #',
@@ -215,7 +215,7 @@ const ROOMS = [
     '#                            #',
     '                             #',
     '                             #',
-    '  P            e          G  #',
+    '  P            e             #',
     '##############################',
   ], [60, 48]],
   // ---------------- World 1: Forest Edge (see docs/LEVELS.md) ----------------
@@ -323,8 +323,8 @@ const ROOMS = [
     '#                            #',
     '#                            #',
     '#                            #',
-    '#                            #',
-    '#                          G #',
+    '#                             ',
+    '#                             ',
     '#                     ########',
     '#                     x#######',
     '#                     x#######',
@@ -333,7 +333,46 @@ const ROOMS = [
     '  P              C    x#######',
     '######^^^^^^^^################',
   ], [150, 94], { world: 1, enter: 'chain' }],
+  ['The moth', [
+    '##############################',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '                             #',
+    ' P                           #',
+    '####                         #',
+    '#                            #',
+    '#                            #',
+    '#                            V',
+    '#                            V',
+    '#             B              V',
+    '##############################',
+  ], [180, 94], { world: 1, enter: 'moth' }],
+  ['Into the ruins', [ // World 2 starts here (rooms still to be built)
+    '##############################',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '                             #',
+    '                             #',
+    '  P                          #',
+    '##############################',
+  ], [210, 94], { world: 2 }],
 ];
+const WORLD_NAMES = { 1: 'Forest Edge', 2: 'Overgrown Ruins', 3: 'Sanctum' }; // fades in when you enter a new world
 const WORLD_SOULS = { 1: 1, 2: 2, 3: 3 }; // souls allowed per world; rooms without a world keep 3
 const START_ROOM = ROOMS.findIndex((r) => r[0] === 'The clearing');
 
@@ -365,10 +404,10 @@ class Room extends Phaser.Scene {
     this.doors = [];
     this.plates = [];
     this.spikes = [];
-    this.goals = [];
     this.enemies = []; // only the current room's walkers exist (Celeste-style)
     this.walkerSpawns = [];
-    this.boss = null;
+    this.bosses = []; // one per boss room; this.boss is the current room's
+    this.gates = [];
     this.dead = 0;
     this.lying = false;
     this.face = 1;
@@ -408,12 +447,14 @@ class Room extends Phaser.Scene {
             case 'x': this.spikes.push(rect(x + 4, y + 2, T - 8, T - 4, 0x7a3550)); break;
             case '_': this.plates.push(Object.assign(rect(x + 4, y + T - 7, T - 8, 6, 0xffd700), { room: ri })); break;
             case 'D': { const d = Object.assign(rect(x, y, T, T, 0x8c6640), { room: ri }); this.statics.add(d); this.doors.push(d); break; }
-            case 'G': this.goals.push(Object.assign(rect(x + 6, y + 2, T - 12, T - 2, 0x3cb371), { room: ri })); break;
             case 'e': this.walkerSpawns.push({ x, y, room: ri }); break; // created when you enter the room
             case 'B': // floats with its underside 2.5 tiles above this tile's floor
-              this.boss = { hp: BOSS_HP, hurt: 0, dir: 1, room: ri, min: ox * T + T + 48, max: (ox + width) * T - T - 48,
-                r: rect(x + T / 2 - 48, y + T - 128, 96, 48, 0x9b59b6) };
+              this.bosses.push({ hp: BOSS_HP, hurt: 0, dir: 1, room: ri, min: ox * T + T + 48, max: (ox + width) * T - T - 48,
+                r: rect(x + T / 2 - 48, y + T - 128, 96, 48, 0x9b59b6),
+                hidden: extra.enter === 'moth' && !Dialogue.seen.has('moth') }); // drops in during its intro
+              this.bosses.at(-1).r.setVisible(!this.bosses.at(-1).hidden);
               break;
+            case 'V': this.gates.push(Object.assign(rect(x, y, T, T, 0x4a6b3a), { room: ri })); this.statics.add(this.gates.at(-1)); break;
             case 'P': room.spawns.push({ x: x + T / 2, y: y + T - 15 }); break;
             case 'A': this.amulets.push(this.add.circle(x + T / 2, y + T - 10, 6, 0xffd774).setStrokeStyle(2, 0xb07a22).setDepth(3)); break;
             case 'C': { // shrine: a mossy stone with a gold rune; touching it moves your respawn here
@@ -430,13 +471,14 @@ class Room extends Phaser.Scene {
       return room;
     });
     this.start = this.rooms[this.index].spawns[0];
+    this.boss = this.bosses.find((b) => b.room === this.index) ?? null;
     rules.max = WORLD_SOULS[this.rooms[this.index].world] ?? 3;
     Dialogue.create(this);
+    this.showWorld(this.rooms[this.index].world);
     Dialogue.play(this, this.rooms[this.index].enter);
 
     this.spawnWalkers(this.index);
     this.physics.add.collider(this.enemies, this.statics);
-    if (this.boss) this.goals.filter((g) => g.room === this.boss.room).forEach((g) => g.setVisible(false));
 
     this.player = this.add.rectangle(this.start.x, this.start.y, 24, 30, 0xd9ebff);
     this.player.setFillStyle(0, 0); // hitbox only; drawn as a figure in drawFigures()
@@ -508,6 +550,25 @@ class Room extends Phaser.Scene {
     }
   }
 
+  // The world's name fades in when you arrive in a new world.
+  showWorld(w) {
+    this.world = w;
+    if (!WORLD_NAMES[w]) return;
+    const t = this.add.text(480, 200, WORLD_NAMES[w], { fontFamily: 'Georgia, serif', fontSize: '42px', color: '#f1e3b8' })
+      .setOrigin(0.5).setScrollFactor(0).setDepth(45).setAlpha(0).setShadow(0, 2, '#000', 8);
+    this.tweens.add({ targets: t, alpha: 1, duration: 900, hold: 1600, yoyo: true, onComplete: () => t.destroy() });
+  }
+
+  // Staging cues fired by dialogue lines (see `cue` in dialogue.js).
+  cue(name) {
+    if (name === 'shake') this.cameras.main.shake(1400, 0.006);
+    if (name === 'moth' && this.boss?.hidden) { // drops down from the canopy
+      const B = this.boss, y = B.r.y;
+      B.r.setVisible(true).y = y - 300;
+      this.tweens.add({ targets: B.r, y, duration: 700, ease: 'Bounce.easeOut', onComplete: () => { B.hidden = false; } });
+    }
+  }
+
   enterRoom(i) {
     const p = this.player, R = this.rooms[i].rect, cam = this.cameras.main;
     this.index = i;
@@ -516,6 +577,8 @@ class Room extends Phaser.Scene {
     this.corpses.forEach((c) => c.destroy());
     this.corpses = [];
     this.spawnWalkers(i);
+    this.boss = this.bosses.find((b) => b.room === i) ?? null;
+    if (this.rooms[i].world !== this.world) this.showWorld(this.rooms[i].world);
     this.start = this.rooms[i].spawns.reduce((a, b) => (Phaser.Math.Distance.Between(p.x, p.y, b.x, b.y) < Phaser.Math.Distance.Between(p.x, p.y, a.x, a.y) ? b : a));
     cam.stopFollow();
     cam.removeBounds();
@@ -779,7 +842,7 @@ class Room extends Phaser.Scene {
 
   updateBoss(dt) {
     const B = this.boss;
-    if (!B) return;
+    if (!B || B.hidden) return;
     B.hurt -= dt;
     B.r.x += B.dir * (BOSS_SPEED + (BOSS_HP - B.hp) * BOSS_SPEEDUP) * dt;
     if (B.r.x < B.min || B.r.x > B.max) { B.r.x = Phaser.Math.Clamp(B.r.x, B.min, B.max); B.dir *= -1; }
@@ -790,7 +853,7 @@ class Room extends Phaser.Scene {
   // bounce frames after it); any other touch kills.
   touchBoss() {
     const B = this.boss, p = this.player;
-    if (!B || !hit(bounds(p), bounds(B.r))) return false;
+    if (!B || B.hidden || !hit(bounds(p), bounds(B.r))) return false;
     const top = B.r.y - 24;
     if (p.y + 15 - top > 14) { this.die(); return true; }
     p.body.velocity.y = -JUMP * 0.8;
@@ -798,8 +861,10 @@ class Room extends Phaser.Scene {
     B.hurt = 0.5;
     if (--B.hp <= 0) {
       B.r.destroy();
+      this.bosses.splice(this.bosses.indexOf(B), 1);
       this.boss = null;
-      this.goals.forEach((g) => g.setVisible(true));
+      this.gates.filter((g) => g.room === B.room).forEach((g) => g.destroy()); // the way on opens
+      this.cameras.main.flash(500, 255, 220, 140);
     }
     return false;
   }
@@ -855,7 +920,6 @@ class Room extends Phaser.Scene {
     const hazards = [...this.spikes, ...this.enemies];
     if (hazards.some((h) => hit(bounds(p), bounds(h))) || (rules.selfDestruct && dieKey)) return this.die();
     if (this.touchBoss()) return;
-    if (this.goals.some((g) => g.room !== this.boss?.room && hit(bounds(p), bounds(g)))) return this.scene.restart({ index: this.index + 1 });
     this.amulets = this.amulets.filter((a) => {
       if (!hit(bounds(p), bounds(a))) return true;
       a.destroy();
