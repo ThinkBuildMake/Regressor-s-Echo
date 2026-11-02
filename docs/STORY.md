@@ -36,6 +36,19 @@ Let each line respond to what the other just said or did. Give them room to hesi
 - **In dialogue, everyone says "soul".** "Echo" is only our word for the standable body a death leaves behind.
 - Faces in brackets are portrait expressions (the lists are in [dialogue.js](../dialogue.js)). *Italics* are staging. Esc skips any conversation.
 
+## How we write together (the author's steering)
+
+- **The author's lines are a framework, not final text.** They show the beat and the intent. Rewrite them so they sound natural in the characters' voices, keep the beats, and keep only the lines the author marks as wanted word for word.
+- **Pace it.** Not every room talks. A scene earns its place by teaching a mechanic or moving the story.
+- **Don't rush big moments.** The first death needed room: pain, confusion, the accusation, the deflection. Give reactions a few lines before moving on.
+- **Transitions are smooth, not abrupt.** The guide eases into things ("Oh, by the way…") rather than announcing them.
+- **Suspicion is earned.** Once the guide has tricked him, the hero questions the guide's suggestions. Let that history colour later scenes.
+- **Don't explain what the player can see.** Nobody says the moth heals; the player watches it happen. Leave mechanics unsaid when the room already shows them (a soul is solid, so it can weigh down a plate).
+- **Teach before testing.** A boss mechanic is taught in an earlier room; during the fight the guide only nudges, and only after the player struggles ("I made it past here. There's a way."). Hints come after repeated deaths, getting a little more specific each time.
+- **Reward moments get staging.** Beating a boss is a scene (glow, dissolve, absorb), not just a door opening.
+- **Each world adds a rune and a power.** The guide names the new power in a line or two; the next room lets the player try it.
+- **Keep the guide's mischief dry.** "Nope!" and "Where's the fun in that?" are the register: short, smiling, unhelpful at the right moment.
+
 ## World 1 script
 
 The game's text lives in [dialogue.js](../dialogue.js); this is the source it's written from.
