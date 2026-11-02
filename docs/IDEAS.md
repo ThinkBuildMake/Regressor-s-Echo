@@ -53,7 +53,7 @@ Every idea raised so far, so we can decide what to build. Status:
 | Stomp the boss from a body; 3 hits; it speeds up each hit | Built | A 1-high step is safe; 2-high puts you in its path |
 | The three bosses | Decided | World 1: **great moth spirit** (floats, wing-dust shots, can't destroy souls). World 2: **tree guardian** with a stone mask face (stationary, branch swings and seed pods, can smash souls). World 3: **spectral stag** (charges, destroys souls it hits, has attacks you can't dodge) |
 | Dialogue portraits | Decided | Dialogue box at the top of the screen: hero portrait on the left, guide on the right, name label, typed-out text. Hero: 8 expressions (neutral, startled, pained, exhausted, determined, relieved smile, thinking, sad). Guide: 6 (wry, amused, solemn, sad, thinking, warm) |
-| The guide's look and voice | Decided | Looks **exactly** like the hero, because every death sends him back in time: same age, face, clothes, no scars. Only differences: translucent pale silver-green ghost (not blue-white, which means "a soul you can stand on"), and tired, knowing, slightly hollow eyes. **Voice:** weathered and jaded: dry humor, short sentences, someone who has said all this before |
+| The guide's look and voice | Decided | Looks **exactly** like the hero, because every death sends him back in time: same age, face, clothes, no scars. Only differences: a translucent blue-white ghost (the soul color, because he is a soul), and tired, knowing, slightly hollow eyes. In the level he's see-through, flameless and floating, so he never reads as a soul you can stand on. **Voice:** weathered and jaded: dry humor, short sentences, someone who has said all this before |
 | Hero look | Decided (changed) | Robin Hood–style treasure hunter: blond, deep forest-green cloak (hood down, darker than the trees), long wavy red scarf, leather jerkin and satchel, gold amulet. No sword, bow or pointed cap, to stay clear of Link (Zelda). Painted with Nano Banana Pro as a sprite sheet; the code-drawn hooded figure is a placeholder |
 | Boss passes through bodies vs. is blocked by them | Undecided | Passing through now. Blocking would let players trap it |
 | Boss projectiles that bodies block | Proposed | Bodies become shields as well as steps |
@@ -97,7 +97,7 @@ Dialogue gets written last, once the rooms exist. The dialogue system gets built
 - **Show the death count on screen**, as the answer to the guide's question.
 - **Possible ending: the hero becomes the guide.** He finds the herb, then meets a new version of himself and asks, *"Which death are you currently on?"* That closes the loop and gives the clear ending the brief asks for.
 - **What the guide shows** (undecided): the guide's own death count, revealed late, could show how much worse it gets.
-- **Color rule (decided):** blue/white = your soul (flames, floating bodies, the hero's death). Gold = the amulet and its runes. Keep both colors for those uses only, so they stay meaningful.
+- **Color rule (decided):** blue/white = souls: your bodies (solid, flame-topped, standable), the hero's death, and the guide (see-through, flameless, floating). Gold = the amulet and its runes. Keep both colors for those uses only, so they stay meaningful.
 - **Visual tone:** bodies as translucent blue soul-husks, not gore. This matches the blue/gold palette in the design doc and keeps the forest setting gentle.
 - **Setting:** forest overgrown with ruins, so both the forest idea and the design doc's "magical ruins" fit.
 
