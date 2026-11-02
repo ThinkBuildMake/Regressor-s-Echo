@@ -30,11 +30,11 @@ Why magenta, not green: the forest is green, so cutting out a green background w
 
 ## 3. Far trees → `far.png`
 
-> Match the style, palette and lighting of the attached image exactly. Only a row of very distant tree silhouettes, pale and hazy, nearly lost in mist, low detail, spread evenly across the full width at similar heights. The bottoms of the trees fade into pale mist. Isolated on a flat solid magenta #FF00FF background. No sky, no ground. Wide 21:9.
+> Match the style, palette and lighting of the attached image exactly. Only a dense row of many small, very distant trees (at least 15), pale and hazy, nearly lost in mist, low detail, spread evenly across the full width at similar heights, each tree small in the frame. The trunks continue straight down to the bottom edge of the image with no fading. Isolated on a flat solid magenta #FF00FF background. No sky, no ground. Wide 21:9.
 
 ## 4. Middle trees → `mid.png`
 
-> Match the style, palette and lighting of the attached image exactly. Only a row of mid-distance forest trees: visible trunks and canopy shapes, medium detail, lighter and softer than a foreground would be, spaced across the full width. The bases of the trunks fade into mist. Isolated on a flat solid magenta #FF00FF background. No sky, no ground. Wide 21:9.
+> Match the style, palette and lighting of the attached image exactly. Only a row of mid-distance forest trees: visible trunks and canopy shapes, medium detail, lighter and softer than a foreground would be, 6 to 8 trees spaced evenly across the full width. The trunks continue straight down to the bottom edge of the image with no fading. Isolated on a flat solid magenta #FF00FF background. No sky, no ground. Wide 21:9.
 
 ## 5. Near foliage → `near.png`
 
@@ -103,6 +103,10 @@ Save to `assets/raw/hero/`. Attach the World 1 reference image for the brushwork
 ## Drawn in code
 
 The souls (the hero's frames tinted blue, with flames), the ghost guide, light beams and glows.
+
+## Processing (done by Claude)
+
+`node tools/art.mjs <raw> <out.webp> [--key] [--mirror]` removes the magenta (with soft edges and no pink fringe), scales to the game's size and saves WebP into `assets/world1/`. Don't fade anything into the magenta yourself; the game adds mist at the bottom of each layer, so trunks should simply run to the bottom edge.
 
 ## Tips
 
