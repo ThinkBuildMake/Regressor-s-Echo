@@ -407,38 +407,82 @@ class Room extends Phaser.Scene {
   }
 
   // Bodies and the player are drawn as figures; their rectangles are only hitboxes.
-  // A soul is a blue, flaming copy of the hero. A lying soul is the hero mid-dive, with a
-  // flame trail filling the rest of its 2-tile hitbox.
-  drawFigures(t) {
-    const g = this.fx;
+  // The hero is a hooded explorer (cloak, scarf, satchel) lit from the upper left. A soul is the
+  // same figure in blue flame; a lying soul is him mid-dive, with a flame trail filling its hitbox.
+  drawFigures(t, dt) {
+    const g = this.fx, b = this.player.body;
     g.clear();
-    for (const c of this.corpses) this.figure(g, c, c.lying, c.dir, t, true);
-    if (this.player.visible) this.figure(g, this.player, this.lying, this.face, t, false);
+    for (const c of this.corpses) this.figure(g, c, { lying: c.lying, dir: c.dir, t, soul: true });
+    const grounded = b.blocked.down || b.touching.down;
+    this.walk = (this.walk || 0) + (grounded ? Math.abs(b.velocity.x) * dt : 0);
+    if (this.player.visible)
+      this.figure(g, this.player, { lying: this.lying, dir: this.face, t, vx: b.velocity.x, air: !grounded, walk: this.walk });
   }
 
-  figure(g, r, lying, dir, t, soul) {
-    const cx = r.x, cy = r.y, w = r.width, h = r.height, top = cy - h / 2, bot = cy + h / 2;
+  figure(g, r, { lying, dir, t, soul = false, vx = 0, air = false, walk = 0 }) {
+    const cx = r.x, w = r.width, h = r.height, top = r.y - h / 2, bot = r.y + h / 2;
     const P = (x, y) => ({ x, y });
-    if (soul) { g.fillStyle(0x5aa6e6, 0.16); g.fillEllipse(cx, cy, w + 20, h + 20); }
-    g.fillStyle(soul ? 0x9fd8ff : 0xd9ebff, soul ? 0.85 : 1);
+    const C = soul
+      ? { cloak: 0x9fd8ff, dark: 0x6fb6ee, face: 0xd8f0ff, scarf: 0xc6e8ff, bag: 0x8ccaf6, rim: 0xffffff, a: 0.85 }
+      : { cloak: 0x34444b, dark: 0x232e33, face: 0x12181a, scarf: 0xb5523b, bag: 0x6b4a32, rim: 0xe8d9a8, a: 1 };
+    const speed = Phaser.Math.Clamp(Math.abs(vx) / SPEED, 0, 1);
+    if (soul) { g.fillStyle(0x5aa6e6, 0.16); g.fillEllipse(cx, r.y, w + 20, h + 20); }
     let flames, chest;
     if (!lying) {
-      const sway = Math.sin(t * 3 + cx) * 1.5;
-      g.fillCircle(cx + dir, top + 6, 5.5);                                       // head
-      g.fillPoints([P(cx - 6, top + 12), P(cx + 6, top + 12), P(cx + 8, bot - 7), P(cx - 8, bot - 7)], true);
-      g.fillRect(cx - 5, bot - 7, 3.5, 7);                                        // legs
-      g.fillRect(cx + 1.5, bot - 7, 3.5, 7);
-      g.fillTriangle(cx - 5 * dir, top + 12, cx - 6 * dir, bot - 7, cx - 13 * dir + sway, bot - 3); // cloak
-      flames = [P(cx - 6, top + 13), P(cx - 2, top + 2), P(cx + 2, top + 1), P(cx + 6, top + 13)];
-      chest = P(cx + 2 * dir, top + 17);
+      const lean = Phaser.Math.Clamp(vx / SPEED, -1, 1) * 2.5, sway = Math.sin(t * 3 + cx) * 1.5;
+      const hx = cx + lean + dir, hy = top + 7;
+      // legs: stride on the ground, tucked in the air
+      const st = air ? 0 : Math.sin(walk * 0.12) * 4.5 * speed;
+      const feet = air ? [P(cx - 3, bot - 3), P(cx + 3, bot - 5)] : [P(cx - 2 + st, bot), P(cx + 2 - st, bot)];
+      g.lineStyle(3.5, C.dark, C.a);
+      feet.forEach((f, i) => g.lineBetween(cx + (i ? 2 : -2) + lean * 0.4, bot - 9, f.x, f.y));
+      // cloak tail, body, satchel
+      g.fillStyle(C.dark, C.a);
+      g.fillTriangle(cx - 4 * dir + lean, top + 12, cx - 6 * dir, bot - 6, cx - (12 + speed * 5) * dir + sway, bot - 3 - speed * 4);
+      g.fillStyle(C.cloak, C.a);
+      g.fillPoints([P(cx - 6 + lean, top + 11), P(cx + 6 + lean, top + 11), P(cx + 8, bot - 7), P(cx - 8, bot - 7)], true);
+      g.fillStyle(C.bag, C.a);
+      g.fillRect(cx - dir * 7 - 2.5, bot - 15, 5, 6);
+      g.lineStyle(1.2, C.bag, C.a);
+      g.lineBetween(cx + lean + dir * 5, top + 12, cx - dir * 6, bot - 14);             // satchel strap
+      // hood with a pointed tip behind, face in shadow, one pale eye
+      g.fillStyle(C.cloak, C.a);
+      g.fillCircle(hx, hy, 6.5);
+      g.fillTriangle(hx - dir * 3, top + 1, hx - dir * 10, hy + 2, hx - dir * 2, hy + 4);
+      g.fillStyle(C.face, C.a);
+      g.fillEllipse(hx + dir * 2.5, hy + 1, 6, 7);
+      if (!soul) { g.fillStyle(0xd8f3ea, 1); g.fillCircle(hx + dir * 3.8, hy, 0.9); }
+      // scarf: a band at the neck and a tail streaming behind, livelier when moving
+      g.fillStyle(C.scarf, C.a);
+      g.fillRect(cx - 6 + lean, top + 11, 12, 3);
+      const tail = [0, 1, 2, 3, 4].map((i) => P(cx + lean - dir * (5 + i * (3 + speed * 1.5)), top + 12.5 + i * (1.6 - speed * 1.2) + Math.sin(t * 9 - i * 1.3) * (0.6 + speed) * i * 0.5));
+      g.lineStyle(2.6, C.scarf, C.a);
+      g.strokePoints(tail);
+      // rim light from the upper left
+      g.lineStyle(1.3, C.rim, soul ? 0.6 : 0.75);
+      g.beginPath(); g.arc(hx, hy, 6.3, Math.PI * 0.85, Math.PI * 1.55); g.strokePath();
+      g.lineStyle(1.1, C.rim, soul ? 0.4 : 0.45);
+      g.lineBetween(cx - 6 + lean, top + 12, cx - 8, bot - 8);
+      flames = [P(cx - 6, top + 13), P(hx - 2, top + 2), P(hx + 2, top + 1), P(cx + 6, top + 13)];
+      chest = P(cx + lean + 2 * dir, top + 17);
     } else {
       const front = cx + dir * (w / 2), back = cx - dir * (w / 2), hip = front - dir * 30;
-      g.fillCircle(front - dir * 6, bot - 5, 5);                                  // head leads the dive
+      g.lineStyle(3.2, C.dark, C.a);                                                  // legs trail behind
+      g.lineBetween(hip, bot - 4, hip - dir * 7, bot - 2);
+      g.lineBetween(hip, bot - 6, hip - dir * 8, bot - 6);
+      g.fillStyle(C.cloak, C.a);
       g.fillPoints([P(front - dir * 11, bot - 9), P(hip, bot - 8), P(hip, bot), P(front - dir * 11, bot)], true);
-      if (soul) {                                                                 // flame trail
+      g.fillCircle(front - dir * 6, bot - 5, 5.5);                                    // hood leads the dive
+      g.fillStyle(C.face, C.a);
+      g.fillEllipse(front - dir * 4, bot - 4.5, 5, 6);
+      g.lineStyle(2.4, C.scarf, C.a);                                                 // scarf streams up and back
+      g.strokePoints([0, 1, 2, 3].map((i) => P(front - dir * (11 + i * 4), bot - 9 - i * 1.2 + Math.sin(t * 9 - i) * 1)));
+      if (soul) {                                                                     // flame trail
         g.fillStyle(0x7cc7ff, 0.55);
         g.fillTriangle(hip, bot - 9, hip, bot, back, bot - 3 + Math.sin(t * 8 + cx) * 2);
       }
+      g.lineStyle(1.1, C.rim, 0.5);
+      g.lineBetween(front - dir * 11, bot - 9, hip, bot - 8);
       flames = [-8, -14, -20, -26].map((o) => P(front + dir * o, bot - 8));
       chest = P(front - dir * 15, bot - 5);
     }
@@ -450,7 +494,7 @@ class Room extends Phaser.Scene {
         g.fillStyle(0xeef8ff, 0.8);
         g.fillTriangle(f.x - 1.5, f.y, f.x + 1.5, f.y, f.x + lean * 0.5, f.y - fh * 0.55);
       });
-    } else {                                                                      // the amulet
+    } else {                                                                          // the amulet
       g.fillStyle(0xffd774, 0.3);
       g.fillCircle(chest.x, chest.y, 5);
       g.fillStyle(0xffd774, 1);
@@ -511,7 +555,7 @@ class Room extends Phaser.Scene {
     if (!rules.freeze) this.dropCorpses(dt);
     this.updateEnemies();
     this.updateBoss(dt);
-    this.drawFigures(this.time.now / 1000);
+    this.drawFigures(this.time.now / 1000, dt);
     Art.update(this, this.time.now / 1000);
 
     const weights = [p, ...this.corpses].map(bounds);

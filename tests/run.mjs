@@ -4,6 +4,8 @@ import { chromium } from 'playwright';
 const page = await (await chromium.launch()).newPage();
 const errors = [];
 page.on('pageerror', (e) => errors.push(e.message));
+// Missing art files are expected (the game draws stand-ins), so their load errors are ignored.
+page.on('console', (m) => m.type() === 'error' && !/assets\/|Failed to load resource/.test(m.text()) && errors.push('console: ' + m.text()));
 await page.goto(new URL('./check.html', import.meta.url).href);
 const result = await (await page.waitForSelector('pre', { timeout: 60000 })).textContent();
 console.log(result);
