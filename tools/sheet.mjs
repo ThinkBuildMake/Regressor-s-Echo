@@ -4,6 +4,8 @@
 // --height     the median figure's height in output pixels, so every sheet shares one pixel scale.
 // --normalize  scale every frame to that height (for run cycles, where the model drew him at slightly
 //              different sizes from frame to frame).
+// --grid       cut equal cells (frames columns x rows) without tracing figures: for portrait sheets,
+//              where every face is framed the same way. --height is then the cell height.
 //
 // Each figure is found as a connected shape, not by cutting straight lines between figures, because
 // figures overlap side to side (feet under the next figure's cape). The biggest connected shapes are
@@ -17,7 +19,7 @@ import { KEYER } from './keyer.mjs';
 const [inPath, outPath, ...flags] = process.argv.slice(2);
 if (!inPath || !outPath) { console.error('usage: node tools/sheet.mjs <sheet> <out.webp> [--height=112] [--frames=N] [--rows=R] [--normalize]'); process.exit(1); }
 const num = (name, d) => Number(flags.find((f) => f.startsWith(`--${name}=`))?.split('=')[1] ?? d);
-const opt = { height: num('height', 112), frames: num('frames', 1), rows: num('rows', 1), normalize: flags.includes('--normalize') };
+const opt = { height: num('height', 112), frames: num('frames', 1), rows: num('rows', 1), normalize: flags.includes('--normalize'), grid: flags.includes('--grid') };
 const mime = /\.jpe?g$/i.test(inPath) ? 'image/jpeg' : 'image/png';
 const src = `data:${mime};base64,${readFileSync(inPath).toString('base64')}`;
 
@@ -35,6 +37,16 @@ const res = await page.evaluate(async ({ src, opt }) => {
   g.drawImage(img, 0, 0);
   const d = g.getImageData(0, 0, W, H), p = d.data;
   keyMagenta(p); // shared with tools/art.mjs
+  if (opt.grid) {
+    g.putImageData(d, 0, 0);
+    const cw = W / opt.frames, ch = H / opt.rows, s = opt.height / ch, fw = Math.round(cw * s);
+    const out = document.createElement('canvas');
+    out.width = fw * opt.frames * opt.rows; out.height = opt.height;
+    const o = out.getContext('2d');
+    for (let r = 0; r < opt.rows; r++) for (let f = 0; f < opt.frames; f++)
+      o.drawImage(c, f * cw, r * ch, cw, ch, (r * opt.frames + f) * fw, 0, fw, opt.height);
+    return { url: out.toDataURL('image/webp', 0.9), frames: opt.frames * opt.rows, fw, fh: opt.height, meta: [] };
+  }
   // Shapes are found from solid pixels only, so figures whose soft edges touch stay separate.
   const solid = (k) => p[k * 4 + 3] > 200;
 

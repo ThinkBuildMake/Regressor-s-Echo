@@ -3,7 +3,8 @@
 // line). While it's open the hero can't move. Each script plays once per session.
 //
 // Portraits: assets/portraits/hero.webp (8 faces) and guide.webp (6 faces), cut from the expression
-// sheets with tools/sheet.mjs. Until they exist, a placeholder circle shows the face's name.
+// sheets with: node tools/sheet.mjs <sheet> assets/portraits/hero.webp --grid --frames=4 --rows=2 --height=192
+// (guide: --frames=3 --rows=2). Until they exist, a placeholder circle shows the face's name.
 
 const FACES = {
   hero: ['neutral', 'startled', 'pained', 'exhausted', 'determined', 'relieved', 'thinking', 'sad'],
@@ -69,12 +70,16 @@ const Dialogue = {
     const panel = scene.add.graphics();
     panel.fillStyle(0x0c1411, 0.9).fillRoundedRect(110, 12, 740, 108, 10);
     panel.lineStyle(1, 0xe8b44a, 0.45).strokeRoundedRect(110, 12, 740, 108, 10);
+    for (const x of [12, W - 104]) { // framed slots for the two portraits
+      panel.fillStyle(0x0c1411, 0.9).fillRoundedRect(x, 12, 92, 108, 10);
+      panel.lineStyle(1, 0xe8b44a, 0.45).strokeRoundedRect(x, 12, 92, 108, 10);
+    }
     const portrait = (x, who) => {
       const key = `portrait-${who}`;
       if (scene.textures.exists(key)) {
         const tex = scene.textures.get(key), img = tex.getSourceImage(), n = FACES[who].length, fw = img.width / n;
         if (!tex.has(0)) for (let i = 0; i < n; i++) tex.add(i, 0, i * fw, 0, fw, img.height);
-        return scene.add.image(x, 66, key, 0).setScale(92 / img.height);
+        return scene.add.image(x, 119, key, 0).setOrigin(0.5, 1).setScale(100 / img.height); // bust sits on the slot's floor
       }
       // Placeholder: a framed circle in the character's colours, with the face name.
       const g = scene.add.graphics();
