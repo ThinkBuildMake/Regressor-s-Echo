@@ -6,9 +6,11 @@ Decisions and their reasons live in [IDEAS.md](IDEAS.md); this page is only what
 ## Sunday
 - [x] Floating souls, slide and dive, connected rooms with camera slides, parallax, painted stand-ins
 - [x] `npm test`, git, this checklist
-- [ ] Hero redrawn as the hooded explorer (scarf, satchel), with painted shading
+- [x] World 1 painted: sky, far, middle, near foliage, earth, mossy top lip
+- [ ] **You:** paint the hero (blond, green cloak, wavy red scarf): `hero.png`, `sheet.png`, `slide.png`
+- [ ] Hero sprite sheet in the game; souls as his frames tinted blue with flames
 - [ ] Dialogue system for the guide (placeholder lines)
-- [ ] **You:** World 1 reference image + layers in Gemini ([PROMPTS.md](PROMPTS.md))
+- [x] World 1 reference image + layers ([PROMPTS.md](PROMPTS.md))
 
 ## Monday
 - [ ] Lasers (souls block the beam)

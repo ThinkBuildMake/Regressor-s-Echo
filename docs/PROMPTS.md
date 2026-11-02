@@ -105,7 +105,7 @@ Save to `assets/raw/hero/`. Attach the World 1 reference image for the brushwork
    > Using the attached character exactly, paint him sliding feet first along the ground, body low and leaning back, one leg extended forward, scarf and cloak streaming behind him. Wide 21:9, character centered.
 
 **Fallback, if the frames don't match each other → `parts.png`:**
-   > Using the attached character exactly, paint the same character separated into parts for cut-out animation, each part apart from the others: hooded head, torso with cloak front, back cloak flap, scarf tail, left arm, right arm, left leg with boot, right leg with boot, satchel. Same scale and colors as the attached image. Wide 21:9.
+   > Using the attached character exactly, paint the same character separated into parts for cut-out animation, each part apart from the others: head with blond hair, torso with cloak front, back cloak flap, scarf tail, left arm, right arm, left leg with boot, right leg with boot, satchel. Same scale and colors as the attached image. Wide 21:9.
 
 ## Drawn in code
 

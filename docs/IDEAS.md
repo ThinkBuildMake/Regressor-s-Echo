@@ -120,7 +120,7 @@ Dialogue gets written last, once the rooms exist. The dialogue system gets built
 
 - **Backgrounds:** AI-painted, 3–4 parallax layers per world (sky, far trees, middle trees, near foliage). Generated one at a time with a shared style prompt, on a flat solid color that's easy to cut away.
 - **Ground you play on:** code-drawn shapes filled with a painted texture, moss edges, higher contrast than the background. Backgrounds slightly hazy and muted so gameplay stays readable.
-- **Hero:** dark cloaked figure with a soft edge of light, animated in code (bob, lean, cloak sway). No AI animation frames.
+- **Hero:** blond treasure hunter in a deep forest-green cloak with a wavy red scarf, painted with Nano Banana Pro as a sprite sheet (run, jump, fall, slide). Fallback: one painting cut into parts and animated in code.
 - **Bosses:** one large painted image each, animated with movement, squash and stretch, and particles.
 - **Budget:** about 12–15 generated images total.
 - **Fallback:** if World 1's painted layers don't look cohesive by Tuesday midday, switch to flat shapes drawn in code. Same layer structure, so only the art changes.
