@@ -458,7 +458,7 @@ const ROOMS = [
     '#                            #',
     '#                            V',
     '                             V',
-    ' P             B             V',
+    ' P            xB             V',
     '##############################',
   ], [286, 104], { world: 1, spots: [[7, 'moth']], deathTalk: { 2: 'dust', 25: 'dust2' } }], // the shaking starts 7 tiles in
   // ---------------- World 2: Overgrown Ruins (greybox) ----------------
@@ -1060,6 +1060,7 @@ class Room extends Phaser.Scene {
   }
 
   bossDefeated(B) {
+    if (B.story === 'mothDown') { rules.max = 2; rules.selfDestruct = true; }
     B.r.destroy();
     this.bosses.splice(this.bosses.indexOf(B), 1);
     if (this.boss === B) this.boss = null;
@@ -1109,6 +1110,7 @@ class Room extends Phaser.Scene {
     const B = this.bosses.find((b) => b.room === this.index && b.story);
     if (name === 'glow' && B) { // the fallen boss turns white and pulses
       B.r.setFillStyle(0xffffff);
+      if (B.story === 'mothDown') B.img?.setTintFill(0xffffff);
       this.tweens.add({ targets: B.r, alpha: 0.4, duration: 220, yoyo: true, repeat: 4 });
     }
     if (name === 'absorb' && B) { // dissolves into motes that stream into the hero, who flashes white
@@ -1261,6 +1263,12 @@ class Room extends Phaser.Scene {
     p.setVisible(false);
     this.dead = RESPAWN_DELAY;
     if (this.boss) { this.boss.hp = BOSS_HP; this.boss.hurt = 0; } // your death heals the boss
+    if (this.boss?.story === 'mothDown' && !this.boss.hidden) {
+      this.boss.dust = 2.4;
+      this.boss.r.x = this.rooms[this.index].rect.x + 22 * T;
+      this.boss.dir = 1;
+      this.shots = this.shots.filter((sh) => { if (!sh.mothDust) return true; sh.destroy(); return false; });
+    }
     if (this.rooms[this.index].world) Dialogue.play(this, 'firstDeath'); // only the first time
     const hint = this.rooms[this.index].deathTalk?.[++this.roomDeaths]; // hints after repeated deaths in a room
     if (hint) Dialogue.play(this, hint);
@@ -1512,6 +1520,8 @@ class Room extends Phaser.Scene {
     }
     this.shots = this.shots.filter((sh) => {
       sh.x += sh.vx * dt;
+      sh.y += (sh.vy ?? 0) * dt;
+      if (sh.mothDust && sh.y >= R.bottom - T - 16) { sh.y = R.bottom - T - 16; sh.vy = 0; }
       if (!solid(new Phaser.Geom.Rectangle(sh.x - 4, sh.y - 4, 8, 8)) && R.contains(sh.x, sh.y)) return true;
       sh.destroy();
       return false;
@@ -1569,6 +1579,15 @@ class Room extends Phaser.Scene {
     if (B?.img) B.img.setPosition(B.r.x, B.r.y).setVisible(B.r.visible).setAlpha(B.r.alpha).setFlipX(B.dir > 0) // sheet faces left
       .setFrame(B.pose ?? MOTH_FRAMES[Math.floor((this.time.now / 1000) * MOTH_FPS) % MOTH_FRAMES.length]);
     if (!B || B.hidden) return;
+    if (B.story === 'mothDown') {
+      B.dust = (B.dust ?? 2.4) - dt;
+      if (B.dust <= 0) {
+        B.dust = 2.4 * 0.8 ** (BOSS_HP - B.hp);
+        const a = Math.atan2(this.rooms[B.room].rect.bottom - T - 16 - B.r.y, this.player.x - B.r.x);
+        this.shots.push(Object.assign(this.add.circle(B.r.x, B.r.y, 6, 0xffdf63).setDepth(4),
+          { vx: Math.cos(a) * 210, vy: Math.sin(a) * 210, mothDust: true }));
+      }
+    }
     B.hurt -= dt;
     B.r.x += B.dir * (BOSS_SPEED + (BOSS_HP - B.hp) * BOSS_SPEEDUP) * dt;
     if (B.r.x < B.min || B.r.x > B.max) { B.r.x = Phaser.Math.Clamp(B.r.x, B.min, B.max); B.dir *= -1; }
@@ -1585,6 +1604,11 @@ class Room extends Phaser.Scene {
     p.body.velocity.y = -JUMP * 0.8;
     if (B.hurt > 0) return false;
     B.hurt = 0.5;
+    if (B.story === 'mothDown') {
+      B.dust = 2.4 * 0.8 ** (BOSS_HP - B.hp + 1);
+      for (const sh of this.shots.filter((sh) => sh.mothDust)) sh.destroy();
+      this.shots = this.shots.filter((sh) => !sh.mothDust);
+    }
     if (--B.hp <= 0 && B.story) { // a story boss stops still; its script dissolves it (cue 'absorb')
       B.hidden = true;
       Dialogue.play(this, B.story);
