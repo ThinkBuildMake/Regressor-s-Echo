@@ -208,15 +208,15 @@ short crossfade; save as OGG or M4A, not MP3.
 
 | For | Prompt | Done |
 |---|---|---|
-| Title | Instrumental, slow and calm, solo fingerpicked harp with soft sustained low strings and a faint music-box melody, D minor (Dorian feel), 70 BPM, 16 bars, gentle and a little melancholy, seamless loop, no intro, no fade-out, no ending, no vocals | |
-| World 1: Forest edge | Instrumental ambient, soft harp arpeggios over warm sustained strings, light wooden flute phrases, no drums, misty and calm, A minor, 80 BPM, 32 bars, steady level throughout, seamless loop, no intro, no fade-out, no ending, no vocals | |
-| World 2: Overgrown ruins | Instrumental ambient, harp and low cello with soft hand-drum pulse and a dulcimer, dusk feeling, slightly mysterious, E Dorian, 84 BPM, 32 bars, steady level throughout, seamless loop, no intro, no fade-out, no ending, no vocals | |
-| World 3: Sanctum | Instrumental ambient, slow sustained strings and choir-like pad (no words), sparse harp notes and a soft low bell, moonlit and still, C minor, 66 BPM, 32 bars, steady level throughout, seamless loop, no intro, no fade-out, no ending, no vocals | |
-| Shrine / dialogue (calm) | Instrumental, very quiet solo harp and a soft string pad, gentle and warm with a hint of playfulness, A minor, 72 BPM, 16 bars, no drums, seamless loop, no intro, no fade-out, no ending, no vocals | |
-| Boss: great moth | Instrumental, driving harp ostinato with fast staccato strings and a light frame-drum beat, fluttering and anxious, A minor, 120 BPM, 32 bars, same energy throughout, seamless loop, no intro, no fade-out, no ending, no vocals | |
-| Boss: tree guardian | Instrumental, heavy low cellos and double basses with deep taiko-style drums, harp and dulcimer riff on top, slow and stomping, E Phrygian, 100 BPM, 32 bars, same energy throughout, seamless loop, no intro, no fade-out, no ending, no vocals | |
-| Boss: spectral stag | Instrumental, urgent strings and choir-like pad (no words), galloping frame drums, harp runs and a low bell on each phrase, grand but sad, C minor, 132 BPM, 32 bars, same energy throughout, seamless loop, no intro, no fade-out, no ending, no vocals | |
-| Ending (not a loop) | Instrumental, solo harp theme from the title slowly joined by warm strings and flute, hopeful and quietly bittersweet, D major turning to D minor at the end, 70 BPM, about 2 minutes, a real ending with a soft final chord, no vocals | |
+| Title | Instrumental, slow and calm, solo fingerpicked harp with soft sustained low strings and a faint music-box melody, D minor (Dorian feel), 70 BPM, 16 bars, gentle and a little melancholy, seamless loop, no intro, no fade-out, no ending, no vocals | ✅ |
+| World 1: Forest edge | Instrumental ambient, soft harp arpeggios over warm sustained strings, light wooden flute phrases, no drums, misty and calm, A minor, 80 BPM, 32 bars, steady level throughout, seamless loop, no intro, no fade-out, no ending, no vocals | ✅ |
+| World 2: Overgrown ruins | Instrumental ambient, harp and low cello with soft hand-drum pulse and a dulcimer, dusk feeling, slightly mysterious, E Dorian, 84 BPM, 32 bars, steady level throughout, seamless loop, no intro, no fade-out, no ending, no vocals | ✅ |
+| World 3: Sanctum | Instrumental ambient, slow sustained strings and choir-like pad (no words), sparse harp notes and a soft low bell, moonlit and still, C minor, 66 BPM, 32 bars, steady level throughout, seamless loop, no intro, no fade-out, no ending, no vocals | ✅ |
+| Shrine / dialogue (calm) | Instrumental, very quiet solo harp and a soft string pad, gentle and warm with a hint of playfulness, A minor, 72 BPM, 16 bars, no drums, seamless loop, no intro, no fade-out, no ending, no vocals | ✅ |
+| Boss: great moth | Instrumental, driving harp ostinato with fast staccato strings and a light frame-drum beat, fluttering and anxious, A minor, 120 BPM, 32 bars, same energy throughout, seamless loop, no intro, no fade-out, no ending, no vocals | ✅ |
+| Boss: tree guardian | Instrumental, heavy low cellos and double basses with deep taiko-style drums, harp and dulcimer riff on top, slow and stomping, E Phrygian, 100 BPM, 32 bars, same energy throughout, seamless loop, no intro, no fade-out, no ending, no vocals | ✅ |
+| Boss: spectral stag | Instrumental, urgent strings and choir-like pad (no words), galloping frame drums, harp runs and a low bell on each phrase, grand but sad, C minor, 132 BPM, 32 bars, same energy throughout, seamless loop, no intro, no fade-out, no ending, no vocals | ✅ |
+| Ending (not a loop) | Instrumental, solo harp theme from the title slowly joined by warm strings and flute, hopeful and quietly bittersweet, D major turning to D minor at the end, 70 BPM, about 2 minutes, a real ending with a soft final chord, no vocals | ✅ |
 
 ## Open questions
 

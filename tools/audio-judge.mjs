@@ -13,8 +13,8 @@ if (!key) { console.error('OPENROUTER_API_KEY is missing from .env'); process.ex
 const level = flags.find((f) => f.startsWith('--level='))?.split('=')[1] ?? 'normal';
 const kind = flags.includes('--music') ? 'looping background music track' : 'sound effect';
 
-// Gemini takes wav/mp3, not Opus: convert in memory.
-const wav = execFileSync('ffmpeg', ['-loglevel', 'error', '-i', inPath, '-ac', '1', '-ar', '22050', '-f', 'wav', '-']);
+// Gemini takes wav/mp3, not Opus: convert in memory to a compact mono mp3 (music tracks run to minutes).
+const audio = execFileSync('ffmpeg', ['-loglevel', 'error', '-i', inPath, '-ac', '1', '-ar', '22050', '-b:a', '64k', '-f', 'mp3', '-'], { maxBuffer: 64 << 20 });
 const ask = `You are a strict sound designer reviewing one ${kind} for a calm, painterly 2D game.
 The sound was generated from this description: "${prompt}".
 It should sit at a ${level} loudness in the mix (quiet = breaths, sighs, faint foley; normal = most effects; loud = impacts, quakes).
@@ -33,7 +33,7 @@ const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     provider: { only: ['google-vertex'], allow_fallbacks: false },
     messages: [{ role: 'user', content: [
       { type: 'text', text: ask },
-      { type: 'input_audio', input_audio: { data: wav.toString('base64'), format: 'wav' } },
+      { type: 'input_audio', input_audio: { data: audio.toString('base64'), format: 'mp3' } },
     ] }],
   }),
 });

@@ -12,3 +12,6 @@
 00:45 sfx batch started (first run died on Python SSL certs for the credit check; switched that check to node). 105,583 credits left.
 00:50 music batch started in parallel (2 concurrent ElevenLabs requests, limit is 5). Loops: generated one bar long, trimmed to whole bars, the extra bar faded over the start; seam = end vs start RMS.
 00:50 DECISION: critic told when it is judging music (--music) so it doesn't grade a loop as a sound effect.
+01:40 music: 9 tracks generated. Critic first failed on long files (ffmpeg output overflowed node's 1 MB buffer): fixed by sending compact mono mp3 with a 64 MB buffer.
+01:55 music loops: tried picking shorter phrase lengths to match end/start level; it only shortened loops. Measured the raws: ElevenLabs holds level until the final ~2 s and fades only the last bar, so the full planned length is right (the faded bar becomes the crossfade tail). Rebuilt at full length.
+02:00 music scores: title 8, World 1 10, World 2 10, World 3 10, shrine 10, moth 10, tree 10, stag 9, ending 10.
