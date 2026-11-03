@@ -44,3 +44,4 @@ DECISION: the user asked for parallel agents. Three Codex workers, one per world
 08:04 story wiring merged (8 missing STORY.md scenes). Spring and Rehearsal test fixes committed. Full suite still fails in Reliquary (twice); Codex on it. User is playing at http://localhost:8010/.
 08:22 full suite: Reliquary now passes, In my own way failed instead (13 min run while the user plays). DECISION: the replays are timing-flaky under load; Codex is making check.html step the game at a fixed 60fps (tests only, game unchanged), done when 3 full runs pass in a row.
 08:51 deterministic tests committed; full suite OK x3 (365s, 392s, 377s).
+09:32 main is NOT merged with night (user thought it was). Merged main (new sprites, audio tools) into night. 3 Codex sprite workers: bosses (w1), hero/enemies/portraits (w2), hazards per world (w3). Next: merge night into main once sprites land.
