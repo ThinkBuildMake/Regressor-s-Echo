@@ -621,19 +621,19 @@ const ROOMS = [
     '##############################',
   ], [540, 75], { world: 2, boss: "tree", spots: [[7, "tree"]], deathTalk: {"2": "treeSlam", "25": "treeSlam2"} }],
   // ---------------- World 3: Sanctum (greybox) ----------------
-  ["Three high", [ // 8-high ledge: a 3-soul staircase (run off your top soul while holding K)
+  ["Three high", [ // 10-high ledge: a 3-soul staircase (run off your top soul while holding K)
     '##############################',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                             ',
-    '#           C                 ',
-    '#         #####            ###',
-    '#         #####            ###',
-    '#         #####            ###',
-    '#         #####            <##',
+    '#               #####        #',
+    '#               #####        #',
+    '#               #####        #',
+    '#               #####        #',
+    '#           C   #####        #',
+    '#         ##### #####         ',
+    '#         ##### #####         ',
+    '#         ##### #####      ###',
+    '#         ##### #####      ###',
+    '#         ##### #####      ###',
+    '#         ##### ##v##      ###',
     '#         #####            ###',
     '          #####            ###',
     '          #####            ###',
@@ -651,7 +651,7 @@ const ROOMS = [
     '##########         ########  #',
     '   ####### C       #######D   ',
     ' P         #    _         D   ',
-    '####^^^^############^^^^######',
+    '####^^^^^###########^^^^^#####',
     '##############################',
     '##############################',
     '##############################',
@@ -708,24 +708,24 @@ const ROOMS = [
     '########################################',
     '#####                         D   ! !  #',
     '#####    C #   o   #   o    #_D C      #',
-    '#####   ####################### #      #',
-    '#####   #######################        #',
-    '#####  f#######################        #',
-    '#####   #######################  ~     #',
-    '#####   #######################        #',
-    '#####   #######################        #',
-    '#####  ########################    ~   #',
-    '#####   #######################        #',
-    '#####f  #######################        #',
-    '#####   #######################      ~ #',
-    '#####   #######################        #',
-    '#####   #######################        #',
-    '######  #######################    ~   #',
-    '#####   #######################        #',
-    '#       #######################        #',
-    '        #######################         ',
-    ' P      #######################         ',
-    '################################^^^^^^##',
+    '#####   ####################### #     x#',
+    '#####   #######################       x#',
+    '#####  f#######################       x#',
+    '#####   #######################  ~    x#',
+    '#####   #######################       x#',
+    '#####   #######################       x#',
+    '#####  ########################    ~  x#',
+    '#####   #######################       x#',
+    '#####f  #######################       x#',
+    '#####   #######################      ~x#',
+    '#####   #######################       x#',
+    '#####   #######################       x#',
+    '######  #######################    ~  x#',
+    '#####   #######################       x#',
+    '#       #######################       x#',
+    '        #######################     ~   ',
+    ' P      #######################      ~~ ',
+    '################################^^^^^^^#',
     '########################################',
   ], [705, 52], { world: 3 }],
   ["The rehearsal", [ // aimed beams: protect a two-soul stair, shrine, sacrifice a corridor decoy
@@ -736,8 +736,8 @@ const ROOMS = [
     '#                 ############',
     '#                 ############',
     '#                            #',
-    '#                           a ',
-    '#               C             ',
+    '#                             ',
+    '#               C           a ',
     '#             ################',
     '#                            #',
     '#                            #',
@@ -815,7 +815,7 @@ const START_ROOM = ((q) => q == null ? ROOMS.findIndex((r) => r[0] === 'The clea
 const hit = (A, B) => A.x < B.right && A.right > B.x && A.y < B.bottom && A.bottom > B.y;
 const bounds = (o) => o.getBounds();
 
-const stats = { deaths: 0 }; // the whole run's deaths, shown on the ending card
+const stats = { deaths: 0, mothFinished: false, treePower: false, stagFinished: false }; // run progress survives room restarts
 const FONT = { fontFamily: 'Georgia, serif', align: 'center' };
 
 // First screen: the content warning. Any key or click continues (that click also lets the browser play audio).
@@ -856,7 +856,7 @@ class End extends Phaser.Scene {
     t(422, 'Art, music and sound made with generative AI tools', '13px', '#7f9086', 10400);
     const again = t(490, 'Press any key to play again', '14px', '#e8b44a', 12000);
     this.time.delayedCall(12000, () => this.input.keyboard.once('keydown', () => {
-      stats.deaths = 0; stats.treePower = false;
+      stats.deaths = 0; stats.treePower = false; stats.mothFinished = false; stats.stagFinished = false;
       Dialogue.seen.clear();
       NAMES.guide = '???';
       this.scene.start('room', { index: START_ROOM });
@@ -902,7 +902,7 @@ class Room extends Phaser.Scene {
     this.walkerSpawns = [];
     this.treePower = !!stats.treePower;
     this.bosses = []; // one per boss room; this.boss is the current room's
-    this.stagFinished = false;
+    this.stagFinished = !!stats.stagFinished;
     this.gates = [];
     this.dead = 0;
     this.lying = false;
@@ -962,8 +962,8 @@ class Room extends Phaser.Scene {
               this.bosses.at(-1).r.setVisible(!this.bosses.at(-1).hidden);
               if (name === 'The spectral stag') {
                 const B = this.bosses.at(-1);
-                Object.assign(B, { stag: true, hidden: !Dialogue.seen.has('stagArrival'), story: 'stagDown', phase: 'setup', clock: 0, waveClock: 0, deaths: 0 });
-                B.r.setVisible(!B.hidden).setSize(96, 64).setPosition(x, (oy + 14) * T).setFillStyle(0xbceaff);
+                Object.assign(B, { stag: true, hidden: !Dialogue.seen.has('stagArrival'), story: 'stagDown', phase: 'setup', clock: 0, waveClock: 0, waves: 0, deaths: 0 });
+                B.r.setVisible(!B.hidden).setSize(192, 64).setPosition(x, (oy + 14) * T).setFillStyle(0xbceaff);
                 B.antlers = this.add.graphics().setDepth(5);
                 B.r.on('destroy', () => B.antlers.destroy());
                 if (this.textures.exists('stagIdle')) {
@@ -993,7 +993,7 @@ class Room extends Phaser.Scene {
               break;
             case 'a': {
               rect(x, y, T, T, 0x539bd6);
-              this.aimedBeams.push({ x: x + T / 2, y: y + T / 2, room: ri, clock: 0, angle: Math.PI });
+              this.aimedBeams.push({ x: x + T / 2, y: y + T / 2, room: ri, clock: -2, period: ty === 8 ? 1.6 : 4, angle: Math.PI });
               break;
             }
             case '>': case '<': case 'v': case 'u': { // laser emitter: a solid block that fires a beam
@@ -1033,10 +1033,17 @@ class Room extends Phaser.Scene {
       if (top < R.y) Art.platform(this, R.x, top, R.width, R.y - top, []);
       if (bottom > R.bottom) Art.platform(this, R.x, R.bottom, R.width, bottom - R.bottom, []);
     }
+    for (const B of [...this.bosses]) {
+      if ((B.stag && stats.stagFinished) || (B.kind === 'tree' && stats.treePower) ||
+          (B.story === 'mothDown' && stats.mothFinished)) {
+        if (B.story === 'mothDown') this.breakWall(B);
+        this.bossDefeated(B);
+      }
+    }
     this.start = this.rooms[this.index].spawns[0];
     this.boss = this.bosses.find((b) => b.room === this.index) ?? null;
     this.bosses.filter((b) => b.story === 'mothDown' && !b.hidden).forEach((b) => this.breakWall(b)); // already broken on replays
-    rules.max = this.treePower ? 3 : WORLD_SOULS[this.rooms[this.index].world] ?? 3;
+    rules.max = this.treePower ? 3 : Math.max(stats.mothFinished ? 2 : 1, WORLD_SOULS[this.rooms[this.index].world] ?? 3);
     Dialogue.create(this);
     this.wearing = Dialogue.seen.has('amulet');
     this.roomDeaths = 0;
@@ -1071,7 +1078,7 @@ class Room extends Phaser.Scene {
       this.make.graphics({ add: false }).fillStyle(0xffffff).fillRoundedRect(0, 0, 22, 40, 10).generateTexture('guideStandIn', 22, 40).destroy();
     this.guide = this.add.image(this.start.x + 60, this.start.y, this.painted ? 'heroIdle' : 'guideStandIn').setOrigin(0.5, 1)
       .setScale(this.painted ? this.heroScale : 1).setTint(0xcfeaff).setBlendMode(Phaser.BlendModes.ADD).setDepth(4.4).setAlpha(0);
-    this.guide.on = Dialogue.seen.has('amulet');
+    this.guide.on = Dialogue.seen.has('amulet') && !this.stagFinished;
     this.guide.hoverY = this.guide.y;
     this.guide.away = 0;
     this.physics.add.existing(this.player);
@@ -1156,7 +1163,8 @@ class Room extends Phaser.Scene {
   }
 
   bossDefeated(B) {
-    if (B.story === 'mothDown') { rules.max = 2; rules.selfDestruct = true; }
+    if (B.stag) this.stagFinished = stats.stagFinished = true;
+    if (B.story === 'mothDown') { stats.mothFinished = true; rules.max = 2; rules.selfDestruct = true; }
     if (B.kind === 'tree') { this.treePower = stats.treePower = true; rules.max = 3; }
     B.r.destroy();
     this.bosses.splice(this.bosses.indexOf(B), 1);
@@ -1306,7 +1314,7 @@ class Room extends Phaser.Scene {
   enterRoom(i) {
     const p = this.player, R = this.rooms[i].rect, cam = this.cameras.main;
     this.index = i;
-    rules.max = this.treePower ? 3 : WORLD_SOULS[this.rooms[i].world] ?? rules.max;
+    rules.max = this.treePower ? 3 : Math.max(stats.mothFinished ? 2 : 1, WORLD_SOULS[this.rooms[i].world] ?? rules.max);
     Dialogue.play(this, this.rooms[i].enter);
     this.roomDeaths = 0;
     this.corpses.forEach((c) => c.destroy());
@@ -1376,7 +1384,7 @@ class Room extends Phaser.Scene {
     p.setVisible(false);
     this.dead = RESPAWN_DELAY;
     if (this.boss) { this.boss.hp = BOSS_HP; this.boss.hurt = 0;
-      if (this.boss.stag) { this.boss.deaths++; this.boss.phase = 'setup'; this.boss.clock = 0; this.boss.waveClock = 0; this.boss.wave = null; this.boss.beam = null; }
+      if (this.boss.stag) { this.boss.deaths++; this.boss.phase = 'setup'; this.boss.clock = 0; this.boss.waveClock = 0; this.boss.waves = 0; this.boss.wave = null; this.boss.beam = null; }
       if (this.boss.kind === 'tree') { this.boss.phase = 'idle'; this.boss.timer = 4; this.boss.attack = 2; this.boss.slamOpen = false; this.boss.pods.forEach((p) => p.r.destroy()); this.boss.pods = []; }
     } // your death heals the boss
     if (this.boss?.story === 'mothDown' && !this.boss.hidden) {
@@ -1716,7 +1724,7 @@ class Room extends Phaser.Scene {
     const R = this.rooms[B.room].rect, w = B.wave;
     const prev = w.x;
     w.x -= 420 * dt;
-    this.fx.fillStyle(0x9bdfff, 0.7).fillRect(w.x, R.y + T, 12, 14 * T);
+    this.fx.fillStyle(0xdf89ff, 0.7).fillRect(w.x, R.y + T, 12, 14 * T);
     const souls = this.corpses.filter((c) => c.x <= prev && c.x >= w.x && c.y < R.y + 12 * T)
       .sort((a, b) => b.x - a.x);
     for (const c of souls) {
@@ -1729,7 +1737,8 @@ class Room extends Phaser.Scene {
 
   updateStag(B, dt) {
     const R = this.rooms[B.room].rect, p = this.player;
-    B.antlers.setVisible(B.r.visible).clear().lineStyle(3, 0xd9f3ff);
+    B.antlers.setVisible(B.r.visible).clear().lineStyle(B.waveClock > 13 ? 7 : 3, B.waveClock > 13 ? 0xdf89ff : 0xd9f3ff);
+    B.img?.setTint(B.waveClock > 13 ? 0xdf89ff : B.phase === 'beam' ? 0x65baff : 0xffffff);
     for (const dx of [-28, 28]) {
       B.antlers.lineBetween(B.r.x + dx, B.r.y - 32, B.r.x + dx, B.r.y - 66);
       B.antlers.lineBetween(B.r.x + dx, B.r.y - 48, B.r.x + dx + Math.sign(dx) * 17, B.r.y - 62);
@@ -1740,13 +1749,13 @@ class Room extends Phaser.Scene {
     if (!Dialogue.seen.has('stagArrival')) { Dialogue.play(this, 'stagArrival'); return; }
     if (B.hidden) return;
     B.hurt -= dt; B.clock += dt;
-    B.r.setFillStyle(B.phase === 'beam' || B.waveClock > 13 ? 0x65baff : B.phase === 'windup' ? 0xffda75 : 0xbceaff);
+    B.r.setFillStyle(B.waveClock > 13 ? 0xdf89ff : B.phase === 'beam' ? 0x65baff : B.phase === 'windup' ? 0xffda75 : 0xbceaff);
     if (B.phase === 'setup') {
       if (B.clock < 8 && p.x < R.x + 7 * T) return;
       B.phase = 'windup'; B.clock = 0;
     }
     B.waveClock += dt;
-    if (B.waveClock >= 15 && !B.wave) { B.waveClock = 0; B.wave = { x: R.right - T, broken: 0 }; }
+    if (B.waveClock >= 15 && !B.wave) { B.waveClock = -10; B.waves++; B.wave = { x: R.right - T, broken: 0 }; }
     if (B.wave) this.stagWave(B, dt);
     if (this.dead > 0) return;
     const gap = 8 * Math.pow(0.8, 3 - B.hp);
@@ -1853,7 +1862,7 @@ class Room extends Phaser.Scene {
     p.body.reset(p.x, top - p.height / 2);
     p.body.velocity.y = -JUMP * 0.8;
     if (B.hurt > 0 || (B.stag && B.stomped) || (B.kind === 'tree' && (B.stompReady === false || !B.slamOpen || !B.target?.buried))) return false;
-    if (B.stag) { B.stomped = true; B.clock = Math.min(B.clock, 0.5); }
+    if (B.stag) { B.stomped = true; if (B.waves) B.waveClock = -10; B.clock = Math.min(B.clock, 0.5); }
     if (B.kind === 'tree') { B.stompReady = false; B.slamOpen = false; }
     B.hurt = 0.5;
     if (B.story === 'mothDown') {
@@ -1970,7 +1979,8 @@ class Room extends Phaser.Scene {
       Dialogue.play(this, 'amulet');
       return false;
     });
-    for (const sh of this.shrines) if (hit(bounds(p), bounds(sh)) && this.start !== sh.spawn) {
+    for (const sh of this.shrines) if ((hit(bounds(p), bounds(sh)) ||
+        (world === 3 && Math.abs(p.x - sh.x) < T / 2 && p.y + 15 <= sh.y + 14 && p.y + 15 > sh.y - 4 * T)) && this.start !== sh.spawn) {
       this.start = sh.spawn;
       this.shrines.forEach((o) => o.rune.setAlpha(o === sh ? 1 : 0.35));
       if (this.rooms[this.index].world) Dialogue.play(this, 'shrineMark'); // the first touch only
@@ -2047,7 +2057,7 @@ class Room extends Phaser.Scene {
       if (target === this.player) this.die();
       else if (this.corpses.includes(target)) { this.corpses.splice(this.corpses.indexOf(target), 1); target.destroy(); }
     }
-    if (beam.clock >= 4) { beam.clock = 0; beam.fired = false; }
+    if (beam.clock >= (beam.period ?? 4)) { beam.clock = 0; beam.fired = false; }
   }
 
   // Each beam runs from its emitter to the first solid thing in its way (walls, closed doors, souls).
