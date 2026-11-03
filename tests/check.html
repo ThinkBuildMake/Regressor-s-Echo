@@ -491,7 +491,45 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     check(short.h < 4.9 && short.x < 9,
       'Let go: one soul falls short of the first ledge');
   }
-  await solve('Off the edge', [[14, 0]], [[14, 1, 0, 19]], 8);
+  await solve('Off the edge', [[7, 0]], [[3, 0, 1, 7], [7, 1, 0, 11], [11, 0, 0, 13]], 8);
+  if (matches('Off the edge')) {
+    s = room();
+    check(s.start === s.shrines.find((sh) => O().contains(sh.x, sh.y))?.spawn,
+      'Off the edge: first airborne step reaches the shrine');
+    await place(16, 0, 8);
+    await place(21, 0, 8);
+    const doors = s.doors.filter((d) => d.room === s.index);
+    check(doors.every((d) => !d.body.enable), 'Off the edge: plate and airborne soul keep the exit open');
+    const a = await hop(17, 0, 8, 21);
+    const b = await hop(21, 1, 8, 25);
+    const c = await hop(25, 0, 8, 27);
+    check(a.h >= 0.95 && b.h >= -0.05 && b.x >= 24.6 && c.x >= 26.6,
+      'Off the edge: second airborne step crosses the pit and held door');
+    await place(14, 0, 8);
+    check(doors.every((d) => d.body.enable) && s.start.x > O().x + 12 * 32,
+      'Off the edge: careless third death erases the plate soul and respawns at the shrine');
+    s = await cleanSolveRoom('Off the edge');
+    const deaths = stats.deaths;
+    await hop(3, 0, 8, 11);
+    check(stats.deaths > deaths && s.player.x < O().x + 11 * 32,
+      'Off the edge: the first pit cannot be jumped without an airborne soul');
+    s = await cleanSolveRoom('Off the edge');
+    s.player.body.reset(O().x + 2 * 32 + 16, O().y + 8 * 32 - 16);
+    await wait(200);
+    key('keydown', 75); key('keydown', 32); key('keydown', 39);
+    await until(() => s.corpses.length === 1);
+    key('keyup', 75); key('keyup', 32); key('keyup', 39);
+    await alive();
+    const soul = s.corpses[0];
+    const tx = Math.floor((soul.x - O().x) / 32);
+    const top = 8 - (soul.y - soul.height / 2 - O().y) / 32;
+    check(tx >= 6 && tx <= 8 && top >= 1,
+      `Off the edge: holding K through a running jump hangs a step (column ${tx}, top ${top})`);
+    const onto = await hop(3, 0, 8, tx);
+    const across = await hop(tx, top, 8, 11);
+    check(onto.h >= top - 0.05 && across.x >= 10.6 && across.h >= -0.05,
+      'Off the edge: the step made by a held jump really bridges the pit');
+  }
   await solve('The ladder', [[19, 2], [20, 3]], [[18, 0, 3, 19], [20, 4, 7, 21]]);
   await solve('The beam', [[23, 1], [24, 4]], [[22, 0, 2, 23], [23, 2, 5, 24], [24, 5, 8, 25]]);
   await solve('The spring', [[20, 6]], [[20, 7, 9, 22]]);

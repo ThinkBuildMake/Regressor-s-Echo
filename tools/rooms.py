@@ -66,7 +66,11 @@ def let_go(o, p):
 room('Let go', [316, 104], 30, 17, 2, 'hold K: two souls stacked reach a 5-high ledge', let_go)
 
 def off_edge(o, p):
-    o(1, 1, 28, 7); o(0, 6, 0, 7); o(29, 6, 29, 7); o(9, 8, 18, 14); o(9, 15, 18, 15, '^'); p(1, 7, 'P')
+    o(1, 1, 28, 7); o(0, 6, 0, 7); o(29, 6, 29, 7); p(1, 7, 'P')
+    # Hang a step over the first pit, then bank the crossing at the shrine.
+    o(4, 8, 10, 14); o(4, 15, 10, 15, '^'); p(13, 7, 'C')
+    # Keep one soul on the plate and one in the air. An extra death shuts the exit.
+    p(16, 7, '_'); o(18, 8, 24, 14); o(18, 15, 24, 15, '^'); o(26, 1, 26, 7, 'D')
 room('Off the edge', [346, 107], 30, 17, 2, 'jump off the edge holding K: the soul appears mid-pit', off_edge)
 
 def ladder(o, p):
