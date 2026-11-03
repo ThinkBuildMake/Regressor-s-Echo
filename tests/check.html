@@ -45,7 +45,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   // Walk the inserted chain in ROOMS order and compare every doorway row in world space.
   for (const [from, to] of [
     ['The gatehouse', 'Thornwood'], ['Thornwood', 'The moth'],
-    ['Wrong order', 'Sawmill'], ['Sawmill', 'Three high'],
+    ['Wrong order', 'Sawmill'], ['Sawmill', 'The tree guardian'], ['The tree guardian', 'Three high'],
     ['Everything', 'Reliquary'], ['Reliquary', 'End of the greybox'],
   ]) {
     if (!matches(from) && !matches(to)) continue;
@@ -349,6 +349,81 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
       rules.max === (WORLD_SOULS[s.rooms[s.index].world] ?? defaultRules.max), `${name}: clean replay state`);
     return s;
   };
+  if (matches('The tree guardian')) {
+    stats.treePower = false;
+    s = await cleanSolveRoom('The tree guardian');
+    const floor = O().y + 16 * 32;
+    await place(21, 0); await place(13, 0);
+    const B = s.boss, step = s.corpses[0], decoy = s.corpses[1];
+    let buriedAt, recoveredAt;
+    const observeBurial = () => {
+      if (decoy.buried > 0 && buriedAt === undefined) buriedAt = s.time.now;
+      if (buriedAt !== undefined && decoy.buried === 0 && recoveredAt === undefined) recoveredAt = s.time.now;
+    };
+    s.events.on('update', observeBurial);
+    // Start each lure at the decoy; the approach and both jumps use real physics.
+    B.phase = 'idle'; B.attack = 2; B.timer = 0.1;
+    const lure = async () => {
+      await until(() => B.phase === 'slam');
+      s.player.body.reset(decoy.x, floor - 48);
+      check(B.target === decoy, 'tree: glow locks the decoy');
+      const started = s.time.now;
+      key('keydown', 39);
+      await until(() => s.player.x > step.x - 3 * 32);
+      key('keydown', 32);
+      await until(() => s.player.x >= step.x - 18);
+      key('keyup', 39); key('keydown', 37);
+      await until(() => s.player.body.velocity.x <= 0);
+      key('keyup', 37); key('keyup', 32);
+      await until(() => s.player.body.blocked.down || s.dead > 0, 2000);
+      const spare = B.timer;
+      check(s.dead <= 0 && spare > 0.25 && spare < 0.85, `tree: reaches step with spare warning (${spare.toFixed(2)}s, ${s.time.now - started}ms)`);
+      await until(() => decoy.buried > 0);
+      const hp = B.hp;
+      key('keydown', 32); await wait(180); key('keydown', 39);
+      await until(() => s.player.x > B.r.x - 12 || s.dead > 0);
+      key('keyup', 39); key('keydown', 37);
+      await until(() => s.player.body.velocity.x <= 0);
+      key('keyup', 37);
+      await until(() => B.hp < hp || s.dead > 0, 2000);
+      key('keyup', 32);
+      check(B.hp === hp - 1 && s.dead <= 0, `tree: stomp after decoy slam (${B.hp} hp)`);
+    };
+    for (let cycle = 0; cycle < 3; cycle++) {
+      // Nearest to the decoy at lock; reposition there to replay the approach.
+      s.player.body.reset(decoy.x, floor - 48);
+      await lure();
+      if (cycle === 2) break;
+      s.player.body.reset(O().x + 4 * 32, floor - 16);
+      await until(() => B.pods.length > 0);
+      // The pod is aimed left; get back to the decoy before the next blue glow.
+      s.player.body.reset(decoy.x, floor - 48);
+
+    }
+    s.events.off('update', observeBurial);
+    check(recoveredAt - buriedAt >= 4900 && recoveredAt - buriedAt < 5200, `tree: buried soul returns after five seconds (${recoveredAt - buriedAt}ms)`);
+    check(B.hp === 0 && B.hidden, 'tree: three intended stomps win');
+    Dialogue.seen.delete('treeDown');
+    // The clean replay marks scripts seen; play the actual defeat cues now.
+    Dialogue.play(s, 'treeDown'); Dialogue.skip(s);
+    check(!s.boss && rules.max === 3 && s.treePower && s.gates.every((g) => !g.active || g.room !== B.room), 'tree: defeat opens vines and grants three souls and recall');
+    const count = s.corpses.length, beforeRecall = stats.deaths;
+    key('keydown', 81); await wait(60); key('keyup', 81);
+    check(s.corpses.length === count - 1 && stats.deaths === beforeRecall, 'tree: Q recalls immediately after victory without dying');
+
+    stats.treePower = false;
+    s = await cleanSolveRoom('The tree guardian');
+    await place(21, 0); await place(13, 0);
+    const tree = s.boss, target = s.corpses[0], deaths = stats.deaths;
+    s.player.body.reset(target.x, floor - 48);
+    tree.phase = 'idle'; tree.attack = 2; tree.timer = 0.1;
+    await until(() => tree.phase === 'slam');
+    check(tree.target === target, 'tree: standing on step targets the step');
+    tree.hp = 1;
+    await until(() => stats.deaths > deaths, 3000);
+    check(stats.deaths > deaths && tree.hp === 3, 'tree: staying on targeted soul kills and heals');
+  }
+
   const solve = async (name, souls, hops, floor = 16) => {
     if (!matches(name)) return;
     await cleanSolveRoom(name);

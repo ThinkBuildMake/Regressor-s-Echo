@@ -123,6 +123,11 @@ def sawmill(o, p):
     o(32, 6, 34, 19); p(33, 9, 'C'); o(35, 15, 42, 19); p(38, 14, 'v'); p(41, 19, 'e'); p(36, 19, '#'); o(43, 17, 43, 19)   # post keeps the walker off the landing
 room('Sawmill', [496, 71], 44, 22, 2, 'SHOWCASE W2: spring + timed self-destruct jams a saw, plate soul as a shield, thrower, laser', sawmill)
 
+def tree_guardian(o, p):
+    o(1, 1, 28, 15); o(0, 13, 0, 15); o(29, 13, 29, 15)
+    p(1, 15, 'P'); p(23, 15, 'B'); o(28, 1, 28, 15, 'V')
+room('The tree guardian', [540, 75], 30, 17, 2, 'step and decoy: lure the blue slam away from the mask', tree_guardian)
+
 # ---------- World 3 ----------
 def three_high(o, p):
     o(1, 1, 20, 15); o(21, 1, 28, 7); o(0, 13, 0, 15); o(29, 6, 29, 7); p(1, 15, 'P')
@@ -169,6 +174,8 @@ room('End of the greybox', [715, 59], 30, 17, None, 'bosses for Worlds 2 and 3 a
 out = []
 for name, pos, world, note, rows, extra in rooms:
     opts = {'world': world} if world else {}
-    o = ', '.join(f"{k}: {v}" for k, v in opts.items())
+    if name == 'The tree guardian': opts.update(boss='tree', spots=[[7, 'tree']], deathTalk={2: 'treeSlam', 25: 'treeSlam2'})
+    if world == 3 or name == 'End of the greybox': pos = [pos[0] + 30, pos[1]]
+    o = ', '.join(f"{k}: {json.dumps(v)}" for k, v in opts.items())
     out.append(f"  [{json.dumps(name)}, [ // {note}\n" + ''.join(f"    '{r}',\n" for r in rows) + f"  ], {json.dumps(pos)}{', { ' + o + ' }' if o else ''}],")
 open(sys.argv[1], 'w').write('\n'.join(out) + '\n')

@@ -141,6 +141,22 @@ const SCRIPT = {
     G('amused', "Where's the fun in that?"),
   ],
   dust2: [G('thinking', "Your soul caught you over the spikes. Think it'd catch a little dust?")], // 25th death (each try costs about two deaths)
+  tree: [
+    H('thinking', 'Big tree. Old tree. Very… still tree.'),
+    G('warning', "Don't."), H('annoyed', "Don't what?"),
+    { ...G('warning', "Don't say it's just a tree."), cue: 'tree' },
+    H('scared', "…It's not just a tree."),
+  ],
+  treeSlam: [H('shouting', 'It smashed me! The other me! It keeps smashing me!'),
+    G('thinking', 'Watch where it looks before it swings.')],
+  treeSlam2: [G('thinking', 'It always goes for the one closest to you. Use that.')],
+  treeDown: [
+    W(0.8), H('exhausted', 'Is it…'), H('annoyed', "Don't you dare get back up."),
+    W(1.2, 'glow'), W(1.4, 'absorb'), H('startled', 'Again?!'),
+    G('thinking', 'Third mark.'), H('curious', 'Three of me now. And…?'),
+    G('thinking', 'And you can take them back. All of them, at once. Without dying.'),
+    H('relieved', "Finally. One that doesn't hurt."), G('wry', "Don't get used to it."),
+  ],
   mothDown: [ // the last stomp
     W(0.8),
     H('exhausted', 'Is it… over?'),

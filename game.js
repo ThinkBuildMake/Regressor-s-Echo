@@ -37,6 +37,7 @@ const MOTH_FRAMES = [0, 1, 2, 1], MOTH_FPS = 8, MOTH_SCALE = 0.243 * MOTH_SIZE; 
 // Its intro: it bursts out of the right wall at these rows (top, bottom) of its room. The hole is only
 // painted; the wall keeps its colliders, so the arena stays closed.
 const MOTH_HOLE = [2, 9];
+const TREE_GLOW = 2.05, TREE_BURIED = 5;
 // Self-destruct (World 2 on): hold K/X this long. You keep moving while it charges; letting go cancels.
 const SD_HOLD = 0.75;
 // Recall (World 3): Q takes back your newest soul. Holding keeps going, each gap shorter, down to RECALL_MIN.
@@ -599,6 +600,25 @@ const ROOMS = [
     '############################################',
     '############################################',
   ], [496, 71], { world: 2 }],
+  ["The tree guardian", [ // step and decoy: lure the blue slam away from the mask
+    '##############################',
+    '#                           V#',
+    '#                           V#',
+    '#                           V#',
+    '#                           V#',
+    '#                           V#',
+    '#                           V#',
+    '#                           V#',
+    '#                           V#',
+    '#                           V#',
+    '#                           V#',
+    '#                           V#',
+    '#                           V#',
+    '                            V ',
+    '                            V ',
+    ' P                     B    V ',
+    '##############################',
+  ], [540, 75], { world: 2, boss: "tree", spots: [[7, "tree"]], deathTalk: {"2": "treeSlam", "25": "treeSlam2"} }],
   // ---------------- World 3: Sanctum (greybox) ----------------
   ["Three high", [ // 8-high ledge: a 3-soul staircase (run off your top soul while holding K)
     '##############################',
@@ -618,7 +638,7 @@ const ROOMS = [
     '                     #########',
     ' P                   #########',
     '##############################',
-  ], [540, 75], { world: 3 }],
+  ], [570, 75], { world: 3 }],
   ["In my own way", [ // two lying souls bridge the tunnel pit; recall (Q) a standing one that blocks it
     '##############################',
     '###########################  #',
@@ -637,7 +657,7 @@ const ROOMS = [
     '##############################',
     '##############################',
     '##############################',
-  ], [570, 73], { world: 3 }],
+  ], [600, 73], { world: 3 }],
   ["Three jobs", [ // plate, pit and a laser blocker at once; recall mistakes instead of dying over them
     '##############################',
     '#                 ####### #  #',
@@ -656,7 +676,7 @@ const ROOMS = [
     '                          D   ',
     ' P   _                    D   ',
     '#########^^^^^^^^#############',
-  ], [600, 67], { world: 3 }],
+  ], [630, 67], { world: 3 }],
   ["Everything", [ // tunnel, plate with a walker, spring; one spare death before the plate soul goes (recall instead)
     '#############################################',
     '###############               #             #',
@@ -680,7 +700,7 @@ const ROOMS = [
     ' P             ##     _   e   D     s  ######',
     '#######^^^###################################',
     '#############################################',
-  ], [630, 63], { world: 3 }],
+  ], [660, 63], { world: 3 }],
   ["Reliquary", [ // SHOWCASE W3: flyers in a chimney, two saws to jam, plate, recall, crumbling descent
     '########################################',
     '########################################',
@@ -706,7 +726,7 @@ const ROOMS = [
     ' P      #######################         ',
     '################################^^^^^^##',
     '########################################',
-  ], [675, 52], { world: 3 }],
+  ], [705, 52], { world: 3 }],
   ["End of the greybox", [ // bosses for Worlds 2 and 3 and the beam rehearsal are not built yet
     '##############################',
     '#                            #',
@@ -725,7 +745,7 @@ const ROOMS = [
     '              P              #',
     '##############################',
     '##############################',
-  ], [715, 59]],
+  ], [745, 59]],
 ];
 const WORLD_NAMES = { 1: 'Forest Edge', 2: 'Overgrown Ruins', 3: 'Sanctum' }; // fades in when you enter a new world
 const WORLD_SOULS = { 1: 1, 2: 2, 3: 3 }; // souls allowed per world; rooms without a world keep 3
@@ -778,7 +798,7 @@ class End extends Phaser.Scene {
     t(422, 'Art, music and sound made with generative AI tools', '13px', '#7f9086', 10400);
     const again = t(490, 'Press any key to play again', '14px', '#e8b44a', 12000);
     this.time.delayedCall(12000, () => this.input.keyboard.once('keydown', () => {
-      stats.deaths = 0;
+      stats.deaths = 0; stats.treePower = false;
       Dialogue.seen.clear();
       NAMES.guide = '???';
       this.scene.start('room', { index: START_ROOM });
@@ -803,6 +823,11 @@ class Room extends Phaser.Scene {
       this.load.json('heroSlideMeta', 'assets/hero/slide.json');  // each frame's head and feet x
     }
     if (!this.textures.exists('walker')) this.load.image('walker', 'assets/enemies/walker.webp');
+    for (const pose of ['intro', 'idle', 'swing', 'slam', 'throw']) {
+      if (!this.textures.exists(`tree-${pose}`)) this.load.image(`tree-${pose}`, `assets/bosses/tree-${pose}.webp`);
+      if (!this.cache.json.exists(`tree-${pose}-frames`)) this.load.json(`tree-${pose}-frames`, `assets/bosses/tree-${pose}.json`);
+    }
+    if (!this.textures.exists('seedPod')) this.load.image('seedPod', 'assets/bosses/seed-pod.webp');
     if (!this.textures.exists('mothFly')) this.load.image('mothFly', 'assets/bosses/moth-fly.webp');
     if (!this.textures.exists('rocks')) this.load.image('rocks', 'assets/world1/rocks.webp'); // 6 earth chunks
     if (!this.textures.exists('wallBreak')) this.load.image('wallBreak', 'assets/world1/wall-break.webp');
@@ -816,6 +841,7 @@ class Room extends Phaser.Scene {
     this.spikes = [];
     this.enemies = []; // only the current room's walkers exist (Celeste-style)
     this.walkerSpawns = [];
+    this.treePower = !!stats.treePower;
     this.bosses = []; // one per boss room; this.boss is the current room's
     this.gates = [];
     this.dead = 0;
@@ -873,7 +899,17 @@ class Room extends Phaser.Scene {
                 hidden: !!extra.spots?.some((sp) => sp[1] === 'moth') && !Dialogue.seen.has('moth'), // bursts in during its intro
                 story: extra.spots?.some((sp) => sp[1] === 'moth') ? 'mothDown' : null });
               this.bosses.at(-1).r.setVisible(!this.bosses.at(-1).hidden);
-              if (this.textures.exists('mothFly')) {
+              if (extra.boss === 'tree') {
+                const B = this.bosses.at(-1);
+                Object.assign(B, { kind: 'tree', story: 'treeDown', hidden: !Dialogue.seen.has('tree'), phase: 'idle', timer: 2, attack: 0, pods: [] });
+                B.r.setDisplaySize(64, 64).setPosition(x + 16, y + T - 96).setVisible(!B.hidden);
+                B.floor = y + T;
+                if (this.textures.exists('tree-idle')) {
+                  B.img = this.add.image(x + 3 * T, B.floor, 'tree-idle').setOrigin(0.5, 1).setDepth(4);
+                  B.r.setFillStyle(0, 0);
+                }
+                B.r.on('destroy', () => { B.img?.destroy(); B.pods.forEach((p) => p.r.destroy()); });
+              } else if (this.textures.exists('mothFly')) {
                 const B = this.bosses.at(-1), tex = this.textures.get('mothFly'), fw = tex.getSourceImage().width / 4;
                 if (!tex.has(0)) for (let i = 0; i < 4; i++) tex.add(i, 0, i * fw, 0, fw, tex.getSourceImage().height);
                 B.r.setFillStyle(0, 0); // hitbox only
@@ -915,7 +951,7 @@ class Room extends Phaser.Scene {
     this.start = this.rooms[this.index].spawns[0];
     this.boss = this.bosses.find((b) => b.room === this.index) ?? null;
     this.bosses.filter((b) => b.story === 'mothDown' && !b.hidden).forEach((b) => this.breakWall(b)); // already broken on replays
-    rules.max = WORLD_SOULS[this.rooms[this.index].world] ?? 3;
+    rules.max = this.treePower ? 3 : WORLD_SOULS[this.rooms[this.index].world] ?? 3;
     Dialogue.create(this);
     this.wearing = Dialogue.seen.has('amulet');
     this.roomDeaths = 0;
@@ -1034,6 +1070,7 @@ class Room extends Phaser.Scene {
   }
 
   bossDefeated(B) {
+    if (B.kind === 'tree') { this.treePower = stats.treePower = true; rules.max = 3; }
     B.r.destroy();
     this.bosses.splice(this.bosses.indexOf(B), 1);
     if (this.boss === B) this.boss = null;
@@ -1060,6 +1097,7 @@ class Room extends Phaser.Scene {
   // Staging cues fired by dialogue lines (see `cue` in dialogue.js).
   cue(name) {
     const g = this.guide, p = this.player;
+    if (name === 'tree' && this.boss?.kind === 'tree') { this.boss.hidden = false; this.boss.r.setVisible(true); this.boss.phase = 'intro'; this.boss.timer = 1; }
     if (name === 'wear') this.wearing = true;
     if (name === 'flash') this.cameras.main.flash(600, 255, 215, 120);
     if (name === 'theEnd') { // he walks into the pyramid: fade out to the ending card
@@ -1165,7 +1203,7 @@ class Room extends Phaser.Scene {
   enterRoom(i) {
     const p = this.player, R = this.rooms[i].rect, cam = this.cameras.main;
     this.index = i;
-    rules.max = WORLD_SOULS[this.rooms[i].world] ?? rules.max;
+    rules.max = this.treePower ? 3 : WORLD_SOULS[this.rooms[i].world] ?? rules.max;
     Dialogue.play(this, this.rooms[i].enter);
     this.roomDeaths = 0;
     this.corpses.forEach((c) => c.destroy());
@@ -1234,7 +1272,7 @@ class Room extends Phaser.Scene {
     p.body.reset(this.start.x, y);
     p.setVisible(false);
     this.dead = RESPAWN_DELAY;
-    if (this.boss) { this.boss.hp = BOSS_HP; this.boss.hurt = 0; } // your death heals the boss
+    if (this.boss) { this.boss.hp = BOSS_HP; this.boss.hurt = 0; if (this.boss.kind === 'tree') { this.boss.phase = 'idle'; this.boss.timer = 2; this.boss.attack = 0; this.boss.pods.forEach((p) => p.r.destroy()); this.boss.pods = []; } } // your death heals the boss
     if (this.rooms[this.index].world) Dialogue.play(this, 'firstDeath'); // only the first time
     const hint = this.rooms[this.index].deathTalk?.[++this.roomDeaths]; // hints after repeated deaths in a room
     if (hint) Dialogue.play(this, hint);
@@ -1296,6 +1334,7 @@ class Room extends Phaser.Scene {
     const g = this.fx, b = this.player.body, p = this.player;
     g.clear();
     for (const c of this.corpses) {
+      if (c.buried > 0) { g.fillStyle(0x69cfff, 0.5).fillRect(c.x - 15, c.y + c.height / 2 - 4, 30, 4); continue; }
       if (c.sprites) this.soulFlames(g, c, t);
       else this.figure(g, c, { lying: c.lying, dir: c.dir, t, soul: true });
     }
@@ -1526,6 +1565,13 @@ class Room extends Phaser.Scene {
 
   drawHazards() {
     const g = this.fx, t = this.time.now / 1000;
+    const B = this.boss;
+    if (B?.kind === 'tree' && !B.hidden) {
+      if (B.phase === 'slam') {
+        g.lineStyle(3, 0x69cfff, 1).strokeCircle(B.aimX, B.target?.y ?? B.floor - 16, 24);
+        g.lineBetween(B.r.x, B.r.y, B.aimX, B.target?.y ?? B.floor);
+      } else if (B.phase === 'swing') g.fillStyle(0xffd76a, 0.35).fillRect(B.r.x - 12 * T, B.floor - 24, 16 * T, 24);
+    }
     for (const sw of this.saws) {
       if (sw.room !== this.index) continue;
       g.fillStyle(0x8a8f99, 1).fillCircle(sw.x, sw.y, SAW_R);
@@ -1539,7 +1585,11 @@ class Room extends Phaser.Scene {
   }
 
   updateBoss(dt) {
+    for (const c of this.corpses) if (c.buried > 0 && (c.buried -= dt) <= 0) {
+      c.buried = 0; c.body.enable = true; c.setAlpha(1); c.sprites?.forEach((s) => s.setAlpha(0.6));
+    }
     const B = this.boss;
+    if (B?.kind === 'tree') return this.updateTree(B, dt);
     if (B?.img) B.img.setPosition(B.r.x, B.r.y).setVisible(B.r.visible).setAlpha(B.r.alpha).setFlipX(B.dir > 0) // sheet faces left
       .setFrame(B.pose ?? MOTH_FRAMES[Math.floor((this.time.now / 1000) * MOTH_FPS) % MOTH_FRAMES.length]);
     if (!B || B.hidden) return;
@@ -1549,15 +1599,63 @@ class Room extends Phaser.Scene {
     B.r.setAlpha(B.hurt > 0 ? 0.4 : 1);
   }
 
+  updateTree(B, dt) {
+    const pose = B.hidden ? 'intro' : ['swing', 'slam', 'throw', 'intro'].includes(B.phase) ? B.phase : 'idle';
+    if (B.img && this.textures.exists(`tree-${pose}`)) {
+      const tex = this.textures.get(`tree-${pose}`), info = this.cache.json.get(`tree-${pose}-frames`);
+      const fw = info?.frameWidth || tex.getSourceImage().width, fh = info?.frameHeight || tex.getSourceImage().height;
+      const count = Math.max(1, Math.floor(tex.getSourceImage().width / fw));
+      if (!tex.has(0)) for (let i = 0; i < count; i++) tex.add(i, 0, i * fw, 0, fw, fh);
+      B.img.setTexture(`tree-${pose}`, B.hidden ? 0 : Math.floor(this.time.now / 140) % count).setScale(224 / fh).setAlpha(B.hidden && B.hp <= 0 ? B.r.alpha : 1);
+      B.img.setTint(B.hidden && B.hp <= 0 ? 0xffffff : B.phase === 'slam' ? 0x69cfff : B.phase === 'swing' || B.phase === 'throw' ? 0xffd76a : 0xffffff);
+    }
+    if (B.hidden || this.dead > 0 || this.talk.line || this.talk.queue.length || this.transit) return;
+    B.hurt -= dt;
+    if (this.player.body.blocked.down || this.player.body.touching.down) B.stompReady = true;
+    const p = this.player, feet = p.y + p.height / 2;
+    for (const pod of [...B.pods]) {
+      pod.vy += 700 * dt; pod.r.x += pod.vx * dt; pod.r.y += pod.vy * dt;
+      const blocked = this.corpses.some((c) => !c.buried && hit(bounds(c), bounds(pod.r)));
+      const landed = pod.r.y >= B.floor - 8;
+      if (!blocked && (hit(bounds(p), bounds(pod.r)) || landed && Math.abs(p.x - pod.r.x) < 38 && feet > B.floor - 28)) return this.die();
+      if (blocked || landed) { pod.r.destroy(); B.pods.splice(B.pods.indexOf(pod), 1); }
+    }
+    if ((B.timer -= dt) > 0) return;
+    const gap = 8 * Math.pow(0.8, BOSS_HP - B.hp);
+    if (B.phase === 'idle' || B.phase === 'intro') {
+      B.attack = (B.attack + 1) % 3;
+      B.phase = B.attack === 0 ? 'slam' : B.attack === 1 ? 'swing' : 'throw';
+      B.timer = B.phase === 'slam' ? TREE_GLOW : 0.6;
+      if (B.phase === 'slam') {
+        B.target = [...this.corpses].sort((a, b) => Math.hypot(a.x - p.x, a.y - p.y) - Math.hypot(b.x - p.x, b.y - p.y))[0];
+        B.aimX = B.target?.x ?? p.x;
+      }
+      return;
+    }
+    if (B.phase === 'slam') {
+      const c = B.target;
+      if (c?.active) { c.buried = TREE_BURIED; c.body.enable = false; c.setAlpha(0.15); c.sprites?.forEach((s) => s.setAlpha(0.1)); }
+      this.cameras.main.shake(180, 0.005);
+      if (feet > B.floor - 24 || Math.abs(p.x - B.aimX) < 28 && feet > (c?.y ?? B.floor) - 40) this.die();
+    } else if (B.phase === 'swing') {
+      if (p.x > B.r.x - 12 * T && p.x < B.r.x + 4 * T && feet > B.floor - 24) this.die();
+    } else if (B.phase === 'throw') {
+      const r = this.textures.exists('seedPod') ? this.add.image(B.r.x, B.r.y, 'seedPod').setDisplaySize(20, 20) : this.add.rectangle(B.r.x, B.r.y, 20, 20, 0xffd76a);
+      B.pods.push({ r, vx: (p.x - B.r.x) / 0.9, vy: (B.floor - 10 - B.r.y - 350 * 0.81) / 0.9 });
+    }
+    B.timer = (gap - TREE_GLOW - 1.2) / 3; B.phase = 'idle';
+  }
+
   // Returns true if the player died. Feet in the boss's top sliver is a stomp (also covers the
   // bounce frames after it); any other touch kills.
   touchBoss() {
     const B = this.boss, p = this.player;
     if (!B || B.hidden || !hit(bounds(p), bounds(B.r))) return false;
-    const top = B.r.y - BOSS_H / 2;
+    const top = bounds(B.r).top;
     if (p.y + 15 - top > 14) { this.die(); return true; }
     p.body.velocity.y = -JUMP * 0.8;
-    if (B.hurt > 0) return false;
+    if (B.hurt > 0 || B.kind === 'tree' && B.stompReady === false) return false;
+    if (B.kind === 'tree') B.stompReady = false;
     B.hurt = 0.5;
     if (--B.hp <= 0 && B.story) { // a story boss stops still; its script dissolves it (cue 'absorb')
       B.hidden = true;
@@ -1637,7 +1735,7 @@ class Room extends Phaser.Scene {
     if (!(k.K.isDown || k.X.isDown)) this.sdLock = false, this.charge = 0;
     else if (!this.sdLock && (rules.selfDestruct || world >= 2) && (this.charge += ms / 1000) >= SD_HOLD) { this.sdLock = true; return this.die(); }
     // Recall: a tap takes back the newest soul; holding keeps going, faster and faster.
-    if ((rules.recall || world >= 3) && k.Q.isDown) {
+    if ((rules.recall || world >= 3 || this.treePower) && k.Q.isDown) {
       if (JD(k.Q)) { this.recallGap = RECALL_GAP; this.recallT = 0; }
       if ((this.recallT -= ms / 1000) <= 0) { // real time, like the physics (dt is capped)
         this.corpses.pop()?.destroy();
