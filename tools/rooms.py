@@ -85,6 +85,7 @@ def ladder(o, p):
     # Safe staircase, then bank the climb before dropping to the spike approach.
     o(1, 1, 9, 15); o(10, 1, 14, 8); p(12, 8, 'C')
     o(15, 1, 23, 15); o(24, 1, 28, 8)
+    o(16, 1, 16, 11, '#')  # descend before approaching the spike stairs
     # Both offset souls are also the bridge; a third death removes the lower step.
     o(21, 16, 23, 16, '^')
     o(0, 14, 0, 15); o(29, 7, 29, 8); p(1, 15, 'P')
@@ -95,6 +96,7 @@ def beam(o, p):
     o(1, 1, 10, 15); o(11, 1, 14, 7); p(11, 11, '<'); p(13, 7, 'C')
     # B: the lower step must also hold the door; a third death removes it.
     o(15, 1, 24, 15); o(25, 1, 28, 7); p(25, 11, '<')
+    o(16, 1, 16, 12, '#')  # sheltered drop beside the shrine
     p(23, 15, '#'); p(23, 14, '_'); o(27, 1, 27, 7, 'D')
     o(0, 14, 0, 15); o(29, 6, 29, 7); p(1, 15, 'P')
 room('The beam', [406, 92], 30, 17, 2, '8-high ledge: jump into the laser right next to its source; that death is the high step and leaves no beam', beam)
@@ -104,6 +106,7 @@ def spring(o, p):
     o(1, 1, 10, 15); o(11, 1, 14, 6); p(6, 15, 's'); p(13, 6, 'C')
     # The second landing must also shield the launch from the laser.
     o(15, 1, 24, 15); o(25, 1, 28, 6); p(20, 15, 's'); p(25, 9, '<')
+    o(16, 1, 16, 10, '#')  # drop under the beam before launching
     o(0, 14, 0, 15); o(29, 5, 29, 6); p(1, 15, 'P')
 room('The spring', [436, 84], 30, 17, 2, '9-high ledge: hold during the launch so a soul hangs beside the spring, then land on it', spring)
 

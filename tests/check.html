@@ -394,11 +394,45 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
       rules.max === (WORLD_SOULS[s.rooms[s.index].world] ?? defaultRules.max), `${name}: clean replay state`);
     return s;
   };
+  // Continue from the current checkpoint instead of resetting across a descent or hazard.
+  const walkTo = async (tx) => {
+    const s = room(), goal = O().x + tx * 32 + 16;
+    const dir = s.player.x < goal ? 39 : 37, back = dir === 39 ? 37 : 39;
+    key('keydown', dir);
+    await until(() => dir === 39 ? s.player.x >= goal - 18 : s.player.x <= goal + 18, 6000, 'walk to ' + tx);
+    key('keyup', dir); key('keydown', back);
+    await until(() => dir === 39 ? s.player.body.velocity.x <= 0 : s.player.body.velocity.x >= 0, 2000, 'brake');
+    key('keyup', back);
+  };
+  const jumpTo = async (tx) => {
+    const s = room();
+    const started = s.time.now;
+    key('keydown', 32); await walkTo(tx);
+    await until(() => s.time.now - started >= 650, 2000, 'held jump');
+    key('keyup', 32);
+    await until(() => s.player.body.blocked.down || s.player.body.touching.down || s.dead > 0, 2500, 'land');
+    await wait(100);
+    return { x: (s.player.x - O().x) / 32, h: 16 - (s.player.y + 15 - O().y) / 32 };
+  };
+  const descend = async (tx) => {
+    const s = room(), deaths = stats.deaths;
+    await walkTo(15.5);
+    await until(() => s.player.y + 15 > O().y + 15.9 * 32, 2500, 'sheltered descent');
+    await walkTo(tx);
+    check(stats.deaths === deaths, s.rooms[s.index].name + ': walk from the shrine to the approach without a beam death');
+  };
+  const sacrifice = async () => {
+    const deaths = stats.deaths;
+    key('keydown', 75);
+    await until(() => stats.deaths > deaths);
+    key('keyup', 75); await alive();
+  };
   if (matches('The tree guardian')) {
     stats.treePower = false;
     s = await cleanSolveRoom('The tree guardian');
     const floor = O().y + 16 * 32;
-    await place(21, 0); await place(13, 0);
+    await walkTo(21); await sacrifice();
+    await walkTo(13); await sacrifice();
     const B = s.boss, step = s.corpses[0], decoy = s.corpses[1];
     let buriedAt, recoveredAt;
     const observeBurial = () => {
@@ -407,14 +441,20 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     };
     s.events.on('update', observeBurial);
     // Start each lure at the decoy; the approach and both jumps use real physics.
-    B.phase = 'idle'; B.attack = 2; B.timer = 0.1;
+    await walkTo(11);
+    await jumpTo(13);
     const lure = async () => {
       await until(() => B.phase === 'slam');
-      s.player.body.reset(decoy.x, floor - 48);
       check(B.target === decoy, 'tree: glow locks the decoy');
       const started = s.time.now;
       key('keydown', 39);
+      if (s.player.y + 15 > floor - 24 && !(decoy.buried > 0.3)) {
+        key('keydown', 32);
+        await until(() => s.player.x > decoy.x + 1.5 * 32);
+        key('keyup', 32);
+      }
       await until(() => s.player.x > step.x - 3 * 32);
+      await until(() => s.player.body.blocked.down || s.player.body.touching.down, 1500, 'land before the step jump');
       key('keydown', 32);
       await until(() => s.player.x >= step.x - 18);
       key('keyup', 39); key('keydown', 37);
@@ -423,7 +463,8 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
       await until(() => s.player.body.blocked.down || s.dead > 0, 2000);
       const spare = B.timer;
       check(s.dead <= 0 && spare > 0.25 && spare < 0.85, `tree: reaches step with spare warning (${spare.toFixed(2)}s, ${s.time.now - started}ms)`);
-      await until(() => decoy.buried > 0);
+      await until(() => B.phase !== 'slam' || s.dead > 0);
+      check(s.dead <= 0 && decoy.buried > 0 && B.slamOpen, 'tree: survive this slam on the kept step');
       const hp = B.hp;
       key('keydown', 32); await wait(180); key('keydown', 39);
       await until(() => s.player.x > B.r.x - 12 || s.dead > 0);
@@ -435,15 +476,15 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
       check(B.hp === hp - 1 && s.dead <= 0, `tree: stomp after decoy slam (${B.hp} hp)`);
     };
     for (let cycle = 0; cycle < 3; cycle++) {
-      // Nearest to the decoy at lock; reposition there to replay the approach.
-      s.player.body.reset(decoy.x, floor - 48);
       await lure();
       if (cycle === 2) break;
-      s.player.body.reset(O().x + 4 * 32, floor - 16);
+      // React to the yellow warning, then lead the pod left and run underneath it.
+      key('keydown', 37);
+      await until(() => B.phase === 'swing' && B.timer < 0.35 && (s.player.body.blocked.down || s.player.body.touching.down), 4000, 'return swing warning');
+      await jumpTo(10);
       await until(() => B.pods.length > 0);
-      // The pod is aimed left; get back to the decoy before the next blue glow.
-      s.player.body.reset(decoy.x, floor - 48);
-
+      await walkTo(12);
+      await until(() => B.phase === 'slam');
     }
     s.events.off('update', observeBurial);
     check(recoveredAt - buriedAt >= 4900 && recoveredAt - buriedAt < 5200, `tree: buried soul returns after five seconds (${recoveredAt - buriedAt}ms)`);
@@ -458,15 +499,42 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
 
     stats.treePower = false;
     s = await cleanSolveRoom('The tree guardian');
-    await place(21, 0); await place(13, 0);
+    await walkTo(21); await sacrifice();
+    await walkTo(13); await sacrifice();
     const tree = s.boss, target = s.corpses[0], deaths = stats.deaths;
-    s.player.body.reset(target.x, floor - 48);
-    tree.phase = 'idle'; tree.attack = 2; tree.timer = 0.1;
+    await walkTo(11);
+    await jumpTo(13);
+    await walkTo(18);
+    await jumpTo(21);
     await until(() => tree.phase === 'slam');
     check(tree.target === target, 'tree: standing on step targets the step');
     tree.hp = 1;
     await until(() => stats.deaths > deaths, 3000);
     check(stats.deaths > deaths && tree.hp === 3, 'tree: staying on targeted soul kills and heals');
+  }
+
+  if (matches('The tree guardian')) {
+    s = await cleanSolveRoom('The tree guardian');
+    await walkTo(21); await sacrifice();
+    const B = s.boss, deaths = stats.deaths;
+    check(B.timer > 3.7 && B.attack === 2, 'tree: respawn gives four seconds before the blue warning');
+    await walkTo(18);
+    await jumpTo(21);
+    check(stats.deaths === deaths, 'tree: the respawn run reaches the step before any swing');
+    let minHP = B.hp;
+    const watchRush = () => { minHP = Math.min(minHP, B.hp); };
+    s.events.on('update', watchRush);
+    key('keydown', 32); await wait(180); await walkTo(23); await wait(1200); key('keyup', 32);
+    s.events.off('update', watchRush);
+    check(minHP === 3, 'tree: repeated one-soul rush stomps cannot damage the mask before a decoy slam');
+    await alive();
+    s = await cleanSolveRoom('The tree guardian');
+    const deathsBeforeJump = stats.deaths;
+    await until(() => s.boss.phase === 'slam' && s.boss.timer < 0.2);
+    key('keydown', 32);
+    await until(() => stats.deaths > deathsBeforeJump, 1500);
+    key('keyup', 32); await alive();
+    check(stats.deaths === deathsBeforeJump + 1, 'tree: jumping from the floor cannot dodge a slam without a decoy and step');
   }
 
   const solve = async (name, souls, hops, floor = 16) => {
@@ -490,6 +558,9 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
         `The gatehouse: walker from the right leaves a soul on plate ${tx}`);
     };
     await onPlate(7);
+    const gateDoors = s.doors.filter((d) => d.room === s.index);
+    check(gateDoors.every((d) => d.body.enable === (d.x > O().x + 20 * 32)),
+      'The gatehouse: the first plate opens only the first pen');
     const a = await hop(5, 0, 16, 7);
     check(a.h >= 0.95, 'The gatehouse: jump onto the first plate soul');
     const b = await hop(7, 1, 16, 12);
@@ -730,17 +801,27 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     s = room();
     check(s.start === s.shrines.find((sh) => O().contains(sh.x, sh.y))?.spawn,
       'The ladder: the safe staircase reaches the shrine');
+    await place(14, 7);
+    await jumpTo(14);
+    key('keydown', 32); key('keydown', 39); await wait(900);
+    key('keyup', 32); key('keyup', 39); await wait(500);
+    check(s.player.x < O().x + 24 * 32,
+      'The ladder: one soul off the shrine cannot bridge over the hanging wall');
     // Stage two: the lower stair hangs over spikes instead of safe ground.
     await place(22, 2);
     await place(23, 3);
-    const a = await hop(20, 0, 16, 22);
-    const b = await hop(22, 3, 16, 23);
-    const c = await hop(23, 4, 16, 24);
+    await descend(20);
+    const a = await jumpTo(22);
+    const b = await jumpTo(23);
+    const c = await jumpTo(24);
     check(a.h >= 2.95 && b.h >= 3.95 && c.h >= 6.95,
       'The ladder: airborne stairs bridge the spikes and climb the second ledge');
     await place(18, 0);
     const deaths = stats.deaths;
-    await hop(20, 0, 16, 22);
+    await descend(17);
+    await jumpTo(20);
+    key('keydown', 32); key('keydown', 39); await wait(1100);
+    key('keyup', 32); key('keyup', 39); await alive();
     check(stats.deaths > deaths && s.start.x > O().x + 11 * 32,
       'The ladder: an extra death erases the bridge; the next approach falls into spikes and returns to the shrine');
   }
@@ -752,14 +833,15 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
       'The beam: shield staircase reaches the shrine');
     await place(23, 1);
     await place(24, 4);
-    const a = await hop(22, 0, 16, 23);
-    const b = await hop(23, 2, 16, 24);
-    const c = await hop(24, 5, 16, 25);
+    await descend(22);
+    const a = await jumpTo(23);
+    const b = await jumpTo(24);
+    const c = await jumpTo(25);
     const doors = s.doors.filter((d) => d.room === s.index);
     check(a.h >= 1.95 && b.h >= 4.95 && c.h >= 7.95,
       'The beam: plate step and laser shield climb the second ledge');
     check(doors.every((d) => !d.body.enable), 'The beam: the lower step holds the exit open');
-    const exit = await hop(25, 8, 16, 28);
+    const exit = await jumpTo(28);
     check(exit.x >= 27.6 && exit.h >= 7.95, 'The beam: cross the held exit door');
     await place(18, 0);
     check(doors.every((d) => d.body.enable), 'The beam: careless third death erases the plate weight and closes the exit');
@@ -788,16 +870,28 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     s = room();
     check(s.start === s.shrines.find((sh) => O().contains(sh.x, sh.y))?.spawn,
       'The spring: the first spring climb reaches the shrine');
+    await place(14, 9);
+    await jumpTo(14);
+    key('keydown', 32); key('keydown', 39); await wait(900);
+    key('keyup', 32); key('keyup', 39); await wait(500);
+    check(s.player.x < O().x + 25 * 32,
+      'The spring: one shrine-edge soul cannot bypass the spring and shield');
+    await place(17, 5);
     await place(23, 6);
-    const launch = await hop(20, 0, 16, 23);
-    const ledge = await hop(23, 7, 16, 25);
-    const exit = await hop(25, 9, 16, 28);
+    await descend(19);
+    await walkTo(20);
+    const launch = await jumpTo(23);
+    const ledge = await jumpTo(25);
+    const exit = await jumpTo(28);
     check(launch.h >= 6.95 && ledge.h >= 8.95 && exit.h >= 8.95,
       'The spring: the second landing soul shields the spring and reaches the exit');
     await place(17, 0);
     await place(18, 0);
     const deaths = stats.deaths;
-    await hop(20, 0, 16, 23);
+    await descend(15.5);
+    await jumpTo(19);
+    await walkTo(20);
+    key('keydown', 39); await wait(900); key('keyup', 39);
     await alive();
     check(stats.deaths > deaths,
       'The spring: extra deaths erase the high shield and the next launch hits the laser');
@@ -947,20 +1041,26 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     await place(2, 4);
     await place(10, 0);
     const doors = s.doors.filter((d) => d.room === s.index);
+    const exitDoors = doors.filter((d) => d.x > O().x + 27 * 32);
+    check(exitDoors.every((d) => d.body.enable), 'Wrong order: the first plate never opens the exit');
     const a = await hop(6.4, 0, 16, 10);
     const b = await hop(10, 1, 16, 15);
     check(a.h >= 0.95 && b.x >= 14.6 && s.start === s.shrines.find((sh) => O().contains(sh.x, sh.y))?.spawn,
       'Wrong order: replace the approach step with the bridge and reach the shrine');
     await place(22, 6);
-    const launch = await hop(20, 0, 16, 22);
-    const high = await leftHop(22, 7, 18);
+    await walkTo(19);
+    await walkTo(20);
+    const launch = await jumpTo(22);
+    const high = (await jumpTo(18)).h;
     check(launch.h >= 6.95 && high >= 8.95,
       `Wrong order: temporary spring landing reaches the nine-high plate (${JSON.stringify({launch, high})})`);
     await place(17, 9);
     await place(24, 6);
-    const shield = await hop(20, 0, 16, 24);
-    const exit = await hop(24, 7, 16, 28.5);
-    check(shield.h >= 6.95 && exit.x >= 28 && doors.every((d) => !d.body.enable),
+    await walkTo(19);
+    await walkTo(20);
+    const shield = await jumpTo(24);
+    const exit = await jumpTo(28.5);
+    check(shield.h >= 6.95 && exit.x >= 28 && exitDoors.every((d) => !d.body.enable),
       `Wrong order: replace the temporary landing with the laser shield and cross to the held exit (${JSON.stringify({shield, exit, doors: doors.map(d => d.body.enable), deaths: stats.deaths})})`);
     await place(21, 0);
     check(doors.every((d) => d.body.enable),
@@ -1027,6 +1127,8 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     s = await cleanSolveRoom('Three jobs');
     // Stage A: three separate jobs, then a real jump through the door to the shrine.
     for (const [x, b] of [[4, 0], [9, 0], [13, 2]]) await place(x, b, 8);
+    check(s.doors.filter((d) => d.room === s.index).every((d) => d.body.enable === (d.x > O().x + 20 * 32)),
+      'Three jobs: the first plate does not open the second stage');
     const aDeaths = stats.deaths;
     for (const [x, top, to, height] of [[5, 0, 9, 1], [9, 1, 13, 0], [13, 0, 16, -7]]) {
       const r = await hop(x, top, 8, to);

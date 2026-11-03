@@ -503,17 +503,17 @@ const ROOMS = [
   ], [346, 107], { world: 2 }],
   ["The ladder", [ // 7-high ledge: stack to 3, then run off your top soul holding K for a step beside it
     '##############################',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                             ',
-    '#           C                 ',
-    '#         #####         ######',
-    '#         #####         ######',
-    '#         #####         ######',
+    '#               #            #',
+    '#               #            #',
+    '#               #            #',
+    '#               #            #',
+    '#               #            #',
+    '#               #            #',
+    '#               #             ',
+    '#           C   #             ',
+    '#         ##### #       ######',
+    '#         ##### #       ######',
+    '#         ##### #       ######',
     '#         #####         ######',
     '#         #####         ######',
     '          #####         ######',
@@ -522,18 +522,18 @@ const ROOMS = [
   ], [376, 99], { world: 2 }],
   ["The beam", [ // 8-high ledge: jump into the laser right next to its source; that death is the high step and leaves no beam
     '##############################',
-    '#                          D #',
-    '#                          D #',
-    '#                          D #',
-    '#                          D #',
-    '#                          D #',
-    '#                          D  ',
-    '#            C             D  ',
-    '#          ####          #####',
-    '#          ####          #####',
-    '#          ####          #####',
-    '#          <###          <####',
-    '#          ####          #####',
+    '#               #          D #',
+    '#               #          D #',
+    '#               #          D #',
+    '#               #          D #',
+    '#               #          D #',
+    '#               #          D  ',
+    '#            C  #          D  ',
+    '#          #### #        #####',
+    '#          #### #        #####',
+    '#          #### #        #####',
+    '#          <### #        <####',
+    '#          #### #        #####',
     '#          ####          #####',
     '           ####        _ #####',
     ' P         ####        # #####',
@@ -541,16 +541,16 @@ const ROOMS = [
   ], [406, 92], { world: 2 }],
   ["The spring", [ // 9-high ledge: hold during the launch so a soul hangs beside the spring, then land on it
     '##############################',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                             ',
-    '#            C                ',
-    '#          ####          #####',
-    '#          ####          #####',
-    '#          ####          <####',
-    '#          ####          #####',
+    '#               #            #',
+    '#               #            #',
+    '#               #            #',
+    '#               #            #',
+    '#               #             ',
+    '#            C  #             ',
+    '#          #### #        #####',
+    '#          #### #        #####',
+    '#          #### #        <####',
+    '#          #### #        #####',
     '#          ####          #####',
     '#          ####          #####',
     '#          ####          #####',
@@ -972,7 +972,7 @@ class Room extends Phaser.Scene {
                 }
               } else if (extra.boss === 'tree') {
                 const B = this.bosses.at(-1);
-                Object.assign(B, { kind: 'tree', story: 'treeDown', hidden: !Dialogue.seen.has('tree'), phase: 'idle', timer: 2, attack: 0, pods: [] });
+                Object.assign(B, { kind: 'tree', story: 'treeDown', hidden: !Dialogue.seen.has('tree'), phase: 'idle', timer: 4, attack: 2, pods: [] });
                 B.r.setDisplaySize(64, 64).setPosition(x + 16, y + T - 96).setVisible(!B.hidden);
                 B.floor = y + T;
                 if (this.textures.exists('tree-idle')) {
@@ -1017,6 +1017,13 @@ class Room extends Phaser.Scene {
       });
       return room;
     });
+    // Shrines separate plate puzzles; adjacent plates in one stage share its doors.
+    for (const d of this.doors) {
+      const R = this.rooms[d.room].rect;
+      const shrines = this.shrines.filter((sh) => R.contains(sh.x, sh.y));
+      const stage = (x) => shrines.filter((sh) => sh.x < x).length;
+      d.plates = this.plates.filter((pl) => pl.room === d.room && stage(pl.x) === stage(d.x));
+    }
     // Fill a screen's height of solid ground above and below every room (stopping at any other room),
     // so the camera's diagonal slide between rooms at different heights never shows empty space.
     for (const { rect: R } of this.rooms) {
@@ -1369,7 +1376,7 @@ class Room extends Phaser.Scene {
     this.dead = RESPAWN_DELAY;
     if (this.boss) { this.boss.hp = BOSS_HP; this.boss.hurt = 0;
       if (this.boss.stag) { this.boss.deaths++; this.boss.phase = 'setup'; this.boss.clock = 0; this.boss.waveClock = 0; this.boss.wave = null; this.boss.beam = null; }
-      if (this.boss.kind === 'tree') { this.boss.phase = 'idle'; this.boss.timer = 2; this.boss.attack = 0; this.boss.pods.forEach((p) => p.r.destroy()); this.boss.pods = []; }
+      if (this.boss.kind === 'tree') { this.boss.phase = 'idle'; this.boss.timer = 4; this.boss.attack = 2; this.boss.slamOpen = false; this.boss.pods.forEach((p) => p.r.destroy()); this.boss.pods = []; }
     } // your death heals the boss
     if (this.boss?.story === 'mothDown' && !this.boss.hidden) {
       this.boss.dust = 2.4;
@@ -1816,11 +1823,12 @@ class Room extends Phaser.Scene {
     }
     if (B.phase === 'slam') {
       const c = B.target;
+      B.slamOpen = !!c?.active;
       if (c?.active) { c.buried = TREE_BURIED; c.body.enable = false; c.setAlpha(0.15); c.sprites?.forEach((s) => s.setAlpha(0.1)); }
       this.cameras.main.shake(180, 0.005);
-      if (feet > B.floor - 24 || Math.abs(p.x - B.aimX) < 28 && feet > (c?.y ?? B.floor) - 40) this.die();
+      if (!this.corpses.some((soul) => !soul.buried && Math.abs(feet - bounds(soul).top) < 3 && Math.abs(p.x - soul.x) < (p.width + soul.width) / 2) || Math.abs(p.x - B.aimX) < 28 && feet > (c?.y ?? B.floor) - 40) return this.die();
     } else if (B.phase === 'swing') {
-      if (p.x > B.r.x - 12 * T && p.x < B.r.x + 4 * T && feet > B.floor - 24) this.die();
+      if (p.x > B.r.x - 12 * T && p.x < B.r.x + 4 * T && feet > B.floor - 24) return this.die();
     } else if (B.phase === 'throw') {
       const r = this.textures.exists('seedPod') ? this.add.image(B.r.x, B.r.y, 'seedPod').setDisplaySize(20, 20) : this.add.rectangle(B.r.x, B.r.y, 20, 20, 0xffd76a);
       B.pods.push({ r, vx: (p.x - B.r.x) / 0.9, vy: (B.floor - 10 - B.r.y - 350 * 0.81) / 0.9 });
@@ -1837,9 +1845,9 @@ class Room extends Phaser.Scene {
     const top = bounds(B.r).top;
     if (p.y + 15 - top > 14) { this.die(); return true; }
     p.body.velocity.y = -JUMP * 0.8;
-    if (B.hurt > 0 || (B.stag && B.stomped) || (B.kind === 'tree' && B.stompReady === false)) return false;
+    if (B.hurt > 0 || (B.stag && B.stomped) || (B.kind === 'tree' && (B.stompReady === false || !B.slamOpen || !B.target?.buried))) return false;
     if (B.stag) { B.stomped = true; B.clock = Math.min(B.clock, 0.5); }
-    if (B.kind === 'tree') B.stompReady = false;
+    if (B.kind === 'tree') { B.stompReady = false; B.slamOpen = false; }
     B.hurt = 0.5;
     if (B.story === 'mothDown') {
       B.dust = 2.4 * 0.8 ** (BOSS_HP - B.hp + 1);
@@ -1885,7 +1893,7 @@ class Room extends Phaser.Scene {
 
     const weights = [p, ...this.corpses].map(bounds);
     for (const d of this.doors) {
-      const held = this.plates.some((pl) => pl.room === d.room && weights.some((w) => hit(w, bounds(pl))));
+      const held = d.plates.some((pl) => weights.some((w) => hit(w, bounds(pl))));
       d.body.enable = !held;
       d.setAlpha(held ? 0.2 : 1);
     }
