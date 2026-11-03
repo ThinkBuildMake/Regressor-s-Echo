@@ -11,6 +11,9 @@
 const errors = [];
 window.onerror = (m) => errors.push(m);
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const only = (new URLSearchParams(location.search).get('only') || '').toLowerCase().split(',').map((s) => s.trim()).filter(Boolean);
+const matches = (name) => !only.length || only.some((part) => name.toLowerCase().includes(part));
+const defaultRules = { ...rules };
 const near = (a, b) => Math.abs(a - b) < 1.5;
 const room = () => game.scene.getScene('room');
 const O = () => room().rooms[room().index].rect; // current room's top-left in the world
@@ -33,219 +36,275 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   const fails = [];
   const check = (ok, msg) => ok || fails.push(msg);
   while (!room()?.player) await wait(100);
+  // Full runs have already seen this before the World 2/3 mechanic checks.
+  if (only.length) Dialogue.seen.add('firstDeath');
+  let s;
+  // Walk the inserted chain in ROOMS order and compare every doorway row in world space.
+  for (const [from, to] of [
+    ['The gatehouse', 'Thornwood'], ['Thornwood', 'The moth'],
+    ['Wrong order', 'Sawmill'], ['Sawmill', 'Three high'],
+    ['Everything', 'Reliquary'], ['Reliquary', 'End of the greybox'],
+  ]) {
+    if (!matches(from) && !matches(to)) continue;
+    const i = ROOMS.findIndex(([name]) => name === from);
+    const j = ROOMS.findIndex(([name]) => name === to);
+    const [, a, [ax, ay]] = ROOMS[i], [, b, [bx, by]] = ROOMS[j];
+    const width = Math.max(30, ...a.map((row) => row.length));
+    const opening = (rows, x, y) => rows.flatMap((row, r) =>
+      row[x] !== undefined && row[x] !== '#' ? [y + r] : []);
+    const exit = opening(a, width - 1, ay), entrance = opening(b, 0, by);
+    check(j === i + 1 && ax + width === bx && exit.length >= 2 &&
+      JSON.stringify(exit) === JSON.stringify(entrance), `${from} → ${to}: consecutive rooms with matching doorways`);
+  }
+  for (const [name, world] of [['Thornwood', 1], ['Sawmill', 2], ['Reliquary', 3]]) {
+    if (!matches(name)) continue;
+    check(ROOMS.find(([n]) => n === name)[3]?.world === world, `${name}: world ${world}`);
+  }
   rules.freeze = false;                              // most checks below cover falling bodies
-  await go(0);
-  await wait(300);
-  let s = room();
-  const feet = s.player.y + 15;
-  s.die();                                           // die on the start point
-  await wait(600);
-  await alive();
-  const a = s.corpses[0];
-  check(near(a.y + 16, feet) && a.x === s.start.x, `body rests on floor (${a.x},${a.y})`);
-  check(s.player.y + 15 <= a.y - 16 + 1.5, `respawn lands on top of body (${s.player.y})`);
-  s.die();                                           // player is now standing on body 1
-  await wait(600);
-  await alive();
-  const b = s.corpses[1];
-  check(near(b.y, a.y - 32) && b.x === a.x, `second body stacks (${b.x},${b.y})`);
-  s.corpses.shift().destroy();                       // remove the base
-  await wait(600);
-  check(near(b.y + 16, feet), `stack falls when base vanishes (${b.y})`);
+  if (matches(ROOMS[0][0])) {
+    await go(0);
+    await wait(300);
+    s = room();
+    const feet = s.player.y + 15;
+    s.die();                                           // die on the start point
+    await wait(600);
+    await alive();
+    const a = s.corpses[0];
+    check(near(a.y + 16, feet) && a.x === s.start.x, `body rests on floor (${a.x},${a.y})`);
+    check(s.player.y + 15 <= a.y - 16 + 1.5, `respawn lands on top of body (${s.player.y})`);
+    s.die();                                           // player is now standing on body 1
+    await wait(600);
+    await alive();
+    const b = s.corpses[1];
+    check(near(b.y, a.y - 32) && b.x === a.x, `second body stacks (${b.x},${b.y})`);
+    s.corpses.shift().destroy();                       // remove the base
+    await wait(600);
+    check(near(b.y + 16, feet), `stack falls when base vanishes (${b.y})`);
+  }
 
-  s = await go(0);                     // jump while pressed into a wall, standing on a body
-  s.player.body.reset(O().x + 17 * 32 + 16, s.start.y); // column 17 touches the cliff face
-  s.die();
-  await wait(600);
-  await alive();
-  const standY = s.corpses[0].y - 31;                // standing on the body
-  s.player.body.reset(O().x + 17 * 32 + 16, standY);
-  await wait(200);
-  key('keydown', 39);                                // hold →
-  await wait(150);
-  key('keydown', 32);                                // jump
-  let top = s.player.y;
-  for (let i = 0; i < 20; i++) { await wait(20); top = Math.min(top, s.player.y); }
-  key('keyup', 32); key('keyup', 39);
-  check(standY - top > 80, `full jump against wall (rose ${Math.round(standY - top)}px)`);
+  if (matches(ROOMS[0][0])) {
+    s = await go(0);                     // jump while pressed into a wall, standing on a body
+    s.player.body.reset(O().x + 17 * 32 + 16, s.start.y); // column 17 touches the cliff face
+    s.die();
+    await wait(600);
+    await alive();
+    const standY = s.corpses[0].y - 31;                // standing on the body
+    s.player.body.reset(O().x + 17 * 32 + 16, standY);
+    await wait(200);
+    key('keydown', 39);                                // hold →
+    await wait(150);
+    key('keydown', 32);                                // jump
+    let top = s.player.y;
+    for (let i = 0; i < 20; i++) { await wait(20); top = Math.min(top, s.player.y); }
+    key('keyup', 32); key('keyup', 39);
+    check(standY - top > 80, `full jump against wall (rose ${Math.round(standY - top)}px)`);
+  }
 
-  s = await go(2);                     // plate room
-  const plate = s.plates[0];
-  s.player.body.reset(plate.x, plate.y - 12);
-  await wait(400);
-  check(!s.doors[0].body.enable, 'standing on plate opens door');
-  s.die();
-  await wait(600);
-  await alive();
-  check(!s.doors[0].body.enable, 'body on plate keeps door open');
+  if (matches(ROOMS[2][0])) {
+    s = await go(2);                     // plate room
+    const plate = s.plates[0];
+    s.player.body.reset(plate.x, plate.y - 12);
+    await wait(400);
+    check(!s.doors[0].body.enable, 'standing on plate opens door');
+    s.die();
+    await wait(600);
+    await alive();
+    check(!s.doors[0].body.enable, 'body on plate keeps door open');
+  }
 
-  s = await go(4);                     // walker
-  const e = s.enemies.find((en) => O().contains(en.x, en.y));
-  const ex = O().x + 26 * 32 + 16;                   // under the right-hand hole
-  e.body.reset(ex, e.y); e.dir = 1;
-  s.player.body.reset(ex, O().y + 10 * 32 + 15);     // inside the hole, above the walker
-  s.die();
-  await wait(400);
-  await alive();
-  check(!s.enemies.includes(e), 'falling body crushes walker');
-  s = await go(4);
-  s.player.body.reset(s.enemies.find((e) => O().contains(e.x, e.y)).x - 40, O().y + 11 * 32 + 17); // in the tunnel, in its path
-  await wait(1000);
-  check(s.corpses.length === 1, 'walker kills on touch');
+  if (matches(ROOMS[4][0])) {
+    s = await go(4);                     // walker
+    const e = s.enemies.find((en) => O().contains(en.x, en.y));
+    const ex = O().x + 26 * 32 + 16;                   // under the right-hand hole
+    e.body.reset(ex, e.y); e.dir = 1;
+    s.player.body.reset(ex, O().y + 10 * 32 + 15);     // inside the hole, above the walker
+    s.die();
+    await wait(400);
+    await alive();
+    check(!s.enemies.includes(e), 'falling body crushes walker');
+    s = await go(4);
+    s.player.body.reset(s.enemies.find((e) => O().contains(e.x, e.y)).x - 40, O().y + 11 * 32 + 17); // in the tunnel, in its path
+    await wait(1000);
+    check(s.corpses.length === 1, 'walker kills on touch');
+  }
 
-  s = await go(5);                     // boss
-  const B = s.boss;
-  s.player.body.reset(B.r.x + B.dir * 20, B.r.y - B.r.height / 2 - 16); // feet 1px above its top (a longer fall can sink past the stomp sliver in one slow frame)
-  for (let t = 0; t < 2000 && B.hp === 3; t += 50) await wait(50);
-  check(B.hp === 2, `stomp hurts boss (hp ${B.hp})`);
-  s.die();
-  check(B.hp === 3, 'dying heals boss');
-  await wait(450);                                   // let the respawn delay pass
-  s.player.body.reset(B.r.x, B.r.y + 40);           // under it, jump into its belly
-  s.player.body.velocity.y = -400;
-  await wait(300);
-  check(s.corpses.length === 2, 'touching boss from below kills');
+  if (matches(ROOMS[5][0])) {
+    s = await go(5);                     // boss
+    const B = s.boss;
+    s.player.body.reset(B.r.x + B.dir * 20, B.r.y - B.r.height / 2 - 16); // feet 1px above its top (a longer fall can sink past the stomp sliver in one slow frame)
+    for (let t = 0; t < 2000 && B.hp === 3; t += 50) await wait(50);
+    check(B.hp === 2, `stomp hurts boss (hp ${B.hp})`);
+    s.die();
+    check(B.hp === 3, 'dying heals boss');
+    await wait(450);                                   // let the respawn delay pass
+    s.player.body.reset(B.r.x, B.r.y + 40);           // under it, jump into its belly
+    s.player.body.velocity.y = -400;
+    await wait(300);
+    check(s.corpses.length === 2, 'touching boss from below kills');
+  }
 
-  s = await go(6);                     // slide room
-  key('keydown', 39);                                // run right
-  await wait(250);
-  key('keydown', 83); await wait(50); key('keyup', 83); // S = slide
-  await wait(50);
-  check(s.lying && s.player.height === 14, 'S while running slides flat');
-  key('keyup', 39);
-  await wait(700);
-  check(!s.lying && s.player.height === 30, 'stands back up after slide');
-  s.player.body.reset(O().x + 13 * 32, O().y + 9 * 32); // over the middle of the spike pit
-  s.setLying(true);
-  s.die();
-  await wait(600);
-  await alive();
-  const lb = s.corpses[0];
-  check(lb.width === 62 && near(lb.y - lb.height / 2, O().y + 12 * 32), `lying body lands flush with the floor (top ${lb.y - lb.height / 2})`);
+  if (matches(ROOMS[6][0])) {
+    s = await go(6);                     // slide room
+    key('keydown', 39);                                // run right
+    await wait(250);
+    key('keydown', 83); await wait(50); key('keyup', 83); // S = slide
+    await wait(50);
+    check(s.lying && s.player.height === 14, 'S while running slides flat');
+    key('keyup', 39);
+    await wait(700);
+    check(!s.lying && s.player.height === 30, 'stands back up after slide');
+    s.player.body.reset(O().x + 13 * 32, O().y + 9 * 32); // over the middle of the spike pit
+    s.setLying(true);
+    s.die();
+    await wait(600);
+    await alive();
+    const lb = s.corpses[0];
+    check(lb.width === 62 && near(lb.y - lb.height / 2, O().y + 12 * 32), `lying body lands flush with the floor (top ${lb.y - lb.height / 2})`);
+  }
 
   rules.freeze = true;                               // default: bodies float where you died
-  s = await go(0);
-  s.player.body.reset(O().x + 10 * 32, O().y + 6 * 32); // mid-air
-  s.die();
-  const fy = s.corpses[0].y;
-  await wait(500);
-  check(s.corpses[0].y === fy, 'floating body stays where you died');
+  if (matches(ROOMS[0][0])) {
+    s = await go(0);
+    s.player.body.reset(O().x + 10 * 32, O().y + 6 * 32); // mid-air
+    s.die();
+    const fy = s.corpses[0].y;
+    await wait(500);
+    check(s.corpses[0].y === fy, 'floating body stays where you died');
+  }
 
   rules.freeze = true;
-  s = await go(ROOMS.findIndex((r) => r[0].startsWith('Forest 1')));            // forest 1 → forest 2 through the gap
-  s.player.body.reset(O().x + 5 * 32, O().y + 10 * 32);
-  s.die();                                           // leave a soul in forest 1
-  await wait(450);
-  await alive();
-  const f1 = s.index;
-  s.player.body.reset(O().right - 20, O().y + 15 * 32 + 17); // at the gap in the right wall
-  key('keydown', 39);                                // walk right through it
-  await wait(900);
-  key('keyup', 39);
-  check(s.index === f1 + 1 && !s.transit, `walking through the gap enters the next room (room ${s.index})`);
-  check(s.corpses.length === 0, 'souls stay behind when you change rooms');
-  check(near(s.cameras.main.scrollX, O().x), `camera slid to the new room (${Math.round(s.cameras.main.scrollX)} vs ${O().x})`);
-
-  s = await go(ROOMS.findIndex(([n]) => n.startsWith('Walker')));  // walkers belong to their room
-  const wi = s.index, home = s.walkerSpawns.find((w) => w.room === wi).x + 16;
-  s.enemies[0].destroy(); s.enemies.length = 0;      // as if crushed
-  s.enterRoom(0);
-  check(s.enemies.length === 0, 'leaving a room removes its walkers');
-  s.enterRoom(wi);
-  check(s.enemies.length === 1 && s.enemies[0].x === home, 'coming back puts the walker where it started');
-  await wait(600);
-  check(s.enemies.every((e) => s.rooms[wi].rect.contains(e.x, e.y)), 'walker stays inside its room');
-
-  Dialogue.seen.delete('amulet'); NAMES.guide = '???';  // the amulet cutscene, skipped with Esc
-  s = await go(ROOMS.findIndex(([n]) => n === 'The clearing'));
-  Dialogue.skip(s);                                  // the clearing's opening lines
-  await wait(100);
-  const am = s.amulets[0];
-  s.player.body.reset(am.x, am.y - 4);
-  await wait(200);
-  check(!s.guide.on && (s.talk.line || s.talk.queue.length), 'picking up the amulet starts the cutscene');
-  key('keydown', 27); await wait(80); key('keyup', 27);
-  await wait(1200);
-  check(s.guide.on && s.wearing && NAMES.guide === 'Yourself' && !s.talk.line && !s.talk.queue.length,
-    'Esc skips the cutscene, and the ghost still appears');
-  await wait(2500);
-  check(s.guide.alpha === 0, `the guide fades away after the conversation (alpha ${s.guide.alpha})`);
-  Dialogue.seen.delete('thorns'); Dialogue.play(s, 'thorns');
-  await wait(1000);
-  check(s.guide.alpha > 0.3, `the guide comes back for his next conversation (alpha ${s.guide.alpha})`);
-  Dialogue.skip(s);
-
-  Dialogue.seen.add('chain');
-  s = await go(ROOMS.findIndex(([n]) => n === 'The chain'));  // the way out of The chain is at the top right
-  await alive();
-  s.player.body.reset(O().right - 40, O().y + 9 * 32 + 17);
-  key('keydown', 39); await wait(900); key('keyup', 39);
-  check(s.rooms[s.index].name === 'The long pit', `top right of The chain leads to the long pit (${s.rooms[s.index].name})`);
-
-  Dialogue.seen.delete('moth');                      // the moth: hidden until its intro brings it in
-  s = await go(ROOMS.findIndex(([n]) => n === 'The moth'));
-  check(s.boss?.hidden && !s.boss.r.visible, 'moth hidden before its intro');
-  check(!s.talk.queue.length && !s.talk.line, 'no talking until you walk in');
-  s.player.body.reset(O().x + 8 * 32, O().y + 9 * 32 + 17);
-  await wait(200);
-  check(s.talk.line || s.talk.queue.length, 'walking partway in starts the shaking');
-  for (let i = 0; i < 6 && (s.talk.line || s.talk.queue.length); i++) { Dialogue.update(s, 0, true); Dialogue.update(s, 0, true); }
-  for (let t = 0; t < 40 && s.boss?.hidden; t++) await wait(100); // bursts out, flies in, screams
-  check(s.boss && !s.boss.hidden && s.boss.r.visible, 'moth arrives during the intro');
-  check(!s.textures.exists('mothFly') || s.boss?.img?.active, 'the moth is painted once it arrives');
-  const M = s.boss, mi = s.index;
-  for (let n = 0; n < 8 && M.hp > 0; n++) { // stomp until it's beaten (a stomp during its hurt blink doesn't count)
-    const hp = M.hp;
-    s.player.body.reset(M.r.x + M.dir * 20, M.r.y - M.r.height / 2 - 16);
-    for (let t = 0; t < 2000 && M.hp === hp; t += 50) await wait(50);
-    await wait(700);
+  if (matches(ROOMS.find(([n]) => n.startsWith('Forest 1'))[0])) {
+    s = await go(ROOMS.findIndex((r) => r[0].startsWith('Forest 1')));            // forest 1 → forest 2 through the gap
+    s.player.body.reset(O().x + 5 * 32, O().y + 10 * 32);
+    s.die();                                           // leave a soul in forest 1
+    await wait(450);
+    await alive();
+    const f1 = s.index;
+    s.player.body.reset(O().right - 20, O().y + 15 * 32 + 17); // at the gap in the right wall
+    key('keydown', 39);                                // walk right through it
+    await wait(900);
+    key('keyup', 39);
+    check(s.index === f1 + 1 && !s.transit, `walking through the gap enters the next room (room ${s.index})`);
+    check(s.corpses.length === 0, 'souls stay behind when you change rooms');
+    check(near(s.cameras.main.scrollX, O().x), `camera slid to the new room (${Math.round(s.cameras.main.scrollX)} vs ${O().x})`);
   }
-  check(M.hidden && s.talk.queue.length > 0, 'the last stomp starts the moth ending scene');
-  Dialogue.skip(s);                                  // skipping still dissolves it
-  await wait(200);
-  check(!s.boss && s.gates.every((g) => !g.active || g.room !== mi), `beating the moth opens the vines (hp ${M.hp})`);
-  s.player.body.reset(s.rooms[mi].rect.right - 20, s.rooms[mi].rect.y + 15 * 32 + 17);
-  key('keydown', 39); await wait(900); key('keyup', 39);
-  check(s.rooms[s.index].name === 'Let go' && rules.max === 2, `walking on reaches World 2 with 2 souls (${s.rooms[s.index].name}, ${rules.max})`);
+
+  if (matches(ROOMS.find(([n]) => n.startsWith('Walker'))[0])) {
+    s = await go(ROOMS.findIndex(([n]) => n.startsWith('Walker')));  // walkers belong to their room
+    const wi = s.index, home = s.walkerSpawns.find((w) => w.room === wi).x + 16;
+    s.enemies[0].destroy(); s.enemies.length = 0;      // as if crushed
+    s.enterRoom(0);
+    check(s.enemies.length === 0, 'leaving a room removes its walkers');
+    s.enterRoom(wi);
+    check(s.enemies.length === 1 && s.enemies[0].x === home, 'coming back puts the walker where it started');
+    await wait(600);
+    check(s.enemies.every((e) => s.rooms[wi].rect.contains(e.x, e.y)), 'walker stays inside its room');
+  }
+
+  if (matches('The clearing')) {
+    Dialogue.seen.delete('amulet'); NAMES.guide = '???';  // the amulet cutscene, skipped with Esc
+    s = await go(ROOMS.findIndex(([n]) => n === 'The clearing'));
+    Dialogue.skip(s);                                  // the clearing's opening lines
+    await wait(100);
+    const am = s.amulets[0];
+    s.player.body.reset(am.x, am.y - 4);
+    await wait(200);
+    check(!s.guide.on && (s.talk.line || s.talk.queue.length), 'picking up the amulet starts the cutscene');
+    key('keydown', 27); await wait(80); key('keyup', 27);
+    await wait(1200);
+    check(s.guide.on && s.wearing && NAMES.guide === 'Yourself' && !s.talk.line && !s.talk.queue.length,
+      'Esc skips the cutscene, and the ghost still appears');
+    await wait(2500);
+    check(s.guide.alpha === 0, `the guide fades away after the conversation (alpha ${s.guide.alpha})`);
+    Dialogue.seen.delete('thorns'); Dialogue.play(s, 'thorns');
+    await wait(1000);
+    check(s.guide.alpha > 0.3, `the guide comes back for his next conversation (alpha ${s.guide.alpha})`);
+    Dialogue.skip(s);
+  }
+
+  if (matches('The chain')) {
+    Dialogue.seen.add('chain');
+    s = await go(ROOMS.findIndex(([n]) => n === 'The chain'));  // the way out of The chain is at the top right
+    await alive();
+    s.player.body.reset(O().right - 40, O().y + 9 * 32 + 17);
+    key('keydown', 39); await wait(900); key('keyup', 39);
+    check(s.rooms[s.index].name === 'The long pit', `top right of The chain leads to the long pit (${s.rooms[s.index].name})`);
+  }
+
+  if (matches('The moth')) {
+    Dialogue.seen.delete('moth');                      // the moth: hidden until its intro brings it in
+    s = await go(ROOMS.findIndex(([n]) => n === 'The moth'));
+    check(s.boss?.hidden && !s.boss.r.visible, 'moth hidden before its intro');
+    check(!s.talk.queue.length && !s.talk.line, 'no talking until you walk in');
+    s.player.body.reset(O().x + 8 * 32, O().y + 9 * 32 + 17);
+    await wait(200);
+    check(s.talk.line || s.talk.queue.length, 'walking partway in starts the shaking');
+    for (let i = 0; i < 6 && (s.talk.line || s.talk.queue.length); i++) { Dialogue.update(s, 0, true); Dialogue.update(s, 0, true); }
+    for (let t = 0; t < 40 && s.boss?.hidden; t++) await wait(100); // bursts out, flies in, screams
+    check(s.boss && !s.boss.hidden && s.boss.r.visible, 'moth arrives during the intro');
+    check(!s.textures.exists('mothFly') || s.boss?.img?.active, 'the moth is painted once it arrives');
+    const M = s.boss, mi = s.index;
+    for (let n = 0; n < 8 && M.hp > 0; n++) { // stomp until it's beaten (a stomp during its hurt blink doesn't count)
+      const hp = M.hp;
+      s.player.body.reset(M.r.x + M.dir * 20, M.r.y - M.r.height / 2 - 16);
+      for (let t = 0; t < 2000 && M.hp === hp; t += 50) await wait(50);
+      await wait(700);
+    }
+    check(M.hidden && s.talk.queue.length > 0, 'the last stomp starts the moth ending scene');
+    Dialogue.skip(s);                                  // skipping still dissolves it
+    await wait(200);
+    check(!s.boss && s.gates.every((g) => !g.active || g.room !== mi), `beating the moth opens the vines (hp ${M.hp})`);
+    s.player.body.reset(s.rooms[mi].rect.right - 20, s.rooms[mi].rect.y + 15 * 32 + 17);
+    key('keydown', 39); await wait(900); key('keyup', 39);
+    check(s.rooms[s.index].name === 'Let go' && rules.max === 2, `walking on reaches World 2 with 2 souls (${s.rooms[s.index].name}, ${rules.max})`);
+  }
 
   rules.freeze = true; // the real game: souls float
   // World 2: self-destruct is held. Letting go early cancels; holding long enough leaves a soul.
-  s = await go(ROOMS.findIndex(([n]) => n === 'Let go'));
-  await wait(2500); await alive();
-  key('keydown', 75); await wait(250); key('keyup', 75); await wait(100);
-  check(s.corpses.length === 0 && s.charge === 0, `letting go of K early cancels (${s.corpses.length} souls)`);
-  key('keydown', 75); await wait(1400); key('keyup', 75);
-  check(s.corpses.length === 1, `holding K leaves a soul (${s.corpses.length})`);
-  const sb = s.corpses[0];
-  check(near((sb.y + sb.height / 2) % 32, 0), `souls snap to the tile grid vertically (bottom ${sb.y + sb.height / 2})`);
+  if (matches('Let go')) {
+    s = await go(ROOMS.findIndex(([n]) => n === 'Let go'));
+    await wait(2500); await alive();
+    key('keydown', 75); await wait(250); key('keyup', 75); await wait(100);
+    check(s.corpses.length === 0 && s.charge === 0, `letting go of K early cancels (${s.corpses.length} souls)`);
+    key('keydown', 75); await wait(1400); key('keyup', 75);
+    check(s.corpses.length === 1, `holding K leaves a soul (${s.corpses.length})`);
+    const sb = s.corpses[0];
+    check(near((sb.y + sb.height / 2) % 32, 0), `souls snap to the tile grid vertically (bottom ${sb.y + sb.height / 2})`);
+  }
 
   // Lasers: walking into the beam kills you, and your soul then cuts the beam short.
-  s = await go(ROOMS.findIndex(([n]) => n === 'The beam'));
-  await alive();
-  const full = s.beams()[0].width;
-  s.player.body.reset(s.lasers[0].e.x - 6 * 32, s.lasers[0].e.y + 2);
-  await wait(300);
-  check(s.corpses.length === 1, 'the laser kills you');
-  check(s.beams()[0].width < full - 3 * 32, `your soul blocks the beam (${s.beams()[0].width} < ${full})`);
+  if (matches('The beam')) {
+    s = await go(ROOMS.findIndex(([n]) => n === 'The beam'));
+    await alive();
+    const full = s.beams()[0].width;
+    s.player.body.reset(s.lasers[0].e.x - 6 * 32, s.lasers[0].e.y + 2);
+    await wait(300);
+    check(s.corpses.length === 1, 'the laser kills you');
+    check(s.beams()[0].width < full - 3 * 32, `your soul blocks the beam (${s.beams()[0].width} < ${full})`);
+  }
 
   // Springs launch you far higher than a jump.
-  s = await go(ROOMS.findIndex(([n]) => n === 'The spring'));
-  await alive();
-  const sp = s.springs[0], y0 = sp.y;
-  s.player.body.reset(sp.x, sp.y - 20);
-  let high = Infinity;
-  for (let i = 0; i < 40; i++) { await wait(25); high = Math.min(high, s.player.y); }
-  check(y0 - high > 7 * 32, `the spring launches you about 9 tiles (${((y0 - high) / 32).toFixed(1)})`);
+  if (matches('The spring')) {
+    s = await go(ROOMS.findIndex(([n]) => n === 'The spring'));
+    await alive();
+    const sp = s.springs[0], y0 = sp.y;
+    s.player.body.reset(sp.x, sp.y - 20);
+    let high = Infinity;
+    for (let i = 0; i < 40; i++) { await wait(25); high = Math.min(high, s.player.y); }
+    check(y0 - high > 7 * 32, `the spring launches you about 9 tiles (${((y0 - high) / 32).toFixed(1)})`);
+  }
 
   // World 3: recall takes back the newest soul first.
-  s = await go(ROOMS.findIndex(([n]) => n === 'Three high'));
-  await alive();
-  for (const tx of [5, 8, 11]) { s.player.body.reset(O().x + tx * 32 + 16, O().y + 15 * 32 + 17); await wait(50); s.die(); await alive(); }
-  const xs = s.corpses.map((c) => c.x);
-  key('keydown', 81); await wait(60); key('keyup', 81); await wait(100);
-  check(s.corpses.length === 2 && s.corpses.every((c, i) => c.x === xs[i]), `tapping Q recalls only the newest soul (${s.corpses.length} left)`);
-  key('keydown', 81); await wait(1200); key('keyup', 81);
-  check(s.corpses.length === 0, `holding Q recalls the rest (${s.corpses.length} left)`);
+  if (matches('Three high')) {
+    s = await go(ROOMS.findIndex(([n]) => n === 'Three high'));
+    await alive();
+    for (const tx of [5, 8, 11]) { s.player.body.reset(O().x + tx * 32 + 16, O().y + 15 * 32 + 17); await wait(50); s.die(); await alive(); }
+    const xs = s.corpses.map((c) => c.x);
+    key('keydown', 81); await wait(60); key('keyup', 81); await wait(100);
+    check(s.corpses.length === 2 && s.corpses.every((c, i) => c.x === xs[i]), `tapping Q recalls only the newest soul (${s.corpses.length} left)`);
+    key('keydown', 81); await wait(1200); key('keyup', 81);
+    check(s.corpses.length === 0, `holding Q recalls the rest (${s.corpses.length} left)`);
+  }
 
   // Solvability: put souls where the intended solution puts them, then make the real jumps.
   // place(tx, b): a soul with its feet b tiles above the floor at column tx. hop(): stand on a surface
@@ -271,8 +330,25 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     await wait(300);
     return { tx: Math.floor((s.player.x - O().x) / 32), x: (s.player.x - O().x) / 32, h: +(floor - (s.player.y + 15 - O().y) / 32).toFixed(2) };
   };
+  const cleanSolveRoom = async (name) => {
+    Object.assign(rules, defaultRules);
+    stats.deaths = 0;
+    // Movement replays run after the story, independent of which dialogue checks ran.
+    Dialogue.seen.clear();
+    Object.keys(SCRIPT).forEach((key) => Dialogue.seen.add(key));
+    NAMES.guide = 'Yourself';
+    room().input.keyboard.resetKeys();
+    const s = await go(ROOMS.findIndex(([n]) => n === name));
+    // A restart can cancel a doorway tween before its resume callback runs.
+    s.physics.world.resume();
+    await wait(200); await alive();
+    check(!s.corpses.length && !s.talk.line && !s.talk.queue.length &&
+      rules.max === (WORLD_SOULS[s.rooms[s.index].world] ?? defaultRules.max), `${name}: clean replay state`);
+    return s;
+  };
   const solve = async (name, souls, hops, floor = 16) => {
-    let s = await go(ROOMS.findIndex(([n]) => n === name)); await wait(200); await alive();
+    if (!matches(name)) return;
+    await cleanSolveRoom(name);
     for (const [tx, b] of souls) await place(tx, b, floor);
     const where = room().corpses.map((c) => `${Math.floor((c.x - O().x) / 32)}:${+(floor - (c.y + c.height / 2 - O().y) / 32).toFixed(2)}`).join(' ');
     for (const [tx, top, wantH, minTx] of hops) {
@@ -286,21 +362,31 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   await solve('The beam', [[23, 1], [24, 4]], [[22, 0, 2, 23], [23, 2, 5, 24], [24, 5, 8, 25]]);
   await solve('The spring', [[20, 6]], [[20, 7, 9, 22]]);
   await solve('Wrong order', [[5, 0], [2, 4], [14, 0]], [[10.4, 0, 1, 14], [14, 1, 0, 19]]); // jump from the pit's edge
-  check(room().corpses.length === 2 && room().doors.filter((d) => d.room === room().index).every((d) => !d.body.enable), 'Wrong order: plate soul and pit soul both stay, and the door is open');
+  if (matches('Wrong order')) check(room().corpses.length === 2 && room().doors.filter((d) => d.room === room().index).every((d) => !d.body.enable), 'Wrong order: plate soul and pit soul both stay, and the door is open');
+  if (matches('Wrong order')) {
+    s = await cleanSolveRoom('Wrong order');
+    await place(14, 0);
+    const soul = s.corpses[0], deaths = stats.deaths;
+    // Three pixels of support: falling one physics step overlaps farther down than sideways.
+    s.player.body.reset(soul.x + 24, soul.y - 16 - 15 - 1);
+    s.player.body.velocity.y = 400;
+    await wait(300);
+    check(stats.deaths === deaths && near(s.player.y + 15, soul.y - 16), 'Wrong order: a narrow landing on the pit soul stays on top');
+  }
   await solve('Three high', [[18, 2], [19, 3], [20, 4]], [[17, 0, 3, 18], [20, 5, 8, 21]]);
   // ...and the same rooms can't be skipped: one soul short, the last jump falls short.
   await solve('The ladder', [[20, 2]], []);
-  { const r = await hop(20, 3, 16, 22); check(r.h < 7, `The ladder: a stack 3 high can't reach the ledge (${r.h})`); }
+  if (matches('The ladder')) { const r = await hop(20, 3, 16, 22); check(r.h < 7, `The ladder: a stack 3 high can't reach the ledge (${r.h})`); }
   await solve('Three high', [[19, 2], [20, 3]], []);
-  { const r = await hop(20, 4, 16, 22); check(r.h < 8, `Three high: two souls can't reach the ledge (${r.h})`); }
-  { // the spring alone falls short of its ledge
-    const s = await go(ROOMS.findIndex(([n]) => n === 'The spring')); await alive();
+  if (matches('Three high')) { const r = await hop(20, 4, 16, 22); check(r.h < 8, `Three high: two souls can't reach the ledge (${r.h})`); }
+  if (matches('The spring')) { // the spring alone falls short of its ledge
+    const s = await cleanSolveRoom('The spring');
     s.player.body.reset(s.springs[0].x, s.springs[0].y - 20); key('keydown', 39); await wait(1600); key('keyup', 39); await wait(300);
     const h = 16 - (s.player.y + 15 - O().y) / 32;
     check(h < 9, `The spring: the spring alone can't reach the ledge (${h.toFixed(2)} up)`);
   }
 
-  for (let i = 0; i < ROOMS.length; i++) { room().scene.restart({ index: i }); await wait(300); }
+  for (let i = 0; i < ROOMS.length; i++) { if (!matches(ROOMS[i][0])) continue; room().scene.restart({ index: i }); await wait(300); }
   check(errors.length === 0, 'no errors: ' + errors.join('; '));
   document.body.insertAdjacentHTML('beforeend', `<pre>RESULT ${fails.length ? 'FAIL ' + fails.join(' | ') : 'OK'}</pre>`);
 })().catch((e) => document.body.insertAdjacentHTML('beforeend', `<pre>RESULT FAIL crashed: ${e.stack}</pre>`));

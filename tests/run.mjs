@@ -6,7 +6,9 @@ const errors = [];
 page.on('pageerror', (e) => errors.push(e.message));
 // Missing art files are expected (the game draws stand-ins), so their load errors are ignored.
 page.on('console', (m) => m.type() === 'error' && !/assets\/|Failed to load resource/.test(m.text()) && errors.push('console: ' + m.text()));
-await page.goto(new URL('./check.html', import.meta.url).href);
+const url = new URL('./check.html', import.meta.url);
+if (process.argv[2]) url.searchParams.set('only', process.argv[2]);
+await page.goto(url.href);
 const result = await (await page.waitForSelector('pre', { timeout: 600000 })).textContent();
 console.log(result);
 if (errors.length) console.log('Page errors:\n' + errors.join('\n'));
