@@ -230,6 +230,10 @@ room('The pyramid entrance', [815, 53], 30, 17, 3, 'walk into floor one after re
 out = []
 for name, pos, world, note, rows, extra in rooms:
     opts = {'world': world} if world else {}
+    if name == 'Let go': opts.update(enter='letGo')
+    if name == 'The ladder': opts.update(spots=[[12, 'carvings']])
+    if name == 'Three high': opts.update(spots=[[4, 'pyramid']])
+    if name == 'Everything': opts.update(shrineTalk='almostCompetent')
     if name == 'The old tree': opts.update(spots=[[18, 'stagPromise']])
     if name == 'The tree guardian': opts.update(boss='tree', spots=[[7, 'tree']], deathTalk={2: 'treeSlam', 25: 'treeSlam2'})
     if world == 3 or name == 'End of the greybox': pos = [pos[0] + 30, pos[1]]

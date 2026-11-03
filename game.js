@@ -481,7 +481,7 @@ const ROOMS = [
     '         #####        ########',
     ' P       ##### # e   _########',
     '##############################',
-  ], [316, 104], { world: 2 }],
+  ], [316, 104], { world: 2, enter: "letGo" }],
   ["Off the edge", [ // jump off the edge holding K: the soul appears mid-pit
     '##############################',
     '#                         D  #',
@@ -519,7 +519,7 @@ const ROOMS = [
     '          #####         ######',
     ' P        #####         ######',
     '#####################^^^######',
-  ], [376, 99], { world: 2 }],
+  ], [376, 99], { world: 2, spots: [[12, "carvings"]] }],
   ["The beam", [ // 8-high ledge: jump into the laser right next to its source; that death is the high step and leaves no beam
     '##############################',
     '#               #          D #',
@@ -639,7 +639,7 @@ const ROOMS = [
     '          #####            ###',
     ' P        #####            ###',
     '##############################',
-  ], [570, 75], { world: 3 }],
+  ], [570, 75], { world: 3, spots: [[4, "pyramid"]] }],
   ["In my own way", [ // two lying souls bridge the tunnel pit; recall (Q) a standing one that blocks it
     '##############################',
     '##############################',
@@ -701,7 +701,7 @@ const ROOMS = [
     ' P             ##  _  #  o    D   s    ######',
     '#######^^^###################################',
     '#############################################',
-  ], [660, 63], { world: 3 }],
+  ], [660, 63], { world: 3, shrineTalk: "almostCompetent" }],
   ["Reliquary", [ // SHOWCASE W3: flyers in a chimney, two saws to jam, plate, recall, crumbling descent
     '########################################',
     '########################################',
@@ -1340,7 +1340,7 @@ class Room extends Phaser.Scene {
     });
   }
 
-  die() {
+  die(chosen = false) {
     if (this.dead > 0) return;
     stats.deaths++;
     const p = this.player;
@@ -1369,6 +1369,10 @@ class Room extends Phaser.Scene {
     }
     this.statics.add(c);
     this.corpses.push(c);
+    if (this.rooms[this.index].name === 'The long pit' && !c.lying &&
+        c.x > this.rooms[this.index].rect.x + 3 * T && c.x < this.rooms[this.index].rect.x + 11 * T &&
+        bottom > this.rooms[this.index].rect.y + 9 * T && bottom - h < this.rooms[this.index].rect.y + 10 * T)
+      Dialogue.play(this, 'lowDoor');
     if (rules.max && this.corpses.length > rules.max) this.corpses.shift().destroy();
 
     this.charge = 0;
@@ -1397,6 +1401,7 @@ class Room extends Phaser.Scene {
     if (this.rooms[this.index].world) Dialogue.play(this, 'firstDeath'); // only the first time
     const hint = this.rooms[this.index].deathTalk?.[++this.roomDeaths]; // hints after repeated deaths in a room
     if (hint) Dialogue.play(this, hint);
+    if (chosen) Dialogue.play(this, 'chosenDeath');
   }
 
   // Bodies fall straight down until they rest on a wall, closed door or another body.
@@ -1874,6 +1879,7 @@ class Room extends Phaser.Scene {
       B.hidden = true;
       if (B.stag) Dialogue.seen.delete(B.story);
       Dialogue.play(this, B.story);
+      if (B.story === 'treeDown') Dialogue.play(this, 'guideCrack');
       if (B.stag) this.talk.queue = this.talk.queue.map((l) => ({ ...l, text: l.text?.replace('{deaths}', B.deaths).replace('{next}', B.deaths + 1) }));
     } else if (B.hp <= 0) {
       this.bossDefeated(B);
@@ -1962,7 +1968,7 @@ class Room extends Phaser.Scene {
     const world = this.rooms[this.index].world ?? 0;
     // Self-destruct: hold to charge, let go to cancel. After a death, let go before charging again.
     if (!(k.K.isDown || k.X.isDown)) this.sdLock = false, this.charge = 0;
-    else if (!this.sdLock && (rules.selfDestruct || world >= 2) && (this.charge += ms / 1000) >= SD_HOLD) { this.sdLock = true; return this.die(); }
+    else if (!this.sdLock && (rules.selfDestruct || world >= 2) && (this.charge += ms / 1000) >= SD_HOLD) { this.sdLock = true; return this.die(true); }
     // Recall: a tap takes back the newest soul; holding keeps going, faster and faster.
     if ((rules.recall || world >= 3 || this.treePower) && k.Q.isDown) {
       if (JD(k.Q)) { this.recallGap = RECALL_GAP; this.recallT = 0; }
@@ -1983,6 +1989,7 @@ class Room extends Phaser.Scene {
         (world === 3 && Math.abs(p.x - sh.x) < T / 2 && p.y + 15 <= sh.y + 14 && p.y + 15 > sh.y - 4 * T)) && this.start !== sh.spawn) {
       this.start = sh.spawn;
       this.shrines.forEach((o) => o.rune.setAlpha(o === sh ? 1 : 0.35));
+      if (this.rooms[this.index].shrineTalk) Dialogue.play(this, this.rooms[this.index].shrineTalk);
       if (this.rooms[this.index].world) Dialogue.play(this, 'shrineMark'); // the first touch only
     }
 
@@ -2055,7 +2062,9 @@ class Room extends Phaser.Scene {
     if (firing && !beam.fired) {
       beam.fired = true;
       if (target === this.player) this.die();
-      else if (this.corpses.includes(target)) { this.corpses.splice(this.corpses.indexOf(target), 1); target.destroy(); }
+      else if (this.corpses.includes(target)) { this.corpses.splice(this.corpses.indexOf(target), 1); target.destroy();
+        if (this.rooms[this.index].name === 'The rehearsal') Dialogue.play(this, 'breakingBeam');
+      }
     }
     if (beam.clock >= (beam.period ?? 4)) { beam.clock = 0; beam.fired = false; }
   }

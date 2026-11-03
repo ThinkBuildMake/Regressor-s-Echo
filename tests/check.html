@@ -48,6 +48,53 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   // Full runs have already seen this before the World 2/3 mechanic checks.
   if (only.length) Dialogue.seen.add('firstDeath');
   let s;
+  const storyState = { stats: { ...stats }, rules: { ...rules }, seen: new Set(Dialogue.seen) };
+  // Story wiring: exercise room metadata and the event handlers, then suppress it for replays.
+  for (const [name, sceneKey, trigger] of [
+    ['Let go', 'letGo', (s) => Dialogue.play(s, s.rooms[s.index].enter)],
+    ['Let go', 'chosenDeath', (s) => s.die(true)],
+    ['The long pit', 'lowDoor', (s) => {
+      s.player.body.reset(O().x + 7.5 * 32, O().y + 10 * 32 - 15); s.die();
+    }],
+    ['The ladder', 'carvings', (s) => {
+      const spot = s.rooms[s.index].spots.find((sp) => sp[1] === 'carvings');
+      if (spot) Dialogue.play(s, spot[1]);
+    }],
+    ['Three high', 'pyramid', (s) => {
+      const spot = s.rooms[s.index].spots.find((sp) => sp[1] === 'pyramid');
+      if (spot) Dialogue.play(s, spot[1]);
+    }],
+    ['Everything', 'almostCompetent', (s) => {
+      const sh = s.shrines.find((sh) => s.rooms[s.index].rect.contains(sh.x, sh.y));
+      s.player.body.reset(sh.x, sh.y); s.update(0, 16);
+    }],
+    ['The rehearsal', 'breakingBeam', (s) => {
+      s.player.body.reset(O().x + 6 * 32, O().y + 15 * 32 - 15); s.die();
+      const c = s.corpses.at(-1);
+      s.player.body.reset(O().x + 3 * 32, O().y + 15 * 32 - 15);
+      s.updateAimedBeam({ x: c.x + 64, y: c.y, angle: Math.PI, clock: 1 }, 0);
+    }],
+    ['The tree guardian', 'guideCrack', (s) => {
+      const b = s.boss; b.hidden = false; b.hp = 1; b.hurt = 0;
+      b.stompReady = true; b.slamOpen = true; b.target = { buried: true };
+      s.player.body.reset(b.r.x, b.r.y - b.r.height / 2 - 14);
+      s.player.body.velocity.y = 10; s.bossPreviousFeet = b.r.y - b.r.height / 2;
+      s.touchBoss();
+    }],
+  ]) {
+    if (!matches(name)) continue;
+    s = await go(ROOMS.findIndex(([n]) => n === name));
+    Dialogue.skip(s); await alive();
+    Dialogue.seen.delete(sceneKey);
+    trigger(s);
+    check(!!SCRIPT[sceneKey] && Dialogue.seen.has(sceneKey) &&
+      s.talk.queue.length > 0, `${name}: ${sceneKey} exists and fires on its trigger`);
+    check(!Dialogue.play(s, sceneKey), `${sceneKey} plays once`);
+    Dialogue.skip(s);
+  }
+  Object.assign(stats, storyState.stats); Object.assign(rules, storyState.rules);
+  Dialogue.seen = storyState.seen;
+  for (const key of ['lowDoor', 'letGo', 'chosenDeath', 'carvings', 'guideCrack', 'pyramid', 'almostCompetent', 'breakingBeam']) Dialogue.seen.add(key);
   // Walk the inserted chain in ROOMS order and compare every doorway row in world space.
   for (const [from, to] of [
     ['The gatehouse', 'Thornwood'], ['Thornwood', 'The moth'],
