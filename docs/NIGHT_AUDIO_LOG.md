@@ -1,5 +1,17 @@
 # Night log (audio)
 
+## Morning summary
+- **Done:** all audio in docs/ASSETS.md. 75 sound-effect files (every row, 3 takes for footsteps/jumps/landings/dialogue blips) and 9 music tracks (8 seamless loops + the ending). Branch `night/2026-11-02-audio` (worktree `../Game-Week-audio`), commits 4d2e35e..HEAD. Not merged into main.
+- **Listen:** https://claude.ai/artifact/CLuj1KAWJxZPRxRSmERRfo: every file with a player, waveform/spectrogram, levels, and what the Gemini critic heard plus its score.
+- **Music:** critic 8–10 on all 9. Loops are cut at their planned bar length; ElevenLabs only fades its last bar, which is crossfaded over the start.
+- **Paid spend:** ElevenLabs 14,674 credits (91,234 left this month; overage is off, so no extra billing). Vertex via OpenRouter BYOK $2.33 (OpenRouter's own credits $0). Cap was $10.
+- **Needs your ears (critic below 6, or alternates to choose between):**
+  - tree-defeat (4), stag-charge (4), moth-defeat (5), hazards-door-closes (5), hazards-plate-down (5), hero-footstep-worlds-2-3-2 (5)
+  - earthquake (4–5) vs earthquake-alt-synth (ffmpeg sub-bass + pebbles); boss-dissolve (6) vs boss-dissolve-alt-layered. The critic may under-hear deep bass.
+  - Plain foley (footsteps, jumps, plates) mostly scored 5–7: the critic is strict on it, so trust your ears over the number.
+- **DECISIONs to check:** own branch/worktree (the level chat owns `night/2026-11-02`); boss-dissolve prompt realigned to the story chat's "shimmer into a whoosh"; critic on gemini-3.5-flash (cheaper than Argon), pinned to google-vertex.
+- **Not done / next:** wiring sounds into the game (code chat); merging this branch into main (needs you or a code session; other sessions are editing main).
+
 23:30 started. Baselines: ElevenLabs Creator, 25,092 / 131,000 credits used (overage disabled: it can't bill extra). OpenRouter key usage $0 (critic is BYOK on Google Vertex; byok_usage baseline 285.6507). 5-hour usage 63%.
 23:30 DECISION: own worktree + branch `night/2026-11-02-audio`, because `night/2026-11-02` belongs to the level chat's night run and main is shared with other sessions.
 23:30 DECISION: ElevenLabs stop line = 20,000 credits left, so the user keeps a buffer for the week.
