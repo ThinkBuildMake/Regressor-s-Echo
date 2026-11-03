@@ -74,7 +74,7 @@ bottom-left corner. The name card is text drawn in code, not an asset.
 | Spikes (tileable strip) | — | | | — | | |
 | Spiky vine wall (the `x` tile) | — (static, tileable) | | | — | | |
 | Pressure plate: up / down | — (two images) | | | — | | |
-| Gate (held open by a pressure plate) | — one image per world (root gate, stone slab, carved shrine door); slides open in code | | | — | | |
+| Gate (held open by a pressure plate) | — one image per world: W1 root gate ✅, W2 stone slab, W3 carved shrine door; slides open in code | ✅ | 🟡 W1 | — | | |
 | Vine barrier (`V`, opens when the room's boss is beaten) | — one tileable image; it withers open in code | | | — | | |
 | Laser emitter (World 2) | — (beam in code) | | | — | | |
 | Spring (World 2) | idle / compressed / launch, 3 frames | | | | | |

@@ -163,6 +163,27 @@ Save to `assets/raw/world1/`. Attach `anchor.png` (brushwork) and, for anything 
 10. **White ghost → `ghost-white.png`** (square 1:1; attach `hero.jpg`)
    > The attached young treasure hunter as a ghostly apparition: exactly his face, hair, cloak, scarf and satchel, but his whole figure is pure soft white, like pale porcelain light, slightly see-through, no other colours. He floats in the air, body upright and relaxed, legs hanging loosely with toes pointed down, arms at his sides, facing right. Calm, eerie. No glow halo, no particles.
 
+## World 2 and 3 props (Flow, Nano Banana 2.1)
+
+Save to `assets/raw/world2/` and `assets/raw/world3/`. Use the World 1 prop style block (attach `anchor.png` for the brushwork) and add the world's setting sentence from "Worlds 2 and 3" above at the end. Gold only for amulet/rune marks; no bright blue-white.
+
+1. **Laser emitter (World 2) → `laser.png`** (1:1)
+   > A small ancient stone device mounted on a ruin wall: a squat carved block of mossy grey stone with a round opening in its face, a dull amber crystal set deep inside the opening, cracked and old. Side view, the opening facing right. The beam itself is not painted (it's drawn in code).
+
+2. **Spring (World 2) → `spring.png`** (1:1)
+   > A launch pad made of a thick, coiled living root wound tight like a spring under a flat round wooden cap, set into mossy stone ruins, clearly springy. Side view.
+
+3. **Moving platform (World 2) → `platform.png`** (16:9)
+   > A floating slab of carved grey ruin stone, wide and flat on top, broken and mossy at the edges, a few vines hanging from its underside, the top surface level. Side view, about four times as wide as it is tall.
+
+4. **Stone slab gate (World 2) → `gate.png`** (9:16)
+   > A tall, heavy slab of carved grey ruin stone closing a doorway-sized gap, faint old carvings on its face, moss and vines in the cracks, touching the top and bottom edges of the image.
+
+5. **Shrine door (World 3) → `gate.png`** (9:16, World 3 setting sentence)
+   > A tall carved stone door closing a doorway in an ancient sanctuary, standing-stone grey with deep carved bands and the ring-and-three-rays mark in the centre (grooves dark, not lit), touching the top and bottom edges of the image.
+
+6. **Shrine, Worlds 2 and 3 → `shrine.png`, `shrine-lit.png`**: the World 1 shrine re-dressed for the world: attach `assets/raw/world1/shrine.jpg`, "Edit the attached image. Keep the stone's shape and carved mark exactly as they are. Only change its setting to match: <the world's setting sentence>." Then the lit version as an edit, as in World 1.
+
 ## Hero (AI Studio, Nano Banana Pro)
 
 Save to `assets/raw/hero/`. Attach the World 1 reference image for the brushwork, and from step 2 on, also attach the hero image from step 1.
