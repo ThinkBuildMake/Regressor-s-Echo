@@ -172,7 +172,7 @@ From here the guide appears only for conversations he's part of: he fades in at 
 > *(The ground shakes.)*  
 > **Hero** [startled]: What's with this shaking… is this an earthquake?  
 > **Guide** [surprised]: Oh shoot, it's been so long that I forgot. Be careful! Watch out for…  
-> *(The moth drops down from above.)*  
+> *(The moth bursts in through the right wall.)*  
 > **Guide** [wry]: …that.
 
 ### 12. The dust — *after his 2nd death in the fight*
@@ -182,7 +182,7 @@ Blocking the dust with your soul should be taught in an earlier room, so the gui
 > **Hero** [annoyed]: Then tell me!  
 > **Guide** [amused]: Where's the fun in that?
 
-*After his 5th death there, one more nudge:*
+*After about 25 deaths there (each try costs about two, since dying heals the moth), one more nudge:*
 > **Guide** [thinking]: Your soul caught you over the spikes. Think it'd catch a little dust?
 
 ### 13. The moth falls — *on the last stomp*
@@ -195,8 +195,8 @@ Blocking the dust with your soul should be taught in an earlier room, so the gui
 > **Hero** [shouting]: Whoa— WHOA!  
 > *(A beat.)*  
 > **Hero** [thinking]: What… just happened?  
-> **Guide** [thinking]: The amulet fed. Your soul's a little stronger now.  
-> **Hero** [scared]: It FED? On a moth?  
+> **Guide** [thinking]: The amulet absorbed it. Your soul's a little stronger now.  
+> **Hero** [scared]: It ABSORBED it? A whole moth?  
 > **Guide** [wry]: It's not picky.  
 > **Hero** [curious]: …Another mark lit up.  
 > **Guide** [thinking]: Means you can leave two of yourself behind now.  
@@ -280,11 +280,11 @@ The wall behind the room is carved; it needs its own background art.
 > *(Its eyes open.)*  
 > **Hero** [scared]: …It's not just a tree.
 
-### 8. The slam — *after his 2nd and 5th deaths in the fight*
+### 8. The slam — *after his 2nd and about his 25th deaths in the fight*
 > **Hero** [shouting]: It smashed me! The other me! It keeps smashing me!  
 > **Guide** [thinking]: Watch where it looks before it swings.
 
-*After the 5th:*
+*After about 25:*
 > **Guide** [thinking]: It always goes for the one closest to you. Use that.
 
 ### 9. The tree falls — *on the last stomp; same staging as the moth*
@@ -365,7 +365,7 @@ The pyramid needs to be visible in the background, its top lost in cloud.
 > **Hero** [determined]: …Okay. Wall first. Then stomps.  
 > **Guide** [warm]: Look at you, with a plan.
 
-### 7. A nudge — *after his 3rd death in the fight*
+### 7. A nudge — *after about 10 deaths in the fight (the beam was taught in the room before)*
 > **Guide** [thinking]: You did this an hour ago. Lead it away.
 
 ### 8. The guide's last stand — *on the last stomp*

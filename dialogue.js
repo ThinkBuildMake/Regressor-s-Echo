@@ -140,7 +140,7 @@ const SCRIPT = {
     H('annoyed', 'Then tell me!'),
     G('amused', "Where's the fun in that?"),
   ],
-  dust2: [G('thinking', "Your soul caught you over the spikes. Think it'd catch a little dust?")], // 5th death
+  dust2: [G('thinking', "Your soul caught you over the spikes. Think it'd catch a little dust?")], // 25th death (each try costs about two deaths)
   mothDown: [ // the last stomp
     W(0.8),
     H('exhausted', 'Is it… over?'),
@@ -151,8 +151,8 @@ const SCRIPT = {
     H('shouting', 'Whoa— WHOA!'),
     W(0.8),
     H('thinking', 'What… just happened?'),
-    G('thinking', "The amulet fed. Your soul's a little stronger now."),
-    H('scared', 'It FED? On a moth?'),
+    G('thinking', "The amulet absorbed it. Your soul's a little stronger now."),
+    H('scared', 'It ABSORBED it? A whole moth?'),
     G('wry', "It's not picky."),
     H('curious', '…Another mark lit up.'),
     G('thinking', 'Means you can leave two of yourself behind now.'),

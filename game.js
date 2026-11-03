@@ -334,7 +334,7 @@ const ROOMS = [
     '#                            V',
     '#             B              V',
     '##############################',
-  ], [150, 94], { world: 1, spots: [[7, 'moth']], deathTalk: { 2: 'dust', 5: 'dust2' } }], // the shaking starts 7 tiles in
+  ], [150, 94], { world: 1, spots: [[7, 'moth']], deathTalk: { 2: 'dust', 25: 'dust2' } }], // the shaking starts 7 tiles in
   ['Into the ruins', [ // World 2 starts here (rooms still to be built)
     '##############################',
     '#                            #',
@@ -676,10 +676,20 @@ class Room extends Phaser.Scene {
       this.time.delayedCall(1600, () => { g.looking = false; });
     }
     if (name === 'shake') this.cameras.main.shake(1400, 0.006);
-    if (name === 'moth' && this.boss?.hidden) { // drops down from the canopy
-      const B = this.boss, y = B.r.y;
-      B.r.setVisible(true).y = y - 300;
-      this.tweens.add({ targets: B.r, y, duration: 700, ease: 'Bounce.easeOut', onComplete: () => { B.hidden = false; } });
+    if (name === 'moth' && this.boss?.hidden) { // bursts in through the right wall, scattering rubble
+      const B = this.boss, x = B.r.x, wall = this.rooms[this.index].rect.right - T;
+      if (!this.textures.exists('rubble'))
+        this.make.graphics({ add: false }).fillStyle(0xffffff).fillRect(0, 0, 6, 6).generateTexture('rubble', 6, 6).destroy();
+      const em = this.add.particles(wall, B.r.y, 'rubble', {
+        speedX: { min: -320, max: -60 }, speedY: { min: -260, max: 60 }, gravityY: 900, lifespan: 1100, rotate: { min: 0, max: 360 },
+        scale: { min: 0.6, max: 1.6 }, tint: [0x5b4a3a, 0x7a6650, 0x3f5a35], emitting: false,
+      }).setDepth(6);
+      em.explode(45);
+      this.time.delayedCall(1300, () => em.destroy());
+      this.cameras.main.shake(450, 0.012);
+      B.dir = -1; // faces into the room
+      B.r.setVisible(true).x = wall + 80;
+      this.tweens.add({ targets: B.r, x, duration: 900, ease: 'Cubic.easeOut', onComplete: () => { B.hidden = false; } });
     }
   }
 
