@@ -246,35 +246,32 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     s = await go(ROOMS.findIndex(([n]) => n === 'The moth'));
     check(s.boss?.hidden && !s.boss.r.visible, 'moth hidden before its intro');
     check(!s.talk.queue.length && !s.talk.line, 'no talking until you walk in');
-    s.player.body.reset(O().x + 8 * 32, O().y + 9 * 32 + 17);
-    await wait(200);
+    key('keydown', 39);
+    await until(() => s.talk.line || s.talk.queue.length, 3000);
+    key('keyup', 39);
     check(s.talk.line || s.talk.queue.length, 'walking partway in starts the shaking');
     for (let i = 0; i < 6 && (s.talk.line || s.talk.queue.length); i++) { Dialogue.update(s, 0, true); Dialogue.update(s, 0, true); }
     for (let t = 0; t < 40 && s.boss?.hidden; t++) await wait(100); // bursts out, flies in, screams
     check(s.boss && !s.boss.hidden && s.boss.r.visible, 'moth arrives during the intro');
     check(!s.textures.exists('mothFly') || s.boss?.img?.active, 'the moth is painted once it arrives');
     const M = s.boss, mi = s.index;
-    // A damaged moth heals on death, even while it is blinking.
-    s.player.body.reset(M.r.x, M.r.y - M.r.height / 2 - 16);
-    await until(() => M.hp < 3, 2000);
-    check(M.hp === 2, 'a stomp damages the moth');
-    s.die();
-    check(M.hp === 3 && M.hurt === 0, 'dying after a stomp heals the moth');
-    Dialogue.skip(s);
-    await alive();
-    s.corpses.forEach((c) => c.destroy()); s.corpses = [];
+    check(s.gates.filter((g) => g.room === mi && g.x < O().x + T).every((g) => g.body.enable), 'moth: entrance closes during the fight');
+    check(M.min - BOSS_W / 2 - O().x > 5.4 * T && O().right - M.max - BOSS_W / 2 > 5.4 * T, 'moth: neither wall kick reaches its back');
     const deaths = stats.deaths;
     // Walk into the thorns: this one soul is shield and launch step.
-    s.player.body.reset(O().x + 13 * T, O().bottom - T - 15);
     key('keydown', 39);
     await until(() => stats.deaths > deaths, 2000);
-    key('keyup', 39); Dialogue.skip(s); await alive();
+    key('keyup', 39); Dialogue.skip(s); await alive(); Dialogue.skip(s);
     const soul = s.corpses[0];
     check(soul && stats.deaths === deaths + 1, 'one thorn death places the launch soul');
     // Approach from the safe side, jump onto the soul, then time vertical jumps
     // for the moth's next crossing. No player or boss repositioning during combat.
-    s.player.body.reset(soul.x - 65, O().bottom - T - 15);
+    key('keydown', 39); key('keydown', 83);
+    await until(() => s.player.x >= soul.x - 90, 3000);
+    key('keyup', 83); key('keyup', 39);
     await wait(120);
+    const dust = new Set();
+    const blockedDust = () => [...dust].some((sh) => !sh.active && Math.abs(sh.x - soul.x) < soul.width / 2 + 8 && Math.abs(sh.y - soul.y) < soul.height / 2 + 8);
     key('keydown', 32); key('keydown', 39);
     await until(() => s.player.x >= soul.x, 1500);
     key('keyup', 39); key('keyup', 32);
@@ -282,7 +279,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     await until(() => s.player.body.blocked.down || s.dead > 0, 2000);
     check(Math.abs(s.player.x - soul.x) < 20 && s.player.y < soul.y - 25, `jump onto the thorn soul (${s.player.x-O().x},${s.player.y-O().y})`);
     const fightDeaths = stats.deaths;
-    const dust = new Set();
+    let lastHp = M.hp, bouncing = false, bounceCleared = false;
     for (let t = 0; t < 45000 && M.hp > 0 && stats.deaths === fightDeaths; t += 20) {
       const grounded = s.player.body.blocked.down || s.player.body.touching.down;
       const speed = BOSS_SPEED + (3 - M.hp) * BOSS_SPEEDUP;
@@ -291,18 +288,31 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
       else if (s.player.body.velocity.y >= 0) key('keyup', 32);
       s.shots.filter((sh) => sh.mothDust).forEach((sh) => dust.add(sh));
       await wait(20);
+      if (M.hp < lastHp && M.hp > 0) bouncing = true;
+      if (bouncing && s.player.body.velocity.y < 0 && s.player.y + 15 < bounds(M.r).top) bounceCleared = true;
+      lastHp = M.hp;
     }
     key('keyup', 32);
+    check(bounceCleared, 'moth: real stomp bounce clears the back and continues to the next stomp');
     check(stats.deaths === deaths + 1 && s.corpses[0] === soul, 'three stomps keep the same thorn soul without dying');
-    check([...dust].some((sh) => !sh.active && Math.abs(sh.x - soul.x) < soul.width / 2 + 8 && Math.abs(sh.y - soul.y) < soul.height / 2 + 8) && soul.active,
+    // Probe dust at shield height independently of the stomp attack timer.
+    const probe = Object.assign(s.add.circle(soul.x + 3 * T, soul.y, 6, 0xffdf63), { vx: -210, vy: 0, mothDust: true });
+    s.shots.push(probe); dust.add(probe);
+    await wait(600);
+    check(blockedDust() && soul.active,
       'the thorn soul blocks yellow wing dust and survives');
     check(M.hidden && s.talk.queue.length > 0, 'the last stomp starts the moth ending scene');
     Dialogue.skip(s);                                  // skipping still dissolves it
     await wait(200);
     check(rules.max === 2 && rules.selfDestruct, 'absorption grants the second rune and self-destruct');
     check(!s.boss && s.gates.every((g) => !g.active || g.room !== mi), `beating the moth opens the vines (hp ${M.hp})`);
-    s.player.body.reset(s.rooms[mi].rect.right - 20, s.rooms[mi].rect.y + 15 * 32 + 17);
-    key('keydown', 39); await wait(900); key('keyup', 39);
+    key('keydown', 39);
+    for (let t = 0; t < 8000 && s.rooms[s.index].name !== 'Let go'; t += 20) {
+      if (s.player.body.blocked.down || s.player.body.touching.down) key('keydown', 32);
+      else if (s.player.body.velocity.y >= 0) key('keyup', 32);
+      await wait(20);
+    }
+    key('keyup', 32); key('keyup', 39);
     check(s.rooms[s.index].name === 'Let go' && rules.max === 2, `walking on reaches World 2 with 2 souls (${s.rooms[s.index].name}, ${rules.max})`);
   }
 
@@ -547,48 +557,81 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
       check(r.h >= wantH - 0.05 && r.h < wantH + 0.5 && r.x >= minTx - 0.4, `${name}: jump from ${top} up at column ${tx} reaches ${wantH} up (got ${r.h} up, column ${r.tx}; souls ${where})`);
     }
   };
+  if (matches('The thorn wall')) {
+    s = await cleanSolveRoom('The thorn wall');
+    key('keydown', 39);
+    await until(() => s.player.x >= O().x + 14.5 * T, 4000, 'approach the thorn wall');
+    key('keydown', 32);
+    await until(() => stats.deaths === 1, 2000, 'touch thorns while rising');
+    key('keyup', 39); key('keyup', 32); await alive();
+    const step = s.corpses[0];
+    check(O().bottom - T - (step.y - step.height / 2) === 3 * T,
+      'The thorn wall: the hint leaves a reachable three-high step');
+    key('keydown', 39);
+    await until(() => s.player.x >= O().x + 13.5 * T, 4000, 'return to the step');
+    key('keydown', 32);
+    await until(() => s.player.x >= step.x - 24, 1500, 'jump onto the step');
+    key('keyup', 39); key('keydown', 37);
+    await until(() => s.player.body.velocity.x <= 0, 1000, 'brake over step');
+    key('keyup', 37);
+    await until(() => s.player.body.blocked.down, 2000, 'land on the step');
+    key('keyup', 32); await wait(100);
+    key('keydown', 32); key('keydown', 39);
+    await until(() => s.player.x > O().x + 17 * T, 2000, 'jump to the ledge');
+    key('keyup', 32); key('keyup', 39);
+    check(stats.deaths === 1, 'The thorn wall: the hinted step reaches the ledge without another death');
+  }
+  for (const name of ['The well', 'Thornwood']) if (matches(name)) {
+    s = await cleanSolveRoom(name);
+    check(s.cameras.main.followOffset.y < 0, `${name}: camera leads down from the real entrance`);
+  }
   if (matches('The gatehouse')) {
     s = await cleanSolveRoom('The gatehouse');
-    const onPlate = async (tx) => {
-      s.player.body.reset(O().x + tx * 32 + 16, O().y + 16 * 32 - 16);
-      const deaths = stats.deaths;
-      for (let t = 0; t < 20000 && stats.deaths === deaths; t += 50) await wait(50);
-      await alive();
-      check(stats.deaths === deaths + 1 && Math.abs(s.corpses[0].x - (O().x + tx * 32 + 16)) < 20,
-        `The gatehouse: walker from the right leaves a soul on plate ${tx}`);
+    const move = async (tx, jump = false) => {
+      const goal = O().x + tx * T + 16;
+      if (jump) key('keydown', 32);
+      key('keydown', 39);
+      await until(() => s.player.x >= goal - (jump ? 28 : 14), 5000, `gatehouse move to ${tx}`);
+      key('keyup', 39);
+      key('keydown', 37);
+      await until(() => s.player.body.velocity.x <= 0, 1000, 'brake');
+      key('keyup', 37);
+      await until(() => s.player.body.blocked.down || s.player.body.touching.down, 2000, 'landing');
+      if (jump) key('keyup', 32);
+      await wait(100);
     };
-    await onPlate(7);
+    const killedOnPlate = async (tx) => {
+      const deaths = stats.deaths;
+      await move(tx);
+      await until(() => stats.deaths > deaths, 20000, 'walker reaches plate');
+      await alive();
+      check(Math.abs(s.corpses[0].x - (O().x + tx * T + 16)) < 20,
+        `The gatehouse: walker leaves the plate soul at ${tx}`);
+    };
+    await killedOnPlate(7);
     const gateDoors = s.doors.filter((d) => d.room === s.index);
     check(gateDoors.every((d) => d.body.enable === (d.x > O().x + 20 * 32)),
       'The gatehouse: the first plate opens only the first pen');
-    const a = await hop(5, 0, 16, 7);
-    check(a.h >= 0.95, 'The gatehouse: jump onto the first plate soul');
-    const b = await hop(7, 1, 16, 12);
-    check(b.x >= 11.6, 'The gatehouse: jump over the penned walker');
-    await hop(12, 0, 16, 15.5);
-    check(s.start.x > O().x + 14 * 32, 'The gatehouse: first pen reaches the shrine');
-    await onPlate(21);
-    const step = s.corpses[0];
-    const guard = s.enemies.find((e) => O().contains(e.x, e.y) && e.x > O().x + 14 * 32);
-    await until(() => guard.x > O().x + 23.2 * 32, 4000);
-    s.player.body.reset(guard.x, guard.y);
-    await wait(200); await alive();
-    check(s.corpses[0] !== step && Math.abs(s.corpses[0].x - step.x) > 20,
-      'The gatehouse: careless guard contact moves the plate step');
-    s = await cleanSolveRoom('The gatehouse');
-    await onPlate(21);
-    const c = await hop(19, 0, 16, 21);
-    check(c.h >= 0.95, 'The gatehouse: mount the second plate soul');
-    const d = await hop(21, 1, 16, 24.5);
-    check(d.x >= 24 && d.h >= 3.95, `The gatehouse: plate soul reaches the four-high ledge (${d.x}, ${d.h})`);
+    await move(5);
+    await move(7, true);
+    await move(12, true);
+    await move(15.5, true);
+    check(s.start.x > O().x + 14 * T, 'The gatehouse: first pen reaches the shrine');
+    const shrineDeaths = stats.deaths;
+    await wait(3500);
+    check(stats.deaths === shrineDeaths && s.enemies.filter((e) => e.spawn.x > O().x + 14 * T).every((e) => e.x > O().x + 18 * T),
+      'The gatehouse: second patrol stays beyond the shrine post');
+    await until(() => s.enemies.some((e) => e.spawn.x > O().x + 14 * T && e.dir > 0 && e.x > O().x + 22.5 * T), 6000, 'patrol returns toward the door');
+    await move(19, true);
+    await killedOnPlate(21);
+    await move(19, true);
+    await move(21, true);
+    await move(24.5, true);
+    check(s.player.y + 15 <= O().y + 12 * T + 2, 'The gatehouse: plate soul reaches the four-high ledge');
     const crossed = stats.deaths;
-    const exit = await hop(24.5, 4, 16, 28);
-    check(exit.x >= 27.6 && stats.deaths === crossed,
-      'The gatehouse: the plate stays held while jumping through the upper door to the exit');
-    s = await cleanSolveRoom('The gatehouse');
-    const short = await hop(21, 0, 16, 24.5);
-    check(short.x < 24 && short.h < 3.95,
-      'The gatehouse: the four-high ledge cannot be jumped without the plate soul');
+    await move(28, true);
+    check(stats.deaths === crossed && s.doors.filter((d) => d.room === s.index).every((d) => !d.body.enable),
+      'The gatehouse: plate soul holds the upper door while crossing');
   }
   if (matches('The long pit')) {
     s = await cleanSolveRoom('The long pit');

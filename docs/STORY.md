@@ -140,7 +140,7 @@ From here the guide appears only for conversations he's part of: he fades in at 
 ### 7. The thorn wall — *on entry*
 > **Hero** [thinking]: That's way too high to climb.  
 > **Hero** [annoyed]: …And let me guess. The thorns.  
-> **Guide** [amused]: Now you're getting the hang of it.
+> **Guide** [amused]: Now you're getting the hang of it. Touch them on the way up, about two tiles off the ground. Leave a step you can reach.
 
 ### 8. The patrol — *on entry*
 > **Guide** [thinking]: See that plate? It holds the door open, as long as something's on it.  
@@ -183,7 +183,7 @@ Blocking the dust with your soul should be taught in an earlier room, so the gui
 > **Guide** [amused]: Where's the fun in that?
 
 *After about 25 deaths there (each try costs about two, since dying heals the moth), one more nudge:*
-> **Guide** [thinking]: Your soul caught you over the spikes. Think it'd catch a little dust?
+> **Guide** [thinking]: Your soul caught you over the thorns. Think it'd catch a little dust?
 
 ### 13. The moth falls — *on the last stomp*
 > *(The moth drops still.)*  
