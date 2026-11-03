@@ -94,7 +94,7 @@ New: **3 souls** and **recall** (Q: tap for the newest soul, hold for more). Mos
 
 | # | Room | Teaches | The trick | Status |
 |---|---|---|---|---|
-| 1 | Three high | 3 souls | A ledge 8 high: the World 2 staircase, one step taller | Greybox |
+| 1 | Three high | 3 souls | Three-soul staircase; shrine, then the top step also blocks a laser. A fourth death erases the first step | Built |
 | 2 | In my own way | Recall | A 5-wide pit in a 1-tall tunnel: two lying souls bridge it. A standing soul plugs the tunnel; recall it instead of resetting | Greybox |
 | 3 | Three jobs | 3 souls at once | A soul on the plate, one in the spike pit, one blocking a laser from the ceiling (die in it mid-jump, so you can walk under). A 4th death erases the plate soul, so recall mistakes instead | Greybox |
 | 4 | Everything | All powers | Slide tunnel, shrine, plate with a walker, door, spring to a 9-high ledge. One spare death before the plate soul goes | Greybox |
