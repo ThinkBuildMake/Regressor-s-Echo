@@ -24,11 +24,15 @@ def long_pit(o, p):
 room('The long pit', [150, 94], 30, 17, 1, 'flat bridge, shrine, stomp the guard twice: bridge death revives it', long_pit)
 
 def well(o, p):
+    # Aim the first fall beside the lip; the soul makes the last jump possible.
     o(0, 8, 5, 9); p(1, 9, 'P')
-    o(6, 1, 11, 21); o(12, 17, 12, 21); o(6, 22, 12, 22, '^')          # shaft A, lip column 12
-    o(12, 17, 15, 18); p(14, 18, 'C')                                  # corridor + shrine
-    o(16, 17, 23, 30); o(23, 19, 23, 26, 'x'); o(24, 27, 24, 30)       # shaft B, thorns on its right wall
-    o(16, 31, 24, 31, '^'); o(24, 27, 29, 28)                          # spikes, exit
+    o(6, 8, 11, 21); o(12, 17, 12, 21); o(6, 22, 12, 22, '^')
+    o(12, 17, 15, 18); p(14, 18, 'C')
+    # Stay off the thorn wall on the way down, then launch from the soul to stomp the guard.
+    # Touching either hazard moves your only landing out of the bottom of the well.
+    o(16, 17, 23, 30); o(23, 19, 23, 24, 'x'); o(24, 27, 24, 30)
+    o(16, 31, 24, 31, '^'); o(24, 25, 28, 28); o(29, 27, 29, 28)
+    p(27, 28, 'e'); p(28, 28, '#')
 room('The well', [180, 94], 30, 33, 1, 'aim your fall: the soul must land near the exit side', well)
 
 def gatehouse(o, p):
