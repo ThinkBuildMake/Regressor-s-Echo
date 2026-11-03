@@ -372,7 +372,8 @@ The pyramid needs to be visible in the background, its top lost in cloud.
 > The limit is when your spirit breaks. On floor ninety, mine did, and I just… stopped getting back up.  
 > So keep getting back up. No matter how hard it gets. No matter what.  
 > Thanks for putting up with me. I know I'm not great company. I'd know.  
-> You'll make it. Trust me.  
+> And don't take my ending as yours. You're me, sure, but you were different from the start.  
+> You'll get further than I ever could.  
 > — You  
 > P.S. The amulet's still not worth anything. I checked.
 
