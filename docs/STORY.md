@@ -290,7 +290,7 @@ The wall behind the room is carved; it needs its own background art.
 > **Guide** [wry]: Don't look so impressed. It's not the top.  
 > **Guide** [solemn]: I figured the deaths didn't have a limit. That I could just keep going until I got it right.  
 > **Hero** [scared]: …They do?  
-> **Guide** [sad]: Must. I'm here, aren't I?  
+> **Guide** [sad]: Must be. I'm here, aren't I?  
 > **Hero** [sad]: …  
 > **Guide** [mischievous]: Anyway! Better odds this time. You've got me.
 
@@ -355,6 +355,7 @@ The pyramid needs to be visible in the background, its top lost in cloud.
 > **Guide** [weary]: Same thing happened last time. My guide did exactly this.  
 > **Hero** [shouting]: You KNEW? Then why would you—  
 > **Guide** [warm]: Because I knew.  
+> **Hero** [sad]: …  
 > **Guide** [warm]: I've watched over you. You're already doing better than I did. You'll get further.  
 > **Guide** [solemn]: Just remember… the deaths aren't free. Count every one.  
 > **Hero** [sad]: Don't— you can't just—  
