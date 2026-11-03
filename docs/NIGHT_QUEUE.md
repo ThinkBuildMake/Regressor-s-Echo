@@ -5,8 +5,6 @@ Goal: Worlds 1–3 playable end to end, every room in the showcase style (docs/L
 **Every room task is done when:** its intended solution is a replay in tests/check.html and passes; `node tools/validate-rooms.mjs game.js` passes; a playtester agent confirms the solution works, finds no skip around the trick, and finds no hidden softlock (Shift+R always gets you out); the room is in the world's chain (walking out of the previous room leads into it); LEVELS.md says Built.
 
 ## Todo
-- [ ] Put the showcase rooms in the chain: Thornwood after The gatehouse, Sawmill after Wrong order, Reliquary after Everything
-- [ ] W1 The long pit — redo in showcase style (2–3 stages, shrine between)
 - [ ] W1 The well — redo in showcase style
 - [ ] W1 The gatehouse — redo in showcase style
 - [ ] W1 The moth — the full fight works: dust, soul shield and step, 3 stomps, heal on death, the defeat scene, 2nd rune → 2 souls + self-destruct, then leads into W2
@@ -20,8 +18,10 @@ Goal: Worlds 1–3 playable end to end, every room in the showcase style (docs/L
 - [ ] Morning summary at the top of NIGHT_LOG.md
 
 ## Doing
+- [ ] W1 The long pit — attempt 1
 
 ## Done
+- [x] Showcase rooms in the chain (+ narrow-landing physics fix, clean replays, ?only= filter) — 969d74c
 - [x] Baseline: `npm test` green on merged main (4m30s) — fd234ed
 
 ## Blocked
