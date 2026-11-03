@@ -9,8 +9,67 @@ const Art = {
   H: 544,
 
   preload(scene) {
+    this.preloadHazards(scene);
     scene.load.on('loaderror', () => {}); // missing file → stand-in below
     for (const k of this.FILES) if (!scene.textures.exists(k)) scene.load.image(k, `assets/world1/${k}.webp`);
+  },
+
+  preloadHazards(scene) {
+    if (scene.hazardsPreloaded) return;
+    scene.hazardsPreloaded = true;
+    for (const world of [1, 2, 3]) {
+      for (const name of ['crumble', 'crumble-cracked', 'crumble-breaking', 'falling-spike', 'saw',
+        ...(world > 1 ? ['spikes', 'thorns', 'plate', 'vine-barrier'] : [])]) {
+        const key = `hazard-${world}-${name}`;
+        if (!scene.textures.exists(key)) scene.load.image(key, `assets/world${world}/${name}.webp`);
+      }
+    }
+    if (!scene.textures.exists('hazard-spring')) scene.load.spritesheet('hazard-spring', 'assets/world2/spring.webp', { frameWidth: 163, frameHeight: 300 });
+  },
+
+  hazardKey(scene, world, name) {
+    return [world, 1].map((w) => `hazard-${w}-${name}`).find((k) => scene.textures.exists(k));
+  },
+
+  hazard(scene, body, world, name, width, height, offsetY = 0) {
+    const key = name === 'spring' ? (scene.textures.exists('hazard-spring') && 'hazard-spring') : this.hazardKey(scene, world, name);
+    if (!key) return;
+    const tex = scene.textures.get(key);
+    if (name === 'spikes' && !tex.has('points')) {
+      const top = key.includes('-2-') ? 71 : 69, source = tex.getSourceImage();
+      tex.add('points', 0, 0, top, source.width, source.height - top);
+    }
+    const img = scene.add.image(body.x, body.y + offsetY, key, name === 'spikes' ? 'points' : undefined).setDisplaySize(width, height).setDepth(3);
+    body.setFillStyle(0, 0).setStrokeStyle(0);
+    body.hazardArt = { img, world, name, offsetY };
+    body.on('destroy', () => img.destroy());
+    (scene.hazardArt ??= []).push(body);
+    return img;
+  },
+
+  updateHazardArt(scene, t) {
+    const weights = [scene.player, ...scene.corpses].map(bounds);
+    for (const body of scene.hazardArt ?? []) {
+      if (!body.active) continue;
+      const { img, world, name, offsetY } = body.hazardArt;
+      img.setPosition(body.x, body.y + offsetY).setVisible(body.visible).setAlpha(body.alpha);
+      if (name === 'crumble') {
+        const state = body.t > 0 ? (body.t < 0.15 ? 'crumble-breaking' : 'crumble-cracked') : 'crumble';
+        img.setTexture(this.hazardKey(scene, world, state) ?? this.hazardKey(scene, world, name));
+        body.setFillStyle(0, 0);
+      } else if (name === 'plate') {
+        const held = weights.some((w) => hit(w, bounds(body)));
+        if (held) img.y += 5;
+        img.setCrop(0, 0, img.frame.width, img.frame.height * (held ? 3 / 8 : 1));
+      } else if (name === 'spring') {
+        const elapsed = scene.time.now - (body.launchArt ?? -1000);
+        img.setFrame(elapsed < 65 ? 1 : elapsed < 200 ? 2 : 0);
+      }
+    }
+    for (const sw of scene.saws) if (sw.img) {
+      sw.img.setPosition(sw.x, sw.y);
+      if (!sw.jam && sw.room === scene.index) sw.img.setRotation(t * 12);
+    }
   },
 
   // Make a stand-in for every texture that didn't load. Textures persist across room restarts.
@@ -172,6 +231,7 @@ const Art = {
   },
 
   update(scene, t) {
+    this.updateHazardArt(scene, t);
     const a = scene.art, cam = scene.cameras.main;
     for (const L of a.layers) L.ts.tilePositionX = (cam.scrollX * L.f) / L.ts.tileScaleX;
     a.shafts.setAlpha(0.75 + Math.sin(t * 0.6) * 0.25);
