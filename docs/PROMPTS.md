@@ -85,6 +85,7 @@ ChatGPT can make transparent backgrounds. If it won't, use the magenta backgroun
 
 3. **World 3, Spectral stag → `stag.png`**
    > A spectral great stag, guardian of a moonlit forest sanctuary. Tall and translucent with a pale silver body, enormous branching antlers wrapped in faint violet light, mist streaming from its legs, head lowered as if about to charge.
+   **Pose (user, 2026-11-02): proud and upright, not stalking.** Append: *"Standing tall and proud in side profile facing left, head raised high, chest out, neck upright, all four legs straight and planted, the great antlers held high. Majestic and still, not crouching or charging."*
 
 Each boss image above is the **reference**. The animation sheets come from it (attach the approved reference). Sheets never have effects: dust, mist, glow and particles are added in code.
 
@@ -200,8 +201,9 @@ Use the matching world's layer method or the World 1 prop style block, plus the 
 3. **The old tree (World 3 §5) → `assets/raw/world3/old-tree.png`** (9:16; World 1 prop style block + World 3 setting; attach `anchor.png`)
    > A single enormous, ancient forest tree with a thick gnarled trunk and great roots, the roots forming a dark hollow at its base big enough to hide a folded letter behind, moss and a few hanging vines, its canopy running off the top of the image. Calm and a little sacred. The trunk and roots stand on flat magenta (no ground strip).
 
-4. **The guide's note (World 3 §9) → `assets/raw/world3/note.png`** (4:3)
-   > A single sheet of old, worn paper, unfolded flat and seen straight on, with soft creases from being folded in quarters, slightly torn edges, faint water stains and a smudge of earth in one corner. Warm off-white parchment colour. The writing area is completely blank (the text is added in code). Centered with a little magenta around it. No text, no letters, no writing.
+4. **The guide's note (World 3 §9) → `assets/raw/world3/note.png`** (16:9; World 1 prop style block + World 3 setting; attach `world3/ground.jpg` for the earth)
+   The note is NOT on paper: the guide wrote it in the dirt behind the old tree. The painting is the blank ground; the game scratches the words into it.
+   > A patch of bare forest earth seen from above at a low angle, smoothed flat as if brushed clean by a hand, roughly oval, framed by moss, roots and fallen leaves around its edges. The smoothed dirt in the middle is completely blank, with room for several lines of writing scratched into it with a stick (the writing is added in code). Moonlit, soft. No text, no letters, no marks in the smoothed area. Isolated on flat magenta, no soil strip along the bottom.
 
 ## Hero (AI Studio, Nano Banana Pro)
 

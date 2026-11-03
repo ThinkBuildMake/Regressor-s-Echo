@@ -16,7 +16,7 @@ Key: ✅ done · 🟡 started · blank = to do · — = not needed (a single ima
 | Hero wall slide + wall jump (coming with wall jump) | slide: clinging to a wall with one hand and one boot, body facing out, sliding down; scarf and cloak lifted upward by the slide, 2–3 frames looping. Kick-off: 1 frame pushing away from the wall. Facing right (the wall on his right); the game mirrors it | | ✅ `raw/hero/hero.jpg` | | | |
 | Hero death | arcade-style burst: he flashes pure white, then breaks apart into square pixels that fly outward, ~4–5 frames (white flash → white silhouette → breaking into pixels). The scattering pixels after the last frame are code particles | | — | | | |
 | Hero respawn | soul light gathers to the respawn point: pixels fly inward (code particles) → white silhouette → the hero. Plays the **death sheet in reverse**, so no new sheet unless it looks wrong | | — | — | | |
-| White ghost (appears when he picks up the amulet) | — single image: the hero entirely white, floating, legs hanging, toes pointed down. Glow and bob in code | | | — | | |
+| White ghost (appears when he picks up the amulet) | — `raw/world1/ghost-white.jpg` approved by the user (standing pose fits the floating motif); glow, bob and alpha in code | | | — | | |
 | Hero self-destruct (World 2 on, hold) | blue-white flames grow over the ~0.75 s hold while he keeps moving: code flames over his current frame, no sheet. Letting go cancels | — | — | — | — | |
 | Recall (World 3) | a soul fades back into the hero, newest first: code effect (the respawn gather, reused), no sheet | — | — | — | — | |
 
@@ -53,7 +53,7 @@ bottom-left corner. The name card is text drawn in code, not an asset.
 | Rock chunks (wall burst debris) | — 6 chunks cut into `assets/world1/rocks.webp` (6 frames, natural sizes), flung by code; dust puffs are code particles | ✅ | ✅ `raw/world1/rocks.jpg` | — | ✅ | |
 | Broken wall edge (the hole the moth leaves) | — `assets/world1/wall-break.webp` (cropped: Flow painted a forest floor under the strip). Clean left side joins the wall, ragged right side; not seamless top-to-bottom, so mask or cap its ends in code | ✅ | ✅ `raw/world1/wall-break.jpg` | — | ✅ | |
 | Moth: wing dust (its attack) | — code particles. Room 11: you hide behind your soul from it; it can't break souls | — | — | — | — | |
-| **Tree guardian** (World 2) | | ✅ | 🟡 `raw/bosses/tree.jpg`, top clipped, faces front | | | |
+| **Tree guardian** (World 2) | reference: the ORIGINAL Flow tree (`raw/bosses/tree.jpg`, user's pick); the side-profile version is kept as `tree-profile.jpg` | ✅ | 🟡 `raw/bosses/tree.jpg`, top clipped, faces front | | | |
 | Tree: intro | mask eyes open, rises out of the ruins, arms spread, ~4 frames | | | | | |
 | Tree: idle | slow sway, ~3–4 frames | | | | | |
 | Tree: branch swing | wind-up → swing → recover, ~4–5 frames | | | | | |
@@ -73,9 +73,9 @@ bottom-left corner. The name card is text drawn in code, not an asset.
 |---|---|---|---|---|---|---|
 | Spikes (tileable strip) | — | | | — | | |
 | Spiky vine wall (the `x` tile) | — (static, tileable) | | | — | | |
-| Pressure plate: up / down | — (two images) | | | — | | |
+| Pressure plate: up / down | — up: `raw/world1/plate.jpg` approved. Down: no new art; when pressed the code sinks the plate so only a thin sliver of its top edge peeks above the ground | | | — | | |
 | Gate (held open by a pressure plate) | — one image per world: W1 root gate ✅, W2 stone slab, W3 carved shrine door; slides open in code | ✅ | 🟡 W1 | — | | |
-| Vine barrier (`V`, opens when the room's boss is beaten) | — one tileable image; it withers open in code | | | — | | |
+| Vine barrier (`V`, opens when the room's boss is beaten) | — `raw/world1/vine-barrier.jpg` approved; draw it **thinner** (about one tile wide) when sizing; it withers open in code | | | — | | |
 | Laser emitter (World 2) | — (beam in code) | | | — | | |
 | Spring (World 2) | idle / compressed / launch, 3 frames | | | | | |
 | Moving platform (World 2 room 7) | — | | | — | | |
@@ -115,7 +115,7 @@ Script: [STORY.md](STORY.md); § = the scene each asset serves. Done in priority
 | Carved wall relief | W2 §6 | reads left to right: a crowd of figures, each with a gold circle on its chest; then fewer; then a handful; then one. Ruins stone, as a background layer behind room 7 | ✅ | | | |
 | Pyramid backdrop | W3 §1 | a huge stepped pyramid, its top lost in cloud; a far parallax layer for the Sanctum | ✅ | | | |
 | The old tree | W3 §5 | by the stag's arena, with a hiding spot behind it (where the note is) | ✅ | | | |
-| The guide's note | W3 §9 | a folded, worn paper, for a close-up the note's text sits on | ✅ | | | |
+| The guide's note | written in the DIRT behind the old tree, not on paper (user): a blank smoothed patch of earth, the words scratched in by code | a folded, worn paper, for a close-up the note's text sits on | ✅ | | | |
 | Sound: the guide cracking like glass as the beam hits him | W3 §8 | sad, not violent | | — | | |
 | Music: the last-stand cue | W3 §8 | later | | — | | |
 
