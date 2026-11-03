@@ -15,7 +15,7 @@ def room(name, pos, w, h, world, note, build, extra=None):
 def long_pit(o, p):
     o(0, 8, 2, 9); o(3, 9, 19, 9); o(20, 1, 28, 9); o(29, 8, 29, 9)
     o(10, 10, 12, 10, '^'); p(1, 9, 'P')
-room('The long pit', [180, 94], 30, 17, 1, 'slide: only a lying soul bridges a pit in a 1-tall tunnel', long_pit)
+room('The long pit', [150, 94], 30, 17, 1, 'slide: only a lying soul bridges a pit in a 1-tall tunnel', long_pit)
 
 def well(o, p):
     o(0, 8, 5, 9); p(1, 9, 'P')
@@ -23,54 +23,54 @@ def well(o, p):
     o(12, 17, 15, 18); p(14, 18, 'C')                                  # corridor + shrine
     o(16, 17, 23, 30); o(23, 19, 23, 26, 'x'); o(24, 27, 24, 30)       # shaft B, thorns on its right wall
     o(16, 31, 24, 31, '^'); o(24, 27, 29, 28)                          # spikes, exit
-room('The well', [210, 94], 30, 33, 1, 'aim your fall: the soul must land near the exit side', well)
+room('The well', [180, 94], 30, 33, 1, 'aim your fall: the soul must land near the exit side', well)
 
 def gatehouse(o, p):
     o(0, 1, 28, 15); o(13, 1, 13, 12, '#'); o(13, 13, 13, 15, 'D')
     o(0, 1, 0, 12, '#'); o(0, 15, 2, 15, '#'); p(1, 14, 'P')
     p(7, 15, '_'); p(11, 15, 'e'); p(15, 15, 'C'); o(29, 14, 29, 15)
     o(17, 16, 24, 16, '^')
-room('The gatehouse', [240, 108], 30, 17, 1, 'get killed on the plate so the walker ends up on the right side', gatehouse)
+room('The gatehouse', [210, 108], 30, 17, 1, 'get killed on the plate so the walker ends up on the right side', gatehouse)
 
 # ---------- World 2 ----------
 def let_go(o, p):
     o(1, 1, 28, 15); o(0, 13, 0, 15); o(22, 11, 29, 16, '#'); o(29, 9, 29, 10); p(1, 15, 'P')
-room('Let go', [300, 108], 30, 17, 2, 'hold K: two souls stacked reach a 5-high ledge', let_go)
+room('Let go', [270, 108], 30, 17, 2, 'hold K: two souls stacked reach a 5-high ledge', let_go)
 
 def off_edge(o, p):
     o(1, 1, 28, 7); o(0, 6, 0, 7); o(29, 6, 29, 7); o(9, 8, 18, 14); o(9, 15, 18, 15, '^'); p(1, 7, 'P')
-room('Off the edge', [330, 111], 30, 17, 2, 'jump off the edge holding K: the soul appears mid-pit', off_edge)
+room('Off the edge', [300, 111], 30, 17, 2, 'jump off the edge holding K: the soul appears mid-pit', off_edge)
 
 def ladder(o, p):
     o(1, 1, 20, 15); o(21, 1, 28, 8); o(0, 14, 0, 15); o(29, 7, 29, 8); p(1, 15, 'P')
-room('The ladder', [360, 103], 30, 17, 2, '7-high ledge: stack to 3, then run off your top soul holding K for a step beside it', ladder)
+room('The ladder', [330, 103], 30, 17, 2, '7-high ledge: stack to 3, then run off your top soul holding K for a step beside it', ladder)
 
 def beam(o, p):
     o(1, 1, 24, 15); o(25, 1, 28, 7); o(0, 14, 0, 15); o(29, 6, 29, 7); p(25, 11, '<'); p(1, 15, 'P')
-room('The beam', [390, 96], 30, 17, 2, '8-high ledge: jump into the laser right next to its source; that death is the high step and leaves no beam', beam)
+room('The beam', [360, 96], 30, 17, 2, '8-high ledge: jump into the laser right next to its source; that death is the high step and leaves no beam', beam)
 
 def spring(o, p):
     o(1, 1, 21, 15); o(22, 1, 28, 6); o(0, 14, 0, 15); o(29, 5, 29, 6); p(17, 15, 's'); p(1, 15, 'P')
-room('The spring', [420, 88], 30, 17, 2, '9-high ledge: hold during the launch so a soul hangs beside the spring, then land on it', spring)
+room('The spring', [390, 88], 30, 17, 2, '9-high ledge: hold during the launch so a soul hangs beside the spring, then land on it', spring)
 
 def wrong_order(o, p):
     o(1, 1, 28, 15); o(0, 14, 0, 15); o(1, 12, 4, 12, '#'); p(2, 11, '_')   # plate on a shelf over the start, out of the way
     o(11, 16, 18, 16, '^'); o(25, 1, 25, 12, '#'); o(25, 13, 25, 15, 'D'); o(29, 13, 29, 15); p(1, 15, 'P')
-room('Wrong order', [450, 79], 30, 17, 2, 'step, plate, pit: in another order a soul you still need vanishes', wrong_order)
+room('Wrong order', [420, 79], 30, 17, 2, 'step, plate, pit: in another order a soul you still need vanishes', wrong_order)
 
 # ---------- World 3 ----------
 def three_high(o, p):
     o(1, 1, 20, 15); o(21, 1, 28, 7); o(0, 13, 0, 15); o(29, 6, 29, 7); p(1, 15, 'P')
-room('Three high', [480, 79], 30, 17, 3, '8-high ledge: a 3-soul staircase (run off your top soul while holding K)', three_high)
+room('Three high', [450, 79], 30, 17, 3, '8-high ledge: a 3-soul staircase (run off your top soul while holding K)', three_high)
 
 def own_way(o, p):
     o(0, 8, 3, 9); o(4, 9, 26, 9); o(27, 1, 28, 9); o(29, 8, 29, 9); o(10, 10, 14, 10, '^'); p(1, 9, 'P')
-room('In my own way', [510, 77], 30, 17, 3, 'two lying souls bridge the tunnel pit; recall (Q) a standing one that blocks it', own_way)
+room('In my own way', [480, 77], 30, 17, 3, 'two lying souls bridge the tunnel pit; recall (Q) a standing one that blocks it', own_way)
 
 def three_jobs(o, p):
     o(1, 1, 28, 15); o(0, 14, 0, 15); p(5, 15, '_'); o(9, 16, 16, 16, '^')
     o(18, 1, 24, 12, '#'); p(21, 12, 'v'); o(26, 1, 26, 12, '#'); o(26, 13, 26, 15, 'D'); o(29, 14, 29, 15); p(1, 15, 'P')
-room('Three jobs', [540, 71], 30, 17, 3, 'plate, pit and a laser blocker at once; recall mistakes instead of dying over them', three_jobs)
+room('Three jobs', [510, 71], 30, 17, 3, 'plate, pit and a laser blocker at once; recall mistakes instead of dying over them', three_jobs)
 
 def everything(o, p):
     o(0, 18, 2, 19); o(3, 19, 14, 19); o(7, 20, 9, 20, '^')                         # tunnel with a 3-wide pit
@@ -78,11 +78,11 @@ def everything(o, p):
     p(22, 19, '_'); p(26, 19, 'e'); o(30, 1, 30, 16, '#'); o(30, 17, 30, 19, 'D')     # plate, walker, door
     o(31, 1, 43, 19); p(36, 19, 's'); o(39, 11, 44, 21, '#'); o(44, 9, 44, 10)       # spring, 9-high ledge
     p(1, 19, 'P')
-room('Everything', [570, 67], 45, 22, 3, 'tunnel, plate with a walker, spring; one spare death before the plate soul goes (recall instead)', everything)
+room('Everything', [540, 67], 45, 22, 3, 'tunnel, plate with a walker, spring; one spare death before the plate soul goes (recall instead)', everything)
 
 def end(o, p):
     o(1, 1, 28, 14); o(0, 13, 0, 14); p(14, 14, 'P')
-room('End of the greybox', [615, 63], 30, 17, None, 'bosses for Worlds 2 and 3 and the beam rehearsal are not built yet', end)
+room('End of the greybox', [585, 63], 30, 17, None, 'bosses for Worlds 2 and 3 and the beam rehearsal are not built yet', end)
 
 # ---------- Showcase rooms: several mechanics per room, Celeste-style (play these first) ----------
 def thornwood(o, p):
