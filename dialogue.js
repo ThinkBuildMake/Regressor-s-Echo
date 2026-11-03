@@ -30,6 +30,65 @@ const G = (face, text) => ({ who: 'guide', face, text });
 const W = (wait, cue) => ({ wait, cue }); // a silent beat: the panel hides for `wait` seconds
 // Written from docs/STORY.md (World 1 script); change the story there first.
 const SCRIPT = {
+  stagPromise: [
+    H("curious", "What? You never stop."),
+    G("thinking", "Can you promise me something?"),
+    H("annoyed", "\u2026That depends."),
+    G("warm", "After the next fight, go take a look behind this tree."),
+    H("curious", "What's back there?"),
+    G("amused", "Nope! Not yet. No peeking."),
+    H("annoyed", "You're doing the mysterious thing again."),
+    G("warm", "Promise me."),
+    H("exhausted", "\u2026Fine. I promise.")
+  ],
+  stagArrival: [
+    H("scared", "Tell me you remember this one."),
+    G("solemn", "I remember this one."),
+    { ...H("determined", "\u2026Okay. I've got this."), cue: "stagAppear" },
+    G("warm", "Look at you.")
+  ],
+  stagNudge: [
+    G("thinking", "You did this an hour ago. Lead it away.")
+  ],
+  stagDown: [
+    H("excited", "We did it! Did you see that? Three stomps, and I barely\u2014"),
+    G("amused", "You died {deaths} times."),
+    H("cocky", "{next}. But who's counting?"),
+    G("warm", "Me. It was always me."),
+    { ...G("warning", "LOOK OUT!"), cue: 'lastBeam' },
+    H("shouting", "NO\u2014!"),
+    G("pained", "Ugh\u2026 I knew it would come to this."),
+    G("weary", "Same thing happened last time. My guide did exactly this."),
+    H("shouting", "You KNEW? Then why would you\u2014"),
+    G("warm", "Because I knew."),
+    H("sad", "\u2026"),
+    G("warm", "I've watched over you. You're already doing better than I did. You'll get further."),
+    G("solemn", "Just remember\u2026 the deaths aren't free. Count every one."),
+    H("sad", "Don't\u2014 you can't just\u2014"),
+    G("wry", "Hey."),
+    { ...G("warm", "I was never alive in the first place, right?"), cue: 'guideBreak' },
+    W(1.6, 'stagGone')
+  ],
+  stagNote: [
+    H("sad", "If you're reading this\u2026 then it must mean I've kicked the bucket."),
+    H("sad", "Don't make that face. I can see it from here. Well. Could."),
+    H("sad", "Well, I guess it's time to come clean."),
+    H("sad", "You know how I said there was a limit? That was a lie. Figured you'd be more careful if you thought you were running out."),
+    H("sad", "The limit is when your spirit breaks. On floor ninety, mine did, and I just\u2026 stopped getting back up."),
+    H("sad", "So keep getting back up. No matter how hard it gets. No matter what."),
+    H("sad", "Thanks for putting up with me. I know I'm not great company. I'd know."),
+    H("sad", "And don't take my ending as yours. You're me, sure, but you were different from the start."),
+    H("sad", "You'll get further than I ever could."),
+    H("sad", "Trust me."),
+    H("sad", "\u2014 You"),
+    H("sad", "P.S. The amulet's still not worth anything. I checked.")
+  ],
+  floorOne: [
+    H("sad", "\u2026Idiot."),
+    H("determined", "Ninety floors, huh."),
+    H("determined", "Then I'm not stopping at ninety."),
+    W(1, 'theEnd')
+  ],
   clearing: [
     W(0.6),
     H('neutral', "Mannn… treasure hunting's slow these days."),

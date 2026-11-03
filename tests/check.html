@@ -46,7 +46,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   for (const [from, to] of [
     ['The gatehouse', 'Thornwood'], ['Thornwood', 'The moth'],
     ['Wrong order', 'Sawmill'], ['Sawmill', 'Three high'],
-    ['Everything', 'Reliquary'], ['Reliquary', 'The rehearsal'], ['The rehearsal', 'End of the greybox'],
+    ['Everything', 'Reliquary'], ['Reliquary', 'The rehearsal'], ['The rehearsal', 'The spectral stag'],
   ]) {
     if (!matches(from) && !matches(to)) continue;
     const i = ROOMS.findIndex(([name]) => name === from);
@@ -719,6 +719,72 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     check(stats.deaths > deaths,
       'The spring: extra deaths erase the high shield and the next launch hits the laser');
   }
+  if (matches('The spectral stag')) {
+    s = await cleanSolveRoom('The spectral stag');
+    const B = s.boss;
+    Dialogue.seen.delete('stagDown');
+    // Place the wall with real deaths, then lead shots from the platform's left end.
+    for (const x of [4, 5, 6]) await place(x, 0, 12);
+    B.hp = 2;
+    key('keydown', 81); await wait(60); key('keyup', 81); await wait(100);
+    check(B.hp === 2 && s.corpses.length === 2, 'The spectral stag: recall never heals');
+    await place(6, 0, 12);
+    const before = stats.deaths;
+    s.player.body.reset(O().x + 2 * 32 + 16, O().y + 12 * 32 - 15);
+    B.phase = 'windup'; B.clock = 0;
+    B.wave = { x: O().right - 32, broken: 0 };
+    await until(() => !B.wave, 5000);
+    check(s.corpses.length === 1 && stats.deaths === before, 'The spectral stag: wave breaks two souls and stops at the third');
+    await place(6, 0, 12);
+    s.player.body.reset(O().x + 2 * 32 + 16, O().y + 12 * 32 - 15);
+    const thinDeaths = stats.deaths;
+    B.wave = { x: O().right - 32, broken: 0 };
+    s.stagWave(B, 3);
+    check(stats.deaths === thinDeaths + 1, 'The spectral stag: a two-thick wall cannot stop the wave');
+    await alive();
+    // Rebuild between runs: death heals all previous damage.
+    for (const c of s.corpses.splice(0)) c.destroy();
+    for (const x of [4, 5, 6]) await place(x, 0, 12);
+    check(B.hp === 3, 'The spectral stag: rebuilding heals to full');
+    const deaths = stats.deaths;
+    B.clock = 8;
+    for (let hp = 3; hp > 0; hp--) {
+      s.player.body.reset(O().x + 2 * 32 + 16, O().y + 12 * 32 - 15);
+      await until(() => B.phase === 'dazed', 12000);
+      // Walk off the wall's top onto the dazed back.
+      s.player.body.reset(O().x + 6 * 32 + 16, O().y + 11 * 32 - 15);
+      await wait(100);
+      key('keydown', 39);
+      await until(() => s.player.x >= B.r.x - 8, 1200);
+      key('keyup', 39); key('keyup', 32); s.player.body.velocity.x = 0;
+      await until(() => B.hp < hp, 2000);
+      check(B.hp === hp - 1, `The spectral stag: stomp after charge ${4 - hp} (hp ${B.hp}, phase ${B.phase}, deaths ${stats.deaths - deaths}, x ${s.player.x - O().x}, y ${s.player.y - O().y})`);
+      if (hp > 1) {
+        s.player.body.reset(O().x + 2 * 32 + 16, O().y + 12 * 32 - 15);
+        await until(() => B.phase === 'beam', 4000);
+        key('keydown', 32);
+        await until(() => B.beam?.clock >= 0.65, 2000);
+        key('keyup', 32);
+        await until(() => B.phase !== 'beam', 9000);
+      }
+    }
+    check(stats.deaths === deaths && s.corpses.length === 1, 'The spectral stag: lead beams away, survive the wave and win without dying');
+    Dialogue.skip(s);
+    check(!s.boss && s.stagFinished && !s.guide.on, 'The spectral stag: last stand removes guide and opens entrance');
+    Dialogue.seen.delete('stagNote'); Dialogue.seen.delete('floorOne');
+    s.player.body.reset(O().x + 2 * 32, O().y + 12 * 32 - 15);
+    await until(() => Dialogue.seen.has('stagNote'), 1000);
+    check(Dialogue.seen.has('stagNote'), 'The spectral stag: returning behind the old tree reveals the note');
+    Dialogue.skip(s);
+    let ending = false;
+    const cue = s.cue;
+    s.cue = function (name) { if (name === 'theEnd') ending = true; else cue.call(this, name); };
+    s.player.body.reset(O().right - 2 * 32, O().y + 15 * 32 - 15);
+    await until(() => Dialogue.seen.has('floorOne'), 1000);
+    Dialogue.skip(s); s.cue = cue;
+    check(ending, 'The spectral stag: reading the note then entering the pyramid cues the ending');
+  }
+
   if (matches('The rehearsal')) {
     s = await cleanSolveRoom('The rehearsal');
     const relics = s.aimedBeams.filter((b) => b.room === s.index);
@@ -753,7 +819,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     key('keydown', 39);
     await until(() => s.index !== ROOMS.findIndex(([n]) => n === 'The rehearsal'), 4000);
     key('keyup', 39);
-    check(s.rooms[s.index].name === 'End of the greybox', 'The rehearsal: run through the corridor after the decoy breaks');
+    check(s.rooms[s.index].name === 'The spectral stag', 'The rehearsal: run through the corridor after the decoy breaks');
   }
   await solve('Wrong order', [[4, 0]], []);
   if (matches('Wrong order')) {

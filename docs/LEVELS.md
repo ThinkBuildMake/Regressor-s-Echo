@@ -99,7 +99,7 @@ New: **3 souls** and **recall** (Q: tap for the newest soul, hold for more). Mos
 | 3 | Three jobs | 3 souls at once | Plate, pit bridge, high laser blocker; shrine, then crumbling lips force you to jump into the beam before the landing falls. A fourth death erases the plate: recall the mistake | Built |
 | 4 | Everything | All powers | Slide a flat bridge to the shrine. Then keep a plate soul, a saw jam and a spring step at once: recall a bad step, because a fourth death shuts the door | Built |
 | 5 | The rehearsal | Leading a beam | Lead the aimed beam below a two-soul stair; shrine, then sacrifice a decoy in a low corridor | Built |
-| 6 | The spectral stag | Final boss | Calm setup: build a 3-thick wall. Then charge → beam (glows blue first; lead it away) → wave every ~15s (hide behind the wall). 3 stomps. A broken soul means dying to rebuild, which heals it | Designed (below) |
+| 6 | The spectral stag | Final boss | Calm setup: build a 3-thick wall. Then charge → beam (glows blue first; jump at the platform’s left end to lead it overhead) → wave every ~15s (hide behind the wall). 3 stomps. A broken soul means dying to rebuild, which heals it | Built (30×17 arena; old tree, note and pyramid share the room) |
 
 Cut: *Spring tower* (a spring-placed soul has to land within a few frames, too tight).
 

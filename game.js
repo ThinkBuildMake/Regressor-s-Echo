@@ -727,7 +727,7 @@ const ROOMS = [
     '# P                          #',
     '##############################',
   ], [715, 59], { world: 3 }],
-  ["End of the greybox", [ // the spectral stag is not built yet
+  ["The spectral stag", [ // final boss: three-soul wall, lead beams away, drop after charges
     '##############################',
     '#                            #',
     '#                            #',
@@ -738,14 +738,14 @@ const ROOMS = [
     '#                            #',
     '#                            #',
     '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '                             #',
-    '              P              #',
+    '#                          V #',
+    '# P                        V #',
+    '# #####                    V #',
+    '                           V #',
+    '                        B  V #',
     '##############################',
     '##############################',
-  ], [745, 53]],
+  ], [745, 53], { world: 3 }],
 ];
 const WORLD_NAMES = { 1: 'Forest Edge', 2: 'Overgrown Ruins', 3: 'Sanctum' }; // fades in when you enter a new world
 const WORLD_SOULS = { 1: 1, 2: 2, 3: 3 }; // souls allowed per world; rooms without a world keep 3
@@ -790,7 +790,7 @@ class End extends Phaser.Scene {
     };
     const floor = t(272, 'Floor 1', '44px', '#f1e3b8', 600);
     this.tweens.add({ targets: floor, alpha: 0, duration: 1200, delay: 4200 });
-    t(170, 'Reincarnation Echo', '46px', '#f1e3b8', 6000);
+    t(170, "Regressor's Echo", '46px', '#f1e3b8', 6000);
     t(245, `Deaths: ${stats.deaths}`, '22px', '#cfeaff', 7400);
     t(280, 'Keep getting back up.', '16px', '#9fb8c8', 8400);
     t(350, 'Thank you for playing.', '20px', '#dfe8e2', 9600);
@@ -823,6 +823,7 @@ class Room extends Phaser.Scene {
       this.load.json('heroSlideMeta', 'assets/hero/slide.json');  // each frame's head and feet x
     }
     if (!this.textures.exists('walker')) this.load.image('walker', 'assets/enemies/walker.webp');
+    if (!this.textures.exists('stagIdle')) this.load.image('stagIdle', 'assets/bosses/stag-idle.webp');
     if (!this.textures.exists('mothFly')) this.load.image('mothFly', 'assets/bosses/moth-fly.webp');
     if (!this.textures.exists('rocks')) this.load.image('rocks', 'assets/world1/rocks.webp'); // 6 earth chunks
     if (!this.textures.exists('wallBreak')) this.load.image('wallBreak', 'assets/world1/wall-break.webp');
@@ -837,6 +838,7 @@ class Room extends Phaser.Scene {
     this.enemies = []; // only the current room's walkers exist (Celeste-style)
     this.walkerSpawns = [];
     this.bosses = []; // one per boss room; this.boss is the current room's
+    this.stagFinished = false;
     this.gates = [];
     this.dead = 0;
     this.lying = false;
@@ -894,7 +896,17 @@ class Room extends Phaser.Scene {
                 hidden: !!extra.spots?.some((sp) => sp[1] === 'moth') && !Dialogue.seen.has('moth'), // bursts in during its intro
                 story: extra.spots?.some((sp) => sp[1] === 'moth') ? 'mothDown' : null });
               this.bosses.at(-1).r.setVisible(!this.bosses.at(-1).hidden);
-              if (this.textures.exists('mothFly')) {
+              if (name === 'The spectral stag') {
+                const B = this.bosses.at(-1);
+                Object.assign(B, { stag: true, hidden: !Dialogue.seen.has('stagArrival'), story: 'stagDown', phase: 'setup', clock: 0, waveClock: 0, deaths: 0 });
+                B.r.setVisible(!B.hidden).setSize(96, 64).setPosition(x, (oy + 14) * T).setFillStyle(0xbceaff);
+                B.antlers = this.add.graphics().setDepth(5);
+                B.r.on('destroy', () => B.antlers.destroy());
+                if (this.textures.exists('stagIdle')) {
+                  B.img = this.add.image(B.r.x, B.r.y, 'stagIdle').setDisplaySize(128, 112);
+                  B.r.setAlpha(0); B.r.on('destroy', () => B.img.destroy());
+                }
+              } else if (this.textures.exists('mothFly')) {
                 const B = this.bosses.at(-1), tex = this.textures.get('mothFly'), fw = tex.getSourceImage().width / 4;
                 if (!tex.has(0)) for (let i = 0; i < 4; i++) tex.add(i, 0, i * fw, 0, fw, tex.getSourceImage().height);
                 B.r.setFillStyle(0, 0); // hitbox only
@@ -945,6 +957,7 @@ class Room extends Phaser.Scene {
     Dialogue.create(this);
     this.wearing = Dialogue.seen.has('amulet');
     this.roomDeaths = 0;
+    this.drawStagGrounds();
     this.showWorld(this.rooms[this.index].world);
     Dialogue.play(this, this.rooms[this.index].enter);
 
@@ -1087,6 +1100,20 @@ class Room extends Phaser.Scene {
   // Staging cues fired by dialogue lines (see `cue` in dialogue.js).
   cue(name) {
     const g = this.guide, p = this.player;
+    if (name === 'stagAppear' && this.boss?.stag) {
+      this.boss.hidden = false; this.boss.r.setVisible(true); this.cameras.main.flash(450, 170, 225, 255);
+    }
+    if (name === 'lastBeam' && this.boss?.stag) {
+      const B = this.boss; g.setPosition(p.x + 40, p.y).setAlpha(0.9);
+      const beam = this.add.line(0, 0, B.r.x, B.r.y, g.x, g.y, 0x9bdfff).setOrigin(0).setLineWidth(7).setDepth(6);
+      this.time.delayedCall(700, () => beam.destroy());
+    }
+    if (name === 'guideBreak') {
+      g.on = false;
+      this.cameras.main.flash(400, 120, 210, 255);
+      this.tweens.add({ targets: g, alpha: 0, duration: 1500, onComplete: () => { g.on = false; } });
+    }
+    if (name === 'stagGone' && this.boss?.stag) { this.bossDefeated(this.boss); this.stagFinished = true; }
     if (name === 'wear') this.wearing = true;
     if (name === 'flash') this.cameras.main.flash(600, 255, 215, 120);
     if (name === 'theEnd') { // he walks into the pyramid: fade out to the ending card
@@ -1262,7 +1289,9 @@ class Room extends Phaser.Scene {
     p.body.reset(this.start.x, y);
     p.setVisible(false);
     this.dead = RESPAWN_DELAY;
-    if (this.boss) { this.boss.hp = BOSS_HP; this.boss.hurt = 0; } // your death heals the boss
+    if (this.boss) { this.boss.hp = BOSS_HP; this.boss.hurt = 0;
+      if (this.boss.stag) { this.boss.deaths++; this.boss.phase = 'setup'; this.boss.clock = 0; this.boss.waveClock = 0; this.boss.wave = null; this.boss.beam = null; }
+    } // your death heals the boss
     if (this.boss?.story === 'mothDown' && !this.boss.hidden) {
       this.boss.dust = 2.4;
       this.boss.r.x = this.rooms[this.index].rect.x + 22 * T;
@@ -1574,8 +1603,70 @@ class Room extends Phaser.Scene {
     }
   }
 
+  drawStagGrounds() {
+    const R = this.rooms.find((r) => r.name === 'The spectral stag').rect;
+    this.add.rectangle(R.x + 64, R.y + 330, 24, 108, 0x655d60).setDepth(1);
+    this.add.circle(R.x + 64, R.y + 260, 55, 0x526672).setDepth(1);
+    this.add.text(R.x + 38, R.y + 372, '≋', { color: '#cfeaff' }).setDepth(3);
+    this.add.triangle(R.right - 60, R.y + 300, 0, 180, 100, 0, 200, 180, 0x708292).setDepth(1);
+  }
+
+  stagWave(B, dt) {
+    const R = this.rooms[B.room].rect, w = B.wave;
+    const prev = w.x;
+    w.x -= 420 * dt;
+    this.fx.fillStyle(0x9bdfff, 0.7).fillRect(w.x, R.y + T, 12, 14 * T);
+    const souls = this.corpses.filter((c) => c.x <= prev && c.x >= w.x && c.y < R.y + 12 * T)
+      .sort((a, b) => b.x - a.x);
+    for (const c of souls) {
+      if (w.broken === 2) { B.wave = null; return; }
+      this.corpses.splice(this.corpses.indexOf(c), 1); c.destroy(); w.broken++;
+    }
+    if (this.player.x <= prev && this.player.x >= w.x) { this.die(); return; }
+    if (w.x < R.x) B.wave = null;
+  }
+
+  updateStag(B, dt) {
+    const R = this.rooms[B.room].rect, p = this.player;
+    B.antlers.setVisible(B.r.visible).clear().lineStyle(3, 0xd9f3ff);
+    for (const dx of [-28, 28]) {
+      B.antlers.lineBetween(B.r.x + dx, B.r.y - 32, B.r.x + dx, B.r.y - 66);
+      B.antlers.lineBetween(B.r.x + dx, B.r.y - 48, B.r.x + dx + Math.sign(dx) * 17, B.r.y - 62);
+    }
+    B.img?.setPosition(B.r.x, B.r.y).setVisible(B.r.visible);
+    if (this.dead > 0 || this.transit || this.talk.line || this.talk.queue.length) return;
+    if (!Dialogue.seen.has('stagPromise')) { Dialogue.play(this, 'stagPromise'); return; }
+    if (!Dialogue.seen.has('stagArrival')) { Dialogue.play(this, 'stagArrival'); return; }
+    if (B.hidden) return;
+    B.hurt -= dt; B.clock += dt;
+    B.r.setFillStyle(B.phase === 'beam' || B.waveClock > 13 ? 0x65baff : B.phase === 'windup' ? 0xffda75 : 0xbceaff);
+    if (B.phase === 'setup') {
+      if (B.clock < 8 && p.x < R.x + 7 * T) return;
+      B.phase = 'windup'; B.clock = 0;
+    }
+    B.waveClock += dt;
+    if (B.waveClock >= 15 && !B.wave) { B.waveClock = 0; B.wave = { x: R.right - T, broken: 0 }; }
+    if (B.wave) this.stagWave(B, dt);
+    if (this.dead > 0) return;
+    const gap = 8 * Math.pow(0.8, 3 - B.hp);
+    if (B.phase === 'windup' && B.clock > 0.7) { B.phase = 'charge'; B.clock = 0; }
+    if (B.phase === 'charge') {
+      B.r.x = Math.max(R.x + 7.8 * T, B.r.x - 650 * dt);
+      for (const c of [...this.corpses]) if (hit(bounds(c), bounds(B.r))) { this.corpses.splice(this.corpses.indexOf(c), 1); c.destroy(); }
+      if (B.r.x <= R.x + 7.8 * T) { B.phase = 'dazed'; B.clock = 0; B.stomped = false; }
+    } else if (B.phase === 'dazed' && B.clock >= 2) {
+      B.r.x = R.right - 5 * T; B.phase = 'beam'; B.clock = 0;
+      B.beam = { x: B.r.x, y: B.r.y - 2 * T, angle: Math.PI, clock: 0 };
+    } else if (B.phase === 'beam') {
+      if (B.beam.clock < 1.18) this.updateAimedBeam(B.beam, dt);
+      if (B.clock > gap) { B.phase = 'windup'; B.clock = 0; }
+    }
+    if (B.deaths >= 10) Dialogue.play(this, 'stagNudge');
+  }
+
   updateBoss(dt) {
     const B = this.boss;
+    if (B?.stag) return this.updateStag(B, dt);
     if (B?.img) B.img.setPosition(B.r.x, B.r.y).setVisible(B.r.visible).setAlpha(B.r.alpha).setFlipX(B.dir > 0) // sheet faces left
       .setFrame(B.pose ?? MOTH_FRAMES[Math.floor((this.time.now / 1000) * MOTH_FPS) % MOTH_FRAMES.length]);
     if (!B || B.hidden) return;
@@ -1599,10 +1690,12 @@ class Room extends Phaser.Scene {
   touchBoss() {
     const B = this.boss, p = this.player;
     if (!B || B.hidden || !hit(bounds(p), bounds(B.r))) return false;
-    const top = B.r.y - BOSS_H / 2;
+    if (B.stag && B.phase !== 'dazed') { this.die(); return true; }
+    const top = B.r.y - B.r.height / 2;
     if (p.y + 15 - top > 14) { this.die(); return true; }
     p.body.velocity.y = -JUMP * 0.8;
-    if (B.hurt > 0) return false;
+    if (B.hurt > 0 || (B.stag && B.stomped)) return false;
+    if (B.stag) { B.stomped = true; B.clock = Math.min(B.clock, 0.5); }
     B.hurt = 0.5;
     if (B.story === 'mothDown') {
       B.dust = 2.4 * 0.8 ** (BOSS_HP - B.hp + 1);
@@ -1611,7 +1704,9 @@ class Room extends Phaser.Scene {
     }
     if (--B.hp <= 0 && B.story) { // a story boss stops still; its script dissolves it (cue 'absorb')
       B.hidden = true;
+      if (B.stag) Dialogue.seen.delete(B.story);
       Dialogue.play(this, B.story);
+      if (B.stag) this.talk.queue = this.talk.queue.map((l) => ({ ...l, text: l.text?.replace('{deaths}', B.deaths).replace('{next}', B.deaths + 1) }));
     } else if (B.hp <= 0) {
       this.bossDefeated(B);
       this.cameras.main.flash(500, 255, 220, 140);
@@ -1636,8 +1731,8 @@ class Room extends Phaser.Scene {
     if (!rules.freeze) this.dropCorpses(dt);
     this.updateEnemies();
     this.updateHazards(dt);
-    this.updateBoss(dt);
     this.drawFigures(this.time.now / 1000, dt);
+    this.updateBoss(dt);
     this.drawBeams();
     if (!this.transit && this.dead <= 0 && !this.talk.line)
       for (const beam of this.aimedBeams) if (beam.room === this.index) this.updateAimedBeam(beam, dt);
@@ -1653,6 +1748,10 @@ class Room extends Phaser.Scene {
 
     this.updateHud();
     if (this.transit) return;
+    if (this.stagFinished && !this.talk.line && !this.talk.queue.length) {
+      if (!Dialogue.seen.has('stagNote') && p.x < this.rooms[this.index].rect.x + 3 * T) Dialogue.play(this, 'stagNote');
+      else if (Dialogue.seen.has('stagNote') && p.x > this.rooms[this.index].rect.right - 4 * T) Dialogue.play(this, 'floorOne');
+    }
     // Spots: [column, script, after] plays a script once you walk past that column (after another script, if given).
     if (!this.talk.line && !this.talk.queue.length)
       for (const [col, key, after] of this.rooms[this.index].spots ?? [])
