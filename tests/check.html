@@ -46,7 +46,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   for (const [from, to] of [
     ['The gatehouse', 'Thornwood'], ['Thornwood', 'The moth'],
     ['Wrong order', 'Sawmill'], ['Sawmill', 'Three high'],
-    ['Everything', 'Reliquary'], ['Reliquary', 'End of the greybox'],
+    ['Everything', 'Reliquary'], ['Reliquary', 'The rehearsal'], ['The rehearsal', 'End of the greybox'],
   ]) {
     if (!matches(from) && !matches(to)) continue;
     const i = ROOMS.findIndex(([name]) => name === from);
@@ -681,6 +681,42 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     await alive();
     check(stats.deaths > deaths,
       'The spring: extra deaths erase the high shield and the next launch hits the laser');
+  }
+  if (matches('The rehearsal')) {
+    s = await cleanSolveRoom('The rehearsal');
+    const relics = s.aimedBeams.filter((b) => b.room === s.index);
+    relics.forEach((b) => b.clock = -100);
+    await place(12, 2); await place(13, 4);
+    s.player.body.reset(O().x + 3 * 32 + 16, O().y + 16 * 32 - 16);
+    const lower = relics[1], beforeShot = stats.deaths;
+    lower.clock = 0; s.updateAimedBeam(lower, 0.59); lower.clock = 0.61;
+    key('keydown', 32); await wait(500); key('keyup', 32);
+    lower.clock = -100;
+    check(stats.deaths === beforeShot && s.corpses.length === 2, 'The rehearsal: bait low, then jump after lock to save the stair');
+    for (const [x, top, to, height] of [[11, 0, 12, 3], [12, 3, 13, 5], [13, 5, 15, 7]]) {
+      const r = await hop(x, top, 16, to);
+      check(r.h >= height - 0.1, `The rehearsal: stair reaches ${height} (${r.h})`);
+    }
+    check(s.corpses.length === 2, 'The rehearsal: leading the beam below the stair preserves both steps');
+    // Aim through the upper stair soul: the first soul absorbs the shot.
+    const beam = relics[1], stair = s.corpses[1];
+    beam.angle = Math.atan2(stair.y - beam.y, stair.x - beam.x);
+    beam.clock = 0.99; beam.fired = false;
+    s.updateAimedBeam(beam, 0.02); beam.clock = -100;
+    check(s.corpses.length === 1 && !s.corpses.includes(stair), 'The rehearsal: a beam crossing the stair breaks its first soul');
+    await place(24, 0, 9);
+    s.player.body.reset(O().x + 20 * 32 + 16, O().y + 9 * 32 - 16);
+    const corridor = relics[0], decoy = s.corpses.at(-1), deaths = stats.deaths;
+    corridor.clock = 0; s.updateAimedBeam(corridor, 0.59);
+    const angle = corridor.angle;
+    corridor.clock = 0.61; s.updateAimedBeam(corridor, 0.1);
+    check(corridor.angle === angle, 'The rehearsal: aiming locks for the final 0.4 seconds');
+    corridor.clock = 0.99; s.updateAimedBeam(corridor, 0.02); corridor.clock = -100;
+    check(!s.corpses.includes(decoy) && stats.deaths === deaths, 'The rehearsal: corridor decoy absorbs the shot without killing the player');
+    key('keydown', 39);
+    await until(() => s.index !== ROOMS.findIndex(([n]) => n === 'The rehearsal'), 4000);
+    key('keyup', 39);
+    check(s.rooms[s.index].name === 'End of the greybox', 'The rehearsal: run through the corridor after the decoy breaks');
   }
   await solve('Wrong order', [[5, 0], [2, 4], [14, 0]], [[10.4, 0, 1, 14], [14, 1, 0, 19]]); // jump from the pit's edge
   if (matches('Wrong order')) check(room().corpses.length === 2 && room().doors.filter((d) => d.room === room().index).every((d) => !d.body.enable), 'Wrong order: plate soul and pit soul both stay, and the door is open');

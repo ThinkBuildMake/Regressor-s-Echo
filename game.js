@@ -66,6 +66,7 @@ const DEV = new URLSearchParams(location.search).has('dev'); // ?dev turns on th
 // '#' wall  '^' spikes  P start  '_' plate  D door (open while any plate is held)
 // e walker enemy  B boss  V vines (open when the room's boss is beaten)  x thorns (kill on touch, not solid)
 // A the amulet  C shrine (touch: respawn here)
+// a aimed soul-breaking relic
 // > < v u laser emitter firing right/left/down/up (the beam kills; walls, doors and souls stop it)  s spring
 // o saw moving sideways  O saw moving up/down  ~ crumbling block  ! falling spike (drops when you pass under)
 // f flyer (flies over souls)  t thrower (shoots at you; souls block the shots). Stomp any enemy to kill it.
@@ -707,7 +708,26 @@ const ROOMS = [
     '################################^^^^^^##',
     '########################################',
   ], [675, 52], { world: 3 }],
-  ["End of the greybox", [ // bosses for Worlds 2 and 3 and the beam rehearsal are not built yet
+  ["The rehearsal", [ // aimed beams: protect a two-soul stair, shrine, sacrifice a corridor decoy
+    '##############################',
+    '##############################',
+    '#                 ############',
+    '#                 ############',
+    '#                 ############',
+    '#                 ############',
+    '#                            #',
+    '#                           a ',
+    '#               C             ',
+    '#             ################',
+    '#                            #',
+    '#                            #',
+    '#                           a#',
+    '                             #',
+    '                             #',
+    '# P                          #',
+    '##############################',
+  ], [715, 59], { world: 3 }],
+  ["End of the greybox", [ // the spectral stag is not built yet
     '##############################',
     '#                            #',
     '#                            #',
@@ -725,7 +745,7 @@ const ROOMS = [
     '              P              #',
     '##############################',
     '##############################',
-  ], [715, 59]],
+  ], [745, 53]],
 ];
 const WORLD_NAMES = { 1: 'Forest Edge', 2: 'Overgrown Ruins', 3: 'Sanctum' }; // fades in when you enter a new world
 const WORLD_SOULS = { 1: 1, 2: 2, 3: 3 }; // souls allowed per world; rooms without a world keep 3
@@ -831,6 +851,7 @@ class Room extends Phaser.Scene {
     this.amulets = [];
     this.shrines = [];
     this.lasers = [];
+    this.aimedBeams = [];
     this.springs = [];
     this.saws = [];
     this.crumbles = [];
@@ -882,6 +903,11 @@ class Room extends Phaser.Scene {
               }
               break;
             case 'V': this.gates.push(Object.assign(rect(x, y, T, T, 0x4a6b3a), { room: ri })); this.statics.add(this.gates.at(-1)); break;
+            case 'a': {
+              rect(x, y, T, T, 0x539bd6);
+              this.aimedBeams.push({ x: x + T / 2, y: y + T / 2, room: ri, clock: 0, angle: Math.PI });
+              break;
+            }
             case '>': case '<': case 'v': case 'u': { // laser emitter: a solid block that fires a beam
               const e = rect(x, y, T, T, 0x5a4a6a);
               this.statics.add(e);
@@ -1589,6 +1615,8 @@ class Room extends Phaser.Scene {
     this.updateBoss(dt);
     this.drawFigures(this.time.now / 1000, dt);
     this.drawBeams();
+    if (!this.transit && this.dead <= 0 && !this.talk.line)
+      for (const beam of this.aimedBeams) if (beam.room === this.index) this.updateAimedBeam(beam, dt);
     this.drawHazards();
     Art.update(this, this.time.now / 1000);
 
@@ -1698,6 +1726,38 @@ class Room extends Phaser.Scene {
     if (grounded) this.kickSide = 0;
     if (jumpUp && this.kick > 0) b.velocity.x *= 0.5; // a tap: a small kick (the jump-height cut is below)
     if (jumpUp && b.velocity.y < 0 && !this.sprung) b.velocity.y *= 0.5; // short hop on early release
+  }
+
+  // Shared by relics and bosses. One shot stops at its first wall, soul or player.
+  updateAimedBeam(beam, dt) {
+    beam.clock += dt;
+    if (beam.clock < 0.6) beam.angle = Math.atan2(this.player.y - beam.y, this.player.x - beam.x);
+    const dx = Math.cos(beam.angle), dy = Math.sin(beam.angle);
+    const distance = (r) => {
+      let lo = 0, hi = 2000;
+      for (const [origin, dir, min, max] of [[beam.x, dx, r.x - 3, r.right + 3], [beam.y, dy, r.y - 3, r.bottom + 3]]) {
+        if (Math.abs(dir) < 0.00001) { if (origin < min || origin > max) return Infinity; }
+        else { const a = (min - origin) / dir, b = (max - origin) / dir; lo = Math.max(lo, Math.min(a, b)); hi = Math.min(hi, Math.max(a, b)); }
+      }
+      return lo <= hi ? lo : Infinity;
+    };
+    let length = 2000, target = null;
+    for (const solid of [...this.statics.getChildren().filter((s) => s.body.enable), this.player]) {
+      const d = distance(bounds(solid));
+      if (d < length) { length = d; target = solid; }
+    }
+    const firing = beam.clock >= 1 && beam.clock < 1.18;
+    if (beam.clock < 1.18) {
+      this.fx.fillStyle(0x65baff, 0.35).fillCircle(beam.x, beam.y, 22);
+      this.fx.lineStyle(firing ? 7 : 1, 0x8edbff, firing ? 1 : beam.clock < 0.6 ? 0.4 : 0.9);
+      this.fx.lineBetween(beam.x, beam.y, beam.x + dx * length, beam.y + dy * length);
+    }
+    if (firing && !beam.fired) {
+      beam.fired = true;
+      if (target === this.player) this.die();
+      else if (this.corpses.includes(target)) { this.corpses.splice(this.corpses.indexOf(target), 1); target.destroy(); }
+    }
+    if (beam.clock >= 4) { beam.clock = 0; beam.fired = false; }
   }
 
   // Each beam runs from its emitter to the first solid thing in its way (walls, closed doors, souls).

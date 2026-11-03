@@ -186,9 +186,18 @@ def reliquary(o, p):
     o(39, 20, 39, 21)
 room('Reliquary', [675, 52], 40, 24, 3, 'SHOWCASE W3: flyers in a chimney, two saws to jam, plate, recall, crumbling descent', reliquary)
 
+def rehearsal(o, p):
+    o(0, 13, 0, 14); o(1, 2, 13, 15); p(2, 15, 'P')
+    # Two staggered souls reach the seven-high shelf; bait the relic below them.
+    o(14, 2, 17, 8); p(16, 8, 'C')
+    o(14, 10, 28, 15); p(28, 12, 'a')
+    # A low corridor gives the second beam a narrow angle: sacrifice a decoy, then run.
+    o(18, 6, 28, 8); p(28, 7, 'a'); o(29, 7, 29, 8)
+room('The rehearsal', [715, 59], 30, 17, 3, 'aimed beams: protect a two-soul stair, shrine, sacrifice a corridor decoy', rehearsal)
+
 def end(o, p):
     o(1, 1, 28, 14); o(0, 13, 0, 14); p(14, 14, 'P')
-room('End of the greybox', [715, 59], 30, 17, None, 'bosses for Worlds 2 and 3 and the beam rehearsal are not built yet', end)
+room('End of the greybox', [745, 53], 30, 17, None, 'the spectral stag is not built yet', end)
 
 out = []
 for name, pos, world, note, rows, extra in rooms:
