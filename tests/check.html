@@ -610,6 +610,9 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     };
     await killedOnPlate(7);
     const gateDoors = s.doors.filter((d) => d.room === s.index);
+    check(gateDoors.every((d) => d.plates.length === 1 &&
+      Math.abs(d.plates[0].x - (O().x + (d.x > O().x + 20 * T ? 21.5 : 7.5) * T)) < 1),
+      'The gatehouse: each pen answers only to its own stage plate');
     check(gateDoors.every((d) => d.body.enable === (d.x > O().x + 20 * 32)),
       'The gatehouse: the first plate opens only the first pen');
     await move(5);
@@ -630,7 +633,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     check(s.player.y + 15 <= O().y + 12 * T + 2, 'The gatehouse: plate soul reaches the four-high ledge');
     const crossed = stats.deaths;
     await move(28, true);
-    check(stats.deaths === crossed && s.doors.filter((d) => d.room === s.index).every((d) => !d.body.enable),
+    check(stats.deaths === crossed && gateDoors.every((d) => d.body.enable === (d.x < O().x + 20 * T)),
       'The gatehouse: plate soul holds the upper door while crossing');
   }
   if (matches('The long pit')) {
