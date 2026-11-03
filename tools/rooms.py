@@ -126,12 +126,17 @@ def three_jobs(o, p):
 room('Three jobs', [600, 67], 30, 17, 3, 'plate, pit and a laser blocker at once; recall mistakes instead of dying over them', three_jobs)
 
 def everything(o, p):
-    o(0, 18, 2, 19); o(3, 19, 14, 19); o(7, 20, 9, 20, '^')                         # tunnel with a 3-wide pit
-    o(15, 1, 29, 19); o(15, 19, 16, 19, '#'); p(16, 18, 'C')                           # shrine on a step
-    p(22, 19, '_'); p(26, 19, 'e'); o(30, 1, 30, 16, '#'); o(30, 17, 30, 19, 'D')     # plate, walker, door
-    o(31, 1, 43, 19); p(36, 19, 's'); o(39, 11, 44, 21, '#'); o(44, 9, 44, 10)       # spring, 9-high ledge
+    # Slide a flat bridge through the low tunnel, then hop onto the shrine.
+    o(0, 18, 2, 19); o(3, 19, 14, 19); o(7, 20, 9, 20, '^')
+    o(14, 15, 21, 19); o(15, 19, 16, 19, '#'); p(16, 18, 'C')
+    # Keep the plate oldest, jam the low saw lane, then time a spring step.
+    # Recall a bad step: another death would erase the plate and shut the door.
+    p(19, 19, '_'); o(22, 18, 29, 19); p(22, 19, '#'); p(25, 19, 'o')
+    o(30, 18, 30, 19, 'D')
+    o(31, 1, 38, 19); p(34, 19, 's')
+    o(39, 1, 43, 10); o(44, 9, 44, 10)
     p(1, 19, 'P')
-room('Everything', [630, 63], 45, 22, 3, 'tunnel, plate with a walker, spring; one spare death before the plate soul goes (recall instead)', everything)
+room('Everything', [630, 63], 45, 22, 3, 'slide bridge, shrine; plate, saw jam and spring step together; recall a bad step', everything)
 
 def reliquary(o, p):
     # A: wall-jump a 3-wide chimney while flyers cross it. A small ledge below each flyer lets you stop and time

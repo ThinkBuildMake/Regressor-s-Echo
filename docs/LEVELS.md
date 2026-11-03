@@ -97,7 +97,7 @@ New: **3 souls** and **recall** (Q: tap for the newest soul, hold for more). Mos
 | 1 | Three high | 3 souls | Three-soul staircase; shrine, then the top step also blocks a laser. A fourth death erases the first step | Built |
 | 2 | In my own way | Recall | Two flat souls bridge a low tunnel; recall a standing soul that plugs it. Shrine, then hold a door plate while bridging another tunnel: a fourth death erases the plate soul, so recall the mistake first | Built |
 | 3 | Three jobs | 3 souls at once | Plate, pit bridge, high laser blocker; shrine, then crumbling lips force you to jump into the beam before the landing falls. A fourth death erases the plate: recall the mistake | Built |
-| 4 | Everything | All powers | Slide tunnel, shrine, plate with a walker, door, spring to a 9-high ledge. One spare death before the plate soul goes | Greybox |
+| 4 | Everything | All powers | Slide a flat bridge to the shrine. Then keep a plate soul, a saw jam and a spring step at once: recall a bad step, because a fourth death shuts the door | Built |
 | 5 | The rehearsal | Leading a beam | A sweeping soul-breaking beam aims at you; lead it away from your soul wall | Designed (below) |
 | 6 | The spectral stag | Final boss | Calm setup: build a 3-thick wall. Then charge → beam (glows blue first; lead it away) → wave every ~15s (hide behind the wall). 3 stomps. A broken soul means dying to rebuild, which heals it | Designed (below) |
 
