@@ -24,7 +24,7 @@ Art to make is tracked in [ASSETS.md](ASSETS.md).
 
 ## Tuesday
 - [ ] Boss 2: tree guardian (smashes souls). Boss 3: spectral stag (charges, can't-dodge attacks)
-- [ ] World 2 rooms (slide unlocked), World 3 rooms (amulet awakens: die anywhere)
+- [ ] World 2 rooms (self-destruct, 2 souls), World 3 rooms (3 souls, recall). Room plan: LEVELS.md
 - [ ] Hazard and object art: thorns, spikes, doors, switches, the goal
 
 ## Wednesday

@@ -10,19 +10,33 @@ This is the design source for building levels: design happens here, and building
 - **Fair, not cruel.** The whole puzzle is on screen, nothing kills you without warning, R resets the room, and a wrong death costs seconds, not minutes.
 - **The trick should feel like cheating.** The best rooms make players feel they broke the game (used a soul in a way it "wasn't meant" to be used).
 
+## Direction after the first playtest (2026-11-02)
+The first greybox rooms were too thin: one mechanic per screen, "find the one spot to die, walk out". Rooms now follow Celeste:
+- **Moving around is a skill too:** wall jump (chimneys 2–3 wide), stomping enemies, crumbling floors and falling spikes that punish hesitation.
+- **Each room has 2–3 stages** with a shrine between, and each stage layers 2–3 elements that react to each other.
+- **Deaths can backfire:** a saw jams wherever you die, a bad death erases a soul you still need, a falling spike kills you somewhere you didn't plan.
+
+Three **showcase rooms**, one per world, are in the greybox to judge this style before the rest are redone (`?dev&room=Thornwood`, `?dev&room=Sawmill`, `?dev&room=Reliquary`):
+- **Thornwood (W1):** walker to stomp, a 2-wide chimney whose right wall turns to thorns for 3 rows (die on the middle one and your soul is the kick point past them), a crumbling bridge under falling spikes, then a saw in a 2-tall corridor you can't jump: let it kill you so your soul jams it (a jammed saw sticks inside the soul, so you walk over it).
+- **Sawmill (W2):** the spring reaches 8.5, the ledge is 9, and a saw sweeps the row 5–6 tiles up. Hold K during a launch so the soul hangs beside the spring: in the saw's row it jams the saw and is your step; a row higher it's a step too, but you spring past a moving saw. Then a plate soul that also shields you from a thrower, a crumbling floor under fire, and a ceiling laser you must block high so you can walk under.
+- **Reliquary (W3):** a 3-wide chimney with flyers crossing it (small ledges let you stop and time them), two saws in their own lanes of a 2-tall corridor (jam both, then self-destruct on the plate at the end: all 3 souls), recall to undo a bad death, and a crumbling descent under falling spikes.
+
 ## Powers by world
 | World | Souls | New power | The world's trick |
 |---|---|---|---|
-| 1. Forest Edge | 1 | None. Every death comes from the forest | **Where you get hit is where your soul hangs.** You aim your deaths with jumps and positioning |
+| 1. Forest Edge | 1 | **Slide** (a speed boost, and it leaves a flat soul 2 wide). Every death comes from the forest | **Where you get hit is where your soul hangs.** You aim your deaths with jumps and positioning |
 | 2. Overgrown Ruins | 2 | **Self-destruct** (hold the button) | **Timing.** You keep moving while you hold, so you press early to die where you'll be, and let go to cancel. A 3rd death erases the 1st, so order matters too |
-| 3. Sanctum | 3 | **Recall** (remove all your souls at once, without dying) | **Taking it back.** Recall drops you off souls you're standing on, releases switches and clears souls that block your path |
+| 3. Sanctum | 3 | **Recall** (take souls back without dying, newest first) | **Three at once, in the right order.** Puzzles need all 3 souls doing different jobs at the same time. Recall clears mistakes without dying, and dropping through a soul only works if it's your newest |
 
 **Self-destruct (World 2 on):** hold the button for about 0.75s while the blue-white flames grow. You keep running, jumping and falling while you hold. Let go early to cancel. A hazard that hits you mid-hold kills you on the spot, so the soul lands there instead.
-**Recall (World 3):** one press removes every soul. It isn't a death, so a boss doesn't heal, and the room's switches and doors react right away.
+**Recall (World 3):** a tap removes your newest soul. Holding keeps removing them, newest first, faster the longer you hold. Recalling the soul you stand on drops you. It isn't a death, so it doesn't hurt and doesn't heal a boss.
+**Bosses:** any death heals the boss to full, so a fight is a setup (die freely to place souls) followed by a run where you must not die. Self-destruct's burst is only visual: it never hurts enemies or bosses.
+**The amulet** gains one rune per boss, and each rune brings the next world's powers.
 
-## World 1: Forest Edge (1 soul, about 6 minutes)
+## World 1: Forest Edge (1 soul, about 7 minutes)
 - **1 soul.** A new death moves your only soul.
 - **No choosing to die.** Every death comes from the forest: spikes, thorns, the walker.
+- **The slide** works from the start (run + S/↓): a short burst of speed, and a death mid-slide leaves a lying soul, 2 tiles wide and half a tile tall. It's first needed in room 7.
 - **Shrines** (mid-room checkpoints) let a 1-soul puzzle chain: place the soul, cross, touch the shrine, place it again.
 
 | # | Room | Teaches | The trick | Story beat | Status |
@@ -33,12 +47,12 @@ This is the design source for building levels: design happens here, and building
 | 4 | The thorn wall | Aiming a death | Where you touch the thorns is where your soul hangs. Jump into them at the top of your jump to make the highest step | The guide teaches timing | Built |
 | 5 | The patrol | Switches, walkers | You choose where the walker catches you: get killed standing on the switch so your soul holds the door | "I want you to get killed *efficiently*." | Built |
 | 6 | The chain | Shrines | Bridge the pit, reach the shrine, die again for a step up | "How many times have you done this?" | Built |
-| 7 | The well | Spike well | A deep shaft with spike ledges. Die on one, respawn at the shrine, drop onto your soul, jump to the next ledge down. Your soul is both landing pad and launch pad | | To build |
-| 8 | The low door | A soul in the wrong spot | The exit is a low tunnel under a high ledge. Die too low on the thorns and your soul blocks the tunnel; die too high and you can't reach the ledge. Find the one height that does both | Guide teases the first wrong try | To build |
-| 9 | The turnaround | Walkers turn at souls | A walker paces in front of the exit. Let it kill you at the mouth of a dead-end pocket: it turns at your soul, stays penned in, and the exit is clear | | To build |
+| 7 | The long pit | Slide | A 3-wide spike pit inside a 1-tall tunnel. Walk in and your standing soul plugs the tunnel (R to reset). Slide in and the lying soul is a flat bridge you can slide across | Guide: "Lie down. No, really." | Greybox |
+| 8 | The well | Aiming a fall | Two deep spike shafts. Land your soul near the exit side, respawn, drop onto it, jump out. The second shaft has thorns on the exit-side wall, so you fall close to them without touching | | Greybox |
+| 9 | The gatehouse | Which side the walker ends up on | Get killed on the plate while the walker comes from the door side: it ends up penned between your soul and the door, and you jump it. Get killed the other way round and it's penned with your respawn point. Then a shrine and a spike pit | | Greybox |
 | 10 | The moth | Boss 1 | One soul, two jobs. You place it by dying on the arena's thorns, and it must shield you from the wing dust *and* be the step you stomp from. Dying again heals the moth and moves the soul, so you get one placement for all 3 stomps. The dust can't break souls | "Careful. It remembers too." | Greybox built (room only) |
 
-After the moth: the amulet grows stronger and you earn a **2nd soul** and **self-destruct**, leading into World 2.
+After the moth: the amulet's 2nd rune lights up and you earn a **2nd soul** and **self-destruct**, leading into World 2.
 
 ## Opening conversation (room 2)
 
@@ -58,40 +72,51 @@ The dialogue lives in [dialogue.js](../dialogue.js). The guide is playful, misch
 
 First death: **Hero** *(shouting)*: AGH! THAT HURT! · **Guide** *(wry)*: It's not like you actually died, right? · **Hero** *(annoyed)*: I literally just died.
 
-## World 2: Overgrown Ruins (2 souls + self-destruct, about 8 minutes)
-New: **2 souls**, **self-destruct** (hold), **lasers** (a soul blocks the beam), **springs**.
+## World 2: Overgrown Ruins (2 souls + self-destruct, about 6 minutes)
+New: **2 souls**, **self-destruct** (hold K), **lasers** (a soul blocks the beam), **springs**.
 
 | # | Room | Teaches | The trick | Status |
 |---|---|---|---|---|
-| 1 | The awakening | Self-destruct | The amulet awakens. No hazards: hold to build a 2-step staircase anywhere. Let go once to see that it cancels | To build |
-| 2 | Off the edge | Hold while moving | A pit too wide to jump. Start holding on solid ground and run off the edge: the soul appears mid-pit. Press later, and it lands further out | To build |
-| 3 | Above the jump | Hold while jumping | The wall is taller than a jump plus one soul. Time the hold so it finishes at the top of your jump | To build |
-| 4 | The beam | Lasers | A laser crosses a gap in mid-air. Finish your hold in the beam's path and your soul blocks it below | To build |
-| 5 | The spring | Springs | A spring throws you higher than any jump. Hold during the flight so your soul appears at the peak, the only step to the high exit | To build |
-| 6 | The race | Hold vs. hazard | A walker closes in on the switch. Your hold has to finish on the switch before the walker reaches you, or it kills you somewhere useless. Or wait and let the walker do it in the right spot | To build |
-| 7 | The moving ledge | Cancelling | A platform crosses a pit at different speeds. Start holding when you think it will be in place; if it won't be, let go and try again | To build |
-| 8 | Wrong order | Death order | Three placements with 2 souls: your 3rd death erases your 1st. Do them in the wrong order and you erase the one you still need | To build |
-| 9 | The tree guardian | Boss 2 | It glows blue, then slams the soul nearest you. Lure the slam onto the soul you don't need and stomp from the one you kept. Dying to rebuild heals it | To build |
+| 1 | Let go | Self-destruct | No hazards. A ledge 5 high: die, stand on your soul, die again on top of it, climb the 2-soul stack | Greybox |
+| 2 | Off the edge | Hold while jumping | A 10-wide pit. Run, jump off the edge holding K: the soul appears mid-pit. Then jump to it and across | Greybox |
+| 3 | The ladder | Staircase | A ledge 7 high. A straight stack only lets you stand on its top, so it tops out at 3. Then run off your top soul holding K: the new soul appears beside it, one step up | Greybox |
+| 4 | The beam | Lasers | A ledge 8 high and a laser at 4.5. Jump into the laser right next to its source: that soul is the high step, and it blocks the whole beam | Greybox |
+| 5 | The spring | Springs | The spring reaches 8.5, the ledge is 9. Hold K during the launch so a soul hangs beside the spring, spring again onto it, jump up | Greybox |
+| 6 | Wrong order | Death order | A step to reach the plate, a soul on the plate, a soul in the pit. Pit first, and your 3rd death erases it | Greybox |
+| 7 | The tree guardian | Boss 2 | It glows blue, then slams the soul nearest you. Lure the slam onto the soul you don't need and stomp from the one you kept. Dying to rebuild heals it | To design in detail |
 
-After the tree: a **3rd soul** and **recall**.
+Cut for now: *The race* (walkers are slow enough to outrun, so it had no tension) and *The moving ledge* (its timing window was too small to be fair).
 
-## World 3: Sanctum (3 souls + recall, about 8 minutes)
-New: **3 souls**, **recall** (remove every soul at once, without dying), **inverse doors** (open only while their switch is *empty*).
+After the tree: the 3rd rune lights up, giving a **3rd soul** and **recall**.
+
+## World 3: Sanctum (3 souls + recall, about 6 minutes)
+New: **3 souls** and **recall** (Q: tap for the newest soul, hold for more). Mostly a convenience: rooms can be longer and harder without a mistake costing several deaths.
 
 | # | Room | Teaches | The trick | Status |
 |---|---|---|---|---|
-| 1 | Three high | 3 souls | A ledge only a 3-soul tower reaches. Easy warm-up | To build |
-| 2 | The drop | Recall | The exit is *below* a spike pit you bridged with souls. Stand on the bridge over the gap below and recall: you fall through | To build |
-| 3 | Two doors | Recall + switches | Your soul on a switch holds door A open, but door B is an inverse door. Pass A, recall, and B opens | To build |
-| 4 | In my own way | Recall vs. dying | Your bridge blocks the exit tunnel once you've crossed. Dying would only erase the oldest soul; recall clears them all | To build |
-| 5 | Mid-air | Recall while jumping | Jump off a soul tower and recall mid-flight, so the tower that blocked your arc is gone before you reach it | To build |
-| 6 | Everything | All powers | A long room: 3 souls, a held self-destruct off a spring, an inverse door and a recall at the right moment. The final exam before the boss | To build |
-| 7 | The rehearsal | Leading a beam | A sweeping soul-breaking beam aims at you; lead it away from the soul wall you need. Teaches the stag fight without the stag | To build |
-| 8 | The spectral stag | Final boss | Calm setup: build a 3-thick wall. Then charge → beam (glows blue first; lead it away) → wave every ~15s (hide behind the wall). 3 stomps. A broken soul means dying to rebuild, which heals it | To build |
+| 1 | Three high | 3 souls | A ledge 8 high: the World 2 staircase, one step taller | Greybox |
+| 2 | In my own way | Recall | A 5-wide pit in a 1-tall tunnel: two lying souls bridge it. A standing soul plugs the tunnel; recall it instead of resetting | Greybox |
+| 3 | Three jobs | 3 souls at once | A soul on the plate, one in the spike pit, one blocking a laser from the ceiling (die in it mid-jump, so you can walk under). A 4th death erases the plate soul, so recall mistakes instead | Greybox |
+| 4 | Everything | All powers | Slide tunnel, shrine, plate with a walker, door, spring to a 9-high ledge. One spare death before the plate soul goes | Greybox |
+| 5 | The drop | Recall to drop | Stand on your newest soul and recall it to fall through. Still needs a layout where the hole can only be plugged by a soul | To design |
+| 6 | The rehearsal | Leading a beam | A sweeping soul-breaking beam aims at you; lead it away from your soul wall | To design (boss mechanic) |
+| 7 | The spectral stag | Final boss | Calm setup: build a 3-thick wall. Then charge → beam (glows blue first; lead it away) → wave every ~15s (hide behind the wall). 3 stomps. A broken soul means dying to rebuild, which heals it | To design in detail |
+
+Cut: *Spring tower* (a spring-placed soul has to land within a few frames, too tight).
+
+## Measured movement (design to these)
+Measured in the game; the greybox tests (`tests/check.html`) replay each tight room's solution with real physics.
+- Jump: **3.4 tiles** up. A ledge 3 up is reachable, 4 is not.
+- Running jump: **5.4 tiles** across; slide-jump **6.1**. The slide adds only about a tile, too little for "slide or fail" gaps; raise `SLIDE_SPEED` if we want those.
+- Spring: **8.5 tiles** up. (Until a fix after the playtest, a speed cap meant for falling held springs to 7.4.)
+- Souls snap to the grid: a spike death leaves a standing soul as a 1-tile step, or a lying soul flush with the floor.
+- **Only the top of a stack can be stood on**, so stacking in place tops out at 3 + a jump = 6.4 tiles. Going higher takes a staircase (souls side by side), built by running off your top soul while holding K.
+- Lasers stop at the first soul, wall or door in their path, so a soul blocks only the part of the beam beyond it.
+
+## Playing the greybox
+The rooms are on the `greybox-levels` branch, in its own folder (`../Game-Week-greybox`). Serve that folder (`python3 -m http.server 8001`) and open `http://localhost:8001/?dev&room=The%20long%20pit` (any room name works; `?dev` turns on the dev keys and the room shortcut). Keys: hold K to self-destruct (World 2 on), Q to recall your newest soul (World 3), Shift+R to retry the room (the way out if you trap yourself), N for the next room and H for the help panel (both dev only). The flames in the bottom left show how many souls you have left.
 
 ## Open design questions
-- **Recall in the stag fight.** It isn't a death, so it doesn't heal the stag, but rebuilding afterwards takes deaths, which do. Idea: the stag switches sides partway through, so your wall faces the wrong way and you have to recall and rebuild. That only works if dying heals one hit, not all three.
-- Does dying heal a boss fully, or only one hit?
-- **The slide.** It was planned for World 2, which is now crowded (self-destruct, 2 souls, lasers, springs). Move it to World 3 or cut it?
-- **The story.** The amulet awakening moves from World 3 to World 2. The arc in IDEAS.md and STORY.md (World 3 = "he chooses his death") needs adjusting.
-- Soul burst (self-destruct kills enemies touching you): in or out?
+- **Slide speed:** raise it so the slide's speed boost can carry puzzles, or keep it as the flat-soul tool only?
+- **The drop:** needs a layout where only a soul can plug the hole you later drop through.
+- **Bosses 2 and 3:** the tree guardian and the stag need detailed attack patterns before they can be greyboxed.

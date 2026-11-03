@@ -18,19 +18,22 @@ Every idea raised so far, so we can decide what to build. Status:
 | Body limit: past the limit, your oldest body vanishes | Built | Key 3 toggles 1/2/3/5/unlimited in the greybox |
 | Bodies float where you died (a soul), instead of falling | Decided: float (default) | Key 1 switches back to falling. More uses: mid-air steps, bridges, shields at any height. Reach is capped by soul count, since a new death removes your oldest body. Costs: no crushing enemies (fine: only bosses need beating), no stack collapse |
 | Bodies snap to the tile grid | Built (toggle) | Key 2. Easier to read puzzles with snap on |
-| Die-anywhere button vs. only dying to the environment | Decided: unlocked late | Off by default (key 4 turns it on for testing). Worlds 1–2 are environment-only deaths. Unlocked as a big upgrade for World 3 |
-| What unlocks die-anywhere | Decided: the amulet awakens | A rune on the amulet lights up as your soul grows stronger. You can then release your soul at will: the hero bursts into blue and white flames, leaving a body. Guide: *"You can let go whenever you like now. Trust me, it's worse when you choose it."* Rejected: big red button (clashes with the tone), dagger (self-harm connotations), burst mushroom, will-o'-wisp |
-| Soul explosion also affects the world (e.g. breaks cracked walls, lights braziers) | Undecided | Would give World 3 new puzzles from the same action. Only if time allows |
+| Die-anywhere button vs. only dying to the environment | Decided: unlocked late | Off by default (key 4 turns it on for testing). World 1 is environment-only deaths. Unlocked in World 2, together with the 2nd soul |
+| What unlocks die-anywhere | Decided: the amulet grows stronger | The amulet gains one rune per boss, each with a new power (World 2: 2 souls + self-destruct; World 3: 3 souls + recall). It's not a single awakening. After the moth, the 2nd rune lights up. You can then release your soul at will: the hero bursts into blue and white flames, leaving a body. Guide: *"You can let go whenever you like now. Trust me, it's worse when you choose it."* Rejected: big red button (clashes with the tone), dagger (self-harm connotations), burst mushroom, will-o'-wisp |
+| Soul explosion also affects the world (e.g. breaks cracked walls, lights braziers) | Undecided | Would give World 3 new puzzles from the same action. Only if time allows. The burst never damages enemies |
+| Wall jump | Decided, built (greybox) | Slide down a wall (or a soul) while pushing into it; jump to kick off. A gentle kick (about 2 tiles out, a bit lower than a jump). Hold jump for the full kick, tap for a small one. You can't kick off the same side twice in a row, and steering locks for 0.3s after a kick, so one wall or ledge face gives no extra height. Gaps 2–3 tiles wide between two walls climb about 1.7–1.9 tiles per kick; a soul can be the second wall. No climbing or stamina |
+| Self-destruct is held (about 0.75s) | Decided | Hold the button while the flames grow. You keep moving, jumping and falling, so where the soul lands depends on when you started. Letting go early cancels. A hazard that hits you mid-hold kills you on the spot |
+| Recall: take souls back without dying | Decided (World 3) | Tap removes your newest soul; hold keeps going, newest first, speeding up. Mostly a convenience (unblock yourself without dying several times). Recalling the soul you stand on drops you, so dropping through a platform needs it to be your newest. Not a death, so it doesn't hurt and bosses don't heal |
 | Dying is sometimes bad: a body in the wrong spot blocks your own path | Built | Walker tunnel room. R resets the room if you trap yourself |
 
 ## Progression
 
 | Idea | Status | Notes |
 |---|---|---|
-| Start with 1 soul (1 body at a time); the soul grows stronger to allow 2, then 3 | Proposed | Turns the body limit into progression. With 1 soul, every death moves your only body |
+| Start with 1 soul (1 body at a time); the soul grows stronger to allow 2, then 3 | Decided | World 1: 1 soul. World 2: 2 souls + self-destruct. World 3: 3 souls + recall. Rooms per world: [LEVELS.md](LEVELS.md) |
 | New tools that change where and how you can die | Proposed | Each tool should create a new way to place a body, not just a movement trick |
 | Slide → leaves a lying body (2 wide × ½ tall) instead of a standing one (1 × 1) | Built | S/↓ while running. Jumping mid-slide is a dive: you stay flat until you land. Lying: bridges, covering wide spike pits, sealing holes, blocking vertical lasers. Standing: steps, towers, switches, blocking horizontal lasers |
-| Slide also as a movement tool (faster on the ground, fits under low gaps) | Undecided | Right now it's faster than running for 0.4s. Low gaps need half-tile walls, which the grid doesn't support yet |
+| Slide also as a movement tool (faster on the ground, fits under low gaps) | Decided: speed boost, from World 1 | Right now it's faster than running for 0.4s. Low gaps need half-tile walls, which the grid doesn't support yet |
 
 ## Hazards and enemies
 
@@ -39,10 +42,13 @@ Every idea raised so far, so we can decide what to build. Status:
 | Spikes; your body covers them | Built | |
 | Pressure plates and doors; a body holds the plate down | Built | |
 | Walker enemy: kills on touch, turns at walls, bodies and ledges | Built | Enemies are obstacles, not things to kill. Only bosses get defeated. The walker room was built for falling bodies and needs a redesign |
-| Player attack / weapon | Decided: none | A weapon would compete with the body mechanic. Bosses take stomps from steps built out of your bodies |
+| Player attack / weapon | Decided: none, but you can stomp | A weapon would compete with the body mechanic. Landing on an enemy from above kills it (Mario-style). It comes back once its starting spot scrolls off screen (so it's waiting when you return), when you die, or when you re-enter the room. In a one-screen room the spot never leaves the screen, so only dying or R brings it back. Bosses take stomps from steps built out of souls |
 | Lasers: kill you, and your body blocks the beam | Proposed | A body that dies in mid-air falls out of the beam, so it needs support to stay in the way |
 | Fall damage: a long fall kills you where you land | Proposed | A death you can control. Limits itself: each body shortens the next fall |
-| Moving hazards (sweeping lasers, crushers) instead of more enemy types | Proposed | Same pressure, much less work than more enemies |
+| Moving hazards | Built (greybox) | **Saw blades** run along a row or column and reverse at walls; a soul in their way **jams** them where you died (can save you or wall you off). **Crumbling blocks** break 0.45s after you land and return 2.5s later. **Falling spikes** drop when you pass under them, so you die where you didn't plan |
+| Springs launch the hero (later worlds) | Proposed | Height no jump can reach. W2: hold during the flight to place a soul higher than any jump |
+| Getting rid of enemies | Decided: stomp, or lure | Stomp them, or lure them into hazards. The self-destruct burst still does no damage |
+| Celeste-style spike wells | Decided | Drop into spikes to make a soul platform, respawn, drop onto that platform, jump off it toward the next ledge, die again lower down. Works with 1 soul and gets longer with shrines or more souls |
 
 ## Bosses
 
@@ -51,6 +57,11 @@ Every idea raised so far, so we can decide what to build. Status:
 | Boss heals to full whenever you die | Built | Setup phase (die to place bodies), then a fight where you must not die |
 | Dying mid-fight ruins your setup (your oldest body vanishes, and the new one lands somewhere unhelpful) | Built | Follows from the body limit and physics |
 | Stomp the boss from a body; 3 hits; it speeds up each hit | Built | A 1-high step is safe; 2-high puts you in its path |
+| Attack colors | Decided | Normal boss attacks are yellow. Before an attack that breaks souls, the boss glows blue while it charges (it's pulling on soul power), so players know to protect their souls. Watch that the yellow stays clearly apart from the amulet's gold |
+| Dying to block an attack | Decided: full heal | Any death heals the boss to full. A one-hit heal would let players brute-force a fight by dying over and over. So dying to block is free during setup (the boss is already full) and costly once you've landed a stomp |
+| Soul-breaking beam aims at you | Proposed | It shows an aiming line pointed at the hero. You lead it away from your soul wall. If it breaks a soul, rebuilding means dying, which heals the boss |
+| Wave you can't dodge | Proposed | Breaks 2 souls and stops at the 3rd, so only a wall 3 souls thick protects you. Final boss only |
+| Boss arc | Proposed | Moth (1 soul): hide behind your soul; can't break souls. Tree (2 souls): a slow, clearly signaled slam hits the soul nearest you, so you lure it to the soul you don't need and stomp from the one you kept. Stag (3 souls, final): build a 3-thick wall during a calm setup, then loop charge → beam (lead it away) → wave every ~15s (hide), and win with 3 stomps |
 | The three bosses | Decided | World 1: **great moth spirit** (floats, wing-dust shots, can't destroy souls). World 2: **tree guardian** with a stone mask face (stationary, branch swings and seed pods, can smash souls). World 3: **spectral stag** (charges, destroys souls it hits, has attacks you can't dodge) |
 | Dialogue portraits | Decided | Dialogue box at the top of the screen: hero portrait on the left, guide on the right, name label, typed-out text. Hero: 8 expressions (neutral, startled, pained, exhausted, determined, relieved smile, thinking, sad). Guide: 6 (wry, amused, solemn, sad, thinking, warm) |
 | Hero personality | Decided | An ordinary, slightly lazy treasure hunter who wants one good find so he can take it easy. Talks to himself, copes by denying and bargaining, has common sense, and takes betrayal personally. Full description: [STORY.md](STORY.md). Extra faces: curious (eyebrow raise at the amulet), annoyed, excited, scared, shouting, cocky |
@@ -64,8 +75,8 @@ Every idea raised so far, so we can decide what to build. Status:
 
 ## Stage structure (draft)
 
-1. **Forest edge / Ruined Approach**: 1 soul, standing bodies only. Teaches steps, spikes and switches. Ends with earning the 2nd soul.
-2. **Overgrown ruins / Spire**: gain the slide (lying bodies). Walkers and lasers. Boss 1 (can't destroy bodies). Ends with the 3rd soul.
+1. **Forest edge / Ruined Approach**: 1 soul, standing and lying (slide) bodies. Teaches steps, spikes, switches and the slide. Ends with earning the 2nd soul.
+2. **Overgrown ruins / Spire**: self-destruct and the 2nd soul (the slide now comes in World 1). Walkers and lasers. Boss 1 (can't destroy bodies). Ends with the 3rd soul.
 3. **Sanctum / where the herb grows**: all tools. Final boss destroys bodies and has attacks you can't dodge.
 
 ## Story and theme
@@ -86,7 +97,7 @@ Every idea raised so far, so we can decide what to build. Status:
 |---|---|---|
 | 1. Forest edge | Fear and denial: every death hurts, and he hates the amulet | The guide teaches him to use his deaths |
 | 2. Overgrown ruins | Enduring: numb, worn down, the strain dialogue peaks | Learns the guide's own history |
-| 3. Sanctum | Acceptance: the amulet awakens and he chooses his death | Uses it deliberately against the final boss |
+| 3. Sanctum | Acceptance: the 3rd rune lets him recall his deaths; control through planning | Uses it deliberately against the final boss |
 | Ending | | Finds the treasure, meets a new version of himself, and asks *"Which death are you currently on?"* |
 
 Dialogue gets written last, once the rooms exist. The dialogue system gets built early with placeholder lines.
@@ -99,7 +110,7 @@ Dialogue gets written last, once the rooms exist. The dialogue system gets built
 - **Show the death count on screen**, as the answer to the guide's question.
 - **Possible ending: the hero becomes the guide.** He finds the herb, then meets a new version of himself and asks, *"Which death are you currently on?"* That closes the loop and gives the clear ending the brief asks for.
 - **What the guide shows** (undecided): the guide's own death count, revealed late, could show how much worse it gets.
-- **Color rule (decided):** blue/white = souls: your bodies (solid, flame-topped, standable), the hero's death, and the guide (see-through, flameless, floating). Gold = the amulet and its runes. Keep both colors for those uses only, so they stay meaningful.
+- **Color rule (decided):** blue/white = souls: your bodies (solid, flame-topped, standable), the hero's death, and the guide (see-through, flameless, floating). Gold = the amulet and its runes. One exception: a boss glows blue while charging an attack that breaks souls (it draws on soul power). Boss attacks are yellow, kept clearly apart from the amulet gold. Otherwise keep these colors for those uses only, so they stay meaningful.
 - **Visual tone:** bodies as translucent blue soul-husks, not gore. This matches the blue/gold palette in the design doc and keeps the forest setting gentle.
 - **Setting:** forest overgrown with ruins, so both the forest idea and the design doc's "magical ruins" fit.
 
@@ -144,4 +155,4 @@ Dialogue gets written last, once the rooms exist. The dialogue system gets built
 | Idea | Status | Why |
 |---|---|---|
 | Time-echo layer (ghosts replaying your past runs) | On hold | Riskiest piece to build in a week. Souls + slide + bosses already add something new in each stage |
-| More AI enemy types | On hold | Moving hazards cover the same ground for less work |
+| More enemy types | Built (greybox) | **Flyer**: flies over souls, so soul walls don't stop it. **Thrower**: stands still and shoots along the ground; souls block its shots, so a soul doubles as a shield |
