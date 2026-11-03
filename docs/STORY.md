@@ -213,7 +213,7 @@ Blocking the dust with your soul should be taught in an earlier room, so the gui
 He writes the note here, while the hero sleeps. Nothing gives it away until World 3.
 > **Hero** [exhausted]: I need… a minute. Or a hundred.  
 > **Guide** [wry]: Go on. I'll keep watch. Not like I sleep.  
-> **Hero** [exhausted]: Wake me if anything else falls out of the sky.  
+> **Hero** [exhausted]: Wake me if anything else comes through a wall.  
 > *(He lies down. The screen dims. The ghost watches him for a long moment.)*  
 > **Guide** [thinking]: …  
 > **Guide** [sad]: …  

@@ -167,7 +167,7 @@ const SCRIPT = {
     // The nap: he writes the note here (revealed in World 3).
     H('exhausted', 'I need… a minute. Or a hundred.'),
     G('wry', "Go on. I'll keep watch. Not like I sleep."),
-    H('exhausted', 'Wake me if anything else falls out of the sky.'),
+    H('exhausted', 'Wake me if anything else comes through a wall.'),
     W(1.6, 'dim'),
     G('thinking', '…'),
     G('sad', '…'),
