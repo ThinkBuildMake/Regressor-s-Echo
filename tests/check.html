@@ -541,6 +541,57 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     await wait(300);
     check(stats.deaths === deaths && near(s.player.y + 15, soul.y - 16), 'Wrong order: a narrow landing on the pit soul stays on top');
   }
+  if (matches('In my own way')) {
+    s = await cleanSolveRoom('In my own way');
+    const flat = async (tx) => {
+      s.player.body.reset(O().x + tx * 32, O().y + 10 * 32 - 7);
+      s.setLying(true); s.die(); await alive();
+      check(s.corpses.at(-1).lying, 'In my own way: slide death leaves a flat bridge');
+    };
+    const recall = async () => {
+      key('keydown', 81); await wait(60); key('keyup', 81); await wait(100);
+    };
+    const cross = async (from, to) => {
+      s.player.body.reset(O().x + from * 32 + 16, O().y + 10 * 32 - 16);
+      await wait(100);
+      const deaths = stats.deaths;
+      key('keydown', 39); await wait(180); key('keydown', 83); await wait(60); key('keyup', 83);
+      for (let t = 0; t < 2500 && stats.deaths === deaths && s.player.x < O().x + to * 32; t += 10) await wait(10);
+      key('keyup', 39); key('keydown', 37);
+      for (let t = 0; t < 500 && s.player.body.velocity.x > 0; t += 10) await wait(10);
+      key('keyup', 37); await wait(100);
+      return stats.deaths === deaths && s.player.x >= O().x + to * 32;
+    };
+    // Stage A: preserve the bridge, remove only the plug, then jump to the shrine.
+    await flat(5); await flat(7);
+    await place(3, 0, 10);
+    const bridge = s.corpses.slice(0, 2);
+    check(!(await cross(1, 10)), 'In my own way: standing soul plugs the low tunnel');
+    await recall();
+    check(bridge.every((c) => s.corpses.includes(c)), 'In my own way: recall preserves both bridge souls');
+    check(await cross(1, 10), 'In my own way: two flat souls cross stage A');
+    const a = await hop(10, 0, 10, 11);
+    check(a.h >= 0.95 && s.start.x > O().x + 10 * 32,
+      `In my own way: real jump onto the shrine step (${a.x}, ${a.h}, spawn ${(s.start.x - O().x) / 32})`);
+    // Stage B: the plate soul is oldest; recall the bad bridge before filling the third slot.
+    key('keydown', 81); await wait(1200); key('keyup', 81); await wait(100);
+    await place(16, 0, 10); await flat(21); await place(22, 0, 10);
+    const plate = s.corpses[0], firstFlat = s.corpses[1];
+    await recall(); await flat(23);
+    check(s.corpses[0] === plate && s.corpses[1] === firstFlat,
+      'In my own way: recalling the mistake keeps plate and first bridge');
+    const b = await hop(14, 0, 10, 18);
+    check(b.x >= 17.6 && b.h > -0.1, 'In my own way: jump over the plate soul reaches the slide approach');
+    check(await cross(18, 27), 'In my own way: plate and two flat souls reach the open exit');
+    await place(18, 0, 10);
+    check(!s.corpses.includes(plate) && s.doors.filter((d) => d.room === s.index).every((d) => d.body.enable),
+      'In my own way: careless fourth death erases the plate soul and closes the door');
+    s = await cleanSolveRoom('In my own way');
+    await flat(5);
+    const deaths = stats.deaths;
+    await hop(2, 0, 10, 10);
+    check(stats.deaths > deaths, 'In my own way: one flat soul cannot bridge the first tunnel');
+  }
   await solve('Three high', [[7, 2], [8, 3], [9, 4]],
     [[6, 0, 3, 7], [7, 3, 5, 9], [9, 5, 8, 12]]);
   if (matches('Three high')) {

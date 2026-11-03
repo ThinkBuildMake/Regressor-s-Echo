@@ -113,7 +113,12 @@ def three_high(o, p):
 room('Three high', [540, 75], 30, 17, 3, '8-high ledge: a 3-soul staircase (run off your top soul while holding K)', three_high)
 
 def own_way(o, p):
-    o(0, 8, 3, 9); o(4, 9, 26, 9); o(27, 1, 28, 9); o(29, 8, 29, 9); o(10, 10, 14, 10, '^'); p(1, 9, 'P')
+    # Recall a standing mistake without disturbing the flat bridge underneath it.
+    o(0, 8, 2, 9); o(3, 9, 9, 9); o(4, 10, 7, 10, '^'); p(1, 9, 'P')
+    o(10, 5, 18, 9); p(11, 9, '#'); p(11, 8, 'C')
+    # The plate and both bridge souls use all three slots: another death shuts the door.
+    p(16, 9, '_'); o(19, 9, 25, 9); o(20, 10, 23, 10, '^')
+    o(26, 8, 26, 9, 'D'); o(27, 5, 28, 9); o(29, 8, 29, 9)
 room('In my own way', [570, 73], 30, 17, 3, 'two lying souls bridge the tunnel pit; recall (Q) a standing one that blocks it', own_way)
 
 def three_jobs(o, p):
