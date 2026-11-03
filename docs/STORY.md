@@ -367,6 +367,7 @@ The pyramid needs to be visible in the background, its top lost in cloud.
 *(He keeps his promise. Behind the tree, a patch of earth has been smoothed flat, and words are scratched into it in his own handwriting.)*
 > If you're reading this… then it must mean I've kicked the bucket.  
 > Don't make that face. I can see it from here. Well. Could.  
+> Well, I guess it's time to come clean.  
 > You know how I said there was a limit? That was a lie. Figured you'd be more careful if you thought you were running out.  
 > The limit is when your spirit breaks. On floor ninety, mine did, and I just… stopped getting back up.  
 > So keep getting back up. Whatever's waiting in there.  
