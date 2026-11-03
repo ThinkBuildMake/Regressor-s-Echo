@@ -649,6 +649,95 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     await hop(2, 0, 10, 10);
     check(stats.deaths > deaths, 'In my own way: one flat soul cannot bridge the first tunnel');
   }
+  if (matches('Three jobs')) {
+    s = await cleanSolveRoom('Three jobs');
+    // Stage A: three separate jobs, then a real jump through the door to the shrine.
+    for (const [x, b] of [[4, 0], [9, 0], [13, 2]]) await place(x, b, 8);
+    const aDeaths = stats.deaths;
+    for (const [x, top, to, height] of [[5, 0, 9, 1], [9, 1, 13, 0], [13, 0, 16, -7]]) {
+      const r = await hop(x, top, 8, to);
+      check(r.x >= to - 0.4 && r.h >= height - 0.1,
+        `Three jobs: stage A jump reaches ${to} (${r.x}, ${r.h})`);
+    }
+    check(stats.deaths === aDeaths && s.start.x > O().x + 15 * 32, 'Three jobs: stage A reaches the shrine alive');
+    key('keydown', 81); await wait(1200); key('keyup', 81); await wait(100);
+    // Stage B: leave the plate oldest, bridge the spikes, block the beam above the crumbling landing.
+    for (const [x, b] of [[18, 0], [23, 0], [17, 0]]) await place(x, b, 15);
+    const plate = s.corpses[0], bridge = s.corpses[1];
+    key('keydown', 81); await wait(60); key('keyup', 81); await wait(100);
+    await place(27, 2, 15);
+    check(s.corpses[0] === plate && s.corpses[1] === bridge,
+      'Three jobs: recalling a mistake preserves the plate and bridge');
+    const bDeaths = stats.deaths;
+    for (const [x, top, to, height] of [[19, 0, 23, 1], [23, 1, 29, -1]]) {
+      const r = await hop(x, top, 15, to);
+      check(r.x >= to - 0.4 && r.h >= height - 0.1,
+        `Three jobs: stage B jump reaches ${to} (${r.x}, ${r.h})`);
+    }
+    check(stats.deaths === bDeaths, 'Three jobs: crumbling lips crossed without another death');
+    await place(17, 0, 15);
+    check(!s.corpses.includes(plate) && s.doors.filter((d) => d.room === s.index).every((d) => d.body.enable),
+      'Three jobs: fourth death erases the plate and shuts both doors');
+    s = await cleanSolveRoom('Three jobs');
+    await place(4, 0, 8); await place(13, 2, 8);
+    const deaths = stats.deaths;
+    await hop(5, 0, 8, 13);
+    check(stats.deaths > deaths, 'Three jobs: plate and laser blocker cannot replace the pit bridge');
+  }
+  if (matches('Everything')) {
+    s = await cleanSolveRoom('Everything');
+    const run = async (from, to, slide = false) => {
+      s.player.body.reset(O().x + from * 32 + 16, O().y + 20 * 32 - 16);
+      await wait(100);
+      const deaths = stats.deaths;
+      key('keydown', 39); await wait(180);
+      if (slide) { key('keydown', 83); await wait(60); key('keyup', 83); }
+      for (let t = 0; t < 3000 && stats.deaths === deaths && s.player.x < O().x + to * 32; t += 10) await wait(10);
+      key('keyup', 39); key('keydown', 37);
+      for (let t = 0; t < 500 && s.player.body.velocity.x > 0; t += 10) await wait(10);
+      key('keyup', 37); await alive();
+      return stats.deaths === deaths && s.player.x >= O().x + to * 32;
+    };
+    const recall = async () => {
+      key('keydown', 81); await wait(60); key('keyup', 81); await wait(100);
+    };
+    // A real slide death places the bridge; the next slide and jump reach the shrine.
+    await run(4, 14, true);
+    check(s.corpses.at(-1)?.lying, 'Everything: slide death leaves a flat tunnel bridge');
+    check(await run(4, 14, true), 'Everything: slide crosses the bridge');
+    const a = await hop(14, 0, 20, 16);
+    check(a.h >= 0.95 && s.start.x > O().x + 15 * 32,
+      'Everything: jump reaches the shrine');
+    await recall();
+    // All three slots have different jobs. Undo the bad spring step without a fourth death.
+    await place(19, 0, 20); await place(25, 0, 20); await place(37, 0, 20);
+    const plate = s.corpses[0], jam = s.corpses[1];
+    await recall(); await place(37, 6, 20);
+    check(s.corpses[0] === plate && s.corpses[1] === jam,
+      'Everything: recall repairs the spring step without losing plate or saw jam');
+    await wait(1000);
+    check(s.saws.some((sw) => sw.room === s.index && sw.jam), 'Everything: second soul jams the tunnel saw');
+    const deaths = stats.deaths;
+    for (const [x, top, to, height] of [[17, 0, 21, 0], [21, 0, 22, 1], [24, 0, 25, 1], [25, 1, 31, 0]]) {
+      const r = await hop(x, top, 20, to);
+      check(r.x >= to - 0.4 && r.h >= height - 0.1,
+        `Everything: plate and saw passage reaches ${to} (${r.x}, ${r.h})`);
+    }
+    // Launch from the spring, steer onto the hanging soul, then jump to the ledge.
+    const launch = await hop(34, 0, 20, 37);
+    check(launch.h >= 6.95 && launch.x >= 36.6,
+      `Everything: spring lands on the hanging step (${launch.x}, ${launch.h})`);
+    const exit = await hop(37, 7, 20, 41);
+    check(exit.h >= 8.95 && exit.x >= 40.6 && stats.deaths === deaths,
+      `Everything: spring step reaches the nine-high exit (${exit.x}, ${exit.h})`);
+    await place(32, 0, 20);
+    check(!s.corpses.includes(plate) && s.doors.filter((d) => d.room === s.index).every((d) => d.body.enable),
+      'Everything: careless fourth death erases the plate and closes the door');
+    s = await cleanSolveRoom('Everything');
+    const before = stats.deaths;
+    await hop(5, 0, 20, 11);
+    check(stats.deaths > before, 'Everything: jumping cannot skip the empty tunnel bridge');
+  }
   await solve('Three high', [[7, 2], [8, 3], [9, 4]],
     [[6, 0, 3, 7], [7, 3, 5, 9], [9, 5, 8, 12]]);
   if (matches('Three high')) {

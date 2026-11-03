@@ -131,17 +131,30 @@ def own_way(o, p):
 room('In my own way', [570, 73], 30, 17, 3, 'two lying souls bridge the tunnel pit; recall (Q) a standing one that blocks it', own_way)
 
 def three_jobs(o, p):
-    o(1, 1, 28, 15); o(0, 14, 0, 15); p(5, 15, '_'); o(9, 16, 16, 16, '^')
-    o(18, 1, 24, 12, '#'); p(21, 12, 'v'); o(26, 1, 26, 12, '#'); o(26, 13, 26, 15, 'D'); o(29, 14, 29, 15); p(1, 15, 'P')
+    # Climb to the safe three-job setup, then drop to the shrine.
+    o(0, 14, 0, 15); o(1, 4, 3, 15); p(1, 15, 'P')
+    o(4, 4, 13, 7); p(4, 7, '_'); o(6, 8, 12, 8, '^'); p(13, 3, 'v')
+    o(14, 6, 14, 7, 'D'); o(15, 4, 16, 14); p(16, 14, 'C')
+    # The second bridge has crumbling lips: commit to the jump, including the high laser death.
+    o(17, 10, 27, 14); p(18, 14, '_'); o(20, 15, 26, 15, '^')
+    for x in (19, 27):
+        p(x, 15, '~'); p(x, 16, '^')
+    p(27, 9, 'v'); o(28, 13, 28, 14, 'D'); o(29, 14, 29, 15)
+
 room('Three jobs', [600, 67], 30, 17, 3, 'plate, pit and a laser blocker at once; recall mistakes instead of dying over them', three_jobs)
 
 def everything(o, p):
-    o(0, 18, 2, 19); o(3, 19, 14, 19); o(7, 20, 9, 20, '^')                         # tunnel with a 3-wide pit
-    o(15, 1, 29, 19); o(15, 19, 16, 19, '#'); p(16, 18, 'C')                           # shrine on a step
-    p(22, 19, '_'); p(26, 19, 'e'); o(30, 1, 30, 16, '#'); o(30, 17, 30, 19, 'D')     # plate, walker, door
-    o(31, 1, 43, 19); p(36, 19, 's'); o(39, 11, 44, 21, '#'); o(44, 9, 44, 10)       # spring, 9-high ledge
+    # Slide a flat bridge through the low tunnel, then hop onto the shrine.
+    o(0, 18, 2, 19); o(3, 19, 14, 19); o(7, 20, 9, 20, '^')
+    o(14, 15, 21, 19); o(15, 19, 16, 19, '#'); p(16, 18, 'C')
+    # Keep the plate oldest, jam the low saw lane, then time a spring step.
+    # Recall a bad step: another death would erase the plate and shut the door.
+    p(19, 19, '_'); o(22, 18, 29, 19); p(22, 19, '#'); p(25, 19, 'o')
+    o(30, 18, 30, 19, 'D')
+    o(31, 1, 38, 19); p(34, 19, 's')
+    o(39, 1, 43, 10); o(44, 9, 44, 10)
     p(1, 19, 'P')
-room('Everything', [630, 63], 45, 22, 3, 'tunnel, plate with a walker, spring; one spare death before the plate soul goes (recall instead)', everything)
+room('Everything', [630, 63], 45, 22, 3, 'slide bridge, shrine; plate, saw jam and spring step together; recall a bad step', everything)
 
 def reliquary(o, p):
     # A: wall-jump a 3-wide chimney while flyers cross it. A small ledge below each flyer lets you stop and time
