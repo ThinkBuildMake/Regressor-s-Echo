@@ -367,11 +367,11 @@ The pyramid needs to be visible in the background, its top lost in cloud.
 *(He keeps his promise. Behind the tree, a patch of earth has been smoothed flat, and words are scratched into it in his own handwriting.)*
 > If you're reading this… then it must mean I've kicked the bucket.  
 > Don't make that face. I can see it from here. Well. Could.  
-> As you probably know by now, the deaths have a limit. I don't know the number. I found it on floor ninety.  
-> Don't spend them like I did.  
-> I'd tell you that to your face, but you'd argue, and I'd lose. We always lose to ourselves.  
+> As you probably know by now, the deaths have a limit. It was never a number, though.  
+> Your body can take the dying. Your spirit can't. On floor ninety, mine broke, and I just… stopped getting back up.  
+> So keep getting back up. Whatever's waiting in there.  
 > Thanks for putting up with me. I know I'm not great company. I'd know.  
-> Go get further than I did.  
+> You'll make it. Trust me.  
 > — You  
 > P.S. The amulet's still not worth anything. I checked.
 
