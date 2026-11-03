@@ -102,6 +102,26 @@ For the moth add: *"Hovering with wings raised, both wings visible, legs visible
 
 5. **Moth screaming:** no sheet. The scream reuses the flying frames (wings spread) with code sound-wave rings; the moth has no mouth to open.
 
+### Tree guardian and stag sheets (from their clean bases)
+
+Make each clean base first (the "Clean base" prompt above, attaching the approved reference), then attach the **shrunk** clean base for every sheet (skill: "Attach a shrunk base"). Each sheet: one row of 4 frames, the same creature and size in every frame, feet/roots on one baseline, facing LEFT, plus the sheet rules above.
+
+**Tree guardian** (`tree-base.png`, then):
+- `tree-intro.png`: 1 hunched low among the ruins, mask eyes dark; 2 the mask eyes open with pale-green light; 3 rising up, arms lifting; 4 standing at full height, arms spread wide.
+- `tree-idle.png`: a slow sway: the body leans slightly left, upright, slightly right, upright; roots stay planted.
+- `tree-swing.png`: 1 winds a branch arm back; 2 mid-swing; 3 arm fully swung forward and low; 4 recovering.
+- `tree-slam.png`: 1 both arms raised high overhead; 2 arms coming down; 3 arms slammed into the ground in front; 4 arms on the ground, body leaning in.
+- `tree-throw.png`: 1 reaches up into its crown; 2 pulls back holding a seed pod; 3 throws forward; 4 follow-through, empty hand. Plus `seed-pod.png` (1:1): a single hard woody seed pod the size of a fist, on magenta.
+
+**Spectral stag** (`stag-base.png`, then):
+- `stag-intro.png`: 1 standing proud; 2 rearing back; 3 up on its hind legs, forelegs raised, antlers high; 4 coming down, forelegs about to land.
+- `stag-idle.png`: standing proud; a slow breath and a small head toss across 4 frames, legs planted.
+- `stag-charge.png`: a 4-frame gallop loop, head lowered, antlers forward.
+- `stag-beam.png`: 1 head lowering; 2 antlers aimed forward, braced; 3 holding the aim; 4 holding (the beam and its blue glow are code).
+- `stag-wave.png`: 1 rearing; 2 up on hind legs; 3 forelegs stamping down; 4 forelegs planted, head low (the wave is code).
+
+**Spring (World 2)** → `spring-sheet.png` (attach the approved spring): 1 idle; 2 compressed low, cap pushed down; 3 fully extended, cap thrown up; (3 frames, same base position).
+
 ## Enemies (Flow, Nano Banana 2.1)
 
 Save to `assets/raw/enemies/`. Attach the World 1 reference image (`anchor.png`) for the brushwork.
@@ -223,6 +243,9 @@ Save to `assets/raw/hero/`. Attach the World 1 reference image for the brushwork
 
 3. **Slide → `slide.png`**
    > Using the attached character exactly, paint him sliding feet first along the ground, body low and leaning back, one leg extended forward, scarf and cloak streaming behind him. Wide 21:9, character centered.
+
+5. **Idle → `idle-sheet.png`** (wide 16:9; attach the shrunk hero, see the skill; one-shot sheet)
+   > Using the attached character exactly (same proportions, hair, colours, scarf, cloak and satchel), paint an idle animation sprite sheet: one horizontal row of 4 evenly spaced frames, all the same size, on flat magenta. He stands still in the same relaxed pose in every frame, feet planted in exactly the same place, body and head unchanged; only his hair, his long red scarf and the hem of his cloak sway gently in a breeze, a little differently in each frame so it loops. Facing right. Same character size in every frame, wide magenta gaps, nothing touching, no effects.
 
 4. **Wall slide → `wall-slide.png`** (wide 16:9, attach `hero.jpg`; one-shot sheet, follow the sheet rules in the skill)
    > Using the attached character exactly (same proportions, hair, colours, scarf and satchel), paint a wall-slide sprite sheet in one horizontal row of 4 evenly spaced frames, all the same size, on flat magenta: frames 1–3 he clings to a vertical wall on his right with one hand and the sole of one boot, body turned out to the left, knees bent, sliding down, his scarf and cloak lifted upward by the slide (slightly different in each frame so it flutters); frame 4 he kicks off the wall, pushing away up and to the left, arms out. Do not paint the wall itself. Every frame the same character size, nothing touching, no effects.

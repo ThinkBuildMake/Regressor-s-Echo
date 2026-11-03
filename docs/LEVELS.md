@@ -98,9 +98,8 @@ New: **3 souls** and **recall** (Q: tap for the newest soul, hold for more). Mos
 | 2 | In my own way | Recall | A 5-wide pit in a 1-tall tunnel: two lying souls bridge it. A standing soul plugs the tunnel; recall it instead of resetting | Greybox |
 | 3 | Three jobs | 3 souls at once | A soul on the plate, one in the spike pit, one blocking a laser from the ceiling (die in it mid-jump, so you can walk under). A 4th death erases the plate soul, so recall mistakes instead | Greybox |
 | 4 | Everything | All powers | Slide tunnel, shrine, plate with a walker, door, spring to a 9-high ledge. One spare death before the plate soul goes | Greybox |
-| 5 | The drop | Recall to drop | Stand on your newest soul and recall it to fall through. Still needs a layout where the hole can only be plugged by a soul | To design |
-| 6 | The rehearsal | Leading a beam | A sweeping soul-breaking beam aims at you; lead it away from your soul wall | To design (boss mechanic) |
-| 7 | The spectral stag | Final boss | Calm setup: build a 3-thick wall. Then charge → beam (glows blue first; lead it away) → wave every ~15s (hide behind the wall). 3 stomps. A broken soul means dying to rebuild, which heals it | To design in detail |
+| 5 | The rehearsal | Leading a beam | A sweeping soul-breaking beam aims at you; lead it away from your soul wall | To design (boss mechanic) |
+| 6 | The spectral stag | Final boss | Calm setup: build a 3-thick wall. Then charge → beam (glows blue first; lead it away) → wave every ~15s (hide behind the wall). 3 stomps. A broken soul means dying to rebuild, which heals it | To design in detail |
 
 Cut: *Spring tower* (a spring-placed soul has to land within a few frames, too tight).
 
@@ -118,5 +117,4 @@ The rooms are on the `greybox-levels` branch, in its own folder (`../Game-Week-g
 
 ## Open design questions
 - **Slide speed:** raise it so the slide's speed boost can carry puzzles, or keep it as the flat-soul tool only?
-- **The drop:** needs a layout where only a soul can plug the hole you later drop through.
 - **Bosses 2 and 3:** the tree guardian and the stag need detailed attack patterns before they can be greyboxed.

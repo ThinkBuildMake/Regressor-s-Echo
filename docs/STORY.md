@@ -296,7 +296,7 @@ The wall behind the room is carved; it needs its own background art.
 
 ## World 3 script: Sanctum
 
-The grounds outside the tribe's pyramid. Silent rooms: 1 Three high, 2 In my own way, 3 The drop, 4 Three jobs, 5 Spring tower. The guide is quieter here; his care shows a little more.
+The grounds outside the tribe's pyramid. Silent rooms: 1 Three high, 2 In my own way, 3 Three jobs, 4 Everything. The guide is quieter here; his care shows a little more.
 
 ### 1. The pyramid — *a few steps in*
 The pyramid needs to be visible in the background, its top lost in cloud.
