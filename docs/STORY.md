@@ -140,11 +140,7 @@ From here the guide appears only for conversations he's part of: he fades in at 
 ### 7. The thorn wall — *on entry*
 > **Hero** [thinking]: That's way too high to climb.  
 > **Hero** [annoyed]: …And let me guess. The thorns.  
-> **Guide** [amused]: Now you're getting the hang of it.  
-> **Hero** [thinking]: Wait. Can I leave more than one of… me?  
-> **Guide** [thinking]: Not yet. Die again, and the last one goes. You've only got enough soul for one.  
-> **Hero** [sad]: Great. I'm rationing myself now.  
-> **Guide** [wry]: Where the thorns catch you is where you'll stay. Pick your spot.
+> **Guide** [amused]: Now you're getting the hang of it.
 
 ### 8. The patrol — *on entry*
 > **Guide** [thinking]: See that plate? It holds the door open, as long as something's on it.  

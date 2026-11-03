@@ -107,10 +107,6 @@ const SCRIPT = {
     H('thinking', "That's way too high to climb."),
     H('annoyed', '…And let me guess. The thorns.'),
     G('amused', "Now you're getting the hang of it."),
-    H('thinking', 'Wait. Can I leave more than one of… me?'),
-    G('thinking', "Not yet. Die again, and the last one goes. You've only got enough soul for one."),
-    H('sad', "Great. I'm rationing myself now."),
-    G('wry', "Where the thorns catch you is where you'll stay. Pick your spot."),
   ],
   patrol: [
     G('thinking', "See that plate? It holds the door open, as long as something's on it."),
