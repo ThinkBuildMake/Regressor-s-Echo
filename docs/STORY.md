@@ -217,7 +217,6 @@ He writes the note here, while the hero sleeps. Nothing gives it away until Worl
 > *(He lies down. The screen dims. The ghost watches him for a long moment.)*  
 > **Guide** [thinking]: …  
 > **Guide** [sad]: …  
-> *(In the dark, a faint scratching sound.)*  
 > *(Morning. The screen brightens.)*  
 > **Hero** [curious]: Did you just… sit there all night?  
 > **Guide** [wry]: Floated. There's a difference.
@@ -426,7 +425,7 @@ The pyramid needs to be visible in the background, its top lost in cloud.
 
 - **Respawn versus timelines:** Normal play returns him to a checkpoint and leaves an echo. How that relates to the guide's other timeline needs one clear rule before anyone explains it. Avoid "your body forgets" as a substitute.
 - **What the guide knows:** He met his own guide once; being the guide is new. Decide what differed in his timeline and what he can't predict, so his knowledge has a consistent basis (he forgot the moth, he's sure about the pit).
-- **To build for the story:** the carved wall (World 2 room 7), the pyramid backdrop (World 3), a scratching sound for the nap, an on-screen "hold" prompt for self-destruct, the stag's death count in the last stand, and triggers for "after a mistake" moments (a soul erased, a soul broken).
+- **To build for the story:** the carved wall (World 2 room 7), the pyramid backdrop (World 3), an on-screen "hold" prompt for self-destruct, the stag's death count in the last stand, and triggers for "after a mistake" moments (a soul erased, a soul broken).
 - **Save for later:** "How many times have you done this?" / "I stopped counting." fits a quieter moment, probably World 2.
 
 Related: [ideas](IDEAS.md), [level plan](LEVELS.md), [in-game dialogue](../dialogue.js).

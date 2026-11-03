@@ -164,7 +164,7 @@ const SCRIPT = {
     G('thinking', 'And one more thing. You can let go now, whenever you like.'),
     H('curious', 'Let go of what?'),
     G('wry', "Yourself. Trust me, it's worse when you choose it."),
-    // The nap: he writes the note here (revealed in World 3). A scratching sound will go in the dark.
+    // The nap: he writes the note here (revealed in World 3).
     H('exhausted', 'I need… a minute. Or a hundred.'),
     G('wry', "Go on. I'll keep watch. Not like I sleep."),
     H('exhausted', 'Wake me if anything else falls out of the sky.'),
