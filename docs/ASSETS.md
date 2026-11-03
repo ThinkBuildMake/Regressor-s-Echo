@@ -4,6 +4,8 @@ Every painted asset the game needs, as a checklist. Each one goes through the `f
 (`.claude/skills/flow-asset/SKILL.md`): **prompt → reference → clean base → sheet → sized → in game**. The critic runs on
 reference, sheet and sized. Art prompts live in [PROMPTS.md](PROMPTS.md); audio prompts are in the Audio section below.
 
+**Status (2026-11-03):** every reference, sheet and sound on this list is made and approved by the user, except the stag walk (prance: keep, retry, or move in code). The art checkboxes below lag behind; the review pages are the record: references https://claude.ai/artifact/D9g8CCAaV7W7MFSZEq2S61 · sprite animations https://claude.ai/artifact/LyqhxdFPrUPioRYo5R7ujU · batch 3 (fallen bosses, flyer, thrower, hazards in all worlds) https://claude.ai/artifact/1EDac6VRWQD4Cw2eqq5jyK · audio https://claude.ai/artifact/CLuj1KAWJxZPRxRSmERRfo. What's left is wiring into the game ("In game" column).
+
 Key: ✅ done · 🟡 started · blank = to do · — = not needed (a single image, or drawn in code).
 "Sheet" lists the animations to ask for. One facing per sheet; the game mirrors for the other.
 
@@ -34,12 +36,12 @@ Key: ✅ done · 🟡 started · blank = to do · — = not needed (a single ima
 | Asset | Sheet (animations) | Prompt | Ref | Sheet | Sized | In game |
 |---|---|---|---|---|---|---|
 | Walker (red beetle) | walk (2 poses + code bob) | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Flyer (coming) | a small flying enemy: flap loop, 4 frames | | | | | |
-| Projectile enemy (coming) | idle + shoot, ~4 frames; its shot is code or one small image | | | | | |
-| Stomping enemy (coming) | idle + raise + slam, ~4 frames | | | | | |
+| Flyer | flies over soul walls; a small red flying beetle (the walker's family); wing-buzz loop, 4 frames | ✅ | | | | |
+| Thrower | stands still and shoots seeds along the ground (souls block them); a red toadstool creature; idle + spit, 4 frames, plus a seed pellet | ✅ | | | | |
 
 ## Bosses
 
+**Boss idles are code, not sheets (user):** each boss just stands in place and breathes: its standing frame plus a slight scale bob.
 Shared: the blue "soul-breaking" charge glow and the yellow normal-attack color are tinted in code, not painted.
 Every boss gets an **intro animation** when the fight starts, with a Silksong-style name card (name + title) in the
 bottom-left corner. The name card is text drawn in code, not an asset.
@@ -55,17 +57,19 @@ bottom-left corner. The name card is text drawn in code, not an asset.
 | Moth: wing dust (its attack) | — code particles. Room 11: you hide behind your soul from it; it can't break souls | — | — | — | — | |
 | **Tree guardian** (World 2) | reference: the ORIGINAL Flow tree (`raw/bosses/tree.jpg`, user's pick); the side-profile version is kept as `tree-profile.jpg` | ✅ | 🟡 `raw/bosses/tree.jpg`, top clipped, faces front | | | |
 | Tree: intro | mask eyes open, rises out of the ruins, arms spread, ~4 frames | | | | | |
-| Tree: idle | slow sway, ~3–4 frames | | | | | |
+| Tree: idle | no sheet (user: too much movement; bosses just stand and breathe): the standing frame from `raw/bosses/tree-base.jpg` plus a slight breathing bob in code (scale ~1–2%, ~2 s per breath). `assets/bosses/tree-idle.webp` stays only as a fallback | — | ✅ | — | | |
 | Tree: branch swing | wind-up → swing → recover, ~4–5 frames | | | | | |
 | Tree: slam (smashes souls) | raise arms → slam down, ~4–5 frames | | | | | |
 | Tree: seed pod throw + pod | throw ~3 frames; pod is a single image | | | | | |
 | **Spectral stag** (World 3) | | ✅ | | | | |
 | Stag: intro | rears up on its hind legs, antlers raised, ~4 frames | | | | | |
-| Stag: idle | breathing / head toss, ~3–4 frames | | | | | |
+| Stag: idle | no sheet (user: the painted idle was useless): the standing frame from the clean base plus a slight breathing bob in code (scale ~1–2%, ~2 s per breath). `assets/bosses/stag-idle.webp` stays only as a fallback | — | ✅ | — | | |
+| Stag: walk | proud walking loop, `assets/bosses/stag-walk.webp` (reads as a prance, not a four-beat walk; user's call). **Stag sheets are drawn at different sizes** (walk and beam ~555 px tall, idle ~486 px): code scales each sheet so the body height matches | ✅ | ✅ | 🟡 | ✅ | |
 | Stag: charge | gallop loop, ~6 frames | | | | | |
 | Stag: beam | lower antlers, charge, fire, ~3–4 frames (beam itself in code) | | | | | |
 | Stag: wave | rear up → stamp, ~4 frames (the wave itself in code) | | | | | |
-| All bosses: hurt | one hit-flash pose each (or code flash) | | | | | |
+| All bosses: hurt | code flash (user's call), no art | — | — | — | — | |
+| All bosses: death | 1 painted **fallen pose** each (moth on the ground wings drooped; tree slumped, mask dark; stag lying down), then code: white glow → dissolves into motes that stream into the hero → he flashes (STORY.md W1 §13) | ✅ | | — | | |
 
 ## Hazards and room objects
 
@@ -79,9 +83,9 @@ bottom-left corner. The name card is text drawn in code, not an asset.
 | Laser emitter (World 2) | — (beam in code) | | | — | | |
 | Spring (World 2) | idle / compressed / launch, 3 frames | | | | | |
 | Moving platform (World 2 room 7) | — | | | — | | |
-| Saw blade (coming) | — one round blade image, spun in code | | | — | | |
-| Crumbling platform (coming) | intact → cracked → breaking, 3 frames (or the platform art plus code cracks and falling chunks) | | | | | |
-| Falling spike (coming) | — one hanging stalactite/thorn spike, shakes then drops in code | | | — | | |
+| Saw blade (all worlds) | — one round blade image, spun in code | | | — | | |
+| Crumbling block (all worlds; breaks 0.45 s after landing, back 2.5 s later) | intact → cracked → breaking, 3 frames (or the platform art plus code cracks and falling chunks) | | | | | |
+| Falling spike (all worlds; drops as you pass under) | — one hanging stalactite/thorn spike, shakes then drops in code | | | — | | |
 
 ## Story assets (requested by the story chat, 2026-11-02)
 
@@ -137,67 +141,67 @@ game adds room sound. Rows marked *(3 takes)* repeat often, so make 2–3 variat
 
 | Group | For | Prompt | Done |
 |---|---|---|---|
-| Hero | Footstep, World 1 *(3 takes)* | A single soft leather boot step on damp packed moss and leaf litter, close, dry, outdoors, 0.2 s | |
-| Hero | Footstep, Worlds 2–3 *(3 takes)* | A single leather boot step on old flat stone with a little grit underfoot, close, dry, 0.2 s | |
-| Hero | Jump *(3 takes)* | A short push-off: boot scuff on ground plus a quick cloth rustle of a light jacket, close, dry, 0.25 s | |
-| Hero | Land *(3 takes)* | Both boots landing on packed earth after a short drop, soft thud with a small cloth flap, close, dry, 0.3 s | |
-| Hero | Slide | A person sliding on their side across damp grass and gravel, a rough scrape that fades out, close, dry, 0.45 s | |
-| Hero | Dive | A quick body lunge: sharp cloth whip of a coat through the air, no impact, close, dry, 0.3 s | |
-| Hero | Death burst | A sharp camera-flash pop followed by a handful of small glass beads scattering and bouncing on a stone floor, close, dry, 0.8 s | |
-| Hero | Respawn (soul gathers back) | Small glass beads rolling inward across a stone floor and settling, then a soft breath over a wine-glass rim swelling to a clear hum, close, quiet, 1 s | |
-| Hero | Soul appears | A soft breath blown across the rim of a wine glass, giving a faint airy hum that swells and settles, close, quiet, 1 s | |
-| Hero | Soul erased / replaced | A thin sheet of frost cracking softly, then a short exhale of air, close, quiet, 0.5 s | |
-| Hero | Release wind-up (W3) | A gas burner igniting with a soft whump, then a steady low flame roar building for 0.75 s, ending abruptly, close, dry | |
-| Story | Amulet pickup | A small brass pendant on a fine chain lifted off stone, a light chain jingle and a single clear tap of metal on glass, close, dry, 0.6 s | |
-| Story | Amulet awakening | A large brass singing bowl struck softly with a felt mallet, a long warm hum with a slow shimmer, close, 3 s, natural decay | |
-| Story | Shrine activates | A heavy stone slab shifting a few centimetres, then a low hum like a finger on a wet glass rim, outdoors, close, 1.5 s | |
-| Hazards | Spikes impale | An iron garden fork stabbed quickly into a sack of wet sand, close, dry, 0.3 s | |
-| Hazards | Vine wall touch | Thick thorny bramble branches snapping back and scratching against a canvas coat, close, dry, 0.4 s | |
-| Hazards | Plate down | A heavy stone tile pressed down into a stone frame, a dull clunk with a short grinding settle, close, dry, 0.35 s | |
-| Hazards | Plate up | The same stone tile rising back up, a lighter clunk with a tiny grit rattle, close, dry, 0.3 s | |
-| Hazards | Door opens | A heavy stone slab door grinding upward in a stone groove, steady scrape, ends in a soft knock, medium distance, 1.2 s | |
-| Hazards | Door closes | A heavy stone slab dropping down a stone groove and landing with a deep thud and dust trickle, medium distance, 0.9 s | |
-| Story | Satchel clink (W1 §2) | A leather shoulder bag set down on a mossy log: a soft thud, then small metal tools and a tin cup clinking together inside it, close, dry, 0.7 s | |
-| Story | Gold flash as he puts the amulet on (W1 §2) | A small brass bell and a glass wind chime struck together once, warm and bright, with a soft rising shimmer of a finger circling a wine-glass rim, close, 2 s, natural decay | |
-| Story | Ghost fading in (W1 §2) | A long, soft breath of air through a slightly open window, with a faint airy hum like a bowed glass, swelling gently and settling, quiet, 2 s | |
-| Story | Amulet refusing to come off (W1 §3) | One low, dull hum of a large brass singing bowl touched by a palm, short and muffled, with a faint warm throb, close, 1 s | |
-| Story | Guide's quiet snicker "…heh" (W1 §4) | A young man's single quiet, amused breath-laugh through the nose, "heh", close, dry, 0.5 s | |
-| Story | Guide's tired sigh (W1 §3) | A young man's long, tired sigh out through the mouth, close, dry, 1.2 s | |
-| Story | Earthquake rumble (W1 §11) | A deep ground rumble of rocks shifting under a forest, low and rolling, with a few small stones and twigs rattling, outdoors, 1.5 s, fades out | |
-| Story | Boss dissolving into light, absorbed (W1 §13) | Fine glass beads poured slowly onto a metal tray, rising into a shimmer of finger-on-glass tones, then a quick soft rush of air drawn in through a narrow gap, 2.5 s | |
-| Story | Pen scratching in the dark (W1 §14) | A pencil writing slowly on rough paper in a quiet room, faint and slow, a few strokes with pauses, very quiet, close, 4 s | |
-| Story | Guide cracking like glass (W3 §8) | A thin pane of glass slowly splintering under pressure, soft crackles spreading, then a faint high ring fading out, sad and gentle, not a smash, close, 2 s | |
-| Bosses | Moth bursts through the wall | A dry earth bank collapsing as something heavy smashes through it: a sharp crack, then a rumble of clods and stones tumbling and scattering on the ground, outdoors, close, 2 s | |
-| Bosses | Name card appears (all bosses) | One deep low drum hit with a large gong swelling behind it, in a stone hall, 2 s, natural decay | |
-| Hazards | Laser hum (loop) | Steady electrical hum of a fluorescent tube, mid-pitch, close, constant level, seamless loop, 2 s | |
-| Hazards | Laser blocked by soul | Water flicked onto a hot iron pan, a short sizzle and hiss, close, dry, 0.4 s | |
-| Hazards | Spring | A heavy steel coil spring compressed and released, a twangy boing with a metallic rattle, close, dry, 0.5 s | |
-| Hazards | Moving platform (loop) | A heavy wooden plank sliding on rope through a creaky wooden pulley, slow, medium distance, seamless loop, 2 s | |
-| Walker | Scuttle (loop) | Small hard beetle legs clicking quickly across a dry wooden table, close, dry, seamless loop, 1 s | |
-| Walker | Crushed | A walnut shell cracked under a boot heel, close, dry, 0.25 s | |
-| Moth | Presence (loop) | Large soft wings slowly fanning, like a heavy silk sheet waved gently in a quiet room, medium distance, seamless loop, 3 s | |
-| Moth | Wing-dust shot | A quick puff of fine flour blown from a palm, with a soft papery wing flap, close, dry, 0.4 s | |
-| Moth | Scream | A wet finger rubbed hard on a large glass pane, a high squealing screech, slowed down, medium distance, 1.5 s | |
-| Moth | Hit | A cushion struck hard with a flat palm, plus a puff of dust, close, dry, 0.3 s | |
-| Moth | Defeat | A long fading screech, then large silk sheets fluttering to the ground and a soft dust settle, medium distance, 3 s | |
-| Tree | Presence (loop) | Old tree trunks creaking and groaning slowly in a light wind, deep, medium distance, seamless loop, 4 s | |
-| Tree | Branch swing | A heavy leafy branch swung fast through the air, a deep whoosh with leaves rustling, close, 0.6 s | |
-| Tree | Slam | A large log dropped flat onto a stone floor, a deep heavy thud with a short crack of stone, close, 0.8 s | |
-| Tree | Seed pod launch | A hollow wooden gourd thrown, a dull pop like a cork pulled from a big bottle, close, dry, 0.3 s | |
-| Tree | Seed pod burst | A dry seed pod cracking open and hard seeds pattering onto stone, close, dry, 0.5 s | |
-| Tree | Mask hit | A wooden mallet striking a thick stone slab, a solid knock with a short ring, close, dry, 0.4 s | |
-| Tree | Defeat | A large tree trunk splitting with long crackling creaks, then a heavy stone mask falling and cracking on stone, medium distance, 3 s | |
-| Stag | Presence (loop) | A large animal breathing slowly through its nose in cold night air, deep and calm, close, seamless loop, 3 s | |
-| Stag | Charge | Heavy hooves galloping fast on hard earth, coming closer, close, dry, 1.5 s | |
-| Stag | Beam | A thin steel wire stretched tight and bowed with a cello bow, a rising steady tone, close, 1.5 s | |
-| Stag | Wave | Hooves stamping once hard on stone, then a rolling rush of air like a sudden gust through a doorway, medium distance, 1.2 s | |
-| Stag | Hit | A thick wooden staff struck against a stag antler, a hard bony clack, close, dry, 0.3 s | |
-| Stag | Defeat | A deep stag bellow fading into a long soft wind over an open hilltop, distant, 4 s, natural decay | |
-| Dialogue | Blip, hero *(3 takes)* | A single soft tap of a fingertip on a wooden box, close, dry, 0.05 s | |
-| Dialogue | Blip, ghost guide *(3 takes)* | A single light tap of a fingernail on a thin glass, a tiny high ring, close, dry, 0.08 s | |
-| UI | Menu move | A small wooden bead sliding one step on an abacus rod, close, dry, 0.1 s | |
-| UI | Menu select | A brass latch of a small wooden box clicking shut, close, dry, 0.2 s | |
-| UI | Pause / unpause | A thick book closed gently on a table, a soft paper thump, close, dry, 0.3 s | |
+| Hero | Footstep, World 1 *(3 takes)* | A single soft leather boot step on damp packed moss and leaf litter, close, dry, outdoors, 0.2 s | ✅ |
+| Hero | Footstep, Worlds 2–3 *(3 takes)* | A single leather boot step on old flat stone with a little grit underfoot, close, dry, 0.2 s | ✅ |
+| Hero | Jump *(3 takes)* | A short push-off: boot scuff on ground plus a quick cloth rustle of a light jacket, close, dry, 0.25 s | ✅ |
+| Hero | Land *(3 takes)* | Both boots landing on packed earth after a short drop, soft thud with a small cloth flap, close, dry, 0.3 s | ✅ |
+| Hero | Slide | A person sliding on their side across damp grass and gravel, a rough scrape that fades out, close, dry, 0.45 s | ✅ |
+| Hero | Dive | A quick body lunge: sharp cloth whip of a coat through the air, no impact, close, dry, 0.3 s | ✅ |
+| Hero | Death burst | A sharp camera-flash pop followed by a handful of small glass beads scattering and bouncing on a stone floor, close, dry, 0.8 s | ✅ |
+| Hero | Respawn (soul gathers back) | Small glass beads rolling inward across a stone floor and settling, then a soft breath over a wine-glass rim swelling to a clear hum, close, quiet, 1 s | ✅ |
+| Hero | Soul appears | A soft breath blown across the rim of a wine glass, giving a faint airy hum that swells and settles, close, quiet, 1 s | ✅ |
+| Hero | Soul erased / replaced | A thin sheet of frost cracking softly, then a short exhale of air, close, quiet, 0.5 s | ✅ |
+| Hero | Release wind-up (W3) | A gas burner igniting with a soft whump, then a steady low flame roar building for 0.75 s, ending abruptly, close, dry | ✅ |
+| Story | Amulet pickup | A small brass pendant on a fine chain lifted off stone, a light chain jingle and a single clear tap of metal on glass, close, dry, 0.6 s | ✅ |
+| Story | Amulet awakening | A large brass singing bowl struck softly with a felt mallet, a long warm hum with a slow shimmer, close, 3 s, natural decay | ✅ |
+| Story | Shrine activates | A heavy stone slab shifting a few centimetres, then a low hum like a finger on a wet glass rim, outdoors, close, 1.5 s | ✅ |
+| Hazards | Spikes impale | An iron garden fork stabbed quickly into a sack of wet sand, close, dry, 0.3 s | ✅ |
+| Hazards | Vine wall touch | Thick thorny bramble branches snapping back and scratching against a canvas coat, close, dry, 0.4 s | ✅ |
+| Hazards | Plate down | A heavy stone tile pressed down into a stone frame, a dull clunk with a short grinding settle, close, dry, 0.35 s | ✅ |
+| Hazards | Plate up | The same stone tile rising back up, a lighter clunk with a tiny grit rattle, close, dry, 0.3 s | ✅ |
+| Hazards | Door opens | A heavy stone slab door grinding upward in a stone groove, steady scrape, ends in a soft knock, medium distance, 1.2 s | ✅ |
+| Hazards | Door closes | A heavy stone slab dropping down a stone groove and landing with a deep thud and dust trickle, medium distance, 0.9 s | ✅ |
+| Story | Satchel clink (W1 §2) | Small metal tools and a tin cup knocking together inside a leather satchel as it is set down: several bright, clear metallic clinks and clanks, iron against tin, close, dry, 0.8 s | ✅ |
+| Story | Gold flash as he puts the amulet on (W1 §2) | Acoustic foley recording: a small brass bell struck gently once with a soft mallet, warm and round, then a soft rising shimmer of a wet finger circling a wine-glass rim, soft high frequencies, close, 2 s, natural decay | ✅ |
+| Story | Ghost fading in (W1 §2) | A long, soft, natural breath of air drifting through a slightly open window, gently swelling and settling, airy and quiet, only the faintest hint of a hum, close, 2 s | ✅ |
+| Story | Amulet refusing to come off (W1 §3) | One low, dull hum of a large brass singing bowl touched by a palm, short and muffled, with a faint warm throb, close, 1 s | ✅ |
+| Story | Guide's quiet snicker "…heh" (W1 §4) | A young man's single quiet, amused breath-laugh through the nose, "heh", close, dry, 0.5 s | ✅ |
+| Story | Guide's tired sigh (W1 §3) | A young man's unvoiced, breathy exhale out through the mouth, tired and resigned, no voice or groan in it, close, dry, 1.2 s | ✅ |
+| Story | Earthquake rumble (W1 §11) | A heavy, resonant sub-bass ground tremor rolling under a forest, swelling up then fading, with distinct gravel and pebbles clattering and small stones knocking together on top, outdoors, close, 1.5 s | ✅ |
+| Story | Boss dissolving into light, absorbed (W1 §13) | A soft glittering shimmer of tiny glass wind chimes and a finger circling a wine-glass rim, rising gently, then a quick soft rush of air drawn inward like a gentle inhale, nothing breaking, 2.3 s | ✅ |
+| Story | Pen scratching in the dark (W1 §14) | Light, soft graphite strokes of a pencil writing slowly on smooth paper in a quiet room, a few gentle strokes with pauses between them, very quiet and delicate, close, 4 s | ✅ |
+| Story | Guide cracking like glass (W3 §8) | A thin pane of glass slowly splintering under pressure, soft crackles spreading, then a faint high ring fading out, sad and gentle, not a smash, close, 2 s | ✅ |
+| Bosses | Moth bursts through the wall | A dry earth bank collapsing as something heavy smashes through it: a sharp crack, then a rumble of clods and stones tumbling and scattering on the ground, outdoors, close, 2 s | ✅ |
+| Bosses | Name card appears (all bosses) | One deep low drum hit with a large gong swelling behind it, in a stone hall, 2 s, natural decay | ✅ |
+| Hazards | Laser hum (loop) | Steady electrical hum of a fluorescent tube, mid-pitch, close, constant level, seamless loop, 2 s | ✅ |
+| Hazards | Laser blocked by soul | Water flicked onto a hot iron pan, a short sizzle and hiss, close, dry, 0.4 s | ✅ |
+| Hazards | Spring | A heavy steel coil spring compressed and released, a twangy boing with a metallic rattle, close, dry, 0.5 s | ✅ |
+| Hazards | Moving platform (loop) | A heavy wooden plank sliding on rope through a creaky wooden pulley, slow, medium distance, seamless loop, 2 s | ✅ |
+| Walker | Scuttle (loop) | Small hard beetle legs clicking quickly across a dry wooden table, close, dry, seamless loop, 1 s | ✅ |
+| Walker | Crushed | A walnut shell cracked under a boot heel, close, dry, 0.25 s | ✅ |
+| Moth | Presence (loop) | Large soft wings slowly fanning, like a heavy silk sheet waved gently in a quiet room, medium distance, seamless loop, 3 s | ✅ |
+| Moth | Wing-dust shot | A quick puff of fine flour blown from a palm, with a soft papery wing flap, close, dry, 0.4 s | ✅ |
+| Moth | Scream | A wet finger rubbed hard on a large glass pane, a high squealing screech, slowed down, medium distance, 1.5 s | ✅ |
+| Moth | Hit | A cushion struck hard with a flat palm, plus a puff of dust, close, dry, 0.3 s | ✅ |
+| Moth | Defeat | A long fading screech, then large silk sheets fluttering to the ground and a soft dust settle, medium distance, 3 s | ✅ |
+| Tree | Presence (loop) | Old tree trunks creaking and groaning slowly in a light wind, deep, medium distance, seamless loop, 4 s | ✅ |
+| Tree | Branch swing | A heavy leafy branch swung fast through the air, a deep whoosh with leaves rustling, close, 0.6 s | ✅ |
+| Tree | Slam | A large log dropped flat onto a stone floor, a deep heavy thud with a short crack of stone, close, 0.8 s | ✅ |
+| Tree | Seed pod launch | A hollow wooden gourd thrown, a dull pop like a cork pulled from a big bottle, close, dry, 0.3 s | ✅ |
+| Tree | Seed pod burst | A dry seed pod cracking open and hard seeds pattering onto stone, close, dry, 0.5 s | ✅ |
+| Tree | Mask hit | A wooden mallet striking a thick stone slab, a solid knock with a short ring, close, dry, 0.4 s | ✅ |
+| Tree | Defeat | A large tree trunk splitting with long crackling creaks, then a heavy stone mask falling and cracking on stone, medium distance, 3 s | ✅ |
+| Stag | Presence (loop) | A large animal breathing slowly through its nose in cold night air, deep and calm, close, seamless loop, 3 s | ✅ |
+| Stag | Charge | Heavy hooves galloping fast on hard earth, coming closer, close, dry, 1.5 s | ✅ |
+| Stag | Beam | A thin steel wire stretched tight and bowed with a cello bow, a rising steady tone, close, 1.5 s | ✅ |
+| Stag | Wave | Hooves stamping once hard on stone, then a rolling rush of air like a sudden gust through a doorway, medium distance, 1.2 s | ✅ |
+| Stag | Hit | A thick wooden staff struck against a stag antler, a hard bony clack, close, dry, 0.3 s | ✅ |
+| Stag | Defeat | A deep stag bellow fading into a long soft wind over an open hilltop, distant, 4 s, natural decay | ✅ |
+| Dialogue | Blip, hero *(3 takes)* | A single soft tap of a fingertip on a wooden box, close, dry, 0.05 s | ✅ |
+| Dialogue | Blip, ghost guide *(3 takes)* | A single light tap of a fingernail on a thin glass, a tiny high ring, close, dry, 0.08 s | ✅ |
+| UI | Menu move | A small wooden bead sliding one step on an abacus rod, close, dry, 0.1 s | ✅ |
+| UI | Menu select | A brass latch of a small wooden box clicking shut, close, dry, 0.2 s | ✅ |
+| UI | Pause / unpause | A thick book closed gently on a table, a soft paper thump, close, dry, 0.3 s | ✅ |
 
 ### Music
 
@@ -206,15 +210,15 @@ short crossfade; save as OGG or M4A, not MP3.
 
 | For | Prompt | Done |
 |---|---|---|
-| Title | Instrumental, slow and calm, solo fingerpicked harp with soft sustained low strings and a faint music-box melody, D minor (Dorian feel), 70 BPM, 16 bars, gentle and a little melancholy, seamless loop, no intro, no fade-out, no ending, no vocals | |
-| World 1: Forest edge | Instrumental ambient, soft harp arpeggios over warm sustained strings, light wooden flute phrases, no drums, misty and calm, A minor, 80 BPM, 32 bars, steady level throughout, seamless loop, no intro, no fade-out, no ending, no vocals | |
-| World 2: Overgrown ruins | Instrumental ambient, harp and low cello with soft hand-drum pulse and a dulcimer, dusk feeling, slightly mysterious, E Dorian, 84 BPM, 32 bars, steady level throughout, seamless loop, no intro, no fade-out, no ending, no vocals | |
-| World 3: Sanctum | Instrumental ambient, slow sustained strings and choir-like pad (no words), sparse harp notes and a soft low bell, moonlit and still, C minor, 66 BPM, 32 bars, steady level throughout, seamless loop, no intro, no fade-out, no ending, no vocals | |
-| Shrine / dialogue (calm) | Instrumental, very quiet solo harp and a soft string pad, gentle and warm with a hint of playfulness, A minor, 72 BPM, 16 bars, no drums, seamless loop, no intro, no fade-out, no ending, no vocals | |
-| Boss: great moth | Instrumental, driving harp ostinato with fast staccato strings and a light frame-drum beat, fluttering and anxious, A minor, 120 BPM, 32 bars, same energy throughout, seamless loop, no intro, no fade-out, no ending, no vocals | |
-| Boss: tree guardian | Instrumental, heavy low cellos and double basses with deep taiko-style drums, harp and dulcimer riff on top, slow and stomping, E Phrygian, 100 BPM, 32 bars, same energy throughout, seamless loop, no intro, no fade-out, no ending, no vocals | |
-| Boss: spectral stag | Instrumental, urgent strings and choir-like pad (no words), galloping frame drums, harp runs and a low bell on each phrase, grand but sad, C minor, 132 BPM, 32 bars, same energy throughout, seamless loop, no intro, no fade-out, no ending, no vocals | |
-| Ending (not a loop) | Instrumental, solo harp theme from the title slowly joined by warm strings and flute, hopeful and quietly bittersweet, D major turning to D minor at the end, 70 BPM, about 2 minutes, a real ending with a soft final chord, no vocals | |
+| Title | Instrumental, slow and calm, solo fingerpicked harp with soft sustained low strings and a faint music-box melody, D minor (Dorian feel), 70 BPM, 16 bars, gentle and a little melancholy, seamless loop, no intro, no fade-out, no ending, no vocals | ✅ |
+| World 1: Forest edge | Instrumental ambient, soft harp arpeggios over warm sustained strings, light wooden flute phrases, no drums, misty and calm, A minor, 80 BPM, 32 bars, steady level throughout, seamless loop, no intro, no fade-out, no ending, no vocals | ✅ |
+| World 2: Overgrown ruins | Instrumental ambient, harp and low cello with soft hand-drum pulse and a dulcimer, dusk feeling, slightly mysterious, E Dorian, 84 BPM, 32 bars, steady level throughout, seamless loop, no intro, no fade-out, no ending, no vocals | ✅ |
+| World 3: Sanctum | Instrumental ambient, slow sustained strings and choir-like pad (no words), sparse harp notes and a soft low bell, moonlit and still, C minor, 66 BPM, 32 bars, steady level throughout, seamless loop, no intro, no fade-out, no ending, no vocals | ✅ |
+| Shrine / dialogue (calm) | Instrumental, very quiet solo harp and a soft string pad, gentle and warm with a hint of playfulness, A minor, 72 BPM, 16 bars, no drums, seamless loop, no intro, no fade-out, no ending, no vocals | ✅ |
+| Boss: great moth | Instrumental, driving harp ostinato with fast staccato strings and a light frame-drum beat, fluttering and anxious, A minor, 120 BPM, 32 bars, same energy throughout, seamless loop, no intro, no fade-out, no ending, no vocals | ✅ |
+| Boss: tree guardian | Instrumental, heavy low cellos and double basses with deep taiko-style drums, harp and dulcimer riff on top, slow and stomping, E Phrygian, 100 BPM, 32 bars, same energy throughout, seamless loop, no intro, no fade-out, no ending, no vocals | ✅ |
+| Boss: spectral stag | Instrumental, urgent strings and choir-like pad (no words), galloping frame drums, harp runs and a low bell on each phrase, grand but sad, C minor, 132 BPM, 32 bars, same energy throughout, seamless loop, no intro, no fade-out, no ending, no vocals | ✅ |
+| Ending (not a loop) | Instrumental, solo harp theme from the title slowly joined by warm strings and flute, hopeful and quietly bittersweet, D major turning to D minor at the end, 70 BPM, about 2 minutes, a real ending with a soft final chord, no vocals | ✅ |
 
 ## Open questions
 

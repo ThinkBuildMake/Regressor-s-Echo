@@ -65,6 +65,9 @@ Generate **one** image per run. Show the user the image and the critic's verdict
 - **Prompt:** click the "What do you want to create?" box, type the style block + prompt, check the attached thumbnail is right, submit (→). Settings button next to → (shows "Nano Banana 2.1 ▭ xN"): model Nano Banana 2.1, count **x1**, aspect 1:1 for single sprites, 16:9 for sheets. Image gen costs 0 credits.
 - **The ring-and-three-rays mark:** Flow keeps inventing a 4th stroke below the ring on re-dressed or new props; say *"three short rays above the ring, nothing below the circle"*.
 - **Downloads stop after ~15 in a session:** Chrome blocks Flow's "multiple automatic downloads". The user has to allow it (Chrome's prompt, or Site settings → Automatic downloads → allow flow.google.com); don't change browser settings yourself. Until then, note which Flow tile holds the result and move on.
+- **Flow often paints sheet frames facing the wrong way** despite the facing rule: mirror those frames when cutting. It also ignores "same size as attached" on some sheets; a weak or duplicate frame can be dropped and an earlier frame reused (e.g. 1,2,3,2).
+- **Uploads from a git worktree are refused** by `file_upload` (only the main repo or the scratchpad count as shared): copy the file to the scratchpad first.
+- **Crop the sprite tight before shrinking a base**, or the shrunk base keeps a big empty margin.
 - **Check the download's filename** before moving it: the newest file in ~/Downloads can be an older, unrelated one. Flow names files after the prompt.
 - **"A wall on his right"** makes Flow draw the wall as a thin line; crop it out.
 - **Subtle motion stays subtle:** "sway gently" gave 2–4 px of scarf movement. Ask for big, clearly different positions per frame.
