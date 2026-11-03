@@ -30,6 +30,70 @@ const G = (face, text) => ({ who: 'guide', face, text });
 const W = (wait, cue) => ({ wait, cue }); // a silent beat: the panel hides for `wait` seconds
 // Written from docs/STORY.md (World 1 script); change the story there first.
 const SCRIPT = {
+  lowDoor: [
+    G("amused", "Well. You've locked yourself out. With yourself. That's a new one."),
+  ],
+  letGo: [
+    H("thinking", "No spikes. No thorns. No bugs. …Why does that make it worse?"),
+    G("thinking", "Because this time, nothing's going to do it for you."),
+  ],
+  chosenDeath: [
+    W(0.8), // A beat.
+    H("sad", "…You were right. That's worse."),
+    G("sad", "I know."),
+    G("wry", "It gets easier. That's the bad part."),
+  ],
+  carvings: [
+    H("curious", "Hey. Look at the wall."),
+    W(0.8), // Carvings: a crowd of figures, each with a gold circle on its chest.
+    H("thinking", "They're all wearing it. The amulet."),
+    G("solemn", "Keep going."),
+    W(0.8), // Further along: fewer figures. Then a handful. Then one.
+    H("scared", "Where'd everyone go?"),
+    G("solemn", "…"),
+    H("thinking", "It didn't save them. Did it."),
+    G("sad", "It kept them going. That's not the same thing."),
+    H("sad", "…"),
+    H("determined", "Well. I'm not ending up as a carving."),
+    G("wry", "That's the spirit. Ha. Spirit."),
+  ],
+  guideCrack: [
+    H("thinking", "Hey. Can I ask you something?"),
+    G("wry", "You're going to anyway."),
+    H("thinking", "In your timeline. Did you ever get it off?"),
+    W(0.8), // A beat.
+    G("solemn", "…No."),
+    G("thinking", "I followed the marks, same as you. All the way to the temple. A pyramid. Floor after floor."),
+    H("curious", "How far did you get?"),
+    G("weary", "Ninety."),
+    H("startled", "NINETY?"),
+    G("wry", "Don't look so impressed. It's not the top."),
+    G("solemn", "I figured the deaths didn't have a limit. That I could just keep going until I got it right."),
+    H("scared", "…They do?"),
+    G("sad", "Must be. I'm here, aren't I?"),
+    H("sad", "…"),
+    G("mischievous", "Anyway! Better odds this time. You've got me."),
+  ],
+  pyramid: [
+    H("startled", "…Whoa."),
+    H("thinking", "That's it, isn't it. The temple."),
+    G("solemn", "That's it."),
+    H("thinking", "How many floors?"),
+    G("wry", "More than ninety."),
+    H("determined", "…Then let's get to the front door."),
+  ],
+  almostCompetent: [
+    H("thinking", "You've been quiet."),
+    G("wry", "Savoring it. You're almost competent."),
+    H("cocky", "Almost?"),
+    G("warm", "…More than I was."),
+  ],
+  breakingBeam: [
+    H("startled", "It broke it! It broke my soul!"),
+    G("solemn", "Those beams don't push. They break. Whatever they hit doesn't come back."),
+    H("scared", "Whatever?"),
+  ],
+
   stagPromise: [
     H("curious", "What? You never stop."),
     G("thinking", "Can you promise me something?"),
