@@ -110,13 +110,8 @@ const SCRIPT = {
   ],
   patrol: [
     G('thinking', "See that plate? It holds the door open, as long as something's on it."),
-    H('thinking', 'Something. Like… a rock. Or a— oh, no.'),
-    H('scared', 'No, no, no. I see where this is going.'),
-    G('amused', "Do you? Then I don't have to say it."),
-    H('annoyed', 'You want that thing to kill me. On purpose.'),
-    G('wry', 'I want it to kill you in the right place.'),
-    H('exhausted', 'Easy for you to say.'),
-    G('wry', 'Well, I already did my turn.'),
+    H('exhausted', 'Lemme guess. I gotta die again.'),
+    G('amused', 'No longer a greenhorn, are ya?'),
   ],
   chain: [ // the first shrine; its mark matches the amulet's
     G('thinking', 'Oh, by the way. Take a look over there.'),

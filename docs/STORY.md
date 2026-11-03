@@ -144,13 +144,8 @@ From here the guide appears only for conversations he's part of: he fades in at 
 
 ### 8. The patrol — *on entry*
 > **Guide** [thinking]: See that plate? It holds the door open, as long as something's on it.  
-> **Hero** [thinking]: Something. Like… a rock. Or a— oh, no.  
-> **Hero** [scared]: No, no, no. I see where this is going.  
-> **Guide** [amused]: Do you? Then I don't have to say it.  
-> **Hero** [annoyed]: You want that thing to kill me. On purpose.  
-> **Guide** [wry]: I want it to kill you in the right place.  
-> **Hero** [exhausted]: Easy for you to say.  
-> **Guide** [wry]: Well, I already did my turn.
+> **Hero** [exhausted]: Lemme guess. I gotta die again.  
+> **Guide** [amused]: No longer a greenhorn, are ya?
 
 ### 9. The first shrine — *The chain, on entry*
 > **Guide** [thinking]: Oh, by the way. Take a look over there.  
