@@ -53,7 +53,7 @@ Let each line respond to what the other just said or did. Give them room to hesi
 ## Story spine
 
 - **The tribe** built the amulet to cheat death. The marks lead through their ruins (World 2) to their pyramid temple. Carvings show many people wearing it, then fewer and fewer: it didn't save them, it used them up.
-- **Deaths have a limit.** The guide believed they didn't. He reached floor 90 of the pyramid, ran out, and became a guide. His "…Oh." when he first sees the hero is that realization; he only explains it in World 2.
+- **The limit is a broken spirit, not a number.** The guide reached floor 90 of the pyramid, his spirit broke, he stopped getting back up, and he became a guide. He tells the hero deaths have a limit (World 2, and his last words) so he'll be careful; the note admits it was a lie. His "…Oh." when he first sees the hero is that realization; he only explains it in World 2.
 - **The loop:** every guide dies protecting his younger self after the stag, as the guide's own guide did for him. Before that, he hides a note behind a tree.
 - **The game ends** with the hero walking into floor 1 of the pyramid, set on climbing the whole thing.
 
@@ -367,8 +367,8 @@ The pyramid needs to be visible in the background, its top lost in cloud.
 *(He keeps his promise. Behind the tree, a patch of earth has been smoothed flat, and words are scratched into it in his own handwriting.)*
 > If you're reading this… then it must mean I've kicked the bucket.  
 > Don't make that face. I can see it from here. Well. Could.  
-> As you probably know by now, the deaths have a limit. It was never a number, though.  
-> Your body can take the dying. Your spirit can't. On floor ninety, mine broke, and I just… stopped getting back up.  
+> You know how I said there was a limit? That was a lie. Figured you'd be more careful if you thought you were running out.  
+> The limit is when your spirit breaks. On floor ninety, mine did, and I just… stopped getting back up.  
 > So keep getting back up. Whatever's waiting in there.  
 > Thanks for putting up with me. I know I'm not great company. I'd know.  
 > You'll make it. Trust me.  
@@ -387,7 +387,7 @@ The pyramid needs to be visible in the background, its top lost in cloud.
 > This game shows a character dying many times, sometimes by his own choice, and deals with grief and self-sacrifice. Death is a puzzle mechanic here and is shown without gore.  
 > If you're going through a hard time, please reach out to someone you trust or a local support line.
 
-**Ending card** (after Floor one; the dialogue cue `theEnd` fades to it): "Floor 1" alone, then the title, "Deaths: N" (the whole run), "Count every one.", "Thank you for playing.", credits, and any key to play again.
+**Ending card** (after Floor one; the dialogue cue `theEnd` fades to it): "Floor 1" alone, then the title, "Deaths: N" (the whole run), "Keep getting back up.", "Thank you for playing.", credits, and any key to play again.
 
 ## Later story direction
 

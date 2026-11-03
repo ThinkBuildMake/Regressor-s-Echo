@@ -398,7 +398,7 @@ class End extends Phaser.Scene {
     this.tweens.add({ targets: floor, alpha: 0, duration: 1200, delay: 4200 });
     t(170, 'Reincarnation Echo', '46px', '#f1e3b8', 6000);
     t(245, `Deaths: ${stats.deaths}`, '22px', '#cfeaff', 7400);
-    t(280, 'Count every one.', '16px', '#9fb8c8', 8400);
+    t(280, 'Keep getting back up.', '16px', '#9fb8c8', 8400);
     t(350, 'Thank you for playing.', '20px', '#dfe8e2', 9600);
     t(400, 'A game by Michael Chuang · Made for Game Week', '14px', '#a8b8ad', 10400);
     t(422, 'Art, music and sound made with generative AI tools', '13px', '#7f9086', 10400);
