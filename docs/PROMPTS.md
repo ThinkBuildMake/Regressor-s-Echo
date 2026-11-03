@@ -59,6 +59,8 @@ I mirror the end cap for right-hand ends.
 
 ## Worlds 2 and 3: same layers, different setting
 
+**Preferred method (learned on World 2): re-dress the World 1 layer.** Attach the World 1 raw layer only (`assets/raw/world1/<layer>.jpg`) and edit: *"Edit the attached image. Keep the layout exactly as it is: the same shapes, positions, spacing, edges and magenta areas. Only change the setting: <the world's setting sentence>. Do not paint anything into the magenta areas."* Edits keep composition, so the layer keeps World 1's silhouettes, repeat margins and tiling, and the worlds line up. Fresh generations with the setting sentence tend to paint a whole scene or backdrop panels.
+
 Make each layer for all three worlds in one sitting (World 1 far trees, then World 2 far trees, then World 3), with the World 1 reference image attached each time. Keep the style block and layer prompt word for word, and add the world's setting sentence at the end. Save to `assets/raw/world2/` and `assets/raw/world3/` with the same file names.
 
 - **World 2, Overgrown ruins:** *"Setting: overcast dusk among mossy grey stone ruins overgrown with vines, broken pillars and arches between the trees. Muted olive and slate palette with soft amber light from the upper left."*
