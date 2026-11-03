@@ -18,9 +18,11 @@ Goal: Worlds 1–3 playable end to end, every room in the showcase style (docs/L
 - [ ] Morning summary at the top of NIGHT_LOG.md
 
 ## Doing
-- [ ] W1 The long pit — attempt 1
+- [ ] Workers w1/w2/w3 running (scratchpad worker.sh); review + merge in batches
 
 ## Done
+- [x] W1 The long pit — 1434b9f
+- [x] W1 The well, W2 Let go, W3 Three high, W3 In my own way — merged 74fa519, full suite OK
 - [x] Showcase rooms in the chain (+ narrow-landing physics fix, clean replays, ?only= filter) — 969d74c
 - [x] Baseline: `npm test` green on merged main (4m30s) — fd234ed
 

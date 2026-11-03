@@ -13,3 +13,4 @@ HOW (for after compaction): scratchpad = /private/tmp/claude-501/-Users-mrchuang
 23:03 The long pit done 1434b9f (1 sendback: stage 2 repeated stage 1). Tests now ~3m20s.
 DECISION: the user asked for parallel agents. Three Codex workers, one per world, in worktrees ../Game-Week-w1, w2, w3 (branches night-w1/2/3). Each works through its world's rooms in order, boss last, without changing room sizes or doorways. worker.sh commits each task; Claude reviews, merges into night/2026-11-02 and runs the full suite.
 23:05 workers w1, w2 and w3 started (first launch fed Codex no task: worker.sh read task files from the wrong folder; fixed, relaunched)
+23:17 batch 1 merged 74fa519, full suite OK. One check.html conflict resolved by hand (kept both blocks). NEEDS REVIEW: The well and Let go reuse 'death revives the guard'; the brief now bans it.
