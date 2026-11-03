@@ -205,15 +205,26 @@ def rehearsal(o, p):
     o(18, 6, 28, 8); p(28, 7, 'a'); o(29, 7, 29, 8)
 room('The rehearsal', [715, 59], 30, 17, 3, 'aimed beams: protect a two-soul stair, shrine, sacrifice a corridor decoy', rehearsal)
 
+def old_tree(o, p):
+    o(1, 7, 28, 14); o(0, 13, 0, 14); o(29, 13, 29, 14)
+    p(2, 14, 'P')
+room('The old tree', [745, 53], 30, 17, 3, 'calm promise; return behind the tree for the note', old_tree)
+
 def end(o, p):
-    o(1, 1, 28, 14); o(0, 13, 0, 14); p(2, 11, 'P')
-    o(2, 12, 6, 12, '#'); p(24, 14, 'B')
-    o(27, 10, 27, 14, 'V')
-room('The spectral stag', [745, 53], 30, 17, 3, 'final boss: three-soul wall, lead beams away, drop after charges', end)
+    o(1, 1, 38, 14); o(0, 13, 0, 14); o(39, 13, 39, 14)
+    p(2, 11, 'P'); o(2, 12, 6, 12, '#')
+    o(4, 13, 4, 14, 'V'); p(34, 14, 'B')
+    o(0, 13, 0, 14, 'V'); o(39, 13, 39, 14, 'V')
+room('The spectral stag', [775, 53], 40, 17, 3, 'final boss: three-soul wall, lead beams away, drop after charges', end)
+
+def pyramid(o, p):
+    o(1, 8, 28, 14); o(0, 13, 0, 14); p(2, 14, 'P')
+room('The pyramid entrance', [815, 53], 30, 17, 3, 'walk into floor one after reading the note', pyramid)
 
 out = []
 for name, pos, world, note, rows, extra in rooms:
     opts = {'world': world} if world else {}
+    if name == 'The old tree': opts.update(spots=[[18, 'stagPromise']])
     if name == 'The tree guardian': opts.update(boss='tree', spots=[[7, 'tree']], deathTalk={2: 'treeSlam', 25: 'treeSlam2'})
     if world == 3 or name == 'End of the greybox': pos = [pos[0] + 30, pos[1]]
     o = ', '.join(f"{k}: {json.dumps(v)}" for k, v in opts.items())

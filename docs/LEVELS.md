@@ -99,7 +99,7 @@ New: **3 souls** and **recall** (Q: tap for the newest soul, hold for more). Mos
 | 3 | Three jobs | 3 souls at once | Plate, pit bridge, high laser blocker; shrine, then crumbling lips force you to jump into the beam before the landing falls. A fourth death erases the plate: recall the mistake | Built |
 | 4 | Everything | All powers | Slide a flat bridge to the shrine. Then keep a plate soul, a saw jam and a spring step at once: recall a bad step, because a fourth death shuts the door | Built |
 | 5 | The rehearsal | Leading a beam | Lead the aimed beam below a two-soul stair; shrine, then sacrifice a decoy in a low corridor | Built |
-| 6 | The spectral stag | Final boss | Calm setup: build a 3-thick wall. Then charge → beam (glows blue first; jump at the platform’s left end to lead it overhead) → wave every ~15s (hide behind the wall). 3 stomps. A broken soul means dying to rebuild, which heals it | Built (30×17 arena; old tree, note and pyramid share the room) |
+| 6 | The spectral stag | Final boss | Calm setup: build a 3-thick wall. Then charge → beam (glows blue first; jump at the platform’s left end to lead it overhead) → wave every ~15s (hide behind the wall). 3 stomps. A broken soul means dying to rebuild, which heals it | Built (40×17 arena; separate old-tree and pyramid rooms) |
 
 Cut: *Spring tower* (a spring-placed soul has to land within a few frames, too tight).
 
@@ -120,13 +120,15 @@ All three follow the moth's rules: 3 stomps from above, it speeds up after each 
 - The room: a ledge 7 high on the left needs a 2-soul staircase. The beam fires every ~4s, so you build the stair between shots and must stand away from it (out in the open, or next to a third "spare" soul) when the line locks, so it never crosses the stair. Recall cleans up a soul the beam made useless. Then a short second stage: a corridor where the line can only be led onto a decoy soul you place on purpose.
 
 ### The spectral stag (W3 boss, 3 souls + recall, final)
-- **Arena:** wider than one screen (about 40 × 17, the camera follows). A raised platform at the left, 3 tiles up and 5 wide; the stag's charge lane is the floor under and to the right of it.
+- **Arena:** wider than one screen (about 40 × 17, the camera follows). A raised platform at the left (columns 2–6, surface row 12 over floor row 15), 3 tiles up and 5 wide; the stag's charge lane is the floor under and to the right of it.
 - **Calm setup:** the stag watches until you step off the platform's edge or 8s pass after its intro. Build a **wall 3 souls thick** on the platform's right edge.
 - **The loop:** charge → beam → charge → beam, with a wave every ~15s.
   - **Charge (yellow):** it gallops along the floor and rams the arena's left wall under the platform, then stands **dazed for 2s under the platform's edge. Drop onto its back from the platform: that's the stomp.** It breaks any soul in its lane, so the floor is no place for souls.
   - **Beam (blue):** the same aimed beam as the rehearsal. Lead the line away from your wall before it locks (step out to the platform's left end), then get back behind the wall.
   - **Wave (blue, can't dodge):** a wall of light rolls across the arena at platform height. It breaks 2 souls and stops at the 3rd, so only the 3-thick wall saves you. Stand behind it.
 - **A broken soul** means a 2-thick wall: you either die to rebuild (it heals) or recall and rebuild later. Recall isn't a death, so it never heals the stag.
+- **Replay numbers:** 40 × 17 arena; charge speed 650 px/s, ram centre column 6.5 against the buttress at column 4, back top row 13. Wall souls at columns 4, 5, 6 on row 12; drop beyond column 7. Setup 8s, yellow wind-up 0.7s, daze 2s, beam gaps 8s × 0.8 per stomp, wave every 15s at 420 px/s (unchanged).
+- **Route:** The rehearsal → The old tree (30 × 17, promise beside the tree at column 21) → arena → The pyramid entrance (30 × 17). Both arena gates and the vine buttress under the platform open after the last stand, clearing the way back. Return behind the tree to the dirt note at columns 18–20, then walk through the arena to the pyramid door at column 22; entering fades to the ending card.
 - **Story:** STORY.md W3 scenes 5 (arrives), 6 (nudge after about 10 deaths), 7 (the guide's last stand), 8 (the note behind the old tree), 9 (floor one, ending card).
 
 ## Measured movement (design to these)

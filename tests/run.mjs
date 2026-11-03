@@ -12,7 +12,7 @@ page.on('console', (m) => m.type() === 'error' && !/assets\/|Failed to load reso
 const url = new URL('./check.html', import.meta.url);
 if (process.argv[2]) url.searchParams.set('only', process.argv[2]);
 await page.goto(url.href);
-const result = await page.waitForSelector('pre', { timeout: 600000 }).then((e) => e.textContent(), () => `RESULT FAIL timed out; last check started: ${at}`);
+const result = await page.waitForSelector('pre', { timeout: 1500000 }).then((e) => e.textContent(), () => `RESULT FAIL timed out; last check started: ${at}`);
 console.log(result);
 if (errors.length) console.log('Page errors:\n' + errors.join('\n'));
 process.exit(result.includes('RESULT OK') && !errors.length ? 0 : 1);

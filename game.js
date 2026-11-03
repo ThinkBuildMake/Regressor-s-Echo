@@ -747,25 +747,63 @@ const ROOMS = [
     '# P                          #',
     '##############################',
   ], [745, 59], { world: 3 }],
+  ["The old tree", [ // calm promise; return behind the tree for the note
+    '##############################',
+    '##############################',
+    '##############################',
+    '##############################',
+    '##############################',
+    '##############################',
+    '##############################',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '                              ',
+    '  P                           ',
+    '##############################',
+    '##############################',
+  ], [775, 53], { world: 3, spots: [[18, "stagPromise"]] }],
   ["The spectral stag", [ // final boss: three-soul wall, lead beams away, drop after charges
+    '########################################',
+    '#                                      #',
+    '#                                      #',
+    '#                                      #',
+    '#                                      #',
+    '#                                      #',
+    '#                                      #',
+    '#                                      #',
+    '#                                      #',
+    '#                                      #',
+    '#                                      #',
+    '# P                                    #',
+    '# #####                                #',
+    'V   V                                  V',
+    'V   V                             B    V',
+    '########################################',
+    '########################################',
+  ], [805, 53], { world: 3 }],
+  ["The pyramid entrance", [ // walk into floor one after reading the note
+    '##############################',
+    '##############################',
+    '##############################',
+    '##############################',
+    '##############################',
+    '##############################',
+    '##############################',
     '##############################',
     '#                            #',
     '#                            #',
     '#                            #',
     '#                            #',
     '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                          V #',
-    '# P                        V #',
-    '# #####                    V #',
-    '                           V #',
-    '                        B  V #',
+    '                             #',
+    '  P                          #',
     '##############################',
     '##############################',
-  ], [775, 53], { world: 3 }],
+  ], [845, 53], { world: 3 }],
 ];
 const WORLD_NAMES = { 1: 'Forest Edge', 2: 'Overgrown Ruins', 3: 'Sanctum' }; // fades in when you enter a new world
 const WORLD_SOULS = { 1: 1, 2: 2, 3: 3 }; // souls allowed per world; rooms without a world keep 3
@@ -950,7 +988,9 @@ class Room extends Phaser.Scene {
                 B.r.on('destroy', () => B.img.destroy());
               }
               break;
-            case 'V': this.gates.push(Object.assign(rect(x, y, T, T, 0x4a6b3a), { room: ri })); this.statics.add(this.gates.at(-1)); break;
+            case 'V': this.gates.push(Object.assign(rect(x, y, T, T, 0x4a6b3a), { room: ri })); this.statics.add(this.gates.at(-1));
+              if (name === 'The spectral stag' && tx === 0) this.gates.at(-1).body.enable = false;
+              break;
             case 'a': {
               rect(x, y, T, T, 0x539bd6);
               this.aimedBeams.push({ x: x + T / 2, y: y + T / 2, room: ri, clock: 0, angle: Math.PI });
@@ -1651,11 +1691,16 @@ class Room extends Phaser.Scene {
   }
 
   drawStagGrounds() {
-    const R = this.rooms.find((r) => r.name === 'The spectral stag').rect;
-    this.add.rectangle(R.x + 64, R.y + 330, 24, 108, 0x655d60).setDepth(1);
-    this.add.circle(R.x + 64, R.y + 260, 55, 0x526672).setDepth(1);
-    this.add.text(R.x + 38, R.y + 372, '≋', { color: '#cfeaff' }).setDepth(3);
-    this.add.triangle(R.right - 60, R.y + 300, 0, 180, 100, 0, 200, 180, 0x708292).setDepth(1);
+    const R = this.rooms.find((r) => r.name === 'The old tree').rect;
+    this.add.rectangle(R.x + 21 * T, R.y + 13 * T, 26, 128, 0x655d60).setDepth(1);
+    this.add.circle(R.x + 21 * T, R.y + 9 * T, 65, 0x526672).setDepth(1);
+    this.add.ellipse(R.x + 19 * T, R.y + 14 * T, 200, 68, 0x705a43).setDepth(1);
+    this.stagWriting = this.add.text(R.x + 16.5 * T, R.y + 13 * T, SCRIPT.stagNote.map((l) => l.text).join('\n'), {
+      fontFamily: 'cursive', fontSize: '14px', color: '#382b23', fontStyle: 'italic', wordWrap: { width: 600 }
+    }).setScale(0.28, 0.14).setAngle(-4).setDepth(2).setVisible(false);
+    const P = this.rooms.find((r) => r.name === 'The pyramid entrance').rect;
+    this.add.triangle(P.x + 22 * T, P.y + 10 * T, 0, 160, 120, 0, 240, 160, 0x708292).setDepth(1);
+    this.add.rectangle(P.x + 22 * T, P.y + 14 * T, 40, 64, 0x101923).setDepth(2);
   }
 
   stagWave(B, dt) {
@@ -1682,7 +1727,7 @@ class Room extends Phaser.Scene {
     }
     B.img?.setPosition(B.r.x, B.r.y).setVisible(B.r.visible);
     if (this.dead > 0 || this.transit || this.talk.line || this.talk.queue.length) return;
-    if (!Dialogue.seen.has('stagPromise')) { Dialogue.play(this, 'stagPromise'); return; }
+    if (p.x > R.x + 1.5 * T) this.gates.filter((g) => g.active && g.room === B.room).forEach((g) => { g.body.enable = true; });
     if (!Dialogue.seen.has('stagArrival')) { Dialogue.play(this, 'stagArrival'); return; }
     if (B.hidden) return;
     B.hurt -= dt; B.clock += dt;
@@ -1698,9 +1743,9 @@ class Room extends Phaser.Scene {
     const gap = 8 * Math.pow(0.8, 3 - B.hp);
     if (B.phase === 'windup' && B.clock > 0.7) { B.phase = 'charge'; B.clock = 0; }
     if (B.phase === 'charge') {
-      B.r.x = Math.max(R.x + 7.8 * T, B.r.x - 650 * dt);
+      B.r.x = Math.max(R.x + 6.5 * T, B.r.x - 650 * dt);
       for (const c of [...this.corpses]) if (hit(bounds(c), bounds(B.r))) { this.corpses.splice(this.corpses.indexOf(c), 1); c.destroy(); }
-      if (B.r.x <= R.x + 7.8 * T) { B.phase = 'dazed'; B.clock = 0; B.stomped = false; }
+      if (B.r.x <= R.x + 6.5 * T) { B.phase = 'dazed'; B.clock = 0; B.stomped = false; }
     } else if (B.phase === 'dazed' && B.clock >= 2) {
       B.r.x = R.right - 5 * T; B.phase = 'beam'; B.clock = 0;
       B.beam = { x: B.r.x, y: B.r.y - 2 * T, angle: Math.PI, clock: 0 };
@@ -1847,9 +1892,13 @@ class Room extends Phaser.Scene {
 
     this.updateHud();
     if (this.transit) return;
+    this.stagWriting.setVisible(this.stagFinished);
     if (this.stagFinished && !this.talk.line && !this.talk.queue.length) {
-      if (!Dialogue.seen.has('stagNote') && p.x < this.rooms[this.index].rect.x + 3 * T) Dialogue.play(this, 'stagNote');
-      else if (Dialogue.seen.has('stagNote') && p.x > this.rooms[this.index].rect.right - 4 * T) Dialogue.play(this, 'floorOne');
+      const R = this.rooms[this.index];
+      if (R.name === 'The old tree' && p.x > R.rect.x + 18 * T && p.x < R.rect.x + 20 * T)
+        Dialogue.play(this, 'stagNote');
+      if (R.name === 'The pyramid entrance' && Dialogue.seen.has('stagNote') && p.x > R.rect.x + 22 * T)
+        Dialogue.play(this, 'floorOne');
     }
     // Spots: [column, script, after] plays a script once you walk past that column (after another script, if given).
     if (!this.talk.line && !this.talk.queue.length)
