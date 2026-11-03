@@ -14,8 +14,8 @@ Key: ✅ done · 🟡 started · blank = to do · — = not needed (a single ima
 | Asset | Sheet (animations) | Prompt | Ref | Sheet | Sized | In game |
 |---|---|---|---|---|---|---|
 | Hero: idle, run, jump, fall, slide | (done) | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Hero idle (animated) | standing still while hair, scarf and cape sway in a breeze, ~4–6 frames looping. Replaces the single `idle.webp` | | ✅ `raw/hero/hero.jpg` | | | |
-| Hero wall slide + wall jump (coming with wall jump) | slide: clinging to a wall with one hand and one boot, body facing out, sliding down; scarf and cloak lifted upward by the slide, 2–3 frames looping. Kick-off: 1 frame pushing away from the wall. Facing right (the wall on his right); the game mirrors it | | ✅ `raw/hero/hero.jpg` | | | |
+| Hero idle (animated) | standing still while hair, scarf and cape sway in a breeze, ~4–6 frames looping. Replaces the single `idle.webp` | | ✅ `raw/hero/hero.jpg` | | | ✅ |
+| Hero wall slide + wall jump (coming with wall jump) | slide: clinging to a wall with one hand and one boot, body facing out, sliding down; scarf and cloak lifted upward by the slide, 2–3 frames looping. Kick-off: 1 frame pushing away from the wall. Facing right (the wall on his right); the game mirrors it | | ✅ `raw/hero/hero.jpg` | | | ✅ |
 | Hero death | arcade-style burst: he flashes pure white, then breaks apart into square pixels that fly outward, ~4–5 frames (white flash → white silhouette → breaking into pixels). The scattering pixels after the last frame are code particles | | — | | | |
 | Hero respawn | soul light gathers to the respawn point: pixels fly inward (code particles) → white silhouette → the hero. Plays the **death sheet in reverse**, so no new sheet unless it looks wrong | | — | — | | |
 | White ghost (appears when he picks up the amulet) | — `raw/world1/ghost-white.jpg` approved by the user (standing pose fits the floating motif); glow, bob and alpha in code | | | — | | |
@@ -36,8 +36,8 @@ Key: ✅ done · 🟡 started · blank = to do · — = not needed (a single ima
 | Asset | Sheet (animations) | Prompt | Ref | Sheet | Sized | In game |
 |---|---|---|---|---|---|---|
 | Walker (red beetle) | walk (2 poses + code bob) | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Flyer | flies over soul walls; a small red flying beetle (the walker's family); wing-buzz loop, 4 frames | ✅ | | | | |
-| Thrower | stands still and shoots seeds along the ground (souls block them); a red toadstool creature; idle + spit, 4 frames, plus a seed pellet | ✅ | | | | |
+| Flyer | flies over soul walls; a small red flying beetle (the walker's family); wing-buzz loop, 4 frames | ✅ | | | | ✅ |
+| Thrower | stands still and shoots seeds along the ground (souls block them); a red toadstool creature; idle + spit, 4 frames, plus a seed pellet | ✅ | | | | ✅ |
 
 ## Bosses
 

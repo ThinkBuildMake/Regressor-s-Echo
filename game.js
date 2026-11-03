@@ -880,6 +880,13 @@ class Room extends Phaser.Scene {
       this.load.image('heroSlide', 'assets/hero/slide.webp'); // 12 slide frames, 3 rows of 4
       this.load.json('heroSlideMeta', 'assets/hero/slide.json');  // each frame's head and feet x
     }
+    for (const [key, path, width, height] of [
+      ['heroIdleAnim', 'hero/idle-anim', 98, 112],
+      ['heroWall', 'hero/wall-slide', 141, 141],
+      ['flyer', 'enemies/flyer', 115, 112],
+      ['thrower', 'enemies/thrower', 123, 112],
+    ]) if (!this.textures.exists(key)) this.load.spritesheet(key, `assets/${path}.webp`, { frameWidth: width, frameHeight: height });
+    if (!this.textures.exists('seedShot')) this.load.image('seedShot', 'assets/enemies/seed-shot.webp');
     if (!this.textures.exists('walker')) this.load.image('walker', 'assets/enemies/walker.webp');
     if (!this.textures.exists('stagIdle')) this.load.image('stagIdle', 'assets/bosses/stag-idle.webp');
     for (const pose of ['intro', 'idle', 'swing', 'slam', 'throw']) {
@@ -1132,13 +1139,14 @@ class Room extends Phaser.Scene {
     {
       if (kind === 'f') { // flyer: no physics body, so souls don't stop it
         const f = rect(x + 4, y + 8, 24, 16, 0x9b59b6).setDepth(4);
+        this.enemyPainting(f, 'flyer', 32);
         this.flyers.push(Object.assign(f, { dir: -1, baseY: y + 16, kind, spawn: sp }));
         return;
       }
       const e = kind === 't' ? rect(x + 4, y + T - 28, 24, 28, 0xe08a3c) : rect(x + 4, y + T - 24, 24, 24, 0xd0543c);
       e.kind = kind;
       e.spawn = sp;
-      if (kind === 't') e.cool = THROW_EVERY;
+      if (kind === 't') { e.cool = THROW_EVERY; this.enemyPainting(e, 'thrower', 32); }
       this.physics.add.existing(e);
       e.dir = -1;
       if (kind === 'e' && this.textures.exists('walker')) {
@@ -1151,6 +1159,14 @@ class Room extends Phaser.Scene {
       e.room = this.rooms[i].rect;
       this.enemies.push(e);
     }
+  }
+
+  enemyPainting(object, key, height) {
+    if (!this.textures.exists(key)) return;
+    object.setFillStyle(0, 0);
+    object.img = this.add.image(object.x, object.y, key, 0).setDepth(4)
+      .setDisplaySize(this.textures.get(key).get(0).width * height / this.textures.get(key).get(0).height, height);
+    object.on('destroy', () => object.img.destroy());
   }
 
   // The world's name fades in when you arrive in a new world.
@@ -1360,9 +1376,9 @@ class Room extends Phaser.Scene {
       // A soul is the hero's painting, frozen in the pose he died in, glowing blue-white.
       const [key, frame] = this.lying ? ['heroSlide', SLIDE_FRAMES[0]] : this.heroFrame; // pose may not be drawn yet
       const feet = c.y + c.height / 2, flip = this.face < 0;
-      const body = this.add.image(c.x, feet, key, frame).setOrigin(0.5, 1).setScale(this.heroScale).setFlipX(flip)
+      const body = this.add.image(c.x, feet, key, frame).setOrigin(0.5, 1).setScale(key === 'heroWall' ? HERO_HEIGHT / 141 : this.heroScale).setFlipX(flip)
         .setTintFill(0x6fb6ee).setAlpha(0.45).setDepth(4.5);
-      const glow = this.add.image(c.x, feet, key, frame).setOrigin(0.5, 1).setScale(this.heroScale).setFlipX(flip)
+      const glow = this.add.image(c.x, feet, key, frame).setOrigin(0.5, 1).setScale(key === 'heroWall' ? HERO_HEIGHT / 141 : this.heroScale).setFlipX(flip)
         .setTint(0xbfe6ff).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.9).setDepth(4.6);
       c.sprites = [body, glow];
       c.on('destroy', () => c.sprites.forEach((sp) => sp.destroy()));
@@ -1475,19 +1491,22 @@ class Room extends Phaser.Scene {
     }
     // Pick the frame: in the air, jump or fall; on the ground, run frames timed to distance covered
     // (one frame per RUN_STEP px, so steps match speed), or the standing painting when still.
+    const wallPose = !grounded && b.velocity.y > 0 && this.wallSide() === this.face && this.textures.exists('heroWall');
     this.heroFrame = this.lying ? ['heroSlide', SLIDE_FRAMES[Math.floor(t * SLIDE_FPS) % SLIDE_FRAMES.length]]
+      : !grounded && this.kick > 0 && this.textures.exists('heroWall') ? ['heroWall', 3]
+      : wallPose ? ['heroWall', Math.floor(t * 8) % Math.min(3, this.textures.get('heroWall').frameTotal - 1)]
       : !grounded ? ['heroSheet', b.velocity.y < 0 ? 6 : 7]
       : Math.abs(b.velocity.x) > 20
         ? (this.textures.exists('heroRun') ? ['heroRun', RUN_FRAMES[Math.floor(this.walk / RUN_STEP) % RUN_FRAMES.length]] : ['heroSheet', Math.floor(this.walk / RUN_STEP) % 6])
-      : ['heroIdle', undefined];
+      : this.textures.exists('heroIdleAnim') ? ['heroIdleAnim', Math.floor(t * 6) % 4] : ['heroIdle', undefined];
     const [key, frame] = this.heroFrame;
     // Standing frames center on him. The slide is anchored by its feet (the frame's leading edge),
     // a little ahead of center, so the body trails behind and getting up moves him forward.
     // Position from the physics body, which has already moved this frame (the rectangle only catches
     // up after drawing, so using it made the painting trail one frame behind the body).
-    const flip = this.face < 0, slide = key === 'heroSlide', bx = b.center.x, feet = b.bottom;
-    this.heroSprite.setTexture(key, frame).setScale(this.heroScale).setFlipX(flip)
-      .setOrigin(slide ? this.slideOrigin(frame, flip) : 0.5, 1)
+    const flip = (key === 'heroWall' && frame === 3 ? this.lastWall : this.face) < 0, slide = key === 'heroSlide', bx = b.center.x, feet = b.bottom;
+    this.heroSprite.setTexture(key, frame).setScale(key === 'heroWall' ? HERO_HEIGHT / 141 : this.heroScale).setFlipX(flip)
+      .setOrigin(slide ? this.slideOrigin(frame, flip) : key === 'heroIdleAnim' ? (flip ? 0.25 : 0.75) : 0.5, 1)
       .setPosition(bx + (slide ? this.face * 12 : 0), feet + 1);
     // the amulet's glow, on his chest (only placed for upright poses)
     if (slide || !this.wearing) return;
@@ -1610,10 +1629,22 @@ class Room extends Phaser.Scene {
       if (e.kind === 't') { // stands still; shoots straight at you along the ground
         b.velocity.x = 0;
         const p = this.player;
+        e.dir = Math.sign(p.x - e.x) || 1;
+        if (e.img) {
+          const until = e.cool, since = THROW_EVERY - until;
+          const frame = since < 0.12 ? 2 : since < 0.28 ? 3 : until < 0.3 ? 1 : 0;
+          e.img.setPosition(e.x, b.bottom - 16).setFlipX(e.dir > 0).setFrame(frame);
+        }
         if (p.visible && Math.abs(p.y - e.y) < 3 * T && (e.cool -= this.game.loop.delta / 1000) <= 0) {
           e.cool = THROW_EVERY;
           const d = Math.sign(p.x - e.x) || 1;
-          this.shots.push(Object.assign(this.add.circle(e.x + d * 16, e.y - 4, 5, 0xffb060).setDepth(4), { vx: d * SHOT_SPEED }));
+          const shot = this.add.circle(e.x + d * 16, e.y - 4, 5, 0xffb060).setDepth(4);
+          if (this.textures.exists('seedShot')) {
+            shot.setFillStyle(0, 0);
+            shot.img = this.add.image(shot.x, shot.y, 'seedShot').setDisplaySize(10, 10).setDepth(4).setFlipX(d < 0);
+            shot.on('destroy', () => shot.img.destroy());
+          }
+          this.shots.push(Object.assign(shot, { vx: d * SHOT_SPEED }));
         }
         continue;
       }
@@ -1648,10 +1679,12 @@ class Room extends Phaser.Scene {
       if (walls(new Phaser.Geom.Rectangle(nx - 12, f.y - 8, 24, 16)) || nx < R.x + 16 || nx > R.right - 16) f.dir *= -1;
       else f.x = nx;
       f.y = f.baseY + Math.sin(t * 3 + f.baseY) * 10;
+      f.img?.setPosition(f.x, f.y).setFlipX(f.dir > 0).setFrame(Math.floor(t * 12) % 4);
     }
     this.shots = this.shots.filter((sh) => {
       sh.x += sh.vx * dt;
       sh.y += (sh.vy ?? 0) * dt;
+      sh.img?.setPosition(sh.x, sh.y);
       if (sh.mothDust && sh.y >= R.bottom - T - 16) { sh.y = R.bottom - T - 16; sh.vy = 0; }
       if (!solid(new Phaser.Geom.Rectangle(sh.x - 4, sh.y - 4, 8, 8)) && R.contains(sh.x, sh.y)) return true;
       sh.destroy();
