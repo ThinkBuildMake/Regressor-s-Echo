@@ -210,7 +210,7 @@ Blocking the dust with your soul should be taught in an earlier room, so the gui
 > **Guide** [wry]: Yourself. Trust me, it's worse when you choose it.
 
 ### 14. The nap — *straight on from 13*
-He writes the note here, while the hero sleeps. Nothing gives it away until World 3.
+He writes the note while the hero sleeps: he's incorporeal, so he drifts ahead to the old tree in World 3 and scratches it into the dirt there. Nothing gives it away until World 3 (a flashback could show it, but isn't needed).
 > **Hero** [exhausted]: I need… a minute. Or a hundred.  
 > **Guide** [wry]: Go on. I'll keep watch. Not like I sleep.  
 > **Hero** [exhausted]: Wake me if anything else comes through a wall.  
