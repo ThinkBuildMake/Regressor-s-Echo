@@ -165,7 +165,7 @@ const SCRIPT = {
   thorns: [
     H('thinking', "That's way too high to climb."),
     H('annoyed', '…And let me guess. The thorns.'),
-    G('amused', "Now you're getting the hang of it."),
+    G('amused', "Now you're getting the hang of it. Touch them on the way up, about two tiles off the ground. Leave a step you can reach."),
   ],
   patrol: [
     G('thinking', "See that plate? It holds the door open, as long as something's on it."),
@@ -199,7 +199,7 @@ const SCRIPT = {
     H('annoyed', 'Then tell me!'),
     G('amused', "Where's the fun in that?"),
   ],
-  dust2: [G('thinking', "Your soul caught you over the spikes. Think it'd catch a little dust?")], // 25th death (each try costs about two deaths)
+  dust2: [G('thinking', "Your soul caught you over the thorns. Think it'd catch a little dust?")], // 25th death (each try costs about two deaths)
   tree: [
     H('thinking', 'Big tree. Old tree. Very… still tree.'),
     G('warning', "Don't."), H('annoyed', "Don't what?"),

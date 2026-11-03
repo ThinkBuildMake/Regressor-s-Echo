@@ -1,6 +1,6 @@
 # Level Plan
 
-Rooms connect Celeste-style (walk through a gap, the camera slides over). Each room is a puzzle you can see whole. Decisions behind this live in [IDEAS.md](IDEAS.md).
+Rooms connect Celeste-style (walk through a gap, the camera slides over). In every room taller than the screen, the camera leads downward to show hazards before a drop reaches them. Decisions behind this live in [IDEAS.md](IDEAS.md).
 
 This is the design source for building levels: design happens here, and building (code and assets) happens in separate chats that work from this file. Mark a room **Built** once it's in the game.
 
@@ -17,7 +17,7 @@ The first greybox rooms were too thin: one mechanic per screen, "find the one sp
 - **Deaths can backfire:** a saw jams wherever you die, a bad death erases a soul you still need, a falling spike kills you somewhere you didn't plan.
 
 Three **showcase rooms**, one per world, are in the greybox to judge this style before the rest are redone (`?dev&room=Thornwood`, `?dev&room=Sawmill`, `?dev&room=Reliquary`):
-- **Thornwood (W1):** walker to stomp, a 2-wide chimney whose right wall turns to thorns for 3 rows (die on the middle one and your soul is the kick point past them), a crumbling bridge under falling spikes, then a saw in a 2-tall corridor you can't jump: let it kill you so your soul jams it (a jammed saw sticks inside the soul, so you walk over it).
+- **Thornwood (W1):** walker to stomp, a 3-wide chimney whose right wall turns to thorns for 5 rows (die on the middle one and your soul is the kick point past them), a crumbling bridge under falling spikes, then a saw in a 2-tall corridor you can't jump: let it kill you so your soul jams it (a jammed saw sticks inside the soul, so you walk over it).
 - **Sawmill (W2):** the spring reaches 8.5, the ledge is 9, and a saw sweeps the row 5–6 tiles up. Hold K during a launch so the soul hangs beside the spring: in the saw's row it jams the saw and is your step; a row higher it's a step too, but you spring past a moving saw. Then a plate soul that also shields you from a thrower, a crumbling floor under fire, and a ceiling laser you must block high so you can walk under.
 - **Reliquary (W3):** a 3-wide chimney with flyers crossing it (small ledges let you stop and time them), two saws in their own lanes of a 2-tall corridor (jam both, then self-destruct on the plate at the end: all 3 souls), recall to undo a bad death, and a crumbling descent under falling spikes.
 
@@ -44,13 +44,13 @@ Three **showcase rooms**, one per world, are in the greybox to judge this style 
 | 1 | The clearing | Moving and jumping | None (story room) | Finds the amulet, puts it on | Built |
 | 2 | The ghost | | None (story room) | The opening conversation (below) | Built |
 | 3 | First death | A death leaves a soul | A pit too wide to jump: die in it, and your soul is a stepping stone over the spikes | "AGH! THAT HURT!" | Built |
-| 4 | The thorn wall | Aiming a death | Where you touch the thorns is where your soul hangs. Jump into them at the top of your jump to make the highest step | The guide teaches timing | Built |
+| 4 | The thorn wall | Aiming a death | Where you touch the thorns is where your soul hangs. Touch them while rising about two tiles above the floor to leave a reachable three-high step; full jump height leaves an unreachable four-high step | The guide teaches timing | Built |
 | 5 | The patrol | Switches, walkers | You choose where the walker catches you: get killed standing on the switch so your soul holds the door | "I want you to get killed *efficiently*." | Built |
 | 6 | The chain | Shrines | Bridge the pit, reach the shrine, die again for a step up | "How many times have you done this?" | Built |
 | 7 | The long pit | Slide | Slide into a low spike tunnel: the flat soul bridges it, a standing soul plugs it. Hop to the shrine; stomp the tunnel guard from the ledge before sliding to place the second bridge. That death revives the guard: stomp it again to use the bridge, then hop the exit post. Touching the guard moves your bridge into the approach | Guide: "Lie down. No, really." | Built |
-| 8 | The well | Aiming a fall | Aim a fall beside the first exit, then drop onto your soul and jump to the shrine. In the second well, steer below the thorns before landing; jump from the soul to the guard’s shelf and stomp it. A thorn or guard death steals your landing | | Built |
-| 9 | The gatehouse | Which side the walker ends up on | Let the walker kill you on the plate from the door side, then hop your soul and its pen. After the shrine, the plate soul is also the step to a four-high ledge. Pen the walker beside your respawn and a careless death steals the step | | Built |
-| 10 | The moth | Boss 1 | One soul, two jobs. You place it by dying on the arena's thorns, and it must shield you from the wing dust *and* be the step you stomp from. Dying again heals the moth and moves the soul, so you get one placement for all 3 stomps. The dust can't break souls | "Careful. It remembers too." | Built |
+| 8 | The well | Aiming a fall | Aim a fall beside the first exit, then drop onto your soul and jump to the shrine. In the second well, fall straight beside the exit, clear of the upper thorns; jump from the soul to the guard’s shelf and stomp it. A thorn or guard death steals your landing | | Built |
+| 9 | The gatehouse | Which side the walker ends up on | Let the walker kill you on the plate from the door side, then hop your soul and its pen. After the shrine, a low post keeps the patrol away from your respawn; the plate soul is also the step to a four-high ledge. Careless guard contact steals the step | | Built |
+| 10 | The moth | Boss 1 | One soul, two jobs. You place it by dying on the arena's thorns, and it must shield you from the wing dust *and* be the step you stomp from. Dying again heals the moth and moves the soul, so you get one placement for all 3 stomps. The dust can't break souls. The moth stays away from both walls, seals the entrance until victory, and pauses briefly after a death so you can approach the step | "Careful. It remembers too." | Built |
 
 After the moth: the amulet's 2nd rune lights up and you earn a **2nd soul** and **self-destruct**, leading into World 2.
 

@@ -41,7 +41,7 @@ def gatehouse(o, p):
     o(0, 15, 2, 15, '#'); p(7, 15, '_'); p(11, 15, 'e')
     o(13, 13, 13, 15, 'D')
     # The second plate soul also reaches the four-high ledge. A bad death steals that step.
-    o(14, 8, 23, 15); p(14, 15, '#'); p(15, 15, 'C'); p(21, 15, '_'); p(23, 15, 'e')
+    o(14, 8, 23, 15); p(14, 15, '#'); p(15, 15, 'C'); p(17, 15, '#'); p(21, 15, '_'); p(23, 15, 'e')
     o(24, 8, 25, 11); o(26, 8, 26, 15, 'D')
     o(27, 8, 28, 15); o(29, 14, 29, 15)
 room('The gatehouse', [210, 108], 30, 17, 1, 'get killed on the plate so the walker ends up on the right side', gatehouse)

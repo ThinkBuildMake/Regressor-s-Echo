@@ -413,7 +413,7 @@ const ROOMS = [
     '#            #          ##D  #',
     '             D          ##D  #',
     ' P           D          ##D   ',
-    '###    _   e D#C     _ e##D   ',
+    '###    _   e D#C #   _ e##D   ',
     '##############################',
   ], [210, 108], { world: 1 }],
   ["Thornwood", [ // SHOWCASE W1: wall jump, thorn anchor, crumbling bridge, falling spikes, saw jam, stomps
@@ -458,8 +458,8 @@ const ROOMS = [
     '#                            #',
     '#                            #',
     '#                            V',
-    '                             V',
-    ' P            xB             V',
+    'V                            V',
+    'VP            xB             V',
     '##############################',
   ], [286, 104], { world: 1, spots: [[7, 'moth']], deathTalk: { 2: 'dust', 25: 'dust2' } }], // the shaking starts 7 tiles in
   // ---------------- World 2: Overgrown Ruins (greybox) ----------------
@@ -955,7 +955,7 @@ class Room extends Phaser.Scene {
             case '~': { const c = rect(x, y, T, T, 0x9a7a52).setStrokeStyle(3, 0x3a2614).setDepth(2); this.statics.add(c); this.crumbles.push(Object.assign(c, { room: ri, t: 0, back: 0 })); break; }
             case '!': this.droppers.push({ room: ri, x0: x + T / 2, y0: y + 12, r: rect(x + 7, y, T - 14, 24, 0xe0484a).setStrokeStyle(2, 0x6a1010).setDepth(3) }); break;
             case 'B': // floats with its underside 2.5 tiles above this tile's floor
-              this.bosses.push({ hp: BOSS_HP, hurt: 0, dir: 1, room: ri, min: ox * T + T + BOSS_W / 2, max: (ox + width) * T - T - BOSS_W / 2,
+              this.bosses.push({ hp: BOSS_HP, hurt: 0, dir: 1, room: ri, min: ox * T + (name === 'The moth' ? 8 * T : T + BOSS_W / 2), max: (ox + width) * T - (name === 'The moth' ? 8 * T : T + BOSS_W / 2),
                 r: rect(x + T / 2 - BOSS_W / 2, y + T - 128, BOSS_W, BOSS_H, 0x9b59b6),
                 hidden: !!extra.spots?.some((sp) => sp[1] === 'moth') && !Dialogue.seen.has('moth'), // bursts in during its intro
                 story: extra.spots?.some((sp) => sp[1] === 'moth') ? 'mothDown' : null });
@@ -989,7 +989,7 @@ class Room extends Phaser.Scene {
               }
               break;
             case 'V': this.gates.push(Object.assign(rect(x, y, T, T, 0x4a6b3a), { room: ri })); this.statics.add(this.gates.at(-1));
-              if (name === 'The spectral stag' && tx === 0) this.gates.at(-1).body.enable = false;
+              if ((name === 'The spectral stag' || name === 'The moth') && tx === 0) this.gates.at(-1).body.enable = false;
               break;
             case 'a': {
               rect(x, y, T, T, 0x539bd6);
@@ -1238,6 +1238,7 @@ class Room extends Phaser.Scene {
     if (name === 'shake') this.cameras.main.shake(1400, 0.006);
     if (name === 'moth' && this.boss?.hidden) { // bursts out of the wall, flies to its patrol spot, screams
       const B = this.boss, { x, y } = B.r, h = this.breakWall(B, true);
+      this.gates.filter((g) => g.room === B.room).forEach((g) => { g.body.enable = true; });
       B.dir = -1;
       B.r.setVisible(true).setPosition(h.x, h.y);
       B.img?.setScale(MOTH_SCALE * 0.5);
@@ -1373,6 +1374,7 @@ class Room extends Phaser.Scene {
     } // your death heals the boss
     if (this.boss?.story === 'mothDown' && !this.boss.hidden) {
       this.boss.dust = 2.4;
+      this.boss.resetWait = 1.5;
       this.boss.r.x = this.rooms[this.index].rect.x + 22 * T;
       this.boss.dir = 1;
       this.shots = this.shots.filter((sh) => { if (!sh.mothDust) return true; sh.destroy(); return false; });
@@ -1767,6 +1769,9 @@ class Room extends Phaser.Scene {
       .setFrame(B.pose ?? MOTH_FRAMES[Math.floor((this.time.now / 1000) * MOTH_FPS) % MOTH_FRAMES.length]);
     if (!B || B.hidden) return;
     if (B.story === 'mothDown') {
+      if (this.player.x > this.rooms[B.room].rect.x + 1.5 * T)
+        this.gates.filter((g) => g.room === B.room).forEach((g) => { g.body.enable = true; });
+      if ((B.resetWait = Math.max(0, (B.resetWait ?? 0) - dt)) > 0) return;
       B.dust = (B.dust ?? 2.4) - dt;
       if (B.dust <= 0) {
         B.dust = 2.4 * 0.8 ** (BOSS_HP - B.hp);
@@ -1828,14 +1833,16 @@ class Room extends Phaser.Scene {
     B.timer = (gap - TREE_GLOW - 1.2) / 3; B.phase = 'idle';
   }
 
-  // Returns true if the player died. Feet in the boss's top sliver is a stomp (also covers the
-  // bounce frames after it); any other touch kills.
+  // Use the previous feet position so a fast fall still counts as landing on top.
   touchBoss() {
     const B = this.boss, p = this.player;
     if (!B || B.hidden || !hit(bounds(p), bounds(B.r))) return false;
     if (B.stag && B.phase !== 'dazed') { this.die(); return true; }
     const top = bounds(B.r).top;
-    if (p.y + 15 - top > 14) { this.die(); return true; }
+    const falling = p.body.velocity.y >= 0;
+    if (!falling && p.y + 15 <= top + 18) return false;
+    if (!falling || (this.bossPreviousFeet ?? p.body.prev.y + p.body.height) > top + 1) { this.die(); return true; }
+    p.body.reset(p.x, top - p.height / 2);
     p.body.velocity.y = -JUMP * 0.8;
     if (B.hurt > 0 || (B.stag && B.stomped) || (B.kind === 'tree' && B.stompReady === false)) return false;
     if (B.stag) { B.stomped = true; B.clock = Math.min(B.clock, 0.5); }
@@ -1861,6 +1868,8 @@ class Room extends Phaser.Scene {
   update(_t, ms) {
     const dt = Math.min(ms / 1000, 0.05);
     const k = this.keys, JD = Phaser.Input.Keyboard.JustDown, p = this.player;
+    this.bossPreviousFeet = this.bossFeet;
+    this.bossFeet = p.y + p.height / 2;
 
     if (JD(k.R) && k.SHIFT.isDown) return this.scene.restart({ index: this.index }); // Shift+R: retry the room (if you've trapped yourself)
     if (DEV && JD(k.N)) return this.scene.restart({ index: this.index + 1 });
@@ -1891,6 +1900,8 @@ class Room extends Phaser.Scene {
     }
 
     this.updateHud();
+    // Look into drops in every tall room, including drops after a shrine.
+    this.cameras.main.setFollowOffset(0, this.rooms[this.index].rect.height > this.cameras.main.height ? -this.cameras.main.height * 0.4 : 0);
     if (this.transit) return;
     this.stagWriting.setVisible(this.stagFinished);
     if (this.stagFinished && !this.talk.line && !this.talk.queue.length) {
