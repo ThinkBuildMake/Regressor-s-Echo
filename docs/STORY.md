@@ -65,45 +65,41 @@ The game's text lives in [dialogue.js](../dialogue.js); this is the source it's 
 > **Hero** [neutral]: Mannn… treasure hunting's slow these days.  
 > **Hero** [thinking]: One good find. That's all I need. Then I could relax. Take it easy for once.
 
-### 2. The amulet — *touching it; he picks it up*
-> **Hero** [thinking]: Hmm? What do we have here?  
-> **Hero** [thinking]: An… amulet?  
-> **Hero** [relieved]: If this is pure gold, it could fetch me a pretty penny.  
-> *(Pause. Tools clink in his satchel.)*  
-> **Hero** [thinking]: It'll get scratched to bits in there.  
-> **Hero** [neutral]: Welp. I'll wear it for now.  
-> *(It appears on his chest and flashes gold. A beat later, a blue-white ghost fades in, floating at his upper right.)*
-
-### 3. A familiar stranger — *straight on from 2*
+### 2. The find and the meeting — *touching the amulet; he picks it up*
+> **Hero** [curious]: Hm? What's this?  
+> **Hero** [excited]: An amulet… if that's pure gold, it'd fetch a pretty penny.  
+> *(Tools clink in his satchel.)*  
+> **Hero** [thinking]: It'd get scratched to bits in there, though. Welp. I'll wear it for now.  
+> *(It appears on his chest and flashes gold. A beat later, a blue-white ghost fades in at his upper right.)*  
 > **Hero** [startled]: WAH—!  
 > **Hero** [scared]: Wh— where did you come from?!  
 > *(The ghost looks one way, then the other, ignoring him.)*  
 > **Guide** [thinking]: Where am I?  
-> **Hero** [startled]: You're asking ME?  
+> **Hero** [annoyed]: You're asking ME?  
 > *(His eyes settle on the hero. A beat.)*  
-> **Guide** [solemn]: …Oh.  
-> **Guide** [wry]: Oh, no. Must've died one too many times. I guess I'm the guide now.  
-> **Hero** [thinking]: Died? Guide? What are you talking about?  
-> **Guide** [weary]: …  
+> **Guide** [solemn]: …Oh. Oh, no.  
+> **Guide** [wry]: Must've died one too many times. Guess I'm the guide now.  
+> **Hero** [thinking]: Died? Guide? What are you—  
 > **Guide** [wry]: Anyways, enough about me moping. Which death are you on right now?  
 > **Hero** [thinking]: Which… death?  
-> **Guide** [wry]: First timer, then. Well. Introductions are in order.  
-> **Hero** [startled]: Hang on. You look like me.  
+> **Guide** [amused]: A first-timer! Introductions, then.  
+> **Hero** [curious]: Hang on. You look like me.  
 > **Guide** [solemn]: I am you. From another timeline. A few thousand deaths ahead.  
 > *(A long beat.)*  
-> **Hero** [startled]: Ooook then. I must be dreaming.  
-> **Hero** [thinking]: Must be this blasted amulet. I should never have put it on.  
-> **Hero** [neutral]: I'll just leave it where I found it and call it a day.  
+> **Hero** [exhausted]: Ooook then. I must be dreaming.
+
+He can move again.
+
+### 3. The curse and the lead — *halfway to the clearing's exit*
+> **Hero** [annoyed]: It's this blasted amulet. I'm leaving it right here.  
 > *(A gold pulse: it won't come off.)*  
-> **Hero** [startled]: Why won't it come off?  
+> **Hero** [startled]: …Why won't it come off?  
 > **Guide** [solemn]: It won't let go. And it won't let you stay dead.  
-> **Hero** [determined]: Well, someone must know how to get it off. I'm not keeping it.  
-> **Guide** [weary]: Fine. If you must take it off, I'd start with the tribe that created the thing.  
-> *(A gold pulse draws the eye to the amulet's symbol.)*  
-> **Guide** [thinking]: Look. See that symbol on it?  
-> **Hero** [thinking]: What about it?  
-> **Guide** [thinking]: Go a little farther in. You should see a very similar one before long.  
-> **Hero** [neutral]: All right. I'll have a look. But if this is a waste of time, I'm going home.
+> **Hero** [determined]: Then someone out there knows how to get it off.  
+> **Guide** [weary]: …Fine. Start with the tribe that made it. See the mark on it?  
+> **Hero** [thinking]: This squiggle?  
+> **Guide** [thinking]: There's another one like it farther in.  
+> **Hero** [neutral]: All right. But if this is a waste of time, I'm going home.
 
 From here the guide appears only for conversations he's part of: he fades in at the hero's upper right and fades away once they're done.
 

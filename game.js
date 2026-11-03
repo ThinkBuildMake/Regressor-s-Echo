@@ -239,7 +239,7 @@ const ROOMS = [
     '#                  ##         ',
     '#  P       A      ###         ',
     '##############################',
-  ], [0, 100], { world: 1, enter: 'clearing' }],
+  ], [0, 100], { world: 1, enter: 'clearing', spots: [[16, 'curse', 'amulet']] }],
   ['First death', [
     '##############################',
     '#                            #',
