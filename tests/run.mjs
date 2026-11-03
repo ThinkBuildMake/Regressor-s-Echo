@@ -1,7 +1,8 @@
 // Runs tests/check.html in a hidden browser and prints its RESULT line. Exit code 1 on failure.
 import { chromium } from 'playwright';
 
-const page = await (await chromium.launch()).newPage();
+// Native rendering avoids slow software WebGL on macOS.
+const page = await (await chromium.launch({ args: process.platform === 'darwin' ? ['--use-angle=metal'] : [] })).newPage();
 const errors = [];
 page.on('pageerror', (e) => errors.push(e.message));
 // Missing art files are expected (the game draws stand-ins), so their load errors are ignored.

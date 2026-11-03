@@ -13,9 +13,15 @@ def room(name, pos, w, h, world, note, build, extra=None):
 
 # ---------- World 1 ----------
 def long_pit(o, p):
-    o(0, 8, 2, 9); o(3, 9, 19, 9); o(20, 1, 28, 9); o(29, 8, 29, 9)
-    o(10, 10, 12, 10, '^'); p(1, 9, 'P')
-room('The long pit', [150, 94], 30, 17, 1, 'slide: only a lying soul bridges a pit in a 1-tall tunnel', long_pit)
+    # Flat bridge first; hop onto the shrine before moving your only soul.
+    o(0, 8, 2, 9); o(3, 9, 10, 9); o(6, 10, 8, 10, '^')
+    o(11, 5, 14, 9); o(12, 9, 13, 9, '#'); p(13, 8, 'C'); p(1, 9, 'P')
+    # The bridge death revives the guard: stomp from the shrine on both runs.
+    # Touching the guard instead moves your only soul out of the pit.
+    o(14, 5, 17, 9); p(16, 9, 'e')
+    o(18, 9, 22, 9); o(18, 10, 20, 10, '^')
+    o(23, 5, 28, 9); p(24, 9, '#'); p(28, 9, '#'); o(29, 8, 29, 9)
+room('The long pit', [150, 94], 30, 17, 1, 'flat bridge, shrine, stomp the guard twice: bridge death revives it', long_pit)
 
 def well(o, p):
     o(0, 8, 5, 9); p(1, 9, 'P')

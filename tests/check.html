@@ -11,6 +11,9 @@
 const errors = [];
 window.onerror = (m) => errors.push(m);
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const until = async (done, timeout = 15000) => {
+  for (let t = 0; t < timeout && !done(); t += 20) await wait(20);
+};
 const only = (new URLSearchParams(location.search).get('only') || '').toLowerCase().split(',').map((s) => s.trim()).filter(Boolean);
 const matches = (name) => !only.length || only.some((part) => name.toLowerCase().includes(part));
 const defaultRules = { ...rules };
@@ -78,7 +81,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     const b = s.corpses[1];
     check(near(b.y, a.y - 32) && b.x === a.x, `second body stacks (${b.x},${b.y})`);
     s.corpses.shift().destroy();                       // remove the base
-    await wait(600);
+    await until(() => near(b.y + 16, feet));
     check(near(b.y + 16, feet), `stack falls when base vanishes (${b.y})`);
   }
 
@@ -266,10 +269,10 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     await wait(2500); await alive();
     key('keydown', 75); await wait(250); key('keyup', 75); await wait(100);
     check(s.corpses.length === 0 && s.charge === 0, `letting go of K early cancels (${s.corpses.length} souls)`);
-    key('keydown', 75); await wait(1400); key('keyup', 75);
+    key('keydown', 75); await until(() => s.corpses.length === 1); key('keyup', 75);
     check(s.corpses.length === 1, `holding K leaves a soul (${s.corpses.length})`);
     const sb = s.corpses[0];
-    check(near((sb.y + sb.height / 2) % 32, 0), `souls snap to the tile grid vertically (bottom ${sb.y + sb.height / 2})`);
+    check(sb && near((sb.y + sb.height / 2) % 32, 0), `souls snap to the tile grid vertically (bottom ${sb && sb.y + sb.height / 2})`);
   }
 
   // Lasers: walking into the beam kills you, and your soul then cuts the beam short.
@@ -356,6 +359,85 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
       check(r.h >= wantH - 0.05 && r.h < wantH + 0.5 && r.x >= minTx - 0.4, `${name}: jump from ${top} up at column ${tx} reaches ${wantH} up (got ${r.h} up, column ${r.tx}; souls ${where})`);
     }
   };
+  if (matches('The long pit')) {
+    s = await cleanSolveRoom('The long pit');
+    const slideTo = async (from, to, die = false) => {
+      s.player.body.reset(O().x + from * 32 + 16, O().y + 10 * 32 - 16);
+      await wait(100);
+      const deaths = stats.deaths;
+      key('keydown', 39);
+      for (let t = 0; t < 2000 && s.player.body.velocity.x <= 100; t += 20) await wait(20);
+      key('keydown', 83);
+      for (let t = 0; t < 2000 && !s.lying; t += 20) await wait(20);
+      key('keyup', 83);
+      for (let t = 0; t < 4000 && stats.deaths === deaths &&
+        s.player.x < O().x + to * 32; t += 20) await wait(20);
+      key('keyup', 39);
+      if (die) {
+        await alive();
+        check(stats.deaths === deaths + 1 && s.corpses[0]?.lying,
+          'The long pit: sliding into the spikes leaves a flat bridge');
+      } else {
+        key('keydown', 37);
+        for (let t = 0; t < 1000 && s.player.body.velocity.x > 0 && stats.deaths === deaths; t += 10) await wait(10);
+        key('keyup', 37); await wait(500);
+        check(stats.deaths === deaths && s.player.x >= O().x + (to - 0.4) * 32,
+          `The long pit: slide from ${from} crosses the bridge (deaths ${stats.deaths - deaths}, column ${(s.player.x - O().x) / 32})`);
+      }
+    };
+    // Stage A: die sliding, cross, then really jump onto the checkpoint step.
+    await slideTo(5, 11, true);
+    await slideTo(5, 11);
+    const a = await hop(11, 0, 10, 12.5);
+    check(a.h >= 0.95 && s.start === s.shrines.find((sh) => sh.x > O().x && sh.x < O().right)?.spawn,
+      'The long pit: first bridge and hop reach the shrine');
+    // Stage B: the bridge death revives the guard, so stomp it on both runs.
+    const stompGuard = async () => {
+      const guard = s.enemies.find((e) => O().contains(e.x, e.y));
+      const deaths = stats.deaths;
+      s.player.body.reset(O().x + 13 * 32 + 16, O().y + 9 * 32 - 16);
+      await wait(150);
+      key('keydown', 32); key('keydown', 39);
+      for (let t = 0; t < 1800 && s.enemies.includes(guard) && stats.deaths === deaths; t += 10) {
+        await wait(10);
+        // Follow the patrol from above, then release steering after the stomp.
+        const dx = guard.x - s.player.x;
+        key(dx > 4 ? 'keydown' : 'keyup', 39);
+        key(dx < -4 ? 'keydown' : 'keyup', 37);
+      }
+      key('keyup', 32); key('keyup', 39); key('keyup', 37);
+      await wait(500);
+      check(!s.enemies.includes(guard) && stats.deaths === deaths,
+        'The long pit: jump from the shrine stomps the tunnel guard');
+    };
+    await stompGuard();
+    await slideTo(17, 23, true);
+    check(s.start.x > O().x + 12 * 32, 'The long pit: second death respawns at the shrine');
+    check(s.enemies.some((e) => O().contains(e.x, e.y)),
+      'The long pit: placing the bridge revives its guard');
+    // Careless contact now moves the bridge out of the pit.
+    const bridge = s.corpses[0], deathsBeforeGuard = stats.deaths;
+    const guard = s.enemies.find((e) => O().contains(e.x, e.y));
+    s.player.body.reset(guard.x, guard.y);
+    await wait(150); await alive();
+    check(stats.deaths === deathsBeforeGuard + 1 && s.corpses[0] !== bridge &&
+      !s.corpses[0]?.lying && s.corpses[0].x < O().x + 18 * 32,
+      'The long pit: touching the revived guard replaces the bridge with a standing soul');
+    await stompGuard();
+    await slideTo(17, 23, true);
+    await stompGuard();
+    await slideTo(17, 23);
+    const b = await hop(23.3, 0, 10, 24);
+    check(b.x >= 23.9 && b.h >= 0.95, 'The long pit: bridge reaches the exit post');
+    const c = await hop(24, 1, 10, 28);
+    check(c.x >= 28 && c.h >= 0.95, `The long pit: jump reaches the exit (column ${c.x}, height ${c.h})`);
+    // The low ceiling prevents even a full jump from skipping an empty pit.
+    s = await cleanSolveRoom('The long pit');
+    const deaths = stats.deaths;
+    await hop(5, 0, 10, 10);
+    check(stats.deaths > deaths && s.player.x < O().x + 9 * 32,
+      'The long pit: jumping without a bridge dies in the tunnel');
+  }
   await solve('Let go', [[21, 0], [21, 1]], [[20, 0, 2, 21], [21, 2, 5, 22]]);
   await solve('Off the edge', [[14, 0]], [[14, 1, 0, 19]], 8);
   await solve('The ladder', [[19, 2], [20, 3]], [[18, 0, 3, 19], [20, 4, 7, 21]]);
