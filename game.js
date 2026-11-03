@@ -921,6 +921,7 @@ class Room extends Phaser.Scene {
     this.springs = [];
     this.saws = [];
     this.crumbles = [];
+    this.hazardArt = [];
     this.droppers = [];
     this.shots = [];
     this.charge = 0;
@@ -930,6 +931,8 @@ class Room extends Phaser.Scene {
       const rows = raw.map((r) => r.padEnd(width, '#'));
       while (rows.length < 17) rows.push('#'.repeat(width));
       const room = { name, ...extra, rect: new Phaser.Geom.Rectangle(ox * T, oy * T, width * T, rows.length * T), spawns: [] };
+      const world = extra.world ?? 1;
+      const hazard = (body, name, w, h, dy) => Art.hazard(this, body, world, name, w, h, dy);
       rows.forEach((row, ty) => {
         for (let tx = 0; tx < row.length; tx++) {
           const x = (ox + tx) * T, y = (oy + ty) * T;
@@ -946,14 +949,21 @@ class Room extends Phaser.Scene {
               this.statics.add(rect(x, y + 16, T, 16, 0).setVisible(false));
               Art.platform(this, x, y + 16, T, 16, [false]);
               this.spikes.push(rect(x + 2, y + 6, T - 4, 10, 0xcd5c5c));
+              hazard(this.spikes.at(-1), 'spikes', T, 16, -3);
               break;
-            case 'x': this.spikes.push(rect(x + 4, y + 2, T - 8, T - 4, 0x7a3550)); break;
-            case '_': this.plates.push(Object.assign(rect(x + 1, y + T - 8, T - 2, 8, 0xffd700).setStrokeStyle(2, 0x8a6a00).setDepth(3), { room: ri })); break;
+            case 'x': this.spikes.push(rect(x + 4, y + 2, T - 8, T - 4, 0x7a3550)); hazard(this.spikes.at(-1), 'thorns', T, T); break;
+            case '_': this.plates.push(Object.assign(rect(x + 1, y + T - 8, T - 2, 8, 0xffd700).setStrokeStyle(2, 0x8a6a00).setDepth(3), { room: ri })); hazard(this.plates.at(-1), 'plate', T, 8); break;
             case 'D': { const d = Object.assign(rect(x, y, T, T, 0x8c6640), { room: ri }); this.statics.add(d); this.doors.push(d); break; }
             case 'e': case 'f': case 't': this.walkerSpawns.push({ x, y, room: ri, kind: row[tx] }); break; // made on entry
-            case 'o': case 'O': this.saws.push({ room: ri, x: x + T / 2, y: y + T / 2, dx: row[tx] === 'o' ? 1 : 0, dy: row[tx] === 'O' ? 1 : 0, dir: 1 }); break;
-            case '~': { const c = rect(x, y, T, T, 0x9a7a52).setStrokeStyle(3, 0x3a2614).setDepth(2); this.statics.add(c); this.crumbles.push(Object.assign(c, { room: ri, t: 0, back: 0 })); break; }
-            case '!': this.droppers.push({ room: ri, x0: x + T / 2, y0: y + 12, r: rect(x + 7, y, T - 14, 24, 0xe0484a).setStrokeStyle(2, 0x6a1010).setDepth(3) }); break;
+            case 'o': case 'O': {
+              const sw = { room: ri, x: x + T / 2, y: y + T / 2, dx: row[tx] === 'o' ? 1 : 0, dy: row[tx] === 'O' ? 1 : 0, dir: 1 };
+              const key = Art.hazardKey(this, world, 'saw');
+              if (key) sw.img = this.add.image(sw.x, sw.y, key).setDisplaySize(36, 36).setDepth(3);
+              this.saws.push(sw);
+              break;
+            }
+            case '~': { const c = rect(x, y, T, T, 0x9a7a52).setStrokeStyle(3, 0x3a2614).setDepth(2); this.statics.add(c); this.crumbles.push(Object.assign(c, { room: ri, t: 0, back: 0 })); hazard(c, 'crumble', T, T); break; }
+            case '!': this.droppers.push({ room: ri, x0: x + T / 2, y0: y + 12, r: rect(x + 7, y, T - 14, 24, 0xe0484a).setStrokeStyle(2, 0x6a1010).setDepth(3) }); hazard(this.droppers.at(-1).r, 'falling-spike', 18, 24); break;
             case 'B': // floats with its underside 2.5 tiles above this tile's floor
               this.bosses.push({ hp: BOSS_HP, hurt: 0, dir: 1, room: ri, min: ox * T + (name === 'The moth' ? 8 * T : T + BOSS_W / 2), max: (ox + width) * T - (name === 'The moth' ? 8 * T : T + BOSS_W / 2),
                 r: rect(x + T / 2 - BOSS_W / 2, y + T - 128, BOSS_W, BOSS_H, 0x9b59b6),
@@ -989,6 +999,7 @@ class Room extends Phaser.Scene {
               }
               break;
             case 'V': this.gates.push(Object.assign(rect(x, y, T, T, 0x4a6b3a), { room: ri })); this.statics.add(this.gates.at(-1));
+              hazard(this.gates.at(-1), 'vine-barrier', T, T);
               if ((name === 'The spectral stag' || name === 'The moth') && tx === 0) this.gates.at(-1).body.enable = false;
               break;
             case 'a': {
@@ -1002,7 +1013,7 @@ class Room extends Phaser.Scene {
               this.lasers.push({ e, room: ri, dx: { '>': 1, '<': -1 }[row[tx]] ?? 0, dy: { v: 1, u: -1 }[row[tx]] ?? 0 });
               break;
             }
-            case 's': this.springs.push(rect(x + 3, y + T - 12, T - 6, 12, 0xffc93c).setStrokeStyle(2, 0x7a5200).setDepth(3)); break;
+            case 's': this.springs.push(rect(x + 3, y + T - 12, T - 6, 12, 0xffc93c).setStrokeStyle(2, 0x7a5200).setDepth(3)); hazard(this.springs.at(-1), 'spring', T - 6, 24, -6); break;
             case 'P': room.spawns.push({ x: x + T / 2, y: y + T - 15 }); break;
             case 'A': this.amulets.push(this.add.circle(x + T / 2, y + T - 10, 6, 0xffd774).setStrokeStyle(2, 0xb07a22).setDepth(3)); break;
             case 'C': { // shrine: a mossy stone with a gold rune; touching it moves your respawn here
@@ -1702,6 +1713,7 @@ class Room extends Phaser.Scene {
     }
     for (const sw of this.saws) {
       if (sw.room !== this.index) continue;
+      if (sw.img) continue;
       g.fillStyle(0x8a8f99, 1).fillCircle(sw.x, sw.y, SAW_R);
       for (let i = 0; i < 8; i++) {
         const a = (sw.jam ? 0 : t * 12) + (i * Math.PI) / 4;
@@ -1997,7 +2009,10 @@ class Room extends Phaser.Scene {
     if (b.velocity.y > MAX_FALL) b.velocity.y = MAX_FALL; // cap falling only (a cap both ways held springs to 7.4 tiles)
     const grounded = b.blocked.down || b.touching.down;
     if (grounded || b.velocity.y >= 0) this.sprung = false;
-    if (b.velocity.y >= 0 && this.springs.some((sp) => hit(bounds(p), bounds(sp)))) { b.velocity.y = -SPRING; this.sprung = true; }
+    if (b.velocity.y >= 0 && this.springs.some((sp) => hit(bounds(p), bounds(sp)))) {
+      b.velocity.y = -SPRING; this.sprung = true;
+      for (const sp of this.springs) if (hit(bounds(p), bounds(sp))) sp.launchArt = this.time.now;
+    }
     const dir = (k.D.isDown || k.RIGHT.isDown) - (k.A.isDown || k.LEFT.isDown);
     if (dir && !(this.lying && this.slide > 0)) this.face = dir; // can't turn mid-slide
     if (slideKey && grounded && !this.lying && Math.abs(b.velocity.x) > 100) {
