@@ -389,7 +389,7 @@ The pyramid needs to be visible in the background, its top lost in cloud.
 > *(He fades.)*
 
 ### 9. The note — *behind the tree*
-*(He keeps his promise. Behind the tree, a folded note in his own handwriting.)*
+*(He keeps his promise. Behind the tree, a patch of earth has been smoothed flat, and words are scratched into it in his own handwriting.)*
 > If you're reading this… then it must mean I've kicked the bucket.  
 > Don't make that face. I can see it from here. Well. Could.  
 > Here's what I didn't tell you, because you'd have argued, and I'd have lost. We always lose to ourselves.  
