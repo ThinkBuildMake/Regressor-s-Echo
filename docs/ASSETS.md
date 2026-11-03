@@ -40,6 +40,7 @@ Key: ✅ done · 🟡 started · blank = to do · — = not needed (a single ima
 
 ## Bosses
 
+**Boss idles are code, not sheets (user):** each boss just stands in place and breathes: its standing frame plus a slight scale bob.
 Shared: the blue "soul-breaking" charge glow and the yellow normal-attack color are tinted in code, not painted.
 Every boss gets an **intro animation** when the fight starts, with a Silksong-style name card (name + title) in the
 bottom-left corner. The name card is text drawn in code, not an asset.
@@ -55,7 +56,7 @@ bottom-left corner. The name card is text drawn in code, not an asset.
 | Moth: wing dust (its attack) | — code particles. Room 11: you hide behind your soul from it; it can't break souls | — | — | — | — | |
 | **Tree guardian** (World 2) | reference: the ORIGINAL Flow tree (`raw/bosses/tree.jpg`, user's pick); the side-profile version is kept as `tree-profile.jpg` | ✅ | 🟡 `raw/bosses/tree.jpg`, top clipped, faces front | | | |
 | Tree: intro | mask eyes open, rises out of the ruins, arms spread, ~4 frames | | | | | |
-| Tree: idle | slow sway, ~3–4 frames | | | | | |
+| Tree: idle | no sheet (user: too much movement; bosses just stand and breathe): the standing frame from `raw/bosses/tree-base.jpg` plus a slight breathing bob in code (scale ~1–2%, ~2 s per breath). `assets/bosses/tree-idle.webp` stays only as a fallback | — | ✅ | — | | |
 | Tree: branch swing | wind-up → swing → recover, ~4–5 frames | | | | | |
 | Tree: slam (smashes souls) | raise arms → slam down, ~4–5 frames | | | | | |
 | Tree: seed pod throw + pod | throw ~3 frames; pod is a single image | | | | | |
