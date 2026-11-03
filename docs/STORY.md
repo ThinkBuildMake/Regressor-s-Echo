@@ -370,7 +370,7 @@ The pyramid needs to be visible in the background, its top lost in cloud.
 > Well, I guess it's time to come clean.  
 > You know how I said there was a limit? That was a lie. Figured you'd be more careful if you thought you were running out.  
 > The limit is when your spirit breaks. On floor ninety, mine did, and I just… stopped getting back up.  
-> So keep getting back up. Whatever's waiting in there.  
+> So keep getting back up. No matter how hard it gets. No matter what.  
 > Thanks for putting up with me. I know I'm not great company. I'd know.  
 > You'll make it. Trust me.  
 > — You  
