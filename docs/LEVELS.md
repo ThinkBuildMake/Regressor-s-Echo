@@ -94,12 +94,15 @@ New: **3 souls** and **recall** (Q: tap for the newest soul, hold for more). Mos
 
 | # | Room | Teaches | The trick | Status |
 |---|---|---|---|---|
-| 1 | Three high | 3 souls | Three-soul staircase; shrine, then the top step also blocks a laser. A fourth death erases the first step | Built |
-| 2 | In my own way | Recall | Two flat souls bridge a low tunnel; recall a standing soul that plugs it. Shrine, then hold a door plate while bridging another tunnel: a fourth death erases the plate soul, so recall the mistake first | Built |
+| 1 | Three high | 3 souls | Ten-high three-soul staircase; shrine, then hang a shield under a low laser lintel before building two exit steps. A fourth death erases the shield | Built |
+| 2 | In my own way | Recall | Two flat souls bridge a five-wide low tunnel; recall a standing soul that plugs it. Shrine, then hold a door plate while bridging another five-wide tunnel: a fourth death erases the plate soul, so recall the mistake first | Built |
 | 3 | Three jobs | 3 souls at once | Plate, pit bridge, high laser blocker; shrine, then crumbling lips force you to jump into the beam before the landing falls. A fourth death erases the plate: recall the mistake | Built |
 | 4 | Everything | All powers | Slide a flat bridge to the shrine. Then keep a plate soul, a saw jam and a spring step at once: recall a bad step, because a fourth death shuts the door | Built |
-| 5 | The rehearsal | Leading a beam | Lead the aimed beam below a two-soul stair; shrine, then sacrifice a decoy in a low corridor | Built |
-| 6 | The spectral stag | Final boss | Calm setup: build a 3-thick wall. Then charge → beam (glows blue first; jump at the platform’s left end to lead it overhead) → wave every ~15s (hide behind the wall). 3 stomps. A broken soul means dying to rebuild, which heals it | Built (40×17 arena; separate old-tree and pyramid rooms) |
+| 5 | Reliquary | Recall, three souls | Climb the flyer chimney, jam two saws and hold the plate. Shrine, then crumbling descent under falling spikes; thorns prevent sliding down the exit wall | Built |
+| 6 | The rehearsal | Leading a beam | First lock after 2.6s: lead the beam below a two-soul stair; shrine, then sacrifice a decoy in a low corridor firing every 1.6s, too fast to run its full length | Built |
+| 7 | The old tree | Story | Calm promise before the fight; return for the note after victory | Built |
+| 8 | The spectral stag | Final boss | Calm setup: build a 3-thick wall. Then charge → beam (glows blue first; jump at the platform’s left end to lead it overhead) → first violet wave after 15s (hide behind the wall). Later waves wait 25s, restarted by each stomp; the six-wide back gives a forgiving drop. 3 stomps. Victory survives room restarts. A broken soul means dying to rebuild, which heals it | Built (40×17 arena; separate old-tree and pyramid rooms) |
+| 9 | The pyramid entrance | Ending | Read the old tree’s note, then enter the pyramid. Restarting preserves the open return route | Built |
 
 Cut: *Spring tower* (a spring-placed soul has to land within a few frames, too tight).
 
@@ -115,19 +118,19 @@ All three follow the moth's rules: 3 stomps from above, it speeds up after each 
 - **Replay numbers:** 30 × 17 arena; floor row 16, mask at column 23 with its top 4 tiles up. Step at column 21, decoy at 13 (8 tiles apart). Blue warning 2.05s; run, jump onto the step, then jump mostly straight up before steering onto the mask. Replay spare time: about 0.5s. Yellow wind-ups 0.6s; burial 5s; attack gaps × 0.8 per stomp.
 - **Story:** STORY.md W2 scenes 4 (arrives partway in), 5 (the slam nudges after the 2nd and about the 25th death) and 6 (the tree falls, 3rd rune: 3 souls + recall).
 
-### The rehearsal (W3 room 5, 3 souls + recall)
-- Teaches the stag's beam without the stag. An emitter (an antler relic in the right wall) glows blue, shows an **aiming line that follows you**, locks 0.4s before it fires, then fires a beam along that line that breaks the first soul it hits and kills you if it reaches you. Then a 3s gap.
+### The rehearsal (W3 room 6, 3 souls + recall)
+- Teaches the stag's beam without the stag. An emitter (an antler relic in the right wall) glows blue, shows an **aiming line that follows you**, locks 0.4s before it fires, then fires a beam along that line that breaks the first soul it hits and kills you if it reaches you. Then a 3s gap in the stair chamber; the corridor cycles every 1.6s. Both give 2s extra before the first shot.
 - The room: a ledge 7 high on the left needs a 2-soul staircase. The beam fires every ~4s, so you build the stair between shots and must stand away from it (out in the open, or next to a third "spare" soul) when the line locks, so it never crosses the stair. Recall cleans up a soul the beam made useless. Then a short second stage: a corridor where the line can only be led onto a decoy soul you place on purpose.
 
 ### The spectral stag (W3 boss, 3 souls + recall, final)
 - **Arena:** wider than one screen (about 40 × 17, the camera follows). A raised platform at the left (columns 2–6, surface row 12 over floor row 15), 3 tiles up and 5 wide; the stag's charge lane is the floor under and to the right of it.
 - **Calm setup:** the stag watches until you step off the platform's edge or 8s pass after its intro. Build a **wall 3 souls thick** on the platform's right edge.
-- **The loop:** charge → beam → charge → beam, with a wave every ~15s.
+- **The loop:** charge → beam → charge → beam, with the first violet wave after 15s; later waves wait 25s, restarted by stomps.
   - **Charge (yellow):** it gallops along the floor and rams the arena's left wall under the platform, then stands **dazed for 2s under the platform's edge. Drop onto its back from the platform: that's the stomp.** It breaks any soul in its lane, so the floor is no place for souls.
   - **Beam (blue):** the same aimed beam as the rehearsal. Lead the line away from your wall before it locks (step out to the platform's left end), then get back behind the wall.
-  - **Wave (blue, can't dodge):** a wall of light rolls across the arena at platform height. It breaks 2 souls and stops at the 3rd, so only the 3-thick wall saves you. Stand behind it.
+  - **Wave (violet, can't dodge):** a wall of light rolls across the arena at platform height. It breaks 2 souls and stops at the 3rd, so only the 3-thick wall saves you. Stand behind it.
 - **A broken soul** means a 2-thick wall: you either die to rebuild (it heals) or recall and rebuild later. Recall isn't a death, so it never heals the stag.
-- **Replay numbers:** 40 × 17 arena; charge speed 650 px/s, ram centre column 6.5 against the buttress at column 4, back top row 13. Wall souls at columns 4, 5, 6 on row 12; drop beyond column 7. Setup 8s, yellow wind-up 0.7s, daze 2s, beam gaps 8s × 0.8 per stomp, wave every 15s at 420 px/s (unchanged).
+- **Replay numbers:** 40 × 17 arena; charge speed 650 px/s, ram centre column 6.5 against the buttress at column 4, six-wide back top row 13. Wall souls at columns 4, 5, 6 on row 12; drop beyond column 7. Setup 8s, yellow wind-up 0.7s, daze 2s, beam gaps 8s × 0.8 per stomp, wave at 420 px/s: first after 15s, later waves after 25s. After the first wave, every stomp restarts the 25s timer.
 - **Route:** The rehearsal → The old tree (30 × 17, promise beside the tree at column 21) → arena → The pyramid entrance (30 × 17). Both arena gates and the vine buttress under the platform open after the last stand, clearing the way back. Return behind the tree to the dirt note at columns 18–20, then walk through the arena to the pyramid door at column 22; entering fades to the ending card.
 - **Story:** STORY.md W3 scenes 5 (arrives), 6 (nudge after about 10 deaths), 7 (the guide's last stand), 8 (the note behind the old tree), 9 (floor one, ending card).
 

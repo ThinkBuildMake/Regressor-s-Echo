@@ -138,18 +138,20 @@ room('The tree guardian', [540, 75], 30, 17, 2, 'step and decoy: lure the blue s
 
 # ---------- World 3 ----------
 def three_high(o, p):
-    # Safe staircase, then a shrine before dropping into the laser chamber.
-    o(1, 1, 9, 15); o(10, 1, 14, 7); p(12, 7, 'C')
-    o(15, 1, 26, 15); o(27, 1, 28, 7); p(27, 11, '<')
+    # Ten high needs three staggered steps, not two hung at jump height.
+    o(1, 1, 9, 15); o(10, 1, 14, 5); p(12, 5, 'C')
+    o(15, 1, 26, 15); o(27, 1, 28, 7)
+    # Drop under the low lintel: the shield cannot double as an exit step.
+    o(16, 1, 20, 11, '#'); p(18, 11, 'v')
     o(0, 13, 0, 15); o(29, 6, 29, 7); p(1, 15, 'P')
-room('Three high', [540, 75], 30, 17, 3, '8-high ledge: a 3-soul staircase (run off your top soul while holding K)', three_high)
+room('Three high', [540, 75], 30, 17, 3, '10-high ledge: a 3-soul staircase (run off your top soul while holding K)', three_high)
 
 def own_way(o, p):
     # Recall a standing mistake without disturbing the flat bridge underneath it.
-    o(0, 8, 2, 9); o(3, 9, 9, 9); o(4, 10, 7, 10, '^'); p(1, 9, 'P')
+    o(0, 8, 2, 9); o(3, 9, 9, 9); o(4, 10, 8, 10, '^'); p(1, 9, 'P')
     o(10, 5, 18, 9); p(11, 9, '#'); p(11, 8, 'C')
     # The plate and both bridge souls use all three slots: another death shuts the door.
-    p(16, 9, '_'); o(19, 9, 25, 9); o(20, 10, 23, 10, '^')
+    p(16, 9, '_'); o(19, 9, 25, 9); o(20, 10, 24, 10, '^')
     o(26, 8, 26, 9, 'D'); o(27, 5, 28, 9); o(29, 8, 29, 9)
 room('In my own way', [570, 73], 30, 17, 3, 'two lying souls bridge the tunnel pit; recall (Q) a standing one that blocks it', own_way)
 
@@ -193,6 +195,7 @@ def reliquary(o, p):
     o(31, 3, 38, 21); p(32, 4, 'C'); o(32, 5, 32, 5, '#'); o(32, 22, 37, 22, '^')
     for x, y in ((33, 8), (35, 11), (37, 14), (35, 17)): o(x, y, x, y, '~')
     for x in (34, 36): p(x, 3, '!')
+    o(38, 5, 38, 19, 'x'); p(38, 22, '^'); p(36, 20, '~'); o(37, 21, 38, 21, '~')
     o(39, 20, 39, 21)
 room('Reliquary', [675, 52], 40, 24, 3, 'SHOWCASE W3: flyers in a chimney, two saws to jam, plate, recall, crumbling descent', reliquary)
 
@@ -202,7 +205,7 @@ def rehearsal(o, p):
     o(14, 2, 17, 8); p(16, 8, 'C')
     o(14, 10, 28, 15); p(28, 12, 'a')
     # A low corridor gives the second beam a narrow angle: sacrifice a decoy, then run.
-    o(18, 6, 28, 8); p(28, 7, 'a'); o(29, 7, 29, 8)
+    o(18, 6, 28, 8); p(28, 8, 'a'); o(29, 7, 29, 8)
 room('The rehearsal', [715, 59], 30, 17, 3, 'aimed beams: protect a two-soul stair, shrine, sacrifice a corridor decoy', rehearsal)
 
 def old_tree(o, p):
