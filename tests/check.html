@@ -247,15 +247,52 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     check(s.boss && !s.boss.hidden && s.boss.r.visible, 'moth arrives during the intro');
     check(!s.textures.exists('mothFly') || s.boss?.img?.active, 'the moth is painted once it arrives');
     const M = s.boss, mi = s.index;
-    for (let n = 0; n < 8 && M.hp > 0; n++) { // stomp until it's beaten (a stomp during its hurt blink doesn't count)
-      const hp = M.hp;
-      s.player.body.reset(M.r.x + M.dir * 20, M.r.y - M.r.height / 2 - 16);
-      for (let t = 0; t < 2000 && M.hp === hp; t += 50) await wait(50);
-      await wait(700);
+    // A damaged moth heals on death, even while it is blinking.
+    s.player.body.reset(M.r.x, M.r.y - M.r.height / 2 - 16);
+    await until(() => M.hp < 3, 2000);
+    check(M.hp === 2, 'a stomp damages the moth');
+    s.die();
+    check(M.hp === 3 && M.hurt === 0, 'dying after a stomp heals the moth');
+    Dialogue.skip(s);
+    await alive();
+    s.corpses.forEach((c) => c.destroy()); s.corpses = [];
+    const deaths = stats.deaths;
+    // Walk into the thorns: this one soul is shield and launch step.
+    s.player.body.reset(O().x + 13 * T, O().bottom - T - 15);
+    key('keydown', 39);
+    await until(() => stats.deaths > deaths, 2000);
+    key('keyup', 39); Dialogue.skip(s); await alive();
+    const soul = s.corpses[0];
+    check(soul && stats.deaths === deaths + 1, 'one thorn death places the launch soul');
+    // Approach from the safe side, jump onto the soul, then time vertical jumps
+    // for the moth's next crossing. No player or boss repositioning during combat.
+    s.player.body.reset(soul.x - 65, O().bottom - T - 15);
+    await wait(120);
+    key('keydown', 32); key('keydown', 39);
+    await until(() => s.player.x >= soul.x, 1500);
+    key('keyup', 39); key('keyup', 32);
+    s.player.body.setVelocityX(0);
+    await until(() => s.player.body.blocked.down || s.dead > 0, 2000);
+    check(Math.abs(s.player.x - soul.x) < 20 && s.player.y < soul.y - 25, `jump onto the thorn soul (${s.player.x-O().x},${s.player.y-O().y})`);
+    const fightDeaths = stats.deaths;
+    const dust = new Set();
+    for (let t = 0; t < 45000 && M.hp > 0 && stats.deaths === fightDeaths; t += 20) {
+      const grounded = s.player.body.blocked.down || s.player.body.touching.down;
+      const speed = BOSS_SPEED + (3 - M.hp) * BOSS_SPEEDUP;
+      const crossing = (soul.x - M.r.x) / (M.dir * speed);
+      if (grounded && crossing > 0.25 + (BOSS_W / 2 + 12) / speed && crossing < 0.33 + (BOSS_W / 2 + 12) / speed) key('keydown', 32);
+      else if (s.player.body.velocity.y >= 0) key('keyup', 32);
+      s.shots.filter((sh) => sh.mothDust).forEach((sh) => dust.add(sh));
+      await wait(20);
     }
+    key('keyup', 32);
+    check(stats.deaths === deaths + 1 && s.corpses[0] === soul, 'three stomps keep the same thorn soul without dying');
+    check([...dust].some((sh) => !sh.active && Math.abs(sh.x - soul.x) < soul.width / 2 + 8 && Math.abs(sh.y - soul.y) < soul.height / 2 + 8) && soul.active,
+      'the thorn soul blocks yellow wing dust and survives');
     check(M.hidden && s.talk.queue.length > 0, 'the last stomp starts the moth ending scene');
     Dialogue.skip(s);                                  // skipping still dissolves it
     await wait(200);
+    check(rules.max === 2 && rules.selfDestruct, 'absorption grants the second rune and self-destruct');
     check(!s.boss && s.gates.every((g) => !g.active || g.room !== mi), `beating the moth opens the vines (hp ${M.hp})`);
     s.player.body.reset(s.rooms[mi].rect.right - 20, s.rooms[mi].rect.y + 15 * 32 + 17);
     key('keydown', 39); await wait(900); key('keyup', 39);
