@@ -96,7 +96,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   s = await go(5);                     // boss
   const B = s.boss;
   s.player.body.reset(B.r.x + B.dir * 20, B.r.y - B.r.height / 2 - 16); // feet 1px above its top (a longer fall can sink past the stomp sliver in one slow frame)
-  await wait(400);
+  for (let t = 0; t < 2000 && B.hp === 3; t += 50) await wait(50);
   check(B.hp === 2, `stomp hurts boss (hp ${B.hp})`);
   s.die();
   check(B.hp === 3, 'dying heals boss');
@@ -180,7 +180,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   await alive();
   s.player.body.reset(O().right - 40, O().y + 9 * 32 + 17);
   key('keydown', 39); await wait(900); key('keyup', 39);
-  check(s.rooms[s.index].name === 'The moth', `top right of The chain leads to the moth (${s.rooms[s.index].name})`);
+  check(s.rooms[s.index].name === 'The long pit', `top right of The chain leads to the long pit (${s.rooms[s.index].name})`);
 
   Dialogue.seen.delete('moth');                      // the moth: hidden until its intro brings it in
   s = await go(ROOMS.findIndex(([n]) => n === 'The moth'));
@@ -194,14 +194,111 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   check(s.boss && !s.boss.hidden && s.boss.r.visible, 'moth arrives during the intro');
   check(!s.textures.exists('mothFly') || s.boss?.img?.active, 'the moth is painted once it arrives');
   const M = s.boss, mi = s.index;
-  for (let n = 0; n < 3; n++) { s.player.body.reset(M.r.x + M.dir * 20, M.r.y - M.r.height / 2 - 16); await wait(600); }
+  for (let n = 0; n < 8 && M.hp > 0; n++) { // stomp until it's beaten (a stomp during its hurt blink doesn't count)
+    const hp = M.hp;
+    s.player.body.reset(M.r.x + M.dir * 20, M.r.y - M.r.height / 2 - 16);
+    for (let t = 0; t < 2000 && M.hp === hp; t += 50) await wait(50);
+    await wait(700);
+  }
   check(M.hidden && s.talk.queue.length > 0, 'the last stomp starts the moth ending scene');
   Dialogue.skip(s);                                  // skipping still dissolves it
   await wait(200);
   check(!s.boss && s.gates.every((g) => !g.active || g.room !== mi), `beating the moth opens the vines (hp ${M.hp})`);
   s.player.body.reset(s.rooms[mi].rect.right - 20, s.rooms[mi].rect.y + 15 * 32 + 17);
   key('keydown', 39); await wait(900); key('keyup', 39);
-  check(s.rooms[s.index].name === 'Into the ruins' && rules.max === 2, `walking on reaches World 2 with 2 souls (${s.rooms[s.index].name}, ${rules.max})`);
+  check(s.rooms[s.index].name === 'Let go' && rules.max === 2, `walking on reaches World 2 with 2 souls (${s.rooms[s.index].name}, ${rules.max})`);
+
+  rules.freeze = true; // the real game: souls float
+  // World 2: self-destruct is held. Letting go early cancels; holding long enough leaves a soul.
+  s = await go(ROOMS.findIndex(([n]) => n === 'Let go'));
+  await wait(2500); await alive();
+  key('keydown', 75); await wait(250); key('keyup', 75); await wait(100);
+  check(s.corpses.length === 0 && s.charge === 0, `letting go of K early cancels (${s.corpses.length} souls)`);
+  key('keydown', 75); await wait(1400); key('keyup', 75);
+  check(s.corpses.length === 1, `holding K leaves a soul (${s.corpses.length})`);
+  const sb = s.corpses[0];
+  check(near((sb.y + sb.height / 2) % 32, 0), `souls snap to the tile grid vertically (bottom ${sb.y + sb.height / 2})`);
+
+  // Lasers: walking into the beam kills you, and your soul then cuts the beam short.
+  s = await go(ROOMS.findIndex(([n]) => n === 'The beam'));
+  await alive();
+  const full = s.beams()[0].width;
+  s.player.body.reset(s.lasers[0].e.x - 6 * 32, s.lasers[0].e.y + 2);
+  await wait(300);
+  check(s.corpses.length === 1, 'the laser kills you');
+  check(s.beams()[0].width < full - 3 * 32, `your soul blocks the beam (${s.beams()[0].width} < ${full})`);
+
+  // Springs launch you far higher than a jump.
+  s = await go(ROOMS.findIndex(([n]) => n === 'The spring'));
+  await alive();
+  const sp = s.springs[0], y0 = sp.y;
+  s.player.body.reset(sp.x, sp.y - 20);
+  let high = Infinity;
+  for (let i = 0; i < 40; i++) { await wait(25); high = Math.min(high, s.player.y); }
+  check(y0 - high > 7 * 32, `the spring launches you about 9 tiles (${((y0 - high) / 32).toFixed(1)})`);
+
+  // World 3: recall takes back the newest soul first.
+  s = await go(ROOMS.findIndex(([n]) => n === 'Three high'));
+  await alive();
+  for (const tx of [5, 8, 11]) { s.player.body.reset(O().x + tx * 32 + 16, O().y + 15 * 32 + 17); await wait(50); s.die(); await alive(); }
+  const xs = s.corpses.map((c) => c.x);
+  key('keydown', 81); await wait(60); key('keyup', 81); await wait(100);
+  check(s.corpses.length === 2 && s.corpses.every((c, i) => c.x === xs[i]), `tapping Q recalls only the newest soul (${s.corpses.length} left)`);
+  key('keydown', 81); await wait(1200); key('keyup', 81);
+  check(s.corpses.length === 0, `holding Q recalls the rest (${s.corpses.length} left)`);
+
+  // Solvability: put souls where the intended solution puts them, then make the real jumps.
+  // place(tx, b): a soul with its feet b tiles above the floor at column tx. hop(): stand on a surface
+  // `top` tiles up at column tx, jump while holding → (or ←); returns where you end up.
+  const place = async (tx, b, floor = 16) => {
+    const s = room(); s.player.body.reset(O().x + tx * 32 + 16, O().y + (floor - b) * 32 - 15.5); s.die(); await alive();
+  };
+  // Steers like a player: jump while holding →, let go of → once over the target column.
+  const hop = async (tx, top, floor, toTx) => {
+    const s = room(); s.player.body.reset(O().x + tx * 32 + 16, O().y + (floor - top) * 32 - 16); await wait(200);
+    const goal = O().x + toTx * 32 + 16;
+    key('keydown', 32); key('keydown', 39);
+    let right = true, jump = true, brake = false;
+    for (let t = 0; t < 1600; t += 10) {
+      await wait(10);
+      if (right && s.player.x >= goal - 4) { key('keyup', 39); right = false; key('keydown', 37); brake = true; } // tap ← to stop over it
+      if (brake && s.player.body.velocity.x <= 0) { key('keyup', 37); brake = false; }
+      if (jump && t >= 650) { key('keyup', 32); jump = false; }
+    }
+    if (right) key('keyup', 39);
+    if (brake) key('keyup', 37);
+    if (jump) key('keyup', 32);
+    await wait(300);
+    return { tx: Math.floor((s.player.x - O().x) / 32), x: (s.player.x - O().x) / 32, h: +(floor - (s.player.y + 15 - O().y) / 32).toFixed(2) };
+  };
+  const solve = async (name, souls, hops, floor = 16) => {
+    let s = await go(ROOMS.findIndex(([n]) => n === name)); await wait(200); await alive();
+    for (const [tx, b] of souls) await place(tx, b, floor);
+    const where = room().corpses.map((c) => `${Math.floor((c.x - O().x) / 32)}:${+(floor - (c.y + c.height / 2 - O().y) / 32).toFixed(2)}`).join(' ');
+    for (const [tx, top, wantH, minTx] of hops) {
+      const r = await hop(tx, top, floor, minTx);
+      check(r.h >= wantH - 0.05 && r.h < wantH + 0.5 && r.x >= minTx - 0.4, `${name}: jump from ${top} up at column ${tx} reaches ${wantH} up (got ${r.h} up, column ${r.tx}; souls ${where})`);
+    }
+  };
+  await solve('Let go', [[21, 0], [21, 1]], [[20, 0, 2, 21], [21, 2, 5, 22]]);
+  await solve('Off the edge', [[14, 0]], [[14, 1, 0, 19]], 8);
+  await solve('The ladder', [[19, 2], [20, 3]], [[18, 0, 3, 19], [20, 4, 7, 21]]);
+  await solve('The beam', [[23, 1], [24, 4]], [[22, 0, 2, 23], [23, 2, 5, 24], [24, 5, 8, 25]]);
+  await solve('The spring', [[20, 6]], [[20, 7, 9, 22]]);
+  await solve('Wrong order', [[5, 0], [2, 4], [14, 0]], [[10.4, 0, 1, 14], [14, 1, 0, 19]]); // jump from the pit's edge
+  check(room().corpses.length === 2 && room().doors.filter((d) => d.room === room().index).every((d) => !d.body.enable), 'Wrong order: plate soul and pit soul both stay, and the door is open');
+  await solve('Three high', [[18, 2], [19, 3], [20, 4]], [[17, 0, 3, 18], [20, 5, 8, 21]]);
+  // ...and the same rooms can't be skipped: one soul short, the last jump falls short.
+  await solve('The ladder', [[20, 2]], []);
+  { const r = await hop(20, 3, 16, 22); check(r.h < 7, `The ladder: a stack 3 high can't reach the ledge (${r.h})`); }
+  await solve('Three high', [[19, 2], [20, 3]], []);
+  { const r = await hop(20, 4, 16, 22); check(r.h < 8, `Three high: two souls can't reach the ledge (${r.h})`); }
+  { // the spring alone falls short of its ledge
+    const s = await go(ROOMS.findIndex(([n]) => n === 'The spring')); await alive();
+    s.player.body.reset(s.springs[0].x, s.springs[0].y - 20); key('keydown', 39); await wait(1600); key('keyup', 39); await wait(300);
+    const h = 16 - (s.player.y + 15 - O().y) / 32;
+    check(h < 9, `The spring: the spring alone can't reach the ledge (${h.toFixed(2)} up)`);
+  }
 
   for (let i = 0; i < ROOMS.length; i++) { room().scene.restart({ index: i }); await wait(300); }
   check(errors.length === 0, 'no errors: ' + errors.join('; '));
