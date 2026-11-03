@@ -472,7 +472,59 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     check(stats.deaths > before && s.start.x < O().x + 6 * 32,
       'The well: without a soul the bottom of the first shaft kills you');
   }
-  await solve('Let go', [[21, 0], [21, 1]], [[20, 0, 2, 21], [21, 2, 5, 22]]);
+  await solve('Let go', [[8, 0], [8, 1]], [[7, 0, 2, 8], [8, 2, 5, 9], [9, 5, 5, 11]]);
+  if (matches('Let go')) {
+    s = room();
+    check(s.start === s.shrines.find((sh) => O().contains(sh.x, sh.y))?.spawn,
+      'Let go: the safe stack reaches the shrine');
+    const stomp = async () => {
+      const guard = s.enemies.find((e) => O().contains(e.x, e.y));
+      const deaths = stats.deaths;
+      // Land on the low post, then jump onto the patrol.
+      const post = await hop(13, 5, 16, 15);
+      check(post.h >= 0.95, 'Let go: drop from the shrine onto the guard post');
+      for (let t = 0; t < 7000 && guard.x > O().x + 17 * 32; t += 20) await wait(20);
+      key('keydown', 32);
+      for (let t = 0; t < 2500 && s.enemies.includes(guard) && stats.deaths === deaths; t += 10) {
+        const dx = guard.x - s.player.x;
+        const target = Phaser.Math.Clamp(dx * 5, -160, 160);
+        const vx = s.player.body.velocity.x;
+        key(vx < target - 12 ? 'keydown' : 'keyup', 39);
+        key(vx > target + 12 ? 'keydown' : 'keyup', 37);
+        await wait(10);
+        if (t > 650) key('keyup', 32);
+      }
+      key('keyup', 32); key('keyup', 39); key('keyup', 37);
+      await wait(300);
+      check(!s.enemies.includes(guard) && stats.deaths === deaths,
+        `Let go: jump from the shrine stomps the guard (deaths ${stats.deaths - deaths}, player ${(s.player.x-O().x)/32},${(s.player.y-O().y)/32}, guard ${(guard.x-O().x)/32},${(guard.y-O().y)/32})`);
+    };
+    await stomp();
+    await place(21, 0);
+    check(s.enemies.some((e) => O().contains(e.x, e.y)), 'Let go: placing the base revives the guard');
+    await stomp();
+    const base = await hop(20, 0, 16, 21);
+    check(base.h >= 0.95, 'Let go: jump onto the plate soul');
+    await place(21, 1);
+    await stomp();
+    const top = await hop(20, 0, 16, 21);
+    const exit = await hop(21, 2, 16, 22);
+    check(top.h >= 1.95 && exit.h >= 4.95,
+      'Let go: two souls on the plate reach the exit ledge');
+    const doors = s.doors.filter((d) => d.room === s.index);
+    check(doors.every((d) => !d.body.enable), 'Let go: the bottom soul also opens the exit door');
+    const through = await hop(22, 5, 16, 26);
+    check(through.x >= 25.6 && through.h >= 4.95, 'Let go: jump through the held door');
+    // A careless extra death removes the plate weight and revives the patrol.
+    await place(16, 0);
+    check(doors.every((d) => d.body.enable) && s.enemies.some((e) => O().contains(e.x, e.y)),
+      'Let go: a third death erases the plate soul, shuts the door and revives the guard');
+    s = await cleanSolveRoom('Let go');
+    await place(8, 0);
+    const short = await hop(8, 1, 16, 9);
+    check(short.h < 4.9 && short.x < 9,
+      'Let go: one soul falls short of the first ledge');
+  }
   await solve('Off the edge', [[14, 0]], [[14, 1, 0, 19]], 8);
   await solve('The ladder', [[19, 2], [20, 3]], [[18, 0, 3, 19], [20, 4, 7, 21]]);
   await solve('The beam', [[23, 1], [24, 4]], [[22, 0, 2, 23], [23, 2, 5, 24], [24, 5, 8, 25]]);

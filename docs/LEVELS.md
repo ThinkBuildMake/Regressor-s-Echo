@@ -77,7 +77,7 @@ New: **2 souls**, **self-destruct** (hold K), **lasers** (a soul blocks the beam
 
 | # | Room | Teaches | The trick | Status |
 |---|---|---|---|---|
-| 1 | Let go | Self-destruct | No hazards. A ledge 5 high: die, stand on your soul, die again on top of it, climb the 2-soul stack | Greybox |
+| 1 | Let go | Self-destruct | Stack two souls for a safe 5-high ledge, then shrine. Stomp the guard and stack on a plate: the bottom soul opens the exit. Each death revives the guard; a careless third death erases the plate soul | Built |
 | 2 | Off the edge | Hold while jumping | A 10-wide pit. Run, jump off the edge holding K: the soul appears mid-pit. Then jump to it and across | Greybox |
 | 3 | The ladder | Staircase | A ledge 7 high. A straight stack only lets you stand on its top, so it tops out at 3. Then run off your top soul holding K: the new soul appears beside it, one step up | Greybox |
 | 4 | The beam | Lasers | A ledge 8 high and a laser at 4.5. Jump into the laser right next to its source: that soul is the high step, and it blocks the whole beam | Greybox |
