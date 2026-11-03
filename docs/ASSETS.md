@@ -159,7 +159,7 @@ game adds room sound. Rows marked *(3 takes)* repeat often, so make 2–3 variat
 | Hazards | Plate up | The same stone tile rising back up, a lighter clunk with a tiny grit rattle, close, dry, 0.3 s | |
 | Hazards | Door opens | A heavy stone slab door grinding upward in a stone groove, steady scrape, ends in a soft knock, medium distance, 1.2 s | |
 | Hazards | Door closes | A heavy stone slab dropping down a stone groove and landing with a deep thud and dust trickle, medium distance, 0.9 s | |
-| Story | Satchel clink (W1 §2) | A leather shoulder bag set down on a mossy log: a soft thud, then small metal tools and a tin cup clinking together inside it, close, dry, 0.7 s || ✅ |
+| Story | Satchel clink (W1 §2) | Small metal tools and a tin cup knocking together inside a leather satchel as it is set down: several bright, clear metallic clinks and clanks, iron against tin, close, dry, 0.8 s | ✅ |
 | Story | Gold flash as he puts the amulet on (W1 §2) | A small brass bell and a glass wind chime struck together once, warm and bright, with a soft rising shimmer of a finger circling a wine-glass rim, close, 2 s, natural decay || ✅ |
 | Story | Ghost fading in (W1 §2) | A long, soft breath of air through a slightly open window, with a faint airy hum like a bowed glass, swelling gently and settling, quiet, 2 s || ✅ |
 | Story | Amulet refusing to come off (W1 §3) | One low, dull hum of a large brass singing bowl touched by a palm, short and muffled, with a faint warm throb, close, 1 s || ✅ |
