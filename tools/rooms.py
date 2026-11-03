@@ -165,8 +165,10 @@ def rehearsal(o, p):
 room('The rehearsal', [715, 59], 30, 17, 3, 'aimed beams: protect a two-soul stair, shrine, sacrifice a corridor decoy', rehearsal)
 
 def end(o, p):
-    o(1, 1, 28, 14); o(0, 13, 0, 14); p(14, 14, 'P')
-room('End of the greybox', [745, 53], 30, 17, None, 'the spectral stag is not built yet', end)
+    o(1, 1, 28, 14); o(0, 13, 0, 14); p(2, 11, 'P')
+    o(2, 12, 6, 12, '#'); p(24, 14, 'B')
+    o(27, 10, 27, 14, 'V')
+room('The spectral stag', [745, 53], 30, 17, 3, 'final boss: three-soul wall, lead beams away, drop after charges', end)
 
 out = []
 for name, pos, world, note, rows, extra in rooms:
