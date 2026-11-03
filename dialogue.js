@@ -30,6 +30,129 @@ const G = (face, text) => ({ who: 'guide', face, text });
 const W = (wait, cue) => ({ wait, cue }); // a silent beat: the panel hides for `wait` seconds
 // Written from docs/STORY.md (World 1 script); change the story there first.
 const SCRIPT = {
+  lowDoor: [
+    G("amused", "Well. You've locked yourself out. With yourself. That's a new one."),
+  ],
+  letGo: [
+    H("thinking", "No spikes. No thorns. No bugs. …Why does that make it worse?"),
+    G("thinking", "Because this time, nothing's going to do it for you."),
+  ],
+  chosenDeath: [
+    W(0.8), // A beat.
+    H("sad", "…You were right. That's worse."),
+    G("sad", "I know."),
+    G("wry", "It gets easier. That's the bad part."),
+  ],
+  carvings: [
+    H("curious", "Hey. Look at the wall."),
+    W(0.8), // Carvings: a crowd of figures, each with a gold circle on its chest.
+    H("thinking", "They're all wearing it. The amulet."),
+    G("solemn", "Keep going."),
+    W(0.8), // Further along: fewer figures. Then a handful. Then one.
+    H("scared", "Where'd everyone go?"),
+    G("solemn", "…"),
+    H("thinking", "It didn't save them. Did it."),
+    G("sad", "It kept them going. That's not the same thing."),
+    H("sad", "…"),
+    H("determined", "Well. I'm not ending up as a carving."),
+    G("wry", "That's the spirit. Ha. Spirit."),
+  ],
+  guideCrack: [
+    H("thinking", "Hey. Can I ask you something?"),
+    G("wry", "You're going to anyway."),
+    H("thinking", "In your timeline. Did you ever get it off?"),
+    W(0.8), // A beat.
+    G("solemn", "…No."),
+    G("thinking", "I followed the marks, same as you. All the way to the temple. A pyramid. Floor after floor."),
+    H("curious", "How far did you get?"),
+    G("weary", "Ninety."),
+    H("startled", "NINETY?"),
+    G("wry", "Don't look so impressed. It's not the top."),
+    G("solemn", "I figured the deaths didn't have a limit. That I could just keep going until I got it right."),
+    H("scared", "…They do?"),
+    G("sad", "Must be. I'm here, aren't I?"),
+    H("sad", "…"),
+    G("mischievous", "Anyway! Better odds this time. You've got me."),
+  ],
+  pyramid: [
+    H("startled", "…Whoa."),
+    H("thinking", "That's it, isn't it. The temple."),
+    G("solemn", "That's it."),
+    H("thinking", "How many floors?"),
+    G("wry", "More than ninety."),
+    H("determined", "…Then let's get to the front door."),
+  ],
+  almostCompetent: [
+    H("thinking", "You've been quiet."),
+    G("wry", "Savoring it. You're almost competent."),
+    H("cocky", "Almost?"),
+    G("warm", "…More than I was."),
+  ],
+  breakingBeam: [
+    H("startled", "It broke it! It broke my soul!"),
+    G("solemn", "Those beams don't push. They break. Whatever they hit doesn't come back."),
+    H("scared", "Whatever?"),
+  ],
+
+  stagPromise: [
+    H("curious", "What? You never stop."),
+    G("thinking", "Can you promise me something?"),
+    H("annoyed", "\u2026That depends."),
+    G("warm", "After the next fight, go take a look behind this tree."),
+    H("curious", "What's back there?"),
+    G("amused", "Nope! Not yet. No peeking."),
+    H("annoyed", "You're doing the mysterious thing again."),
+    G("warm", "Promise me."),
+    H("exhausted", "\u2026Fine. I promise.")
+  ],
+  stagArrival: [
+    H("scared", "Tell me you remember this one."),
+    G("solemn", "I remember this one."),
+    { ...H("determined", "\u2026Okay. I've got this."), cue: "stagAppear" },
+    G("warm", "Look at you.")
+  ],
+  stagNudge: [
+    G("thinking", "You did this an hour ago. Lead it away.")
+  ],
+  stagDown: [
+    H("excited", "We did it! Did you see that? Three stomps, and I barely\u2014"),
+    G("amused", "You died {deaths} times."),
+    H("cocky", "{next}. But who's counting?"),
+    G("warm", "Me. It was always me."),
+    { ...G("warning", "LOOK OUT!"), cue: 'lastBeam' },
+    H("shouting", "NO\u2014!"),
+    G("pained", "Ugh\u2026 I knew it would come to this."),
+    G("weary", "Same thing happened last time. My guide did exactly this."),
+    H("shouting", "You KNEW? Then why would you\u2014"),
+    G("warm", "Because I knew."),
+    H("sad", "\u2026"),
+    G("warm", "I've watched over you. You're already doing better than I did. You'll get further."),
+    G("solemn", "Just remember\u2026 the deaths aren't free. Count every one."),
+    H("sad", "Don't\u2014 you can't just\u2014"),
+    G("wry", "Hey."),
+    { ...G("warm", "I was never alive in the first place, right?"), cue: 'guideBreak' },
+    W(1.6, 'stagGone')
+  ],
+  stagNote: [
+    H("sad", "If you're reading this\u2026 then it must mean I've kicked the bucket."),
+    H("sad", "Don't make that face. I can see it from here. Well. Could."),
+    H("sad", "Well, I guess it's time to come clean."),
+    H("sad", "You know how I said there was a limit? That was a lie. Figured you'd be more careful if you thought you were running out."),
+    H("sad", "The limit is when your spirit breaks. On floor ninety, mine did, and I just\u2026 stopped getting back up."),
+    H("sad", "So keep getting back up. No matter how hard it gets. No matter what."),
+    H("sad", "Thanks for putting up with me. I know I'm not great company. I'd know."),
+    H("sad", "And don't take my ending as yours. You're me, sure, but you were different from the start."),
+    H("sad", "You'll get further than I ever could."),
+    H("sad", "Trust me."),
+    H("sad", "\u2014 You"),
+    H("sad", "P.S. The amulet's still not worth anything. I checked.")
+  ],
+  floorOne: [
+    H("sad", "\u2026Idiot."),
+    H("determined", "Ninety floors, huh."),
+    H("determined", "Then I'm not stopping at ninety."),
+    W(1, 'theEnd')
+  ],
   clearing: [
     W(0.6),
     H('neutral', "Mannn… treasure hunting's slow these days."),
@@ -106,7 +229,7 @@ const SCRIPT = {
   thorns: [
     H('thinking', "That's way too high to climb."),
     H('annoyed', '…And let me guess. The thorns.'),
-    G('amused', "Now you're getting the hang of it."),
+    G('amused', "Now you're getting the hang of it. Touch them on the way up, about two tiles off the ground. Leave a step you can reach."),
   ],
   patrol: [
     G('thinking', "See that plate? It holds the door open, as long as something's on it."),
@@ -140,7 +263,23 @@ const SCRIPT = {
     H('annoyed', 'Then tell me!'),
     G('amused', "Where's the fun in that?"),
   ],
-  dust2: [G('thinking', "Your soul caught you over the spikes. Think it'd catch a little dust?")], // 25th death (each try costs about two deaths)
+  dust2: [G('thinking', "Your soul caught you over the thorns. Think it'd catch a little dust?")], // 25th death (each try costs about two deaths)
+  tree: [
+    H('thinking', 'Big tree. Old tree. Very… still tree.'),
+    G('warning', "Don't."), H('annoyed', "Don't what?"),
+    { ...G('warning', "Don't say it's just a tree."), cue: 'tree' },
+    H('scared', "…It's not just a tree."),
+  ],
+  treeSlam: [H('shouting', 'It smashed me! The other me! It keeps smashing me!'),
+    G('thinking', 'Watch where it looks before it swings.')],
+  treeSlam2: [G('thinking', 'It always goes for the one closest to you. Use that.')],
+  treeDown: [
+    W(0.8), H('exhausted', 'Is it…'), H('annoyed', "Don't you dare get back up."),
+    W(1.2, 'glow'), W(1.4, 'absorb'), H('startled', 'Again?!'),
+    G('thinking', 'Third mark.'), H('curious', 'Three of me now. And…?'),
+    G('thinking', 'And you can take them back. All of them, at once. Without dying.'),
+    H('relieved', "Finally. One that doesn't hurt."), G('wry', "Don't get used to it."),
+  ],
   mothDown: [ // the last stomp
     W(0.8),
     H('exhausted', 'Is it… over?'),

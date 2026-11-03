@@ -14,8 +14,8 @@ Key: ✅ done · 🟡 started · blank = to do · — = not needed (a single ima
 | Asset | Sheet (animations) | Prompt | Ref | Sheet | Sized | In game |
 |---|---|---|---|---|---|---|
 | Hero: idle, run, jump, fall, slide | (done) | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Hero idle (animated) | standing still while hair, scarf and cape sway in a breeze, ~4–6 frames looping. Replaces the single `idle.webp` | | ✅ `raw/hero/hero.jpg` | | | |
-| Hero wall slide + wall jump (coming with wall jump) | slide: clinging to a wall with one hand and one boot, body facing out, sliding down; scarf and cloak lifted upward by the slide, 2–3 frames looping. Kick-off: 1 frame pushing away from the wall. Facing right (the wall on his right); the game mirrors it | | ✅ `raw/hero/hero.jpg` | | | |
+| Hero idle (animated) | standing still while hair, scarf and cape sway in a breeze, ~4–6 frames looping. Replaces the single `idle.webp` | | ✅ `raw/hero/hero.jpg` | | | ✅ |
+| Hero wall slide + wall jump (coming with wall jump) | slide: clinging to a wall with one hand and one boot, body facing out, sliding down; scarf and cloak lifted upward by the slide, 2–3 frames looping. Kick-off: 1 frame pushing away from the wall. Facing right (the wall on his right); the game mirrors it | | ✅ `raw/hero/hero.jpg` | | | ✅ |
 | Hero death | arcade-style burst: he flashes pure white, then breaks apart into square pixels that fly outward, ~4–5 frames (white flash → white silhouette → breaking into pixels). The scattering pixels after the last frame are code particles | | — | | | |
 | Hero respawn | soul light gathers to the respawn point: pixels fly inward (code particles) → white silhouette → the hero. Plays the **death sheet in reverse**, so no new sheet unless it looks wrong | | — | — | | |
 | White ghost (appears when he picks up the amulet) | — `raw/world1/ghost-white.jpg` approved by the user (standing pose fits the floating motif); glow, bob and alpha in code | | | — | | |
@@ -36,8 +36,8 @@ Key: ✅ done · 🟡 started · blank = to do · — = not needed (a single ima
 | Asset | Sheet (animations) | Prompt | Ref | Sheet | Sized | In game |
 |---|---|---|---|---|---|---|
 | Walker (red beetle) | walk (2 poses + code bob) | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Flyer | flies over soul walls; a small red flying beetle (the walker's family); wing-buzz loop, 4 frames | ✅ | | | | |
-| Thrower | stands still and shoots seeds along the ground (souls block them); a red toadstool creature; idle + spit, 4 frames, plus a seed pellet | ✅ | | | | |
+| Flyer | flies over soul walls; a small red flying beetle (the walker's family); wing-buzz loop, 4 frames | ✅ | | | | ✅ |
+| Thrower | stands still and shoots seeds along the ground (souls block them); a red toadstool creature; idle + spit, 4 frames, plus a seed pellet | ✅ | | | | ✅ |
 
 ## Bosses
 
@@ -56,36 +56,36 @@ bottom-left corner. The name card is text drawn in code, not an asset.
 | Broken wall edge (the hole the moth leaves) | — `assets/world1/wall-break.webp` (cropped: Flow painted a forest floor under the strip). Clean left side joins the wall, ragged right side; not seamless top-to-bottom, so mask or cap its ends in code | ✅ | ✅ `raw/world1/wall-break.jpg` | — | ✅ | |
 | Moth: wing dust (its attack) | — code particles. Room 11: you hide behind your soul from it; it can't break souls | — | — | — | — | |
 | **Tree guardian** (World 2) | reference: the ORIGINAL Flow tree (`raw/bosses/tree.jpg`, user's pick); the side-profile version is kept as `tree-profile.jpg` | ✅ | 🟡 `raw/bosses/tree.jpg`, top clipped, faces front | | | |
-| Tree: intro | mask eyes open, rises out of the ruins, arms spread, ~4 frames | | | | | |
-| Tree: idle | no sheet (user: too much movement; bosses just stand and breathe): the standing frame from `raw/bosses/tree-base.jpg` plus a slight breathing bob in code (scale ~1–2%, ~2 s per breath). `assets/bosses/tree-idle.webp` stays only as a fallback | — | ✅ | — | | |
-| Tree: branch swing | wind-up → swing → recover, ~4–5 frames | | | | | |
-| Tree: slam (smashes souls) | raise arms → slam down, ~4–5 frames | | | | | |
-| Tree: seed pod throw + pod | throw ~3 frames; pod is a single image | | | | | |
+| Tree: intro | mask eyes open, rises out of the ruins, arms spread, ~4 frames | | | | | ✅ |
+| Tree: idle | no sheet (user: too much movement; bosses just stand and breathe): the standing frame from `raw/bosses/tree-base.jpg` plus a slight breathing bob in code (scale ~1–2%, ~2 s per breath). `assets/bosses/tree-idle.webp` stays only as a fallback | — | ✅ | — | | ✅ |
+| Tree: branch swing | wind-up → swing → recover, ~4–5 frames | | | | | ✅ |
+| Tree: slam (smashes souls) | raise arms → slam down, ~4–5 frames | | | | | ✅ |
+| Tree: seed pod throw + pod | throw ~3 frames; pod is a single image | | | | | ✅ |
 | **Spectral stag** (World 3) | | ✅ | | | | |
-| Stag: intro | rears up on its hind legs, antlers raised, ~4 frames | | | | | |
-| Stag: idle | no sheet (user: the painted idle was useless): the standing frame from the clean base plus a slight breathing bob in code (scale ~1–2%, ~2 s per breath). `assets/bosses/stag-idle.webp` stays only as a fallback | — | ✅ | — | | |
+| Stag: intro | rears up on its hind legs, antlers raised, ~4 frames | | | | | ✅ |
+| Stag: idle | no sheet (user: the painted idle was useless): the standing frame from the clean base plus a slight breathing bob in code (scale ~1–2%, ~2 s per breath). `assets/bosses/stag-idle.webp` stays only as a fallback | — | ✅ | — | | ✅ |
 | Stag: walk | proud walking loop, `assets/bosses/stag-walk.webp` (reads as a prance, not a four-beat walk; user's call). **Stag sheets are drawn at different sizes** (walk and beam ~555 px tall, idle ~486 px): code scales each sheet so the body height matches | ✅ | ✅ | 🟡 | ✅ | |
-| Stag: charge | gallop loop, ~6 frames | | | | | |
-| Stag: beam | lower antlers, charge, fire, ~3–4 frames (beam itself in code) | | | | | |
-| Stag: wave | rear up → stamp, ~4 frames (the wave itself in code) | | | | | |
+| Stag: charge | gallop loop, ~6 frames | | | | | ✅ |
+| Stag: beam | lower antlers, charge, fire, ~3–4 frames (beam itself in code) | | | | | ✅ |
+| Stag: wave | rear up → stamp, ~4 frames (the wave itself in code) | | | | | ✅ |
 | All bosses: hurt | code flash (user's call), no art | — | — | — | — | |
-| All bosses: death | 1 painted **fallen pose** each (moth on the ground wings drooped; tree slumped, mask dark; stag lying down), then code: white glow → dissolves into motes that stream into the hero → he flashes (STORY.md W1 §13) | ✅ | | — | | |
+| All bosses: death | 1 painted **fallen pose** each (moth on the ground wings drooped; tree slumped, mask dark; stag lying down), then code: white glow → dissolves into motes that stream into the hero → he flashes (STORY.md W1 §13) | ✅ | | — | | ✅ |
 
 ## Hazards and room objects
 
 | Asset | Sheet (animations) | Prompt | Ref | Sheet | Sized | In game |
 |---|---|---|---|---|---|---|
-| Spikes (tileable strip) | — | | | — | | |
-| Spiky vine wall (the `x` tile) | — (static, tileable) | | | — | | |
-| Pressure plate: up / down | — up: `raw/world1/plate.jpg` approved. Down: no new art; when pressed the code sinks the plate so only a thin sliver of its top edge peeks above the ground | | | — | | |
+| Spikes (tileable strip) | — | | | — | | ✅ W2–3 |
+| Spiky vine wall (the `x` tile) | — (static, tileable) | | | — | | ✅ W2–3 |
+| Pressure plate: up / down | — up: `raw/world1/plate.jpg` approved. Down: no new art; when pressed the code sinks the plate so only a thin sliver of its top edge peeks above the ground | | | — | | ✅ W2–3 |
 | Gate (held open by a pressure plate) | — one image per world: W1 root gate ✅, W2 stone slab, W3 carved shrine door; slides open in code | ✅ | 🟡 W1 | — | | |
-| Vine barrier (`V`, opens when the room's boss is beaten) | — `raw/world1/vine-barrier.jpg` approved; draw it **thinner** (about one tile wide) when sizing; it withers open in code | | | — | | |
+| Vine barrier (`V`, opens when the room's boss is beaten) | — `raw/world1/vine-barrier.jpg` approved; draw it **thinner** (about one tile wide) when sizing; it withers open in code | | | — | | ✅ W2–3 |
 | Laser emitter (World 2) | — (beam in code) | | | — | | |
-| Spring (World 2) | idle / compressed / launch, 3 frames | | | | | |
+| Spring (World 2) | idle / compressed / launch, 3 frames | | | | | ✅ |
 | Moving platform (World 2 room 7) | — | | | — | | |
-| Saw blade (all worlds) | — one round blade image, spun in code | | | — | | |
-| Crumbling block (all worlds; breaks 0.45 s after landing, back 2.5 s later) | intact → cracked → breaking, 3 frames (or the platform art plus code cracks and falling chunks) | | | | | |
-| Falling spike (all worlds; drops as you pass under) | — one hanging stalactite/thorn spike, shakes then drops in code | | | — | | |
+| Saw blade (all worlds) | — one round blade image, spun in code | | | — | | ✅ |
+| Crumbling block (all worlds; breaks 0.45 s after landing, back 2.5 s later) | intact → cracked → breaking, 3 frames (or the platform art plus code cracks and falling chunks) | | | | | ✅ |
+| Falling spike (all worlds; drops as you pass under) | — one hanging stalactite/thorn spike, shakes then drops in code | | | — | | ✅ |
 
 ## Story assets (requested by the story chat, 2026-11-02)
 

@@ -1,6 +1,6 @@
 # Level Plan
 
-Rooms connect Celeste-style (walk through a gap, the camera slides over). Each room is a puzzle you can see whole. Decisions behind this live in [IDEAS.md](IDEAS.md).
+Rooms connect Celeste-style (walk through a gap, the camera slides over). In every room taller than the screen, the camera leads downward to show hazards before a drop reaches them. Decisions behind this live in [IDEAS.md](IDEAS.md).
 
 This is the design source for building levels: design happens here, and building (code and assets) happens in separate chats that work from this file. Mark a room **Built** once it's in the game.
 
@@ -17,7 +17,7 @@ The first greybox rooms were too thin: one mechanic per screen, "find the one sp
 - **Deaths can backfire:** a saw jams wherever you die, a bad death erases a soul you still need, a falling spike kills you somewhere you didn't plan.
 
 Three **showcase rooms**, one per world, are in the greybox to judge this style before the rest are redone (`?dev&room=Thornwood`, `?dev&room=Sawmill`, `?dev&room=Reliquary`):
-- **Thornwood (W1):** walker to stomp, a 2-wide chimney whose right wall turns to thorns for 3 rows (die on the middle one and your soul is the kick point past them), a crumbling bridge under falling spikes, then a saw in a 2-tall corridor you can't jump: let it kill you so your soul jams it (a jammed saw sticks inside the soul, so you walk over it).
+- **Thornwood (W1):** walker to stomp, a 3-wide chimney whose right wall turns to thorns for 5 rows (die on the middle one and your soul is the kick point past them), a crumbling bridge under falling spikes, then a saw in a 2-tall corridor you can't jump: let it kill you so your soul jams it (a jammed saw sticks inside the soul, so you walk over it).
 - **Sawmill (W2):** the spring reaches 8.5, the ledge is 9, and a saw sweeps the row 5–6 tiles up. Hold K during a launch so the soul hangs beside the spring: in the saw's row it jams the saw and is your step; a row higher it's a step too, but you spring past a moving saw. Then a plate soul that also shields you from a thrower, a crumbling floor under fire, and a ceiling laser you must block high so you can walk under.
 - **Reliquary (W3):** a 3-wide chimney with flyers crossing it (small ledges let you stop and time them), two saws in their own lanes of a 2-tall corridor (jam both, then self-destruct on the plate at the end: all 3 souls), recall to undo a bad death, and a crumbling descent under falling spikes.
 
@@ -44,13 +44,13 @@ Three **showcase rooms**, one per world, are in the greybox to judge this style 
 | 1 | The clearing | Moving and jumping | None (story room) | Finds the amulet, puts it on | Built |
 | 2 | The ghost | | None (story room) | The opening conversation (below) | Built |
 | 3 | First death | A death leaves a soul | A pit too wide to jump: die in it, and your soul is a stepping stone over the spikes | "AGH! THAT HURT!" | Built |
-| 4 | The thorn wall | Aiming a death | Where you touch the thorns is where your soul hangs. Jump into them at the top of your jump to make the highest step | The guide teaches timing | Built |
+| 4 | The thorn wall | Aiming a death | Where you touch the thorns is where your soul hangs. Touch them while rising about two tiles above the floor to leave a reachable three-high step; full jump height leaves an unreachable four-high step | The guide teaches timing | Built |
 | 5 | The patrol | Switches, walkers | You choose where the walker catches you: get killed standing on the switch so your soul holds the door | "I want you to get killed *efficiently*." | Built |
 | 6 | The chain | Shrines | Bridge the pit, reach the shrine, die again for a step up | "How many times have you done this?" | Built |
-| 7 | The long pit | Slide | A 3-wide spike pit inside a 1-tall tunnel. Walk in and your standing soul plugs the tunnel (R to reset). Slide in and the lying soul is a flat bridge you can slide across | Guide: "Lie down. No, really." | Greybox |
-| 8 | The well | Aiming a fall | Two deep spike shafts. Land your soul near the exit side, respawn, drop onto it, jump out. The second shaft has thorns on the exit-side wall, so you fall close to them without touching | | Greybox |
-| 9 | The gatehouse | Which side the walker ends up on | Get killed on the plate while the walker comes from the door side: it ends up penned between your soul and the door, and you jump it. Get killed the other way round and it's penned with your respawn point. Then a shrine and a spike pit | | Greybox |
-| 10 | The moth | Boss 1 | One soul, two jobs. You place it by dying on the arena's thorns, and it must shield you from the wing dust *and* be the step you stomp from. Dying again heals the moth and moves the soul, so you get one placement for all 3 stomps. The dust can't break souls | "Careful. It remembers too." | Greybox built (room only) |
+| 7 | The long pit | Slide | Slide into a low spike tunnel: the flat soul bridges it, a standing soul plugs it. Hop to the shrine; stomp the tunnel guard from the ledge before sliding to place the second bridge. That death revives the guard: stomp it again to use the bridge, then hop the exit post. Touching the guard moves your bridge into the approach | Guide: "Lie down. No, really." | Built |
+| 8 | The well | Aiming a fall | Aim a fall beside the first exit, then drop onto your soul and jump to the shrine. In the second well, fall straight beside the exit, clear of the upper thorns; jump from the soul to the guard’s shelf and stomp it. A thorn or guard death steals your landing | | Built |
+| 9 | The gatehouse | Which side the walker ends up on | Let the walker kill you on the plate from the door side, then hop your soul and its pen. After the shrine, a low post keeps the patrol away from your respawn; the plate soul is also the step to a four-high ledge. Careless guard contact steals the step | | Built |
+| 10 | The moth | Boss 1 | One soul, two jobs. You place it by dying on the arena's thorns, and it must shield you from the wing dust *and* be the step you stomp from. Dying again heals the moth and moves the soul, so you get one placement for all 3 stomps. The dust can't break souls. The moth stays away from both walls, seals the entrance until victory, and pauses briefly after a death so you can approach the step | "Careful. It remembers too." | Built |
 
 After the moth: the amulet's 2nd rune lights up and you earn a **2nd soul** and **self-destruct**, leading into World 2.
 
@@ -77,13 +77,13 @@ New: **2 souls**, **self-destruct** (hold K), **lasers** (a soul blocks the beam
 
 | # | Room | Teaches | The trick | Status |
 |---|---|---|---|---|
-| 1 | Let go | Self-destruct | No hazards. A ledge 5 high: die, stand on your soul, die again on top of it, climb the 2-soul stack | Greybox |
-| 2 | Off the edge | Hold while jumping | A 10-wide pit. Run, jump off the edge holding K: the soul appears mid-pit. Then jump to it and across | Greybox |
-| 3 | The ladder | Staircase | A ledge 7 high. A straight stack only lets you stand on its top, so it tops out at 3. Then run off your top soul holding K: the new soul appears beside it, one step up | Greybox |
-| 4 | The beam | Lasers | A ledge 8 high and a laser at 4.5. Jump into the laser right next to its source: that soul is the high step, and it blocks the whole beam | Greybox |
-| 5 | The spring | Springs | The spring reaches 8.5, the ledge is 9. Hold K during the launch so a soul hangs beside the spring, spring again onto it, jump up | Greybox |
-| 6 | Wrong order | Death order | A step to reach the plate, a soul on the plate, a soul in the pit. Pit first, and your 3rd death erases it | Greybox |
-| 7 | The tree guardian | Boss 2 | It glows blue, then slams the soul nearest you. Lure the slam onto the soul you don't need and stomp from the one you kept. Dying to rebuild heals it | To design in detail |
+| 1 | Let go | Self-destruct | Stack two souls for a safe 5-high ledge, then shrine. Stomp the guard and stack on a plate: the bottom soul opens the exit. Each death revives the guard; a careless third death erases the plate soul | Built |
+| 2 | Off the edge | Hold while jumping | Jump off holding K: hang a step over the pit, cross to the shrine. Then leave a soul on the plate and hang another over the next pit; a careless third death closes the exit | Built |
+| 3 | The ladder | Staircase | Offset your two souls to climb a 7-high ledge; a straight stack falls short. Shrine, descend beneath the hanging wall, then hang the staircase over spikes: the lower step is also your bridge. A third death erases it | Built |
+| 4 | The beam | Lasers | Die beside the laser source: the high step also blocks the beam. Shrine, drop through the sheltered shaft, then the lower step must hold a plate while the laser soul finishes the stair. A third death erases the plate soul and shuts the exit | Built |
+| 5 | The spring | Springs | Hang a soul beside the spring to reach a 9-high ledge, then shrine. Descend through the sheltered shaft; the hanging wall prevents bridging from the shrine. The second landing soul also blocks a laser: die too low and the beam stays live; extra deaths can erase the shield | Built |
+| 6 | Wrong order | Death order | Step, plate, pit: replace the step, not the bridge. Shrine, then spring to a high plate via a temporary landing; replace it with a laser shield over spikes. Only the high plate opens the exit; one death too many shuts it | Built |
+| 7 | The tree guardian | Boss 2 | It glows blue, then slams the soul nearest you. Lure each slam onto the decoy while standing on the step; only then can one stomp hurt it. Jumping alone cannot dodge the shockwave. Respawning gives four seconds before the next blue warning. Dying to rebuild heals it | Built |
 
 Cut for now: *The race* (walkers are slow enough to outrun, so it had no tension) and *The moving ledge* (its timing window was too small to be fair).
 
@@ -94,14 +94,45 @@ New: **3 souls** and **recall** (Q: tap for the newest soul, hold for more). Mos
 
 | # | Room | Teaches | The trick | Status |
 |---|---|---|---|---|
-| 1 | Three high | 3 souls | A ledge 8 high: the World 2 staircase, one step taller | Greybox |
-| 2 | In my own way | Recall | A 5-wide pit in a 1-tall tunnel: two lying souls bridge it. A standing soul plugs the tunnel; recall it instead of resetting | Greybox |
-| 3 | Three jobs | 3 souls at once | A soul on the plate, one in the spike pit, one blocking a laser from the ceiling (die in it mid-jump, so you can walk under). A 4th death erases the plate soul, so recall mistakes instead | Greybox |
-| 4 | Everything | All powers | Slide tunnel, shrine, plate with a walker, door, spring to a 9-high ledge. One spare death before the plate soul goes | Greybox |
-| 5 | The rehearsal | Leading a beam | A sweeping soul-breaking beam aims at you; lead it away from your soul wall | To design (boss mechanic) |
-| 6 | The spectral stag | Final boss | Calm setup: build a 3-thick wall. Then charge → beam (glows blue first; lead it away) → wave every ~15s (hide behind the wall). 3 stomps. A broken soul means dying to rebuild, which heals it | To design in detail |
+| 1 | Three high | 3 souls | Ten-high three-soul staircase; shrine, then hang a shield under a low laser lintel before building two exit steps. A fourth death erases the shield | Built |
+| 2 | In my own way | Recall | Two flat souls bridge a five-wide low tunnel; recall a standing soul that plugs it. Shrine, then hold a door plate while bridging another five-wide tunnel: a fourth death erases the plate soul, so recall the mistake first | Built |
+| 3 | Three jobs | 3 souls at once | Plate, pit bridge, high laser blocker; shrine, then crumbling lips force you to jump into the beam before the landing falls. A fourth death erases the plate: recall the mistake | Built |
+| 4 | Everything | All powers | Slide a flat bridge to the shrine. Then keep a plate soul, a saw jam and a spring step at once: recall a bad step, because a fourth death shuts the door | Built |
+| 5 | Reliquary | Recall, three souls | Climb the flyer chimney, jam two saws and hold the plate. Shrine, then crumbling descent under falling spikes; thorns prevent sliding down the exit wall | Built |
+| 6 | The rehearsal | Leading a beam | First lock after 2.6s: lead the beam below a two-soul stair; shrine, then sacrifice a decoy in a low corridor firing every 1.6s, too fast to run its full length | Built |
+| 7 | The old tree | Story | Calm promise before the fight; return for the note after victory | Built |
+| 8 | The spectral stag | Final boss | Calm setup: build a 3-thick wall. Then charge → beam (glows blue first; jump at the platform’s left end to lead it overhead) → first violet wave after 15s (hide behind the wall). Later waves wait 25s, restarted by each stomp; the six-wide back gives a forgiving drop. 3 stomps. Victory survives room restarts. A broken soul means dying to rebuild, which heals it | Built (40×17 arena; separate old-tree and pyramid rooms) |
+| 9 | The pyramid entrance | Ending | Read the old tree’s note, then enter the pyramid. Restarting preserves the open return route | Built |
 
 Cut: *Spring tower* (a spring-placed soul has to land within a few frames, too tight).
+
+## Boss and rehearsal designs (2026-11-02, written for the overnight build; tune the numbers in playtests)
+All three follow the moth's rules: 3 stomps from above, it speeds up after each one (attack gaps × 0.8), any death heals it to full, yellow attacks never break souls, and an attack that breaks souls is warned by a blue glow.
+
+### The tree guardian (W2 boss, 2 souls + self-destruct)
+- **Arena:** one screen (30 × 17), flat floor. The tree is rooted at the right (about 7 tiles wide) and never moves. Its stone mask is the stomp target: top **4 tiles up**, sticking out over the floor at its left edge. Out of reach from the floor, in reach from one standing soul 1–2 tiles in front of it, so every stomp needs a soul.
+- **Branch swing (yellow):** a 0.6s wind-up, then a branch sweeps the floor band (the bottom tile) from the trunk out to about 12 tiles. Jump it, or be standing on a soul. It passes through souls.
+- **Seed pod (yellow):** lobbed at where you are, bursts on landing in a small area. A soul between you and the pod blocks it, as with the moth's dust.
+- **The slam (blue, smashes souls):** every third attack. The mask glows blue for 2.05s and **looks at the soul nearest you; the target locks when the glow starts**. The arm slams that soul into the ground: it sinks flat (useless as a step) and **pushes back up 5s later**. The slam also sends a shockwave along the floor that kills you unless you are standing on an unburied soul when it lands. Each buried decoy opens one stomp, lasting until it rises. With no souls out, it slams where you stand.
+- **The trick:** you need 2 souls: the step in front of the mask and a decoy farther out (self-destruct lets you put the decoy anywhere, mid-air too). When the glow starts, be near the decoy. Then get onto the step before the slam lands: the slam buries the decoy, the shockwave passes under you, and you stomp. Stand on the step when the glow starts and the slam buries your step and the shockwave kills you, which heals the tree. As it speeds up (slam intervals 8s → 6.4s → 5.12s), the decoy is barely back up in time, so the last cycle is tight.
+- **Replay numbers:** 30 × 17 arena; floor row 16, mask at column 23 with its top 4 tiles up. Step at column 21, decoy at 13 (8 tiles apart). Blue warning 2.05s; run, jump onto the step, then jump mostly straight up before steering onto the mask. Replay spare time: 0.3–0.6s. Jump over the return swing earlier as it speeds up, then lead the pod left before returning to the decoy. Yellow wind-ups 0.6s; burial 5s; attack gaps × 0.8 per stomp.
+- **Story:** STORY.md W2 scenes 4 (arrives partway in), 5 (the slam nudges after the 2nd and about the 25th death) and 6 (the tree falls, 3rd rune: 3 souls + recall).
+
+### The rehearsal (W3 room 6, 3 souls + recall)
+- Teaches the stag's beam without the stag. An emitter (an antler relic in the right wall) glows blue, shows an **aiming line that follows you**, locks 0.4s before it fires, then fires a beam along that line that breaks the first soul it hits and kills you if it reaches you. Then a 3s gap in the stair chamber; the corridor cycles every 1.6s. Both give 2s extra before the first shot.
+- The room: a ledge 7 high on the left needs a 2-soul staircase. The beam fires every ~4s, so you build the stair between shots and must stand away from it (out in the open, or next to a third "spare" soul) when the line locks, so it never crosses the stair. Recall cleans up a soul the beam made useless. Then a short second stage: a corridor where the line can only be led onto a decoy soul you place on purpose.
+
+### The spectral stag (W3 boss, 3 souls + recall, final)
+- **Arena:** wider than one screen (about 40 × 17, the camera follows). A raised platform at the left (columns 2–6, surface row 12 over floor row 15), 3 tiles up and 5 wide; the stag's charge lane is the floor under and to the right of it.
+- **Calm setup:** the stag watches until you step off the platform's edge or 8s pass after its intro. Build a **wall 3 souls thick** on the platform's right edge.
+- **The loop:** charge → beam → charge → beam, with the first violet wave after 15s; later waves wait 25s, restarted by stomps.
+  - **Charge (yellow):** it gallops along the floor and rams the arena's left wall under the platform, then stands **dazed for 2s under the platform's edge. Drop onto its back from the platform: that's the stomp.** It breaks any soul in its lane, so the floor is no place for souls.
+  - **Beam (blue):** the same aimed beam as the rehearsal. Lead the line away from your wall before it locks (step out to the platform's left end), then get back behind the wall.
+  - **Wave (violet, can't dodge):** a wall of light rolls across the arena at platform height. It breaks 2 souls and stops at the 3rd, so only the 3-thick wall saves you. Stand behind it.
+- **A broken soul** means a 2-thick wall: you either die to rebuild (it heals) or recall and rebuild later. Recall isn't a death, so it never heals the stag.
+- **Replay numbers:** 40 × 17 arena; charge speed 650 px/s, ram centre column 6.5 against the buttress at column 4, six-wide back top row 13. Wall souls at columns 4, 5, 6 on row 12; drop beyond column 7. Setup 8s, yellow wind-up 0.7s, daze 2s, beam gaps 8s × 0.8 per stomp, wave at 420 px/s: first after 15s, later waves after 25s. After the first wave, every stomp restarts the 25s timer.
+- **Route:** The rehearsal → The old tree (30 × 17, promise beside the tree at column 21) → arena → The pyramid entrance (30 × 17). Both arena gates and the vine buttress under the platform open after the last stand, clearing the way back. Return behind the tree to the dirt note at columns 18–20, then walk through the arena to the pyramid door at column 22; entering fades to the ending card.
+- **Story:** STORY.md W3 scenes 5 (arrives), 6 (nudge after about 10 deaths), 7 (the guide's last stand), 8 (the note behind the old tree), 9 (floor one, ending card).
 
 ## Measured movement (design to these)
 Measured in the game; the greybox tests (`tests/check.html`) replay each tight room's solution with real physics.
@@ -117,4 +148,3 @@ The rooms are on the `greybox-levels` branch, in its own folder (`../Game-Week-g
 
 ## Open design questions
 - **Slide speed:** raise it so the slide's speed boost can carry puzzles, or keep it as the flat-soul tool only?
-- **Bosses 2 and 3:** the tree guardian and the stag need detailed attack patterns before they can be greyboxed.

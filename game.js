@@ -37,6 +37,7 @@ const MOTH_FRAMES = [0, 1, 2, 1], MOTH_FPS = 8, MOTH_SCALE = 0.243 * MOTH_SIZE; 
 // Its intro: it bursts out of the right wall at these rows (top, bottom) of its room. The hole is only
 // painted; the wall keeps its colliders, so the arena stays closed.
 const MOTH_HOLE = [2, 9];
+const TREE_GLOW = 2.05, TREE_BURIED = 5;
 // Self-destruct (World 2 on): hold K/X this long. You keep moving while it charges; letting go cancels.
 const SD_HOLD = 0.75;
 // Recall (World 3): Q takes back your newest soul. Holding keeps going, each gap shorter, down to RECALL_MIN.
@@ -66,6 +67,7 @@ const DEV = new URLSearchParams(location.search).has('dev'); // ?dev turns on th
 // '#' wall  '^' spikes  P start  '_' plate  D door (open while any plate is held)
 // e walker enemy  B boss  V vines (open when the room's boss is beaten)  x thorns (kill on touch, not solid)
 // A the amulet  C shrine (touch: respawn here)
+// a aimed soul-breaking relic
 // > < v u laser emitter firing right/left/down/up (the beam kills; walls, doors and souls stop it)  s spring
 // o saw moving sideways  O saw moving up/down  ~ crumbling block  ! falling spike (drops when you pass under)
 // f flyer (flies over souls)  t thrower (shoots at you; souls block the shots). Stomp any enemy to kill it.
@@ -341,18 +343,18 @@ const ROOMS = [
     '######^^^^^^^^################',
   ], [120, 94], { world: 1, enter: 'chain' }],
   // New World 1 rooms (greybox, see docs/LEVELS.md)
-  ["The long pit", [ // slide: only a lying soul bridges a pit in a 1-tall tunnel
+  ["The long pit", [ // flat bridge, shrine, stomp the guard twice: bridge death revives it
     '##############################',
-    '####################         #',
-    '####################         #',
-    '####################         #',
-    '####################         #',
-    '####################         #',
-    '####################         #',
-    '####################         #',
-    '   #################          ',
-    ' P                            ',
-    '##########^^^#################',
+    '##############################',
+    '##############################',
+    '##############################',
+    '##############################',
+    '###########       #####      #',
+    '###########       #####      #',
+    '###########       #####      #',
+    '   ########  C    #####       ',
+    ' P          ##  e       #   # ',
+    '######^^^#########^^^#########',
     '##############################',
     '##############################',
     '##############################',
@@ -362,13 +364,13 @@ const ROOMS = [
   ], [150, 94], { world: 1 }],
   ["The well", [ // aim your fall: the soul must land near the exit side
     '##############################',
-    '######      ##################',
-    '######      ##################',
-    '######      ##################',
-    '######      ##################',
-    '######      ##################',
-    '######      ##################',
-    '######      ##################',
+    '##############################',
+    '##############################',
+    '##############################',
+    '##############################',
+    '##############################',
+    '##############################',
+    '##############################',
     '            ##################',
     ' P          ##################',
     '######      ##################',
@@ -386,10 +388,10 @@ const ROOMS = [
     '######^^^^^^^###       x######',
     '################       x######',
     '################       x######',
-    '################       x######',
-    '################       x######',
+    '################             #',
+    '################             #',
     '################              ',
-    '################              ',
+    '################           e# ',
     '################         #####',
     '################         #####',
     '################^^^^^^^^^#####',
@@ -397,258 +399,23 @@ const ROOMS = [
   ], [180, 94], { world: 1 }],
   ["The gatehouse", [ // get killed on the plate so the walker ends up on the right side
     '##############################',
-    '#            #               #',
-    '#            #               #',
-    '#            #               #',
-    '#            #               #',
-    '#            #               #',
-    '#            #               #',
-    '#            #               #',
-    '#            #               #',
-    '#            #               #',
-    '#            #               #',
-    '#            #               #',
-    '#            #               #',
-    '             D               #',
-    ' P           D                ',
-    '###    _   e D C              ',
-    '#################^^^^^^^^#####',
+    '##############################',
+    '##############################',
+    '##############################',
+    '##############################',
+    '##############################',
+    '##############################',
+    '##############################',
+    '##############            D  #',
+    '##############            D  #',
+    '##############            D  #',
+    '#            #            D  #',
+    '#            #          ##D  #',
+    '             D          ##D  #',
+    ' P           D          ##D   ',
+    '###    _   e D#C #   _ e##D   ',
+    '##############################',
   ], [210, 108], { world: 1 }],
-  ['The moth', [ // you walk in on the arena floor: one soul is the step that reaches its back
-    '##############################',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            V',
-    '                             V',
-    ' P             B             V',
-    '##############################',
-  ], [240, 108], { world: 1, spots: [[7, 'moth']], deathTalk: { 2: 'dust', 25: 'dust2' } }], // the shaking starts 7 tiles in
-  // ---------------- World 2: Overgrown Ruins (greybox) ----------------
-  ["Let go", [ // hold K: two souls stacked reach a 5-high ledge
-    '##############################',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                             ',
-    '#                             ',
-    '#                     ########',
-    '#                     ########',
-    '                      ########',
-    '                      ########',
-    ' P                    ########',
-    '##############################',
-  ], [270, 108], { world: 2 }],
-  ["Off the edge", [ // jump off the edge holding K: the soul appears mid-pit
-    '##############################',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '                              ',
-    ' P                            ',
-    '#########          ###########',
-    '#########          ###########',
-    '#########          ###########',
-    '#########          ###########',
-    '#########          ###########',
-    '#########          ###########',
-    '#########          ###########',
-    '#########^^^^^^^^^^###########',
-    '##############################',
-  ], [300, 111], { world: 2 }],
-  ["The ladder", [ // 7-high ledge: stack to 3, then run off your top soul holding K for a step beside it
-    '##############################',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                             ',
-    '#                             ',
-    '#                    #########',
-    '#                    #########',
-    '#                    #########',
-    '#                    #########',
-    '#                    #########',
-    '                     #########',
-    ' P                   #########',
-    '##############################',
-  ], [330, 103], { world: 2 }],
-  ["The beam", [ // 8-high ledge: jump into the laser right next to its source; that death is the high step and leaves no beam
-    '##############################',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                             ',
-    '#                             ',
-    '#                        #####',
-    '#                        #####',
-    '#                        #####',
-    '#                        <####',
-    '#                        #####',
-    '#                        #####',
-    '                         #####',
-    ' P                       #####',
-    '##############################',
-  ], [360, 96], { world: 2 }],
-  ["The spring", [ // 9-high ledge: hold during the launch so a soul hangs beside the spring, then land on it
-    '##############################',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                             ',
-    '#                             ',
-    '#                     ########',
-    '#                     ########',
-    '#                     ########',
-    '#                     ########',
-    '#                     ########',
-    '#                     ########',
-    '#                     ########',
-    '                      ########',
-    ' P               s    ########',
-    '##############################',
-  ], [390, 88], { world: 2 }],
-  ["Wrong order", [ // step, plate, pit: in another order a soul you still need vanishes
-    '##############################',
-    '#                        #   #',
-    '#                        #   #',
-    '#                        #   #',
-    '#                        #   #',
-    '#                        #   #',
-    '#                        #   #',
-    '#                        #   #',
-    '#                        #   #',
-    '#                        #   #',
-    '#                        #   #',
-    '# _                      #   #',
-    '#####                    #   #',
-    '#                        D    ',
-    '                         D    ',
-    ' P                       D    ',
-    '###########^^^^^^^^###########',
-  ], [420, 79], { world: 2 }],
-  // ---------------- World 3: Sanctum (greybox) ----------------
-  ["Three high", [ // 8-high ledge: a 3-soul staircase (run off your top soul while holding K)
-    '##############################',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                             ',
-    '#                             ',
-    '#                    #########',
-    '#                    #########',
-    '#                    #########',
-    '#                    #########',
-    '#                    #########',
-    '                     #########',
-    '                     #########',
-    ' P                   #########',
-    '##############################',
-  ], [450, 79], { world: 3 }],
-  ["In my own way", [ // two lying souls bridge the tunnel pit; recall (Q) a standing one that blocks it
-    '##############################',
-    '###########################  #',
-    '###########################  #',
-    '###########################  #',
-    '###########################  #',
-    '###########################  #',
-    '###########################  #',
-    '###########################  #',
-    '    #######################   ',
-    ' P                            ',
-    '##########^^^^^###############',
-    '##############################',
-    '##############################',
-    '##############################',
-    '##############################',
-    '##############################',
-    '##############################',
-  ], [480, 77], { world: 3 }],
-  ["Three jobs", [ // plate, pit and a laser blocker at once; recall mistakes instead of dying over them
-    '##############################',
-    '#                 ####### #  #',
-    '#                 ####### #  #',
-    '#                 ####### #  #',
-    '#                 ####### #  #',
-    '#                 ####### #  #',
-    '#                 ####### #  #',
-    '#                 ####### #  #',
-    '#                 ####### #  #',
-    '#                 ####### #  #',
-    '#                 ####### #  #',
-    '#                 ####### #  #',
-    '#                 ###v### #  #',
-    '#                         D  #',
-    '                          D   ',
-    ' P   _                    D   ',
-    '#########^^^^^^^^#############',
-  ], [510, 71], { world: 3 }],
-  ["Everything", [ // tunnel, plate with a walker, spring; one spare death before the plate soul goes (recall instead)
-    '#############################################',
-    '###############               #             #',
-    '###############               #             #',
-    '###############               #             #',
-    '###############               #             #',
-    '###############               #             #',
-    '###############               #             #',
-    '###############               #             #',
-    '###############               #             #',
-    '###############               #              ',
-    '###############               #              ',
-    '###############               #        ######',
-    '###############               #        ######',
-    '###############               #        ######',
-    '###############               #        ######',
-    '###############               #        ######',
-    '###############               #        ######',
-    '###############               D        ######',
-    '   ############ C             D        ######',
-    ' P             ##     _   e   D     s  ######',
-    '#######^^^###################################',
-    '#############################################',
-  ], [540, 67], { world: 3 }],
-  ["End of the greybox", [ // bosses for Worlds 2 and 3 and the beam rehearsal are not built yet
-    '##############################',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
-    '                             #',
-    '              P              #',
-    '##############################',
-    '##############################',
-  ], [585, 63]],
   ["Thornwood", [ // SHOWCASE W1: wall jump, thorn anchor, crumbling bridge, falling spikes, saw jam, stomps
     '##############################################',
     '##############################################',
@@ -671,11 +438,145 @@ const ROOMS = [
     '#          #   ################      ######   ',
     '#          #   ################      ######  #',
     '#              ################      ######  #',
-    '#              ################              #',
-    '#P      e      ################   e #   o    #',
+    '               ################              #',
+    ' P      e      ################   e #   o    #',
     '##############################################',
     '##############################################',
-  ], [700, 100], { world: 1 }],
+  ], [240, 101], { world: 1 }],
+  ['The moth', [ // you walk in on the arena floor: one soul is the step that reaches its back
+    '##############################',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            V',
+    'V                            V',
+    'VP            xB             V',
+    '##############################',
+  ], [286, 104], { world: 1, spots: [[7, 'moth']], deathTalk: { 2: 'dust', 25: 'dust2' } }], // the shaking starts 7 tiles in
+  // ---------------- World 2: Overgrown Ruins (greybox) ----------------
+  ["Let go", [ // hold K: two souls stacked reach a 5-high ledge
+    '##############################',
+    '#                       D    #',
+    '#                       D    #',
+    '#                       D    #',
+    '#                       D    #',
+    '#                       D    #',
+    '#                       D    #',
+    '#                       D    #',
+    '#                       D    #',
+    '#                       D     ',
+    '#          C            D     ',
+    '#        #####        ########',
+    '#        #####        ########',
+    '         #####        ########',
+    '         #####        ########',
+    ' P       ##### # e   _########',
+    '##############################',
+  ], [316, 104], { world: 2, enter: "letGo" }],
+  ["Off the edge", [ // jump off the edge holding K: the soul appears mid-pit
+    '##############################',
+    '#                         D  #',
+    '#                         D  #',
+    '#                         D  #',
+    '#                         D  #',
+    '#                         D  #',
+    '                          D   ',
+    ' P           C  _         D   ',
+    '####       #######       #####',
+    '####       #######       #####',
+    '####       #######       #####',
+    '####       #######       #####',
+    '####       #######       #####',
+    '####       #######       #####',
+    '####       #######       #####',
+    '####^^^^^^^#######^^^^^^^#####',
+    '##############################',
+  ], [346, 107], { world: 2 }],
+  ["The ladder", [ // 7-high ledge: stack to 3, then run off your top soul holding K for a step beside it
+    '##############################',
+    '#               #            #',
+    '#               #            #',
+    '#               #            #',
+    '#               #            #',
+    '#               #            #',
+    '#               #            #',
+    '#               #             ',
+    '#           C   #             ',
+    '#         ##### #       ######',
+    '#         ##### #       ######',
+    '#         ##### #       ######',
+    '#         #####         ######',
+    '#         #####         ######',
+    '          #####         ######',
+    ' P        #####         ######',
+    '#####################^^^######',
+  ], [376, 99], { world: 2, spots: [[12, "carvings"]] }],
+  ["The beam", [ // 8-high ledge: jump into the laser right next to its source; that death is the high step and leaves no beam
+    '##############################',
+    '#               #          D #',
+    '#               #          D #',
+    '#               #          D #',
+    '#               #          D #',
+    '#               #          D #',
+    '#               #          D  ',
+    '#            C  #          D  ',
+    '#          #### #        #####',
+    '#          #### #        #####',
+    '#          #### #        #####',
+    '#          <### #        <####',
+    '#          #### #        #####',
+    '#          ####          #####',
+    '           ####        _ #####',
+    ' P         ####        # #####',
+    '##############################',
+  ], [406, 92], { world: 2 }],
+  ["The spring", [ // 9-high ledge: hold during the launch so a soul hangs beside the spring, then land on it
+    '##############################',
+    '#               #            #',
+    '#               #            #',
+    '#               #            #',
+    '#               #            #',
+    '#               #             ',
+    '#            C  #             ',
+    '#          #### #        #####',
+    '#          #### #        #####',
+    '#          #### #        <####',
+    '#          #### #        #####',
+    '#          ####          #####',
+    '#          ####          #####',
+    '#          ####          #####',
+    '           ####          #####',
+    ' P    s    ####     s    #####',
+    '##############################',
+  ], [436, 84], { world: 2 }],
+  ["Wrong order", [ // step, plate, pit: in another order a soul you still need vanishes
+    '##############################',
+    '#             D             D#',
+    '#             D             D#',
+    '#             D             D#',
+    '#             D             D#',
+    '#             D             D#',
+    '#             D  _          D#',
+    '#             D ###         D#',
+    '#             D ###         D#',
+    '#             D ###         <#',
+    '#             D ###         D#',
+    '# _           D ###         D#',
+    '####          D             D#',
+    '#             D             D ',
+    '              D             D ',
+    ' P            DC    s       D ',
+    '#######^^^^^^^########^^^^^^##',
+  ], [466, 75], { world: 2 }],
   ["Sawmill", [ // SHOWCASE W2: spring + timed self-destruct jams a saw, plate soul as a shield, thrower, laser
     '############################################',
     '#              #############################',
@@ -694,38 +595,215 @@ const ROOMS = [
     '#  o      #########^^^^^^^######   ###v#####',
     '#         ######################           #',
     '#         ######################           #',
-    '#         ######################           #',
+    '          ######################            ',
     '          ######################            ',
     ' P    s   ######################    #    e  ',
     '############################################',
     '############################################',
-  ], [746, 99], { world: 2 }],
+  ], [496, 71], { world: 2 }],
+  ["The tree guardian", [ // step and decoy: lure the blue slam away from the mask
+    '##############################',
+    '#                           V#',
+    '#                           V#',
+    '#                           V#',
+    '#                           V#',
+    '#                           V#',
+    '#                           V#',
+    '#                           V#',
+    '#                           V#',
+    '#                           V#',
+    '#                           V#',
+    '#                           V#',
+    '#                           V#',
+    '                            V ',
+    '                            V ',
+    ' P                     B    V ',
+    '##############################',
+  ], [540, 75], { world: 2, boss: "tree", spots: [[7, "tree"]], deathTalk: {"2": "treeSlam", "25": "treeSlam2"} }],
+  // ---------------- World 3: Sanctum (greybox) ----------------
+  ["Three high", [ // 10-high ledge: a 3-soul staircase (run off your top soul while holding K)
+    '##############################',
+    '#               #####        #',
+    '#               #####        #',
+    '#               #####        #',
+    '#               #####        #',
+    '#           C   #####        #',
+    '#         ##### #####         ',
+    '#         ##### #####         ',
+    '#         ##### #####      ###',
+    '#         ##### #####      ###',
+    '#         ##### #####      ###',
+    '#         ##### ##v##      ###',
+    '#         #####            ###',
+    '          #####            ###',
+    '          #####            ###',
+    ' P        #####            ###',
+    '##############################',
+  ], [570, 75], { world: 3, spots: [[4, "pyramid"]] }],
+  ["In my own way", [ // two lying souls bridge the tunnel pit; recall (Q) a standing one that blocks it
+    '##############################',
+    '##############################',
+    '##############################',
+    '##############################',
+    '##############################',
+    '##########         ########  #',
+    '##########         ########  #',
+    '##########         ########  #',
+    '   ####### C       #######D   ',
+    ' P         #    _         D   ',
+    '####^^^^^###########^^^^^#####',
+    '##############################',
+    '##############################',
+    '##############################',
+    '##############################',
+    '##############################',
+    '##############################',
+  ], [600, 73], { world: 3 }],
+  ["Three jobs", [ // plate, pit and a laser blocker at once; recall mistakes instead of dying over them
+    '##############################',
+    '##############################',
+    '##############################',
+    '#############v################',
+    '#             #  #############',
+    '#             #  #############',
+    '#             D  #############',
+    '#   _         D  #############',
+    '#   ##^^^^^^^##  #############',
+    '#   ###########  ##########v##',
+    '#   ###########             ##',
+    '#   ###########             ##',
+    '#   ###########             ##',
+    '#   ###########             D#',
+    '    ########### C _         D ',
+    ' P  ###############~^^^^^^^~# ',
+    '###################^#######^##',
+  ], [630, 67], { world: 3 }],
+  ["Everything", [ // slide bridge, shrine; plate, saw jam and spring step together; recall a bad step
+    '#############################################',
+    '###############################             #',
+    '###############################             #',
+    '###############################             #',
+    '###############################             #',
+    '###############################             #',
+    '###############################             #',
+    '###############################             #',
+    '###############################             #',
+    '###############################              ',
+    '###############################              ',
+    '###############################        ######',
+    '###############################        ######',
+    '###############################        ######',
+    '###############################        ######',
+    '##############        #########        ######',
+    '##############        #########        ######',
+    '##############        #########        ######',
+    '   ###########  C             D        ######',
+    ' P             ##  _  #  o    D   s    ######',
+    '#######^^^###################################',
+    '#############################################',
+  ], [660, 63], { world: 3, shrineTalk: "almostCompetent" }],
   ["Reliquary", [ // SHOWCASE W3: flyers in a chimney, two saws to jam, plate, recall, crumbling descent
     '########################################',
     '########################################',
     '########################################',
     '#####                         D   ! !  #',
     '#####    C #   o   #   o    #_D C      #',
-    '#####   ####################### #      #',
-    '#####   #######################        #',
-    '#####  f#######################        #',
-    '#####   #######################  ~     #',
-    '#####   #######################        #',
-    '#####   #######################        #',
-    '#####  ########################    ~   #',
-    '#####   #######################        #',
-    '#####f  #######################        #',
-    '#####   #######################      ~ #',
-    '#####   #######################        #',
-    '#####   #######################        #',
-    '######  #######################    ~   #',
-    '#####   #######################        #',
-    '#       #######################        #',
-    '        #######################        #',
-    ' P      #######################        #',
-    '################################^^^^^^##',
+    '#####   ####################### #     x#',
+    '#####   #######################       x#',
+    '#####  f#######################       x#',
+    '#####   #######################  ~    x#',
+    '#####   #######################       x#',
+    '#####   #######################       x#',
+    '#####  ########################    ~  x#',
+    '#####   #######################       x#',
+    '#####f  #######################       x#',
+    '#####   #######################      ~x#',
+    '#####   #######################       x#',
+    '#####   #######################       x#',
+    '######  #######################    ~  x#',
+    '#####   #######################       x#',
+    '#       #######################       x#',
+    '        #######################     ~   ',
+    ' P      #######################      ~~ ',
+    '################################^^^^^^^#',
     '########################################',
-  ], [790, 97], { world: 3 }],
+  ], [705, 52], { world: 3 }],
+  ["The rehearsal", [ // aimed beams: protect a two-soul stair, shrine, sacrifice a corridor decoy
+    '##############################',
+    '##############################',
+    '#                 ############',
+    '#                 ############',
+    '#                 ############',
+    '#                 ############',
+    '#                            #',
+    '#                             ',
+    '#               C           a ',
+    '#             ################',
+    '#                            #',
+    '#                            #',
+    '#                           a#',
+    '                             #',
+    '                             #',
+    '# P                          #',
+    '##############################',
+  ], [745, 59], { world: 3 }],
+  ["The old tree", [ // calm promise; return behind the tree for the note
+    '##############################',
+    '##############################',
+    '##############################',
+    '##############################',
+    '##############################',
+    '##############################',
+    '##############################',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '                              ',
+    '  P                           ',
+    '##############################',
+    '##############################',
+  ], [775, 53], { world: 3, spots: [[18, "stagPromise"]] }],
+  ["The spectral stag", [ // final boss: three-soul wall, lead beams away, drop after charges
+    '########################################',
+    '#                                      #',
+    '#                                      #',
+    '#                                      #',
+    '#                                      #',
+    '#                                      #',
+    '#                                      #',
+    '#                                      #',
+    '#                                      #',
+    '#                                      #',
+    '#                                      #',
+    '# P                                    #',
+    '# #####                                #',
+    'V   V                                  V',
+    'V   V                             B    V',
+    '########################################',
+    '########################################',
+  ], [805, 53], { world: 3 }],
+  ["The pyramid entrance", [ // walk into floor one after reading the note
+    '##############################',
+    '##############################',
+    '##############################',
+    '##############################',
+    '##############################',
+    '##############################',
+    '##############################',
+    '##############################',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '                             #',
+    '  P                          #',
+    '##############################',
+    '##############################',
+  ], [845, 53], { world: 3 }],
 ];
 const WORLD_NAMES = { 1: 'Forest Edge', 2: 'Overgrown Ruins', 3: 'Sanctum' }; // fades in when you enter a new world
 const WORLD_SOULS = { 1: 1, 2: 2, 3: 3 }; // souls allowed per world; rooms without a world keep 3
@@ -737,7 +815,7 @@ const START_ROOM = ((q) => q == null ? ROOMS.findIndex((r) => r[0] === 'The clea
 const hit = (A, B) => A.x < B.right && A.right > B.x && A.y < B.bottom && A.bottom > B.y;
 const bounds = (o) => o.getBounds();
 
-const stats = { deaths: 0 }; // the whole run's deaths, shown on the ending card
+const stats = { deaths: 0, mothFinished: false, treePower: false, stagFinished: false }; // run progress survives room restarts
 const FONT = { fontFamily: 'Georgia, serif', align: 'center' };
 
 // First screen: the content warning. Any key or click continues (that click also lets the browser play audio).
@@ -770,7 +848,7 @@ class End extends Phaser.Scene {
     };
     const floor = t(272, 'Floor 1', '44px', '#f1e3b8', 600);
     this.tweens.add({ targets: floor, alpha: 0, duration: 1200, delay: 4200 });
-    t(170, 'Reincarnation Echo', '46px', '#f1e3b8', 6000);
+    t(170, "Regressor's Echo", '46px', '#f1e3b8', 6000);
     t(245, `Deaths: ${stats.deaths}`, '22px', '#cfeaff', 7400);
     t(280, 'Keep getting back up.', '16px', '#9fb8c8', 8400);
     t(350, 'Thank you for playing.', '20px', '#dfe8e2', 9600);
@@ -778,7 +856,7 @@ class End extends Phaser.Scene {
     t(422, 'Art, music and sound made with generative AI tools', '13px', '#7f9086', 10400);
     const again = t(490, 'Press any key to play again', '14px', '#e8b44a', 12000);
     this.time.delayedCall(12000, () => this.input.keyboard.once('keydown', () => {
-      stats.deaths = 0;
+      stats.deaths = 0; stats.treePower = false; stats.mothFinished = false; stats.stagFinished = false;
       Dialogue.seen.clear();
       NAMES.guide = '???';
       this.scene.start('room', { index: START_ROOM });
@@ -802,7 +880,28 @@ class Room extends Phaser.Scene {
       this.load.image('heroSlide', 'assets/hero/slide.webp'); // 12 slide frames, 3 rows of 4
       this.load.json('heroSlideMeta', 'assets/hero/slide.json');  // each frame's head and feet x
     }
+    for (const [key, path, width, height] of [
+      ['heroIdleAnim', 'hero/idle-anim', 98, 112],
+      ['heroWall', 'hero/wall-slide', 141, 141],
+      ['flyer', 'enemies/flyer', 115, 112],
+      ['thrower', 'enemies/thrower', 123, 112],
+    ]) if (!this.textures.exists(key)) this.load.spritesheet(key, `assets/${path}.webp`, { frameWidth: width, frameHeight: height });
+    if (!this.textures.exists('seedShot')) this.load.image('seedShot', 'assets/enemies/seed-shot.webp');
     if (!this.textures.exists('walker')) this.load.image('walker', 'assets/enemies/walker.webp');
+    if (this.bossArtRequested) return;
+    this.bossArtRequested = true;
+    for (const pose of ['intro', 'idle', 'charge', 'beam', 'wave']) {
+      if (!this.textures.exists(`stag-${pose}`)) this.load.image(`stag-${pose}`, `assets/bosses/stag-${pose}.webp`);
+      if (!this.cache.json.exists(`stag-${pose}-frames`)) this.load.json(`stag-${pose}-frames`, `assets/bosses/stag-${pose}.json`);
+    }
+    for (const kind of ['moth', 'tree', 'stag']) {
+      if (!this.textures.exists(`${kind}-fallen`)) this.load.image(`${kind}-fallen`, `assets/bosses/${kind}-fallen.webp`);
+    }
+    for (const pose of ['intro', 'idle', 'swing', 'slam', 'throw']) {
+      if (!this.textures.exists(`tree-${pose}`)) this.load.image(`tree-${pose}`, `assets/bosses/tree-${pose}.webp`);
+      if (!this.cache.json.exists(`tree-${pose}-frames`)) this.load.json(`tree-${pose}-frames`, `assets/bosses/tree-${pose}.json`);
+    }
+    if (!this.textures.exists('seedPod')) this.load.image('seedPod', 'assets/bosses/seed-pod.webp');
     if (!this.textures.exists('mothFly')) this.load.image('mothFly', 'assets/bosses/moth-fly.webp');
     if (!this.textures.exists('rocks')) this.load.image('rocks', 'assets/world1/rocks.webp'); // 6 earth chunks
     if (!this.textures.exists('wallBreak')) this.load.image('wallBreak', 'assets/world1/wall-break.webp');
@@ -816,7 +915,9 @@ class Room extends Phaser.Scene {
     this.spikes = [];
     this.enemies = []; // only the current room's walkers exist (Celeste-style)
     this.walkerSpawns = [];
+    this.treePower = !!stats.treePower;
     this.bosses = []; // one per boss room; this.boss is the current room's
+    this.stagFinished = !!stats.stagFinished;
     this.gates = [];
     this.dead = 0;
     this.lying = false;
@@ -831,9 +932,11 @@ class Room extends Phaser.Scene {
     this.amulets = [];
     this.shrines = [];
     this.lasers = [];
+    this.aimedBeams = [];
     this.springs = [];
     this.saws = [];
     this.crumbles = [];
+    this.hazardArt = [];
     this.droppers = [];
     this.shots = [];
     this.charge = 0;
@@ -843,6 +946,8 @@ class Room extends Phaser.Scene {
       const rows = raw.map((r) => r.padEnd(width, '#'));
       while (rows.length < 17) rows.push('#'.repeat(width));
       const room = { name, ...extra, rect: new Phaser.Geom.Rectangle(ox * T, oy * T, width * T, rows.length * T), spawns: [] };
+      const world = extra.world ?? 1;
+      const hazard = (body, name, w, h, dy) => Art.hazard(this, body, world, name, w, h, dy);
       rows.forEach((row, ty) => {
         for (let tx = 0; tx < row.length; tx++) {
           const x = (ox + tx) * T, y = (oy + ty) * T;
@@ -859,21 +964,49 @@ class Room extends Phaser.Scene {
               this.statics.add(rect(x, y + 16, T, 16, 0).setVisible(false));
               Art.platform(this, x, y + 16, T, 16, [false]);
               this.spikes.push(rect(x + 2, y + 6, T - 4, 10, 0xcd5c5c));
+              hazard(this.spikes.at(-1), 'spikes', T, 16, -3);
               break;
-            case 'x': this.spikes.push(rect(x + 4, y + 2, T - 8, T - 4, 0x7a3550)); break;
-            case '_': this.plates.push(Object.assign(rect(x + 1, y + T - 8, T - 2, 8, 0xffd700).setStrokeStyle(2, 0x8a6a00).setDepth(3), { room: ri })); break;
+            case 'x': this.spikes.push(rect(x + 4, y + 2, T - 8, T - 4, 0x7a3550)); hazard(this.spikes.at(-1), 'thorns', T, T); break;
+            case '_': this.plates.push(Object.assign(rect(x + 1, y + T - 8, T - 2, 8, 0xffd700).setStrokeStyle(2, 0x8a6a00).setDepth(3), { room: ri })); hazard(this.plates.at(-1), 'plate', T, 8); break;
             case 'D': { const d = Object.assign(rect(x, y, T, T, 0x8c6640), { room: ri }); this.statics.add(d); this.doors.push(d); break; }
             case 'e': case 'f': case 't': this.walkerSpawns.push({ x, y, room: ri, kind: row[tx] }); break; // made on entry
-            case 'o': case 'O': this.saws.push({ room: ri, x: x + T / 2, y: y + T / 2, dx: row[tx] === 'o' ? 1 : 0, dy: row[tx] === 'O' ? 1 : 0, dir: 1 }); break;
-            case '~': { const c = rect(x, y, T, T, 0x9a7a52).setStrokeStyle(3, 0x3a2614).setDepth(2); this.statics.add(c); this.crumbles.push(Object.assign(c, { room: ri, t: 0, back: 0 })); break; }
-            case '!': this.droppers.push({ room: ri, x0: x + T / 2, y0: y + 12, r: rect(x + 7, y, T - 14, 24, 0xe0484a).setStrokeStyle(2, 0x6a1010).setDepth(3) }); break;
+            case 'o': case 'O': {
+              const sw = { room: ri, x: x + T / 2, y: y + T / 2, dx: row[tx] === 'o' ? 1 : 0, dy: row[tx] === 'O' ? 1 : 0, dir: 1 };
+              const key = Art.hazardKey(this, world, 'saw');
+              if (key) sw.img = this.add.image(sw.x, sw.y, key).setDisplaySize(36, 36).setDepth(3);
+              this.saws.push(sw);
+              break;
+            }
+            case '~': { const c = rect(x, y, T, T, 0x9a7a52).setStrokeStyle(3, 0x3a2614).setDepth(2); this.statics.add(c); this.crumbles.push(Object.assign(c, { room: ri, t: 0, back: 0 })); hazard(c, 'crumble', T, T); break; }
+            case '!': this.droppers.push({ room: ri, x0: x + T / 2, y0: y + 12, r: rect(x + 7, y, T - 14, 24, 0xe0484a).setStrokeStyle(2, 0x6a1010).setDepth(3) }); hazard(this.droppers.at(-1).r, 'falling-spike', 18, 24); break;
             case 'B': // floats with its underside 2.5 tiles above this tile's floor
-              this.bosses.push({ hp: BOSS_HP, hurt: 0, dir: 1, room: ri, min: ox * T + T + BOSS_W / 2, max: (ox + width) * T - T - BOSS_W / 2,
+              this.bosses.push({ hp: BOSS_HP, hurt: 0, dir: 1, room: ri, min: ox * T + (name === 'The moth' ? 8 * T : T + BOSS_W / 2), max: (ox + width) * T - (name === 'The moth' ? 8 * T : T + BOSS_W / 2),
                 r: rect(x + T / 2 - BOSS_W / 2, y + T - 128, BOSS_W, BOSS_H, 0x9b59b6),
                 hidden: !!extra.spots?.some((sp) => sp[1] === 'moth') && !Dialogue.seen.has('moth'), // bursts in during its intro
                 story: extra.spots?.some((sp) => sp[1] === 'moth') ? 'mothDown' : null });
               this.bosses.at(-1).r.setVisible(!this.bosses.at(-1).hidden);
-              if (this.textures.exists('mothFly')) {
+              if (name === 'The spectral stag') {
+                const B = this.bosses.at(-1);
+                Object.assign(B, { stag: true, hidden: !Dialogue.seen.has('stagArrival'), story: 'stagDown', phase: 'setup', clock: 0, waveClock: 0, waves: 0, deaths: 0 });
+                B.r.setVisible(!B.hidden).setSize(192, 64).setPosition(x, (oy + 14) * T).setFillStyle(0xbceaff);
+                B.antlers = this.add.graphics().setDepth(5);
+                B.r.on('destroy', () => B.antlers.destroy());
+                if (this.textures.exists('stag-idle')) {
+                  B.img = this.add.image(B.r.x, B.r.y + 32, 'stag-idle').setOrigin(0.5, 1).setDepth(4).setVisible(!B.hidden);
+                  this.bossPose(B, 'stag', 'idle', 180, 1);
+                  B.r.setAlpha(0); B.r.on('destroy', () => B.img.destroy());
+                }
+              } else if (extra.boss === 'tree') {
+                const B = this.bosses.at(-1);
+                Object.assign(B, { kind: 'tree', story: 'treeDown', hidden: !Dialogue.seen.has('tree'), phase: 'idle', timer: 4, attack: 2, pods: [] });
+                B.r.setDisplaySize(64, 64).setPosition(x + 16, y + T - 96).setVisible(!B.hidden);
+                B.floor = y + T;
+                if (this.textures.exists('tree-idle')) {
+                  B.img = this.add.image(x + 3 * T, B.floor, 'tree-idle').setOrigin(0.5, 1).setDepth(4);
+                  B.r.setFillStyle(0, 0);
+                }
+                B.r.on('destroy', () => { B.img?.destroy(); B.pods.forEach((p) => p.r.destroy()); });
+              } else if (this.textures.exists('mothFly')) {
                 const B = this.bosses.at(-1), tex = this.textures.get('mothFly'), fw = tex.getSourceImage().width / 4;
                 if (!tex.has(0)) for (let i = 0; i < 4; i++) tex.add(i, 0, i * fw, 0, fw, tex.getSourceImage().height);
                 B.r.setFillStyle(0, 0); // hitbox only
@@ -881,14 +1014,22 @@ class Room extends Phaser.Scene {
                 B.r.on('destroy', () => B.img.destroy());
               }
               break;
-            case 'V': this.gates.push(Object.assign(rect(x, y, T, T, 0x4a6b3a), { room: ri })); this.statics.add(this.gates.at(-1)); break;
+            case 'V': this.gates.push(Object.assign(rect(x, y, T, T, 0x4a6b3a), { room: ri })); this.statics.add(this.gates.at(-1));
+              hazard(this.gates.at(-1), 'vine-barrier', T, T);
+              if ((name === 'The spectral stag' || name === 'The moth') && tx === 0) this.gates.at(-1).body.enable = false;
+              break;
+            case 'a': {
+              rect(x, y, T, T, 0x539bd6);
+              this.aimedBeams.push({ x: x + T / 2, y: y + T / 2, room: ri, clock: -2, period: ty === 8 ? 1.6 : 4, angle: Math.PI });
+              break;
+            }
             case '>': case '<': case 'v': case 'u': { // laser emitter: a solid block that fires a beam
               const e = rect(x, y, T, T, 0x5a4a6a);
               this.statics.add(e);
               this.lasers.push({ e, room: ri, dx: { '>': 1, '<': -1 }[row[tx]] ?? 0, dy: { v: 1, u: -1 }[row[tx]] ?? 0 });
               break;
             }
-            case 's': this.springs.push(rect(x + 3, y + T - 12, T - 6, 12, 0xffc93c).setStrokeStyle(2, 0x7a5200).setDepth(3)); break;
+            case 's': this.springs.push(rect(x + 3, y + T - 12, T - 6, 12, 0xffc93c).setStrokeStyle(2, 0x7a5200).setDepth(3)); hazard(this.springs.at(-1), 'spring', T - 6, 24, -6); break;
             case 'P': room.spawns.push({ x: x + T / 2, y: y + T - 15 }); break;
             case 'A': this.amulets.push(this.add.circle(x + T / 2, y + T - 10, 6, 0xffd774).setStrokeStyle(2, 0xb07a22).setDepth(3)); break;
             case 'C': { // shrine: a mossy stone with a gold rune; touching it moves your respawn here
@@ -903,6 +1044,13 @@ class Room extends Phaser.Scene {
       });
       return room;
     });
+    // Shrines separate plate puzzles; adjacent plates in one stage share its doors.
+    for (const d of this.doors) {
+      const R = this.rooms[d.room].rect;
+      const shrines = this.shrines.filter((sh) => R.contains(sh.x, sh.y));
+      const stage = (x) => shrines.filter((sh) => sh.x < x).length;
+      d.plates = this.plates.filter((pl) => pl.room === d.room && stage(pl.x) === stage(d.x));
+    }
     // Fill a screen's height of solid ground above and below every room (stopping at any other room),
     // so the camera's diagonal slide between rooms at different heights never shows empty space.
     for (const { rect: R } of this.rooms) {
@@ -912,13 +1060,21 @@ class Room extends Phaser.Scene {
       if (top < R.y) Art.platform(this, R.x, top, R.width, R.y - top, []);
       if (bottom > R.bottom) Art.platform(this, R.x, R.bottom, R.width, bottom - R.bottom, []);
     }
+    for (const B of [...this.bosses]) {
+      if ((B.stag && stats.stagFinished) || (B.kind === 'tree' && stats.treePower) ||
+          (B.story === 'mothDown' && stats.mothFinished)) {
+        if (B.story === 'mothDown') this.breakWall(B);
+        this.bossDefeated(B);
+      }
+    }
     this.start = this.rooms[this.index].spawns[0];
     this.boss = this.bosses.find((b) => b.room === this.index) ?? null;
     this.bosses.filter((b) => b.story === 'mothDown' && !b.hidden).forEach((b) => this.breakWall(b)); // already broken on replays
-    rules.max = WORLD_SOULS[this.rooms[this.index].world] ?? 3;
+    rules.max = this.treePower ? 3 : Math.max(stats.mothFinished ? 2 : 1, WORLD_SOULS[this.rooms[this.index].world] ?? 3);
     Dialogue.create(this);
     this.wearing = Dialogue.seen.has('amulet');
     this.roomDeaths = 0;
+    this.drawStagGrounds();
     this.showWorld(this.rooms[this.index].world);
     Dialogue.play(this, this.rooms[this.index].enter);
 
@@ -949,7 +1105,7 @@ class Room extends Phaser.Scene {
       this.make.graphics({ add: false }).fillStyle(0xffffff).fillRoundedRect(0, 0, 22, 40, 10).generateTexture('guideStandIn', 22, 40).destroy();
     this.guide = this.add.image(this.start.x + 60, this.start.y, this.painted ? 'heroIdle' : 'guideStandIn').setOrigin(0.5, 1)
       .setScale(this.painted ? this.heroScale : 1).setTint(0xcfeaff).setBlendMode(Phaser.BlendModes.ADD).setDepth(4.4).setAlpha(0);
-    this.guide.on = Dialogue.seen.has('amulet');
+    this.guide.on = Dialogue.seen.has('amulet') && !this.stagFinished;
     this.guide.hoverY = this.guide.y;
     this.guide.away = 0;
     this.physics.add.existing(this.player);
@@ -960,6 +1116,9 @@ class Room extends Phaser.Scene {
       const a = this.player.body, b = s.body;
       const ox = Math.min(a.right, b.right) - Math.max(a.x, b.x);
       const oy = Math.min(a.bottom, b.bottom) - Math.max(a.y, b.y);
+      // A narrow landing is still a floor contact, even when the fall exceeds its width.
+      const across = a.prev.x < b.right && a.prev.x + a.width > b.x;
+      if (across && a.prev.y + a.height <= b.y) return true;
       if (ox >= oy) return true; // floor/ceiling contact: normal handling
       a.x += a.x + a.halfWidth < b.x + b.halfWidth ? -ox : ox;
       a.velocity.x = 0;
@@ -1000,13 +1159,14 @@ class Room extends Phaser.Scene {
     {
       if (kind === 'f') { // flyer: no physics body, so souls don't stop it
         const f = rect(x + 4, y + 8, 24, 16, 0x9b59b6).setDepth(4);
+        this.enemyPainting(f, 'flyer', 32);
         this.flyers.push(Object.assign(f, { dir: -1, baseY: y + 16, kind, spawn: sp }));
         return;
       }
       const e = kind === 't' ? rect(x + 4, y + T - 28, 24, 28, 0xe08a3c) : rect(x + 4, y + T - 24, 24, 24, 0xd0543c);
       e.kind = kind;
       e.spawn = sp;
-      if (kind === 't') e.cool = THROW_EVERY;
+      if (kind === 't') { e.cool = THROW_EVERY; this.enemyPainting(e, 'thrower', 32); }
       this.physics.add.existing(e);
       e.dir = -1;
       if (kind === 'e' && this.textures.exists('walker')) {
@@ -1021,6 +1181,14 @@ class Room extends Phaser.Scene {
     }
   }
 
+  enemyPainting(object, key, height) {
+    if (!this.textures.exists(key)) return;
+    object.setFillStyle(0, 0);
+    object.img = this.add.image(object.x, object.y, key, 0).setDepth(4)
+      .setDisplaySize(this.textures.get(key).get(0).width * height / this.textures.get(key).get(0).height, height);
+    object.on('destroy', () => object.img.destroy());
+  }
+
   // The world's name fades in when you arrive in a new world.
   showWorld(w) {
     this.world = w;
@@ -1031,6 +1199,9 @@ class Room extends Phaser.Scene {
   }
 
   bossDefeated(B) {
+    if (B.stag) this.stagFinished = stats.stagFinished = true;
+    if (B.story === 'mothDown') { stats.mothFinished = true; rules.max = 2; rules.selfDestruct = true; }
+    if (B.kind === 'tree') { this.treePower = stats.treePower = true; rules.max = 3; }
     B.r.destroy();
     this.bosses.splice(this.bosses.indexOf(B), 1);
     if (this.boss === B) this.boss = null;
@@ -1057,6 +1228,21 @@ class Room extends Phaser.Scene {
   // Staging cues fired by dialogue lines (see `cue` in dialogue.js).
   cue(name) {
     const g = this.guide, p = this.player;
+    if (name === 'stagAppear' && this.boss?.stag) {
+      this.boss.hidden = false; this.boss.introUntil = this.time.now + 1000; this.boss.r.setVisible(true); this.cameras.main.flash(450, 170, 225, 255);
+    }
+    if (name === 'lastBeam' && this.boss?.stag) {
+      const B = this.boss; g.setPosition(p.x + 40, p.y).setAlpha(0.9);
+      const beam = this.add.line(0, 0, B.r.x, B.r.y, g.x, g.y, 0x9bdfff).setOrigin(0).setLineWidth(7).setDepth(6);
+      this.time.delayedCall(700, () => beam.destroy());
+    }
+    if (name === 'guideBreak') {
+      g.on = false;
+      this.cameras.main.flash(400, 120, 210, 255);
+      this.tweens.add({ targets: g, alpha: 0, duration: 1500, onComplete: () => { g.on = false; } });
+    }
+    if (name === 'stagGone' && this.boss?.stag) { this.bossDefeated(this.boss); this.stagFinished = true; }
+    if (name === 'tree' && this.boss?.kind === 'tree') { this.boss.hidden = false; this.boss.r.setVisible(true); this.boss.phase = 'intro'; this.boss.timer = 1; }
     if (name === 'wear') this.wearing = true;
     if (name === 'flash') this.cameras.main.flash(600, 255, 215, 120);
     if (name === 'theEnd') { // he walks into the pyramid: fade out to the ending card
@@ -1079,8 +1265,9 @@ class Room extends Phaser.Scene {
     }
     const B = this.bosses.find((b) => b.room === this.index && b.story);
     if (name === 'glow' && B) { // the fallen boss turns white and pulses
-      B.r.setFillStyle(0xffffff);
-      this.tweens.add({ targets: B.r, alpha: 0.4, duration: 220, yoyo: true, repeat: 4 });
+      if (!B.img) B.r.setFillStyle(0xffffff);
+      B.img?.setTintFill(0xffffff);
+      this.tweens.add({ targets: B.img ?? B.r, alpha: 0.4, duration: 220, yoyo: true, repeat: 4 });
     }
     if (name === 'absorb' && B) { // dissolves into motes that stream into the hero, who flashes white
       if (!this.textures.exists('spark'))
@@ -1102,6 +1289,7 @@ class Room extends Phaser.Scene {
     if (name === 'shake') this.cameras.main.shake(1400, 0.006);
     if (name === 'moth' && this.boss?.hidden) { // bursts out of the wall, flies to its patrol spot, screams
       const B = this.boss, { x, y } = B.r, h = this.breakWall(B, true);
+      this.gates.filter((g) => g.room === B.room).forEach((g) => { g.body.enable = true; });
       B.dir = -1;
       B.r.setVisible(true).setPosition(h.x, h.y);
       B.img?.setScale(MOTH_SCALE * 0.5);
@@ -1162,7 +1350,7 @@ class Room extends Phaser.Scene {
   enterRoom(i) {
     const p = this.player, R = this.rooms[i].rect, cam = this.cameras.main;
     this.index = i;
-    rules.max = WORLD_SOULS[this.rooms[i].world] ?? rules.max;
+    rules.max = this.treePower ? 3 : Math.max(stats.mothFinished ? 2 : 1, WORLD_SOULS[this.rooms[i].world] ?? rules.max);
     Dialogue.play(this, this.rooms[i].enter);
     this.roomDeaths = 0;
     this.corpses.forEach((c) => c.destroy());
@@ -1188,7 +1376,7 @@ class Room extends Phaser.Scene {
     });
   }
 
-  die() {
+  die(chosen = false) {
     if (this.dead > 0) return;
     stats.deaths++;
     const p = this.player;
@@ -1208,15 +1396,19 @@ class Room extends Phaser.Scene {
       // A soul is the hero's painting, frozen in the pose he died in, glowing blue-white.
       const [key, frame] = this.lying ? ['heroSlide', SLIDE_FRAMES[0]] : this.heroFrame; // pose may not be drawn yet
       const feet = c.y + c.height / 2, flip = this.face < 0;
-      const body = this.add.image(c.x, feet, key, frame).setOrigin(0.5, 1).setScale(this.heroScale).setFlipX(flip)
+      const body = this.add.image(c.x, feet, key, frame).setOrigin(0.5, 1).setScale(key === 'heroWall' ? HERO_HEIGHT / 141 : this.heroScale).setFlipX(flip)
         .setTintFill(0x6fb6ee).setAlpha(0.45).setDepth(4.5);
-      const glow = this.add.image(c.x, feet, key, frame).setOrigin(0.5, 1).setScale(this.heroScale).setFlipX(flip)
+      const glow = this.add.image(c.x, feet, key, frame).setOrigin(0.5, 1).setScale(key === 'heroWall' ? HERO_HEIGHT / 141 : this.heroScale).setFlipX(flip)
         .setTint(0xbfe6ff).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.9).setDepth(4.6);
       c.sprites = [body, glow];
       c.on('destroy', () => c.sprites.forEach((sp) => sp.destroy()));
     }
     this.statics.add(c);
     this.corpses.push(c);
+    if (this.rooms[this.index].name === 'The long pit' && !c.lying &&
+        c.x > this.rooms[this.index].rect.x + 3 * T && c.x < this.rooms[this.index].rect.x + 11 * T &&
+        bottom > this.rooms[this.index].rect.y + 9 * T && bottom - h < this.rooms[this.index].rect.y + 10 * T)
+      Dialogue.play(this, 'lowDoor');
     if (rules.max && this.corpses.length > rules.max) this.corpses.shift().destroy();
 
     this.charge = 0;
@@ -1231,10 +1423,21 @@ class Room extends Phaser.Scene {
     p.body.reset(this.start.x, y);
     p.setVisible(false);
     this.dead = RESPAWN_DELAY;
-    if (this.boss) { this.boss.hp = BOSS_HP; this.boss.hurt = 0; } // your death heals the boss
+    if (this.boss) { this.boss.hp = BOSS_HP; this.boss.hurt = 0;
+      if (this.boss.stag) { this.boss.deaths++; this.boss.phase = 'setup'; this.boss.clock = 0; this.boss.waveClock = 0; this.boss.waves = 0; this.boss.wave = null; this.boss.beam = null; }
+      if (this.boss.kind === 'tree') { this.boss.phase = 'idle'; this.boss.timer = 4; this.boss.attack = 2; this.boss.slamOpen = false; this.boss.pods.forEach((p) => p.r.destroy()); this.boss.pods = []; }
+    } // your death heals the boss
+    if (this.boss?.story === 'mothDown' && !this.boss.hidden) {
+      this.boss.dust = 2.4;
+      this.boss.resetWait = 1.5;
+      this.boss.r.x = this.rooms[this.index].rect.x + 22 * T;
+      this.boss.dir = 1;
+      this.shots = this.shots.filter((sh) => { if (!sh.mothDust) return true; sh.destroy(); return false; });
+    }
     if (this.rooms[this.index].world) Dialogue.play(this, 'firstDeath'); // only the first time
     const hint = this.rooms[this.index].deathTalk?.[++this.roomDeaths]; // hints after repeated deaths in a room
     if (hint) Dialogue.play(this, hint);
+    if (chosen) Dialogue.play(this, 'chosenDeath');
   }
 
   // Bodies fall straight down until they rest on a wall, closed door or another body.
@@ -1293,6 +1496,7 @@ class Room extends Phaser.Scene {
     const g = this.fx, b = this.player.body, p = this.player;
     g.clear();
     for (const c of this.corpses) {
+      if (c.buried > 0) { g.fillStyle(0x69cfff, 0.5).fillRect(c.x - 15, c.y + c.height / 2 - 4, 30, 4); continue; }
       if (c.sprites) this.soulFlames(g, c, t);
       else this.figure(g, c, { lying: c.lying, dir: c.dir, t, soul: true });
     }
@@ -1307,19 +1511,22 @@ class Room extends Phaser.Scene {
     }
     // Pick the frame: in the air, jump or fall; on the ground, run frames timed to distance covered
     // (one frame per RUN_STEP px, so steps match speed), or the standing painting when still.
+    const wallPose = !grounded && b.velocity.y > 0 && this.wallSide() === this.face && this.textures.exists('heroWall');
     this.heroFrame = this.lying ? ['heroSlide', SLIDE_FRAMES[Math.floor(t * SLIDE_FPS) % SLIDE_FRAMES.length]]
+      : !grounded && this.kick > 0 && this.textures.exists('heroWall') ? ['heroWall', 3]
+      : wallPose ? ['heroWall', Math.floor(t * 8) % Math.min(3, this.textures.get('heroWall').frameTotal - 1)]
       : !grounded ? ['heroSheet', b.velocity.y < 0 ? 6 : 7]
       : Math.abs(b.velocity.x) > 20
         ? (this.textures.exists('heroRun') ? ['heroRun', RUN_FRAMES[Math.floor(this.walk / RUN_STEP) % RUN_FRAMES.length]] : ['heroSheet', Math.floor(this.walk / RUN_STEP) % 6])
-      : ['heroIdle', undefined];
+      : this.textures.exists('heroIdleAnim') ? ['heroIdleAnim', Math.floor(t * 6) % 4] : ['heroIdle', undefined];
     const [key, frame] = this.heroFrame;
     // Standing frames center on him. The slide is anchored by its feet (the frame's leading edge),
     // a little ahead of center, so the body trails behind and getting up moves him forward.
     // Position from the physics body, which has already moved this frame (the rectangle only catches
     // up after drawing, so using it made the painting trail one frame behind the body).
-    const flip = this.face < 0, slide = key === 'heroSlide', bx = b.center.x, feet = b.bottom;
-    this.heroSprite.setTexture(key, frame).setScale(this.heroScale).setFlipX(flip)
-      .setOrigin(slide ? this.slideOrigin(frame, flip) : 0.5, 1)
+    const flip = (key === 'heroWall' && frame === 3 ? this.lastWall : this.face) < 0, slide = key === 'heroSlide', bx = b.center.x, feet = b.bottom;
+    this.heroSprite.setTexture(key, frame).setScale(key === 'heroWall' ? HERO_HEIGHT / 141 : this.heroScale).setFlipX(flip)
+      .setOrigin(slide ? this.slideOrigin(frame, flip) : key === 'heroIdleAnim' ? (flip ? 0.25 : 0.75) : 0.5, 1)
       .setPosition(bx + (slide ? this.face * 12 : 0), feet + 1);
     // the amulet's glow, on his chest (only placed for upright poses)
     if (slide || !this.wearing) return;
@@ -1442,10 +1649,22 @@ class Room extends Phaser.Scene {
       if (e.kind === 't') { // stands still; shoots straight at you along the ground
         b.velocity.x = 0;
         const p = this.player;
+        e.dir = Math.sign(p.x - e.x) || 1;
+        if (e.img) {
+          const until = e.cool, since = THROW_EVERY - until;
+          const frame = since < 0.12 ? 2 : since < 0.28 ? 3 : until < 0.3 ? 1 : 0;
+          e.img.setPosition(e.x, b.bottom - 16).setFlipX(e.dir > 0).setFrame(frame);
+        }
         if (p.visible && Math.abs(p.y - e.y) < 3 * T && (e.cool -= this.game.loop.delta / 1000) <= 0) {
           e.cool = THROW_EVERY;
           const d = Math.sign(p.x - e.x) || 1;
-          this.shots.push(Object.assign(this.add.circle(e.x + d * 16, e.y - 4, 5, 0xffb060).setDepth(4), { vx: d * SHOT_SPEED }));
+          const shot = this.add.circle(e.x + d * 16, e.y - 4, 5, 0xffb060).setDepth(4);
+          if (this.textures.exists('seedShot')) {
+            shot.setFillStyle(0, 0);
+            shot.img = this.add.image(shot.x, shot.y, 'seedShot').setDisplaySize(10, 10).setDepth(4).setFlipX(d < 0);
+            shot.on('destroy', () => shot.img.destroy());
+          }
+          this.shots.push(Object.assign(shot, { vx: d * SHOT_SPEED }));
         }
         continue;
       }
@@ -1480,9 +1699,13 @@ class Room extends Phaser.Scene {
       if (walls(new Phaser.Geom.Rectangle(nx - 12, f.y - 8, 24, 16)) || nx < R.x + 16 || nx > R.right - 16) f.dir *= -1;
       else f.x = nx;
       f.y = f.baseY + Math.sin(t * 3 + f.baseY) * 10;
+      f.img?.setPosition(f.x, f.y).setFlipX(f.dir > 0).setFrame(Math.floor(t * 12) % 4);
     }
     this.shots = this.shots.filter((sh) => {
       sh.x += sh.vx * dt;
+      sh.y += (sh.vy ?? 0) * dt;
+      sh.img?.setPosition(sh.x, sh.y);
+      if (sh.mothDust && sh.y >= R.bottom - T - 16) { sh.y = R.bottom - T - 16; sh.vy = 0; }
       if (!solid(new Phaser.Geom.Rectangle(sh.x - 4, sh.y - 4, 8, 8)) && R.contains(sh.x, sh.y)) return true;
       sh.destroy();
       return false;
@@ -1523,8 +1746,16 @@ class Room extends Phaser.Scene {
 
   drawHazards() {
     const g = this.fx, t = this.time.now / 1000;
+    const B = this.boss;
+    if (B?.kind === 'tree' && !B.hidden) {
+      if (B.phase === 'slam') {
+        g.lineStyle(3, 0x69cfff, 1).strokeCircle(B.aimX, B.target?.y ?? B.floor - 16, 24);
+        g.lineBetween(B.r.x, B.r.y, B.aimX, B.target?.y ?? B.floor);
+      } else if (B.phase === 'swing') g.fillStyle(0xffd76a, 0.35).fillRect(B.r.x - 12 * T, B.floor - 24, 16 * T, 24);
+    }
     for (const sw of this.saws) {
       if (sw.room !== this.index) continue;
+      if (sw.img) continue;
       g.fillStyle(0x8a8f99, 1).fillCircle(sw.x, sw.y, SAW_R);
       for (let i = 0; i < 8; i++) {
         const a = (sw.jam ? 0 : t * 12) + (i * Math.PI) / 4;
@@ -1535,30 +1766,211 @@ class Room extends Phaser.Scene {
     }
   }
 
+  drawStagGrounds() {
+    const R = this.rooms.find((r) => r.name === 'The old tree').rect;
+    this.add.rectangle(R.x + 21 * T, R.y + 13 * T, 26, 128, 0x655d60).setDepth(1);
+    this.add.circle(R.x + 21 * T, R.y + 9 * T, 65, 0x526672).setDepth(1);
+    this.add.ellipse(R.x + 19 * T, R.y + 14 * T, 200, 68, 0x705a43).setDepth(1);
+    this.stagWriting = this.add.text(R.x + 16.5 * T, R.y + 13 * T, SCRIPT.stagNote.map((l) => l.text).join('\n'), {
+      fontFamily: 'cursive', fontSize: '14px', color: '#382b23', fontStyle: 'italic', wordWrap: { width: 600 }
+    }).setScale(0.28, 0.14).setAngle(-4).setDepth(2).setVisible(false);
+    const P = this.rooms.find((r) => r.name === 'The pyramid entrance').rect;
+    this.add.triangle(P.x + 22 * T, P.y + 10 * T, 0, 160, 120, 0, 240, 160, 0x708292).setDepth(1);
+    this.add.rectangle(P.x + 22 * T, P.y + 14 * T, 40, 64, 0x101923).setDepth(2);
+  }
+
+  stagWave(B, dt) {
+    const R = this.rooms[B.room].rect, w = B.wave;
+    const prev = w.x;
+    w.x -= 420 * dt;
+    this.fx.fillStyle(0xdf89ff, 0.7).fillRect(w.x, R.y + T, 12, 14 * T);
+    const souls = this.corpses.filter((c) => c.x <= prev && c.x >= w.x && c.y < R.y + 12 * T)
+      .sort((a, b) => b.x - a.x);
+    for (const c of souls) {
+      if (w.broken === 2) { B.wave = null; return; }
+      this.corpses.splice(this.corpses.indexOf(c), 1); c.destroy(); w.broken++;
+    }
+    if (this.player.x <= prev && this.player.x >= w.x) { this.die(); return; }
+    if (w.x < R.x) B.wave = null;
+  }
+
+  updateStag(B, dt) {
+    const R = this.rooms[B.room].rect, p = this.player;
+    B.antlers.setVisible(B.r.visible && !B.img).clear().lineStyle(B.waveClock > 13 ? 7 : 3, B.waveClock > 13 ? 0xdf89ff : 0xd9f3ff);
+    for (const dx of [-28, 28]) {
+      B.antlers.lineBetween(B.r.x + dx, B.r.y - 32, B.r.x + dx, B.r.y - 66);
+      B.antlers.lineBetween(B.r.x + dx, B.r.y - 48, B.r.x + dx + Math.sign(dx) * 17, B.r.y - 62);
+    }
+    const pose = this.time.now < B.introUntil ? 'intro' : B.phase === 'beam' ? 'beam'
+      : B.waveClock >= 14 ? 'wave' : B.phase === 'charge' ? 'charge' : 'idle';
+    this.bossPose(B, 'stag', pose, 180, pose === 'wave' || pose === 'intro' ? 1 : 0.7, pose === 'charge' || pose === 'idle');
+    B.img?.setPosition(B.r.x, B.r.y + 32 + (B.artFoot ?? 0)).setVisible(B.r.visible).setTint(B.waveClock > 13 ? 0xdf89ff : B.phase === 'beam' ? 0x65baff : 0xffffff);
+    if (this.dead > 0 || this.transit || this.talk.line || this.talk.queue.length) return;
+    if (p.x > R.x + 1.5 * T) this.gates.filter((g) => g.active && g.room === B.room).forEach((g) => { g.body.enable = true; });
+    if (!Dialogue.seen.has('stagArrival')) { Dialogue.play(this, 'stagArrival'); return; }
+    if (B.hidden) return;
+    B.hurt -= dt; B.clock += dt;
+    B.r.setFillStyle(B.waveClock > 13 ? 0xdf89ff : B.phase === 'beam' ? 0x65baff : B.phase === 'windup' ? 0xffda75 : 0xbceaff);
+    if (B.phase === 'setup') {
+      if (B.clock < 8 && p.x < R.x + 7 * T) return;
+      B.phase = 'windup'; B.clock = 0;
+    }
+    B.waveClock += dt;
+    if (B.waveClock >= 15 && !B.wave) { B.waveClock = -10; B.waves++; B.wave = { x: R.right - T, broken: 0 }; }
+    if (B.wave) this.stagWave(B, dt);
+    if (this.dead > 0) return;
+    const gap = 8 * Math.pow(0.8, 3 - B.hp);
+    if (B.phase === 'windup' && B.clock > 0.7) { B.phase = 'charge'; B.clock = 0; }
+    if (B.phase === 'charge') {
+      B.r.x = Math.max(R.x + 6.5 * T, B.r.x - 650 * dt);
+      for (const c of [...this.corpses]) if (hit(bounds(c), bounds(B.r))) { this.corpses.splice(this.corpses.indexOf(c), 1); c.destroy(); }
+      if (B.r.x <= R.x + 6.5 * T) { B.phase = 'dazed'; B.clock = 0; B.stomped = false; }
+    } else if (B.phase === 'dazed' && B.clock >= 2) {
+      B.r.x = R.right - 5 * T; B.phase = 'beam'; B.clock = 0;
+      B.beam = { x: B.r.x, y: B.r.y - 2 * T, angle: Math.PI, clock: 0 };
+    } else if (B.phase === 'beam') {
+      if (B.beam.clock < 1.18) this.updateAimedBeam(B.beam, dt);
+      if (B.clock > gap) { B.phase = 'windup'; B.clock = 0; }
+    }
+    if (B.deaths >= 10) Dialogue.play(this, 'stagNudge');
+  }
+
   updateBoss(dt) {
+    for (const c of this.corpses) if (c.buried > 0 && (c.buried -= dt) <= 0) {
+      c.buried = 0; c.body.enable = true; c.setAlpha(1); c.sprites?.forEach((s) => s.setAlpha(0.6));
+    }
     const B = this.boss;
+    if (B?.hp <= 0) return;
+    if (B?.stag) return this.updateStag(B, dt);
+    if (B?.kind === 'tree') return this.updateTree(B, dt);
     if (B?.img) B.img.setPosition(B.r.x, B.r.y).setVisible(B.r.visible).setAlpha(B.r.alpha).setFlipX(B.dir > 0) // sheet faces left
       .setFrame(B.pose ?? MOTH_FRAMES[Math.floor((this.time.now / 1000) * MOTH_FPS) % MOTH_FRAMES.length]);
     if (!B || B.hidden) return;
+    if (B.story === 'mothDown') {
+      if (this.player.x > this.rooms[B.room].rect.x + 1.5 * T)
+        this.gates.filter((g) => g.room === B.room).forEach((g) => { g.body.enable = true; });
+      if ((B.resetWait = Math.max(0, (B.resetWait ?? 0) - dt)) > 0) return;
+      B.dust = (B.dust ?? 2.4) - dt;
+      if (B.dust <= 0) {
+        B.dust = 2.4 * 0.8 ** (BOSS_HP - B.hp);
+        const a = Math.atan2(this.rooms[B.room].rect.bottom - T - 16 - B.r.y, this.player.x - B.r.x);
+        this.shots.push(Object.assign(this.add.circle(B.r.x, B.r.y, 6, 0xffdf63).setDepth(4),
+          { vx: Math.cos(a) * 210, vy: Math.sin(a) * 210, mothDust: true }));
+      }
+    }
     B.hurt -= dt;
     B.r.x += B.dir * (BOSS_SPEED + (BOSS_HP - B.hp) * BOSS_SPEEDUP) * dt;
     if (B.r.x < B.min || B.r.x > B.max) { B.r.x = Phaser.Math.Clamp(B.r.x, B.min, B.max); B.dir *= -1; }
     B.r.setAlpha(B.hurt > 0 ? 0.4 : 1);
   }
 
-  // Returns true if the player died. Feet in the boss's top sliver is a stomp (also covers the
-  // bounce frames after it); any other touch kills.
+  // Attack sheets start at the wind-up and hold their recovery frame.
+  bossPose(B, kind, pose, height, duration, loop = false) {
+    const key = `${kind}-${pose}`;
+    if (!B.img || !this.textures.exists(key)) return;
+    const tex = this.textures.get(key), info = this.cache.json.get(`${key}-frames`);
+    if (!info) return;
+    const { frameWidth: fw, frameHeight: fh } = info, source = tex.getSourceImage();
+    const cols = Math.floor(source.width / fw), count = cols * Math.floor(source.height / fh);
+    if (!tex.has(0)) for (let i = 0; i < count; i++) tex.add(i, 0, (i % cols) * fw, Math.floor(i / cols) * fh, fw, fh);
+    if (B.artPose !== key) { B.artPose = key; B.artStart = this.time.now; }
+    const frame = Math.floor((this.time.now - B.artStart) / (duration * 1000) * count);
+    const sourceHeight = kind === 'stag' ? { idle: 486, intro: 584, charge: 500, beam: 555, wave: 617 }[pose] : fh;
+    const scale = height / sourceHeight;
+    B.artFoot = kind === 'stag' ? (fh - { idle: 660, intro: 677, charge: 676, beam: 653, wave: 676 }[pose]) * scale : 0;
+    B.img.setTexture(key, loop ? frame % count : Math.min(count - 1, frame)).setScale(scale);
+    if (pose === 'idle') B.img.setFrame(0).setScale(scale, scale * (1 + Math.sin(this.time.now / 320) * 0.012));
+  }
+
+  fallenBoss(B) {
+    const kind = B.stag ? 'stag' : B.kind === 'tree' ? 'tree' : 'moth', key = `${kind}-fallen`;
+    if (!this.textures.exists(key)) return;
+    if (!B.img) {
+      B.img = this.add.image(B.r.x, B.r.y, key).setDepth(4);
+      B.r.on('destroy', () => B.img.destroy());
+    }
+    const floor = this.rooms[B.room].rect.bottom - T;
+    const tex = this.textures.get(key);
+    // Fallen paintings have wide transparent margins.
+    const [x, y, w, h] = { moth: [464, 310, 344, 104], tree: [512, 270, 250, 158], stag: [558, 306, 136, 86] }[kind];
+    if (!tex.has('pose')) tex.add('pose', 0, x, y, w, h);
+    B.img.setTexture(key, 'pose').setOrigin(0.5, 1).setVisible(true).setAlpha(1).clearTint().setFlipX(false);
+    B.img.setScale((kind === 'tree' ? 150 : kind === 'stag' ? 160 : 170) / w);
+    B.img.setPosition(B.r.x, kind === 'moth' ? B.r.y : floor);
+    B.r.setFillStyle(0, 0);
+    B.antlers?.setVisible(false);
+    if (kind === 'moth') this.tweens.add({ targets: B.img, y: floor, duration: 650, ease: 'Quad.easeIn' });
+  }
+
+  updateTree(B, dt) {
+    const pose = ['swing', 'slam', 'throw', 'intro'].includes(B.phase) ? B.phase : 'idle';
+    this.bossPose(B, 'tree', pose, 224, pose === 'slam' ? TREE_GLOW : pose === 'intro' ? 1 : 0.6, pose === 'idle');
+    B.img?.setVisible(B.r.visible).setTint(B.phase === 'slam' ? 0x69cfff : B.phase === 'swing' || B.phase === 'throw' ? 0xffd76a : 0xffffff);
+    if (B.hidden || this.dead > 0 || this.talk.line || this.talk.queue.length || this.transit) return;
+    B.hurt -= dt;
+    if (this.player.body.blocked.down || this.player.body.touching.down) B.stompReady = true;
+    const p = this.player, feet = p.y + p.height / 2;
+    for (const pod of [...B.pods]) {
+      pod.vy += 700 * dt; pod.r.x += pod.vx * dt; pod.r.y += pod.vy * dt;
+      const blocked = this.corpses.some((c) => !c.buried && hit(bounds(c), bounds(pod.r)));
+      const landed = pod.r.y >= B.floor - 8;
+      if (!blocked && (hit(bounds(p), bounds(pod.r)) || landed && Math.abs(p.x - pod.r.x) < 38 && feet > B.floor - 28)) return this.die();
+      if (blocked || landed) { pod.r.destroy(); B.pods.splice(B.pods.indexOf(pod), 1); }
+    }
+    if ((B.timer -= dt) > 0) return;
+    const gap = 8 * Math.pow(0.8, BOSS_HP - B.hp);
+    if (B.phase === 'idle' || B.phase === 'intro') {
+      B.attack = (B.attack + 1) % 3;
+      B.phase = B.attack === 0 ? 'slam' : B.attack === 1 ? 'swing' : 'throw';
+      B.timer = B.phase === 'slam' ? TREE_GLOW : 0.6;
+      if (B.phase === 'slam') {
+        B.target = [...this.corpses].sort((a, b) => Math.hypot(a.x - p.x, a.y - p.y) - Math.hypot(b.x - p.x, b.y - p.y))[0];
+        B.aimX = B.target?.x ?? p.x;
+      }
+      return;
+    }
+    if (B.phase === 'slam') {
+      const c = B.target;
+      B.slamOpen = !!c?.active;
+      if (c?.active) { c.buried = TREE_BURIED; c.body.enable = false; c.setAlpha(0.15); c.sprites?.forEach((s) => s.setAlpha(0.1)); }
+      this.cameras.main.shake(180, 0.005);
+      if (!this.corpses.some((soul) => !soul.buried && Math.abs(feet - bounds(soul).top) < 3 && Math.abs(p.x - soul.x) < (p.width + soul.width) / 2) || Math.abs(p.x - B.aimX) < 28 && feet > (c?.y ?? B.floor) - 40) return this.die();
+    } else if (B.phase === 'swing') {
+      if (p.x > B.r.x - 12 * T && p.x < B.r.x + 4 * T && feet > B.floor - 24) return this.die();
+    } else if (B.phase === 'throw') {
+      const r = this.textures.exists('seedPod') ? this.add.image(B.r.x, B.r.y, 'seedPod').setDisplaySize(20, 20) : this.add.rectangle(B.r.x, B.r.y, 20, 20, 0xffd76a);
+      B.pods.push({ r, vx: (p.x - B.r.x) / 0.9, vy: (B.floor - 10 - B.r.y - 350 * 0.81) / 0.9 });
+    }
+    B.timer = (gap - TREE_GLOW - 1.2) / 3; B.phase = 'idle';
+  }
+
+  // Use the previous feet position so a fast fall still counts as landing on top.
   touchBoss() {
     const B = this.boss, p = this.player;
     if (!B || B.hidden || !hit(bounds(p), bounds(B.r))) return false;
-    const top = B.r.y - BOSS_H / 2;
-    if (p.y + 15 - top > 14) { this.die(); return true; }
+    if (B.stag && B.phase !== 'dazed') { this.die(); return true; }
+    const top = bounds(B.r).top;
+    const falling = p.body.velocity.y >= 0;
+    if (!falling && p.y + 15 <= top + 18) return false;
+    if (!falling || (this.bossPreviousFeet ?? p.body.prev.y + p.body.height) > top + 1) { this.die(); return true; }
+    p.body.reset(p.x, top - p.height / 2);
     p.body.velocity.y = -JUMP * 0.8;
-    if (B.hurt > 0) return false;
+    if (B.hurt > 0 || (B.stag && B.stomped) || (B.kind === 'tree' && (B.stompReady === false || !B.slamOpen || !B.target?.buried))) return false;
+    if (B.stag) { B.stomped = true; if (B.waves) B.waveClock = -10; B.clock = Math.min(B.clock, 0.5); }
+    if (B.kind === 'tree') { B.stompReady = false; B.slamOpen = false; }
     B.hurt = 0.5;
+    if (B.story === 'mothDown') {
+      B.dust = 2.4 * 0.8 ** (BOSS_HP - B.hp + 1);
+      for (const sh of this.shots.filter((sh) => sh.mothDust)) sh.destroy();
+      this.shots = this.shots.filter((sh) => !sh.mothDust);
+    }
     if (--B.hp <= 0 && B.story) { // a story boss stops still; its script dissolves it (cue 'absorb')
       B.hidden = true;
+      this.fallenBoss(B);
+      if (B.stag) Dialogue.seen.delete(B.story);
       Dialogue.play(this, B.story);
+      if (B.story === 'treeDown') Dialogue.play(this, 'guideCrack');
+      if (B.stag) this.talk.queue = this.talk.queue.map((l) => ({ ...l, text: l.text?.replace('{deaths}', B.deaths).replace('{next}', B.deaths + 1) }));
     } else if (B.hp <= 0) {
       this.bossDefeated(B);
       this.cameras.main.flash(500, 255, 220, 140);
@@ -1569,6 +1981,8 @@ class Room extends Phaser.Scene {
   update(_t, ms) {
     const dt = Math.min(ms / 1000, 0.05);
     const k = this.keys, JD = Phaser.Input.Keyboard.JustDown, p = this.player;
+    this.bossPreviousFeet = this.bossFeet;
+    this.bossFeet = p.y + p.height / 2;
 
     if (JD(k.R) && k.SHIFT.isDown) return this.scene.restart({ index: this.index }); // Shift+R: retry the room (if you've trapped yourself)
     if (DEV && JD(k.N)) return this.scene.restart({ index: this.index + 1 });
@@ -1583,21 +1997,33 @@ class Room extends Phaser.Scene {
     if (!rules.freeze) this.dropCorpses(dt);
     this.updateEnemies();
     this.updateHazards(dt);
-    this.updateBoss(dt);
     this.drawFigures(this.time.now / 1000, dt);
+    this.updateBoss(dt);
     this.drawBeams();
+    if (!this.transit && this.dead <= 0 && !this.talk.line)
+      for (const beam of this.aimedBeams) if (beam.room === this.index) this.updateAimedBeam(beam, dt);
     this.drawHazards();
     Art.update(this, this.time.now / 1000);
 
     const weights = [p, ...this.corpses].map(bounds);
     for (const d of this.doors) {
-      const held = this.plates.some((pl) => pl.room === d.room && weights.some((w) => hit(w, bounds(pl))));
+      const held = d.plates.some((pl) => weights.some((w) => hit(w, bounds(pl))));
       d.body.enable = !held;
       d.setAlpha(held ? 0.2 : 1);
     }
 
     this.updateHud();
+    // Look into drops in every tall room, including drops after a shrine.
+    this.cameras.main.setFollowOffset(0, this.rooms[this.index].rect.height > this.cameras.main.height ? -this.cameras.main.height * 0.4 : 0);
     if (this.transit) return;
+    this.stagWriting.setVisible(this.stagFinished);
+    if (this.stagFinished && !this.talk.line && !this.talk.queue.length) {
+      const R = this.rooms[this.index];
+      if (R.name === 'The old tree' && p.x > R.rect.x + 18 * T && p.x < R.rect.x + 20 * T)
+        Dialogue.play(this, 'stagNote');
+      if (R.name === 'The pyramid entrance' && Dialogue.seen.has('stagNote') && p.x > R.rect.x + 22 * T)
+        Dialogue.play(this, 'floorOne');
+    }
     // Spots: [column, script, after] plays a script once you walk past that column (after another script, if given).
     if (!this.talk.line && !this.talk.queue.length)
       for (const [col, key, after] of this.rooms[this.index].spots ?? [])
@@ -1632,9 +2058,9 @@ class Room extends Phaser.Scene {
     const world = this.rooms[this.index].world ?? 0;
     // Self-destruct: hold to charge, let go to cancel. After a death, let go before charging again.
     if (!(k.K.isDown || k.X.isDown)) this.sdLock = false, this.charge = 0;
-    else if (!this.sdLock && (rules.selfDestruct || world >= 2) && (this.charge += ms / 1000) >= SD_HOLD) { this.sdLock = true; return this.die(); }
+    else if (!this.sdLock && (rules.selfDestruct || world >= 2) && (this.charge += ms / 1000) >= SD_HOLD) { this.sdLock = true; return this.die(true); }
     // Recall: a tap takes back the newest soul; holding keeps going, faster and faster.
-    if ((rules.recall || world >= 3) && k.Q.isDown) {
+    if ((rules.recall || world >= 3 || this.treePower) && k.Q.isDown) {
       if (JD(k.Q)) { this.recallGap = RECALL_GAP; this.recallT = 0; }
       if ((this.recallT -= ms / 1000) <= 0) { // real time, like the physics (dt is capped)
         this.corpses.pop()?.destroy();
@@ -1649,9 +2075,11 @@ class Room extends Phaser.Scene {
       Dialogue.play(this, 'amulet');
       return false;
     });
-    for (const sh of this.shrines) if (hit(bounds(p), bounds(sh)) && this.start !== sh.spawn) {
+    for (const sh of this.shrines) if ((hit(bounds(p), bounds(sh)) ||
+        (world === 3 && Math.abs(p.x - sh.x) < T / 2 && p.y + 15 <= sh.y + 14 && p.y + 15 > sh.y - 4 * T)) && this.start !== sh.spawn) {
       this.start = sh.spawn;
       this.shrines.forEach((o) => o.rune.setAlpha(o === sh ? 1 : 0.35));
+      if (this.rooms[this.index].shrineTalk) Dialogue.play(this, this.rooms[this.index].shrineTalk);
       if (this.rooms[this.index].world) Dialogue.play(this, 'shrineMark'); // the first touch only
     }
 
@@ -1659,7 +2087,10 @@ class Room extends Phaser.Scene {
     if (b.velocity.y > MAX_FALL) b.velocity.y = MAX_FALL; // cap falling only (a cap both ways held springs to 7.4 tiles)
     const grounded = b.blocked.down || b.touching.down;
     if (grounded || b.velocity.y >= 0) this.sprung = false;
-    if (b.velocity.y >= 0 && this.springs.some((sp) => hit(bounds(p), bounds(sp)))) { b.velocity.y = -SPRING; this.sprung = true; }
+    if (b.velocity.y >= 0 && this.springs.some((sp) => hit(bounds(p), bounds(sp)))) {
+      b.velocity.y = -SPRING; this.sprung = true;
+      for (const sp of this.springs) if (hit(bounds(p), bounds(sp))) sp.launchArt = this.time.now;
+    }
     const dir = (k.D.isDown || k.RIGHT.isDown) - (k.A.isDown || k.LEFT.isDown);
     if (dir && !(this.lying && this.slide > 0)) this.face = dir; // can't turn mid-slide
     if (slideKey && grounded && !this.lying && Math.abs(b.velocity.x) > 100) {
@@ -1695,6 +2126,40 @@ class Room extends Phaser.Scene {
     if (grounded) this.kickSide = 0;
     if (jumpUp && this.kick > 0) b.velocity.x *= 0.5; // a tap: a small kick (the jump-height cut is below)
     if (jumpUp && b.velocity.y < 0 && !this.sprung) b.velocity.y *= 0.5; // short hop on early release
+  }
+
+  // Shared by relics and bosses. One shot stops at its first wall, soul or player.
+  updateAimedBeam(beam, dt) {
+    beam.clock += dt;
+    if (beam.clock < 0.6) beam.angle = Math.atan2(this.player.y - beam.y, this.player.x - beam.x);
+    const dx = Math.cos(beam.angle), dy = Math.sin(beam.angle);
+    const distance = (r) => {
+      let lo = 0, hi = 2000;
+      for (const [origin, dir, min, max] of [[beam.x, dx, r.x - 3, r.right + 3], [beam.y, dy, r.y - 3, r.bottom + 3]]) {
+        if (Math.abs(dir) < 0.00001) { if (origin < min || origin > max) return Infinity; }
+        else { const a = (min - origin) / dir, b = (max - origin) / dir; lo = Math.max(lo, Math.min(a, b)); hi = Math.min(hi, Math.max(a, b)); }
+      }
+      return lo <= hi ? lo : Infinity;
+    };
+    let length = 2000, target = null;
+    for (const solid of [...this.statics.getChildren().filter((s) => s.body.enable), this.player]) {
+      const d = distance(bounds(solid));
+      if (d < length) { length = d; target = solid; }
+    }
+    const firing = beam.clock >= 1 && beam.clock < 1.18;
+    if (beam.clock < 1.18) {
+      this.fx.fillStyle(0x65baff, 0.35).fillCircle(beam.x, beam.y, 22);
+      this.fx.lineStyle(firing ? 7 : 1, 0x8edbff, firing ? 1 : beam.clock < 0.6 ? 0.4 : 0.9);
+      this.fx.lineBetween(beam.x, beam.y, beam.x + dx * length, beam.y + dy * length);
+    }
+    if (firing && !beam.fired) {
+      beam.fired = true;
+      if (target === this.player) this.die();
+      else if (this.corpses.includes(target)) { this.corpses.splice(this.corpses.indexOf(target), 1); target.destroy();
+        if (this.rooms[this.index].name === 'The rehearsal') Dialogue.play(this, 'breakingBeam');
+      }
+    }
+    if (beam.clock >= (beam.period ?? 4)) { beam.clock = 0; beam.fired = false; }
   }
 
   // Each beam runs from its emitter to the first solid thing in its way (walls, closed doors, souls).
