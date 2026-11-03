@@ -56,20 +56,20 @@ bottom-left corner. The name card is text drawn in code, not an asset.
 | Broken wall edge (the hole the moth leaves) | — `assets/world1/wall-break.webp` (cropped: Flow painted a forest floor under the strip). Clean left side joins the wall, ragged right side; not seamless top-to-bottom, so mask or cap its ends in code | ✅ | ✅ `raw/world1/wall-break.jpg` | — | ✅ | |
 | Moth: wing dust (its attack) | — code particles. Room 11: you hide behind your soul from it; it can't break souls | — | — | — | — | |
 | **Tree guardian** (World 2) | reference: the ORIGINAL Flow tree (`raw/bosses/tree.jpg`, user's pick); the side-profile version is kept as `tree-profile.jpg` | ✅ | 🟡 `raw/bosses/tree.jpg`, top clipped, faces front | | | |
-| Tree: intro | mask eyes open, rises out of the ruins, arms spread, ~4 frames | | | | | |
-| Tree: idle | no sheet (user: too much movement; bosses just stand and breathe): the standing frame from `raw/bosses/tree-base.jpg` plus a slight breathing bob in code (scale ~1–2%, ~2 s per breath). `assets/bosses/tree-idle.webp` stays only as a fallback | — | ✅ | — | | |
-| Tree: branch swing | wind-up → swing → recover, ~4–5 frames | | | | | |
-| Tree: slam (smashes souls) | raise arms → slam down, ~4–5 frames | | | | | |
-| Tree: seed pod throw + pod | throw ~3 frames; pod is a single image | | | | | |
+| Tree: intro | mask eyes open, rises out of the ruins, arms spread, ~4 frames | | | | | ✅ |
+| Tree: idle | no sheet (user: too much movement; bosses just stand and breathe): the standing frame from `raw/bosses/tree-base.jpg` plus a slight breathing bob in code (scale ~1–2%, ~2 s per breath). `assets/bosses/tree-idle.webp` stays only as a fallback | — | ✅ | — | | ✅ |
+| Tree: branch swing | wind-up → swing → recover, ~4–5 frames | | | | | ✅ |
+| Tree: slam (smashes souls) | raise arms → slam down, ~4–5 frames | | | | | ✅ |
+| Tree: seed pod throw + pod | throw ~3 frames; pod is a single image | | | | | ✅ |
 | **Spectral stag** (World 3) | | ✅ | | | | |
-| Stag: intro | rears up on its hind legs, antlers raised, ~4 frames | | | | | |
-| Stag: idle | no sheet (user: the painted idle was useless): the standing frame from the clean base plus a slight breathing bob in code (scale ~1–2%, ~2 s per breath). `assets/bosses/stag-idle.webp` stays only as a fallback | — | ✅ | — | | |
+| Stag: intro | rears up on its hind legs, antlers raised, ~4 frames | | | | | ✅ |
+| Stag: idle | no sheet (user: the painted idle was useless): the standing frame from the clean base plus a slight breathing bob in code (scale ~1–2%, ~2 s per breath). `assets/bosses/stag-idle.webp` stays only as a fallback | — | ✅ | — | | ✅ |
 | Stag: walk | proud walking loop, `assets/bosses/stag-walk.webp` (reads as a prance, not a four-beat walk; user's call). **Stag sheets are drawn at different sizes** (walk and beam ~555 px tall, idle ~486 px): code scales each sheet so the body height matches | ✅ | ✅ | 🟡 | ✅ | |
-| Stag: charge | gallop loop, ~6 frames | | | | | |
-| Stag: beam | lower antlers, charge, fire, ~3–4 frames (beam itself in code) | | | | | |
-| Stag: wave | rear up → stamp, ~4 frames (the wave itself in code) | | | | | |
+| Stag: charge | gallop loop, ~6 frames | | | | | ✅ |
+| Stag: beam | lower antlers, charge, fire, ~3–4 frames (beam itself in code) | | | | | ✅ |
+| Stag: wave | rear up → stamp, ~4 frames (the wave itself in code) | | | | | ✅ |
 | All bosses: hurt | code flash (user's call), no art | — | — | — | — | |
-| All bosses: death | 1 painted **fallen pose** each (moth on the ground wings drooped; tree slumped, mask dark; stag lying down), then code: white glow → dissolves into motes that stream into the hero → he flashes (STORY.md W1 §13) | ✅ | | — | | |
+| All bosses: death | 1 painted **fallen pose** each (moth on the ground wings drooped; tree slumped, mask dark; stag lying down), then code: white glow → dissolves into motes that stream into the hero → he flashes (STORY.md W1 §13) | ✅ | | — | | ✅ |
 
 ## Hazards and room objects
 
