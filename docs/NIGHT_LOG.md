@@ -1,5 +1,22 @@
 # Night log
 
+## Morning summary (07:45)
+- **Done:** all three worlds are built end to end on branch `night/2026-11-02` (worktree `../Game-Week-night`, 54 commits since fd234ed, not merged into main, not pushed).
+  - W1: The long pit, The well, The gatehouse redone in the showcase style; Thornwood in the chain; the moth fight complete (dust, 3 stomps, 2nd rune).
+  - W2: all 6 rooms redone, Sawmill in the chain, the tree guardian built with the tree art.
+  - W3: all 4 rooms redone, Reliquary in the chain, The rehearsal (aimed beam), The old tree, the stag (40-wide arena), the note, the pyramid entrance and the ending card.
+- **Playtested:** one Claude playtester per world played with real key presses (reports in `docs/playtests/`). Codex fixed what they found: plates opened every door in a room, the tree could be rushed with one soul, boss stomps could kill you on the bounce, Shift+R after the stag brought it back (softlock in the pyramid), skips in 7 rooms, blind drops in tall rooms, a stomp target on the stag about 1 tile wide.
+- **Needs your review (DECISIONs):**
+  - The tree's slam buries a soul for 5s instead of breaking it (otherwise the fight can't be won with 2 souls). LEVELS.md "Boss and rehearsal designs".
+  - Boss designs for the tree, the rehearsal and the stag were written by Claude and tuned by Codex; worth playing them yourself first.
+  - The stag's waves: the first at 15s, later ones every 25s, pushed back by a stomp; the wave warning is violet.
+  - Tall rooms: the camera looks further down instead of a pan.
+  - The Long pit, The well and Let go share a "death revives the guard" idea; later rooms were told not to reuse it.
+- **Not yet verified:** the full test suite passing twice in a row after the last merge (Codex is fixing a flaky Spring replay and a Rehearsal timing check). No playtest after the fixes, and nobody has played it start to finish by hand.
+- **Left out:** polish items in the playtest reports (Thornwood's chimney kick works about 1 in 4, the Sawmill thrower shield does nothing, standing on a wall seam in Reliquary, the saw in Everything running through an open door). The full suite now takes 7-11 minutes (3 before the bosses).
+- **Art over file://:** the playtesters saw stand-in shapes because the game opened from disk; serve it over http to see the art.
+
+
 DECISION: W1 rooms 3–6 (First death → The chain) stay as they are. They're the teaching rooms, and LEVELS.md says to teach one idea alone and safe first.
 DECISION: the showcase style is approved for every room after the teaching rooms (LEVELS.md and the greybox memory both say the remaining rooms get redone in that style).
 DECISION: slide speed stays as it is (the slide is the flat-soul tool). Open question in LEVELS.md.
