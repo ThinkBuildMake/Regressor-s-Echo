@@ -15,3 +15,6 @@
 01:40 music: 9 tracks generated. Critic first failed on long files (ffmpeg output overflowed node's 1 MB buffer): fixed by sending compact mono mp3 with a 64 MB buffer.
 01:55 music loops: tried picking shorter phrase lengths to match end/start level; it only shortened loops. Measured the raws: ElevenLabs holds level until the final ~2 s and fades only the last bar, so the full planned length is right (the faded bar becomes the crossfade tail). Rebuilt at full length.
 02:00 music scores: title 8, World 1 10, World 2 10, World 3 10, shrine 10, moth 10, tree 10, stag 9, ending 10.
+02:40 sfx batch done: 64 files, 32 below 8 (worst: boss defeats, wing-dust shot, shrine activates, seed-pod burst, mask hit, stag charge at 3–4). Footsteps/landings mostly 5–7: the critic is strict on plain foley; ears should decide those.
+02:40 SPEND ElevenLabs 13,605 credits tonight (92,303 left, overage off). Vertex via OpenRouter BYOK $1.89 tonight (OpenRouter's own usage $0).
+02:45 pass 2 started: 3 fresh takes for each of the 16 sounds scoring <= 5; a file is replaced only if the new best scores higher.
