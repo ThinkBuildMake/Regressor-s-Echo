@@ -62,6 +62,9 @@ Generate **one** image per run. Show the user the image and the critic's verdict
   ```
   Then select it in the picker → Add to prompt.
 - **Prompt:** click the "What do you want to create?" box, type the style block + prompt, check the attached thumbnail is right, submit (→). Settings button next to → (shows "Nano Banana 2.1 ▭ xN"): model Nano Banana 2.1, count **x1**, aspect 1:1 for single sprites, 16:9 for sheets. Image gen costs 0 credits.
+- **The ring-and-three-rays mark:** Flow keeps inventing a 4th stroke below the ring on re-dressed or new props; say *"three short rays above the ring, nothing below the circle"*.
+- **Downloads stop after ~15 in a session:** Chrome blocks Flow's "multiple automatic downloads". The user has to allow it (Chrome's prompt, or Site settings → Automatic downloads → allow flow.google.com); don't change browser settings yourself. Until then, note which Flow tile holds the result and move on.
+- **Submit exactly once:** click the arrow OR press Enter, never both, then screenshot and confirm exactly ONE new tile appeared. Never resubmit because a result is slow (wait up to ~60 s). Every retry and fix edit also leaves an image in the project, so allow at most one extra attempt per image; the user doesn't want duplicates.
 - **Wait:** ~30 s; new results appear top-left of All media. The grid **crops thumbnails**: judge only the downloaded file (the wall strip looked clean in the grid but had a painted forest floor under it).
 - **Download:** right-click → `find` "Download" menuitem → click → `find` the **first** "Upscaled" menuitem (2K; the second is 4K, paid) → click. It lands in `~/Downloads` as `<Flow_title>_<hash>_2K.jpg` after ~10–20 s; `ls -t ~/Downloads | head` and `mv` it to the raw path.
 - Don't trash or delete anything in Flow without asking.
