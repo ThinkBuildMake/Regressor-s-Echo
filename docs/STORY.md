@@ -374,6 +374,7 @@ The pyramid needs to be visible in the background, its top lost in cloud.
 > Thanks for putting up with me. I know I'm not great company. I'd know.  
 > And don't take my ending as yours. You're me, sure, but you were different from the start.  
 > You'll get further than I ever could.  
+> Trust me.  
 > — You  
 > P.S. The amulet's still not worth anything. I checked.
 
