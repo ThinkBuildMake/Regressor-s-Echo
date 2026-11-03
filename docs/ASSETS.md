@@ -61,7 +61,8 @@ bottom-left corner. The name card is text drawn in code, not an asset.
 | Tree: seed pod throw + pod | throw ~3 frames; pod is a single image | | | | | |
 | **Spectral stag** (World 3) | | ✅ | | | | |
 | Stag: intro | rears up on its hind legs, antlers raised, ~4 frames | | | | | |
-| Stag: idle | breathing / head toss, ~3–4 frames | | | | | |
+| Stag: idle | no sheet (user: the painted idle was useless): the standing frame from the clean base plus a slight breathing bob in code (scale ~1–2%, ~2 s per breath). `assets/bosses/stag-idle.webp` stays only as a fallback | — | ✅ | — | | |
+| Stag: walk | proud walking loop for moving between attacks, 4 frames (user asked for boss walking; the moth flies, the tree is stationary by design) | ✅ | ✅ | | | |
 | Stag: charge | gallop loop, ~6 frames | | | | | |
 | Stag: beam | lower antlers, charge, fire, ~3–4 frames (beam itself in code) | | | | | |
 | Stag: wave | rear up → stamp, ~4 frames (the wave itself in code) | | | | | |

@@ -109,13 +109,14 @@ Make each clean base first (the "Clean base" prompt above, attaching the approve
 **Tree guardian** (`tree-base.png`, then):
 - `tree-intro.png`: 1 hunched low among the ruins, mask eyes dark; 2 the mask eyes open with pale-green light; 3 rising up, arms lifting; 4 standing at full height, arms spread wide.
 - `tree-idle.png`: a slow sway: the body leans slightly left, upright, slightly right, upright; roots stay planted.
-- `tree-swing.png`: 1 winds a branch arm back; 2 mid-swing; 3 arm fully swung forward and low; 4 recovering.
+- `tree-swing.png` (redo, user: "a single arm swung down"): ONE branch arm only; the other arm stays still at its side. 1 the arm raised high above its head; 2 the arm coming down in front of it; 3 the arm swung all the way down, striking low in front of its roots; 4 the arm still low, recovering. A big overhead chop.
 - `tree-slam.png`: 1 both arms raised high overhead; 2 arms coming down; 3 arms slammed into the ground in front; 4 arms on the ground, body leaning in.
-- `tree-throw.png`: 1 reaches up into its crown; 2 pulls back holding a seed pod; 3 throws forward; 4 follow-through, empty hand. Plus `seed-pod.png` (1:1): a single hard woody seed pod the size of a fist, on magenta.
+- `tree-throw.png` (redo, user: "not throwing correctly"): 1 one branch arm reaches up into its own crown and its twig fingers close around a round seed pod (the pod clearly visible in the hand); 2 that arm cocked far back behind its body, pod in hand, body leaning back; 3 the arm whipping forward and up, the pod just leaving the open hand and flying ahead of it; 4 follow-through: the arm fully extended forward and low, hand open and empty, body leaning forward. Plus `seed-pod.png` (1:1): a single hard woody seed pod the size of a fist, on magenta.
 
 **Spectral stag** (`stag-base.png`, then):
 - `stag-intro.png`: 1 standing proud; 2 rearing back; 3 up on its hind legs, forelegs raised, antlers high; 4 coming down, forelegs about to land.
 - `stag-idle.png`: standing proud; a slow breath and a small head toss across 4 frames, legs planted.
+- `stag-walk.png`: a 4-frame walking loop, proud and unhurried, head held high, legs moving in a clear four-beat walk (each frame a clearly different leg position), body level. For moving between attacks.
 - `stag-charge.png`: a 4-frame gallop loop, head lowered, antlers forward.
 - `stag-beam.png`: 1 head lowering; 2 antlers aimed forward, braced; 3 holding the aim; 4 holding (the beam and its blue glow are code).
 - `stag-wave.png`: 1 rearing; 2 up on hind legs; 3 forelegs stamping down; 4 forelegs planted, head low (the wave is code).
