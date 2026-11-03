@@ -367,9 +367,8 @@ The pyramid needs to be visible in the background, its top lost in cloud.
 *(He keeps his promise. Behind the tree, a patch of earth has been smoothed flat, and words are scratched into it in his own handwriting.)*
 > If you're reading this… then it must mean I've kicked the bucket.  
 > Don't make that face. I can see it from here. Well. Could.  
-> Here's what I didn't tell you, because you'd have argued, and I'd have lost. We always lose to ourselves.  
-> The deaths have a limit. I don't know the number. I found it on floor ninety.  
-> So don't spend them like I did. Think first. Die second.  
+> I know I'll never say it to your face, but I really did enjoy our time together.  
+> A few thousand deaths, and the best part was listening to you complain through them.  
 > Thanks for putting up with me. I know I'm not great company. I'd know.  
 > Go get further than I did.  
 > — You  
