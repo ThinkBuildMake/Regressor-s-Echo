@@ -82,7 +82,7 @@ New: **2 souls**, **self-destruct** (hold K), **lasers** (a soul blocks the beam
 | 3 | The ladder | Staircase | Offset your two souls to climb a 7-high ledge; a straight stack falls short. Shrine, then hang the staircase over spikes: the lower step is also your bridge. A third death erases it | Built |
 | 4 | The beam | Lasers | Die beside the laser source: the high step also blocks the beam. Shrine, then the lower step must hold a plate while the laser soul finishes the stair. A third death erases the plate soul and shuts the exit | Built |
 | 5 | The spring | Springs | Hang a soul beside the spring to reach a 9-high ledge, then shrine. The second landing soul also blocks a laser: die too low and the beam stays live; extra deaths can erase the shield | Built |
-| 6 | Wrong order | Death order | A step to reach the plate, a soul on the plate, a soul in the pit. Pit first, and your 3rd death erases it | Greybox |
+| 6 | Wrong order | Death order | Step, plate, pit: replace the step, not the bridge. Shrine, then spring to a high plate via a temporary landing; replace it with a laser shield over spikes. One death too many shuts the exit | Built |
 | 7 | The tree guardian | Boss 2 | It glows blue, then slams the soul nearest you. Lure the slam onto the soul you don't need and stomp from the one you kept. Dying to rebuild heals it | Designed (below) |
 
 Cut for now: *The race* (walkers are slow enough to outrun, so it had no tension) and *The moving ledge* (its timing window was too small to be fair).

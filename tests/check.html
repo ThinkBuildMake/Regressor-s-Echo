@@ -755,17 +755,48 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     key('keyup', 39);
     check(s.rooms[s.index].name === 'End of the greybox', 'The rehearsal: run through the corridor after the decoy breaks');
   }
-  await solve('Wrong order', [[5, 0], [2, 4], [14, 0]], [[10.4, 0, 1, 14], [14, 1, 0, 19]]); // jump from the pit's edge
-  if (matches('Wrong order')) check(room().corpses.length === 2 && room().doors.filter((d) => d.room === room().index).every((d) => !d.body.enable), 'Wrong order: plate soul and pit soul both stay, and the door is open');
+  await solve('Wrong order', [[4, 0]], []);
   if (matches('Wrong order')) {
+    s = room();
+    const leftHop = async (tx, top, toTx) => {
+      s.player.body.reset(O().x + tx * 32 + 16, O().y + (16 - top) * 32 - 16);
+      await wait(200);
+      key('keydown', 32); key('keydown', 37);
+      await until(() => s.player.x <= O().x + toTx * 32 + 20);
+      key('keyup', 37); key('keydown', 39);
+      await until(() => s.player.body.velocity.x >= 0);
+      key('keyup', 39); await wait(900); key('keyup', 32); await wait(200);
+      return 16 - (s.player.y + 15 - O().y) / 32;
+    };
+    const shelf = await leftHop(4, 1, 3);
+    check(shelf >= 3.95, 'Wrong order: the temporary step reaches the first plate shelf');
+    await place(2, 4);
+    await place(10, 0);
+    const doors = s.doors.filter((d) => d.room === s.index);
+    const a = await hop(6.4, 0, 16, 10);
+    const b = await hop(10, 1, 16, 15);
+    check(a.h >= 0.95 && b.x >= 14.6 && s.start === s.shrines.find((sh) => O().contains(sh.x, sh.y))?.spawn,
+      'Wrong order: replace the approach step with the bridge and reach the shrine');
+    await place(22, 6);
+    const launch = await hop(20, 0, 16, 22);
+    const high = await leftHop(22, 7, 18);
+    check(launch.h >= 6.95 && high >= 8.95,
+      `Wrong order: temporary spring landing reaches the nine-high plate (${JSON.stringify({launch, high})})`);
+    await place(17, 9);
+    await place(24, 6);
+    const shield = await hop(20, 0, 16, 24);
+    const exit = await hop(24, 7, 16, 28.5);
+    check(shield.h >= 6.95 && exit.x >= 28 && doors.every((d) => !d.body.enable),
+      `Wrong order: replace the temporary landing with the laser shield and cross to the held exit (${JSON.stringify({shield, exit, doors: doors.map(d => d.body.enable), deaths: stats.deaths})})`);
+    await place(21, 0);
+    check(doors.every((d) => d.body.enable),
+      'Wrong order: an extra death erases the high plate and shuts the exit');
     s = await cleanSolveRoom('Wrong order');
-    await place(14, 0);
-    const soul = s.corpses[0], deaths = stats.deaths;
-    // Three pixels of support: falling one physics step overlaps farther down than sideways.
-    s.player.body.reset(soul.x + 24, soul.y - 16 - 15 - 1);
-    s.player.body.velocity.y = 400;
-    await wait(300);
-    check(stats.deaths === deaths && near(s.player.y + 15, soul.y - 16), 'Wrong order: a narrow landing on the pit soul stays on top');
+    await place(10, 0); await place(4, 0); await place(2, 4);
+    const deaths = stats.deaths;
+    await hop(6.4, 0, 16, 10);
+    check(stats.deaths > deaths,
+      'Wrong order: pit first loses the bridge on the third death');
   }
   if (matches('In my own way')) {
     s = await cleanSolveRoom('In my own way');
