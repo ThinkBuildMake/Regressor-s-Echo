@@ -368,7 +368,7 @@ The pyramid needs to be visible in the background, its top lost in cloud.
 > If you're reading this… then it must mean I've kicked the bucket.  
 > Don't make that face. I can see it from here. Well. Could.  
 > As you probably know by now, the deaths have a limit. I don't know the number. I found it on floor ninety.  
-> So don't spend them like I did. Think first. Die second.  
+> Don't spend them like I did.  
 > I'd tell you that to your face, but you'd argue, and I'd lose. We always lose to ourselves.  
 > Thanks for putting up with me. I know I'm not great company. I'd know.  
 > Go get further than I did.  
