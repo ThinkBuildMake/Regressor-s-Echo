@@ -15,3 +15,5 @@ DECISION: the user asked for parallel agents. Three Codex workers, one per world
 23:05 workers w1, w2 and w3 started (first launch fed Codex no task: worker.sh read task files from the wrong folder; fixed, relaunched)
 23:17 batch 1 merged 74fa519, full suite OK. One check.html conflict resolved by hand (kept both blocks). NEEDS REVIEW: The well and Let go reuse 'death revives the guard'; the brief now bans it.
 23:46 all three workers finished (the W2 tree is the last one in). Batches 2-3 merged with full suite OK. After merging the moth + stag, the full suite hangs; investigating. NEEDS REVIEW: stag is a first pass in a 30x17 room.
+00:10 tree merged ae47049 (Codex merged the shared boss code). Full suite: W2 rooms fail, Let go fails even alone; Codex is bisecting moth/stag/tree merges. Earlier 'hang' was a syntax error from my check.html conflict script (it dropped duplicate lines like closing braces); fixed and that merge redone.
+00:28 W2 breakage = my resolve-check.py deleted 4 new solve() lines in the tree merge. Restored; 9 W2 rooms + bosses pass. Script deleted. Full suite now times out in the stag test (passes alone); folded into the stag second pass.

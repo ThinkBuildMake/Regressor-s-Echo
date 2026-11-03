@@ -628,6 +628,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     check(stats.deaths > before && s.start.x < O().x + 6 * 32,
       'The well: without a soul the bottom of the first shaft kills you');
   }
+  await solve('Let go', [[8, 0], [8, 1]], [[7, 0, 2, 8], [8, 2, 5, 9], [9, 5, 5, 11]]);
   if (matches('Let go')) {
     s = room();
     check(s.start === s.shrines.find((sh) => O().contains(sh.x, sh.y))?.spawn,
@@ -680,6 +681,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     check(short.h < 4.9 && short.x < 9,
       'Let go: one soul falls short of the first ledge');
   }
+  await solve('Off the edge', [[7, 0]], [[3, 0, 1, 7], [7, 1, 0, 11], [11, 0, 0, 13]], 8);
   if (matches('Off the edge')) {
     s = room();
     check(s.start === s.shrines.find((sh) => O().contains(sh.x, sh.y))?.spawn,
@@ -777,6 +779,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     check(short.h < 7.9 && short.x < 11,
       'The beam: without the laser soul the first ledge is out of reach');
   }
+  await solve('The spring', [[9, 6]], [[6, 0, 7, 9], [9, 7, 9, 11], [11, 9, 9, 13]]);
   if (matches('The spring')) {
     s = room();
     check(s.start === s.shrines.find((sh) => O().contains(sh.x, sh.y))?.spawn,
@@ -897,6 +900,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     key('keyup', 39);
     check(s.rooms[s.index].name === 'The spectral stag', 'The rehearsal: run through the corridor after the decoy breaks');
   }
+  await solve('Wrong order', [[4, 0]], []);
   if (matches('Wrong order')) {
     s = room();
     const leftHop = async (tx, top, toTx) => {
