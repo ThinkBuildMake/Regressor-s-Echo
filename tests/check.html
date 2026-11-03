@@ -624,8 +624,64 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     check(stats.deaths > deaths && s.start.x > O().x + 11 * 32,
       'The ladder: an extra death erases the bridge; the next approach falls into spikes and returns to the shrine');
   }
-  await solve('The beam', [[23, 1], [24, 4]], [[22, 0, 2, 23], [23, 2, 5, 24], [24, 5, 8, 25]]);
-  await solve('The spring', [[20, 6]], [[20, 7, 9, 22]]);
+  await solve('The beam', [[9, 1], [10, 4]],
+    [[8, 0, 2, 9], [9, 2, 5, 10], [10, 5, 8, 11], [11, 8, 8, 13]]);
+  if (matches('The beam')) {
+    s = room();
+    check(s.start === s.shrines.find((sh) => O().contains(sh.x, sh.y))?.spawn,
+      'The beam: shield staircase reaches the shrine');
+    await place(23, 1);
+    await place(24, 4);
+    const a = await hop(22, 0, 16, 23);
+    const b = await hop(23, 2, 16, 24);
+    const c = await hop(24, 5, 16, 25);
+    const doors = s.doors.filter((d) => d.room === s.index);
+    check(a.h >= 1.95 && b.h >= 4.95 && c.h >= 7.95,
+      'The beam: plate step and laser shield climb the second ledge');
+    check(doors.every((d) => !d.body.enable), 'The beam: the lower step holds the exit open');
+    const exit = await hop(25, 8, 16, 28);
+    check(exit.x >= 27.6 && exit.h >= 7.95, 'The beam: cross the held exit door');
+    await place(18, 0);
+    check(doors.every((d) => d.body.enable), 'The beam: careless third death erases the plate weight and closes the exit');
+    s = await cleanSolveRoom('The beam');
+    await place(9, 1);
+    const deaths = stats.deaths;
+    await hop(9.7, 2, 16, 10);
+    await alive();
+    const shield = s.corpses[1];
+    const shieldX = shield && Math.floor((shield.x - O().x) / 32);
+    const shieldTop = shield && 16 - (shield.y - shield.height / 2 - O().y) / 32;
+    check(stats.deaths === deaths + 1 && shieldX === 10 && shieldTop >= 5,
+      `The beam: jumping beside the source makes the high shield (column ${shieldX}, top ${shieldTop})`);
+    const onto = await hop(9, 2, 16, 10);
+    const ledge = await hop(10, 5, 16, 11);
+    check(onto.h >= 4.95 && ledge.h >= 7.95,
+      'The beam: the soul made by the laser really reaches the ledge');
+    s = await cleanSolveRoom('The beam');
+    await place(8, 1);
+    const short = await hop(8, 2, 16, 11);
+    check(short.h < 7.9 && short.x < 11,
+      'The beam: without the laser soul the first ledge is out of reach');
+  }
+  await solve('The spring', [[9, 6]], [[6, 0, 7, 9], [9, 7, 9, 11], [11, 9, 9, 13]]);
+  if (matches('The spring')) {
+    s = room();
+    check(s.start === s.shrines.find((sh) => O().contains(sh.x, sh.y))?.spawn,
+      'The spring: the first spring climb reaches the shrine');
+    await place(23, 6);
+    const launch = await hop(20, 0, 16, 23);
+    const ledge = await hop(23, 7, 16, 25);
+    const exit = await hop(25, 9, 16, 28);
+    check(launch.h >= 6.95 && ledge.h >= 8.95 && exit.h >= 8.95,
+      'The spring: the second landing soul shields the spring and reaches the exit');
+    await place(17, 0);
+    await place(18, 0);
+    const deaths = stats.deaths;
+    await hop(20, 0, 16, 23);
+    await alive();
+    check(stats.deaths > deaths,
+      'The spring: extra deaths erase the high shield and the next launch hits the laser');
+  }
   await solve('Wrong order', [[5, 0], [2, 4], [14, 0]], [[10.4, 0, 1, 14], [14, 1, 0, 19]]); // jump from the pit's edge
   if (matches('Wrong order')) check(room().corpses.length === 2 && room().doors.filter((d) => d.room === room().index).every((d) => !d.body.enable), 'Wrong order: plate soul and pit soul both stay, and the door is open');
   if (matches('Wrong order')) {

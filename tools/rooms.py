@@ -91,11 +91,20 @@ def ladder(o, p):
 room('The ladder', [376, 99], 30, 17, 2, '7-high ledge: stack to 3, then run off your top soul holding K for a step beside it', ladder)
 
 def beam(o, p):
-    o(1, 1, 24, 15); o(25, 1, 28, 7); o(0, 14, 0, 15); o(29, 6, 29, 7); p(25, 11, '<'); p(1, 15, 'P')
+    # A: the laser death is both the high step and the shield.
+    o(1, 1, 10, 15); o(11, 1, 14, 7); p(11, 11, '<'); p(13, 7, 'C')
+    # B: the lower step must also hold the door; a third death removes it.
+    o(15, 1, 24, 15); o(25, 1, 28, 7); p(25, 11, '<')
+    p(23, 15, '#'); p(23, 14, '_'); o(27, 1, 27, 7, 'D')
+    o(0, 14, 0, 15); o(29, 6, 29, 7); p(1, 15, 'P')
 room('The beam', [406, 92], 30, 17, 2, '8-high ledge: jump into the laser right next to its source; that death is the high step and leaves no beam', beam)
 
 def spring(o, p):
-    o(1, 1, 21, 15); o(22, 1, 28, 6); o(0, 14, 0, 15); o(29, 5, 29, 6); p(17, 15, 's'); p(1, 15, 'P')
+    # Safe launch: hang a soul beside the spring, land on it, then jump to the shrine.
+    o(1, 1, 10, 15); o(11, 1, 14, 6); p(6, 15, 's'); p(13, 6, 'C')
+    # The second landing must also shield the launch from the laser.
+    o(15, 1, 24, 15); o(25, 1, 28, 6); p(20, 15, 's'); p(25, 9, '<')
+    o(0, 14, 0, 15); o(29, 5, 29, 6); p(1, 15, 'P')
 room('The spring', [436, 84], 30, 17, 2, '9-high ledge: hold during the launch so a soul hangs beside the spring, then land on it', spring)
 
 def wrong_order(o, p):

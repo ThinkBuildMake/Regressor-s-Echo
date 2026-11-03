@@ -80,8 +80,8 @@ New: **2 souls**, **self-destruct** (hold K), **lasers** (a soul blocks the beam
 | 1 | Let go | Self-destruct | Stack two souls for a safe 5-high ledge, then shrine. Stomp the guard and stack on a plate: the bottom soul opens the exit. Each death revives the guard; a careless third death erases the plate soul | Built |
 | 2 | Off the edge | Hold while jumping | Jump off holding K: hang a step over the pit, cross to the shrine. Then leave a soul on the plate and hang another over the next pit; a careless third death closes the exit | Built |
 | 3 | The ladder | Staircase | Offset your two souls to climb a 7-high ledge; a straight stack falls short. Shrine, then hang the staircase over spikes: the lower step is also your bridge. A third death erases it | Built |
-| 4 | The beam | Lasers | A ledge 8 high and a laser at 4.5. Jump into the laser right next to its source: that soul is the high step, and it blocks the whole beam | Greybox |
-| 5 | The spring | Springs | The spring reaches 8.5, the ledge is 9. Hold K during the launch so a soul hangs beside the spring, spring again onto it, jump up | Greybox |
+| 4 | The beam | Lasers | Die beside the laser source: the high step also blocks the beam. Shrine, then the lower step must hold a plate while the laser soul finishes the stair. A third death erases the plate soul and shuts the exit | Built |
+| 5 | The spring | Springs | Hang a soul beside the spring to reach a 9-high ledge, then shrine. The second landing soul also blocks a laser: die too low and the beam stays live; extra deaths can erase the shield | Built |
 | 6 | Wrong order | Death order | A step to reach the plate, a soul on the plate, a soul in the pit. Pit first, and your 3rd death erases it | Greybox |
 | 7 | The tree guardian | Boss 2 | It glows blue, then slams the soul nearest you. Lure the slam onto the soul you don't need and stomp from the one you kept. Dying to rebuild heals it | Designed (below) |
 
