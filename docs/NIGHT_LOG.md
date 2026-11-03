@@ -22,3 +22,4 @@ DECISION: the user asked for parallel agents. Three Codex workers, one per world
 01:19 started 3 Claude playtesters (W1, W2, W3) on the night branch. DECISION: Claude, not Codex, because Codex is locked out until 02:54 and a different model gives a more independent playtest.
 06:07 W2 playtest in: docs/playtests/2026-11-03-w2.md (2 major skips: plates open every door; tree stomps not gated by the slam).
 06:25 W3 playtest in: docs/playtests/2026-11-03-w3.md (blocker: Shift+R after the stag resurrects it, softlock in the pyramid).
+06:30 W1 playtest in: docs/playtests/2026-11-03-w1.md (moth stomp-bounce death bug, wall-kick skip; tall rooms hide hazards).
