@@ -42,3 +42,4 @@ DECISION: the user asked for parallel agents. Three Codex workers, one per world
 06:30 W1 playtest in: docs/playtests/2026-11-03-w1.md (moth stomp-bounce death bug, wall-kick skip; tall rooms hide hazards).
 07:07 merged W2 fixes (87e7e63) and W1 fixes (8b696f3). The Gatehouse fails with both (stage-door rule vs the new post); Codex fixing. W3 fix worker still running.
 08:04 story wiring merged (8 missing STORY.md scenes). Spring and Rehearsal test fixes committed. Full suite still fails in Reliquary (twice); Codex on it. User is playing at http://localhost:8010/.
+08:22 full suite: Reliquary now passes, In my own way failed instead (13 min run while the user plays). DECISION: the replays are timing-flaky under load; Codex is making check.html step the game at a fixed 60fps (tests only, game unchanged), done when 3 full runs pass in a row.
