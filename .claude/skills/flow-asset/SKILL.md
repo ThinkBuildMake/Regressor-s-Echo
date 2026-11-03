@@ -48,6 +48,7 @@ Generate **one** image per run. Show the user the image and the critic's verdict
 
 - **Reference already in the project:** ⋮ (or right-click) on the image → **Add to prompt**.
 - **Picker search:** + ("Add ingredients") → type in "Search assets" → click the result to preview it → press **Add to prompt**. Remove leftover attachments (their x) before an edit so only the image being edited is attached.
+- **Edits keep the composition fixed:** they clean up, recolour or light things, but won't re-angle, sink, move or re-pose a subject. Flow also copies the pose of an attached character, so to get a new pose, attach a reference already in (or near) that pose. "See-through" on magenta bakes in a pink tint: make it opaque and set alpha in code.
 - **Tiles and strips:** Flow ignores "edge to edge" / "touches the top and bottom" on the first try; expect one fix edit. Check seams with `art.mjs --mirror` (strips) or a 2×2 view (tiles).
 - **Every attached image tends to get pasted in.** Attach only what the step needs, say *"Do not include the attached <X> itself"*, and expect one cleanup edit. Right-click → Add to prompt replaces earlier attachments.
 - **Earth/ground references** (`ground.jpg`) make Flow paint a soil band along the bottom: add *"no soil strip along the bottom, the prop floats on magenta"*.
