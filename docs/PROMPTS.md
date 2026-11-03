@@ -60,6 +60,7 @@ I mirror the end cap for right-hand ends.
 ## Worlds 2 and 3: same layers, different setting
 
 **Preferred method (learned on World 2): re-dress the World 1 layer.** Attach the World 1 raw layer only (`assets/raw/world1/<layer>.jpg`) and edit: *"Edit the attached image. Keep the layout exactly as it is: the same shapes, positions, spacing, edges and magenta areas. Only change the setting: <the world's setting sentence>. Do not paint anything into the magenta areas."* Edits keep composition, so the layer keeps World 1's silhouettes, repeat margins and tiling, and the worlds line up. Fresh generations with the setting sentence tend to paint a whole scene or backdrop panels.
+Add per layer: far *"as pale and low-contrast as the original"*; mid *"the gaps between trunks stay flat magenta"*; near *"keep the painted areas as sparse as the original"*; sky *"sky only, no silhouettes"*; ground tiles *"flat even lighting, no vignette or edge rim; keep the edges matching so it stays tileable"*. Flow outputs 16:9 while the World 1 layers are wider (2.36:1), so trees get re-spaced slightly.
 
 Make each layer for all three worlds in one sitting (World 1 far trees, then World 2 far trees, then World 3), with the World 1 reference image attached each time. Keep the style block and layer prompt word for word, and add the world's setting sentence at the end. Save to `assets/raw/world2/` and `assets/raw/world3/` with the same file names.
 
@@ -185,6 +186,22 @@ Save to `assets/raw/world2/` and `assets/raw/world3/`. Use the World 1 prop styl
    > A tall carved stone door closing a doorway in an ancient sanctuary, standing-stone grey with deep carved bands and the ring-and-three-rays mark in the centre (grooves dark, not lit), touching the top and bottom edges of the image.
 
 6. **Shrine, Worlds 2 and 3 → `shrine.png`, `shrine-lit.png`**: the World 1 shrine re-dressed for the world: attach `assets/raw/world1/shrine.jpg`, "Edit the attached image. Keep the stone's shape and carved mark exactly as they are. Only change its setting to match: <the world's setting sentence>." Then the lit version as an edit, as in World 1.
+
+## Story scenes, Worlds 2 and 3 (Flow, Nano Banana 2.1; from the story chat)
+
+Use the matching world's layer method or the World 1 prop style block, plus the world's setting sentence. Gold only for the amulet circles on the carving.
+
+1. **Carved wall relief (World 2 §6) → `assets/raw/world2/carvings.png`** (16:9; re-dress `assets/raw/world2/mid.jpg`'s palette but a NEW composition, so generate fresh, attaching `world2/far.jpg` for palette)
+   > A long weathered wall of grey ruin stone, carved with a shallow relief that reads left to right like a story: on the left a dense crowd of simple carved human figures standing together, each with a small round gold inlay on its chest; moving right, fewer figures; then a handful; at the far right a single figure standing alone. Moss and vines in the cracks, soft amber light from the upper left, calm and low-contrast like a background layer. The wall fills the whole image edge to edge. No text, no letters.
+
+2. **Pyramid backdrop (World 3 §1) → `assets/raw/world3/pyramid.png`** (16:9; attach `world3/far.jpg` for palette)
+   > A far background layer: a colossal stepped stone pyramid rising out of the moonlit forest far away, so tall its upper half disappears into a thick bank of cloud, pale and hazy with distance, blue-violet and silver, low contrast. Only the pyramid and the cloud bank around its top; everything else flat solid magenta #FF00FF, including the sky. Centered, the base wide, running to the bottom edge.
+
+3. **The old tree (World 3 §5) → `assets/raw/world3/old-tree.png`** (9:16; World 1 prop style block + World 3 setting; attach `anchor.png`)
+   > A single enormous, ancient forest tree with a thick gnarled trunk and great roots, the roots forming a dark hollow at its base big enough to hide a folded letter behind, moss and a few hanging vines, its canopy running off the top of the image. Calm and a little sacred. The trunk and roots stand on flat magenta (no ground strip).
+
+4. **The guide's note (World 3 §9) → `assets/raw/world3/note.png`** (4:3)
+   > A single sheet of old, worn paper, unfolded flat and seen straight on, with soft creases from being folded in quarters, slightly torn edges, faint water stains and a smudge of earth in one corner. Warm off-white parchment colour. The writing area is completely blank (the text is added in code). Centered with a little magenta around it. No text, no letters, no writing.
 
 ## Hero (AI Studio, Nano Banana Pro)
 

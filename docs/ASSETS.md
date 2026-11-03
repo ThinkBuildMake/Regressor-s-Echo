@@ -112,10 +112,10 @@ Script: [STORY.md](STORY.md); § = the scene each asset serves. Done in priority
 
 | Asset | § | Notes | Prompt | Ref | Sized | In game |
 |---|---|---|---|---|---|---|
-| Carved wall relief | W2 §6 | reads left to right: a crowd of figures, each with a gold circle on its chest; then fewer; then a handful; then one. Ruins stone, as a background layer behind room 7 | | | | |
-| Pyramid backdrop | W3 §1 | a huge stepped pyramid, its top lost in cloud; a far parallax layer for the Sanctum | | | | |
-| The old tree | W3 §5 | by the stag's arena, with a hiding spot behind it (where the note is) | | | | |
-| The guide's note | W3 §9 | a folded, worn paper, for a close-up the note's text sits on | | | | |
+| Carved wall relief | W2 §6 | reads left to right: a crowd of figures, each with a gold circle on its chest; then fewer; then a handful; then one. Ruins stone, as a background layer behind room 7 | ✅ | | | |
+| Pyramid backdrop | W3 §1 | a huge stepped pyramid, its top lost in cloud; a far parallax layer for the Sanctum | ✅ | | | |
+| The old tree | W3 §5 | by the stag's arena, with a hiding spot behind it (where the note is) | ✅ | | | |
+| The guide's note | W3 §9 | a folded, worn paper, for a close-up the note's text sits on | ✅ | | | |
 | Sound: the guide cracking like glass as the beam hits him | W3 §8 | sad, not violent | | — | | |
 | Music: the last-stand cue | W3 §8 | later | | — | | |
 
