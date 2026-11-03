@@ -888,7 +888,15 @@ class Room extends Phaser.Scene {
     ]) if (!this.textures.exists(key)) this.load.spritesheet(key, `assets/${path}.webp`, { frameWidth: width, frameHeight: height });
     if (!this.textures.exists('seedShot')) this.load.image('seedShot', 'assets/enemies/seed-shot.webp');
     if (!this.textures.exists('walker')) this.load.image('walker', 'assets/enemies/walker.webp');
-    if (!this.textures.exists('stagIdle')) this.load.image('stagIdle', 'assets/bosses/stag-idle.webp');
+    if (this.bossArtRequested) return;
+    this.bossArtRequested = true;
+    for (const pose of ['intro', 'idle', 'charge', 'beam', 'wave']) {
+      if (!this.textures.exists(`stag-${pose}`)) this.load.image(`stag-${pose}`, `assets/bosses/stag-${pose}.webp`);
+      if (!this.cache.json.exists(`stag-${pose}-frames`)) this.load.json(`stag-${pose}-frames`, `assets/bosses/stag-${pose}.json`);
+    }
+    for (const kind of ['moth', 'tree', 'stag']) {
+      if (!this.textures.exists(`${kind}-fallen`)) this.load.image(`${kind}-fallen`, `assets/bosses/${kind}-fallen.webp`);
+    }
     for (const pose of ['intro', 'idle', 'swing', 'slam', 'throw']) {
       if (!this.textures.exists(`tree-${pose}`)) this.load.image(`tree-${pose}`, `assets/bosses/tree-${pose}.webp`);
       if (!this.cache.json.exists(`tree-${pose}-frames`)) this.load.json(`tree-${pose}-frames`, `assets/bosses/tree-${pose}.json`);
@@ -973,8 +981,9 @@ class Room extends Phaser.Scene {
                 B.r.setVisible(!B.hidden).setSize(192, 64).setPosition(x, (oy + 14) * T).setFillStyle(0xbceaff);
                 B.antlers = this.add.graphics().setDepth(5);
                 B.r.on('destroy', () => B.antlers.destroy());
-                if (this.textures.exists('stagIdle')) {
-                  B.img = this.add.image(B.r.x, B.r.y, 'stagIdle').setDisplaySize(128, 112);
+                if (this.textures.exists('stag-idle')) {
+                  B.img = this.add.image(B.r.x, B.r.y + 32, 'stag-idle').setOrigin(0.5, 1).setDepth(4).setVisible(!B.hidden);
+                  this.bossPose(B, 'stag', 'idle', 180, 1);
                   B.r.setAlpha(0); B.r.on('destroy', () => B.img.destroy());
                 }
               } else if (extra.boss === 'tree') {
@@ -1209,7 +1218,7 @@ class Room extends Phaser.Scene {
   cue(name) {
     const g = this.guide, p = this.player;
     if (name === 'stagAppear' && this.boss?.stag) {
-      this.boss.hidden = false; this.boss.r.setVisible(true); this.cameras.main.flash(450, 170, 225, 255);
+      this.boss.hidden = false; this.boss.introUntil = this.time.now + 1000; this.boss.r.setVisible(true); this.cameras.main.flash(450, 170, 225, 255);
     }
     if (name === 'lastBeam' && this.boss?.stag) {
       const B = this.boss; g.setPosition(p.x + 40, p.y).setAlpha(0.9);
@@ -1245,9 +1254,9 @@ class Room extends Phaser.Scene {
     }
     const B = this.bosses.find((b) => b.room === this.index && b.story);
     if (name === 'glow' && B) { // the fallen boss turns white and pulses
-      B.r.setFillStyle(0xffffff);
-      if (B.story === 'mothDown') B.img?.setTintFill(0xffffff);
-      this.tweens.add({ targets: B.r, alpha: 0.4, duration: 220, yoyo: true, repeat: 4 });
+      if (!B.img) B.r.setFillStyle(0xffffff);
+      B.img?.setTintFill(0xffffff);
+      this.tweens.add({ targets: B.img ?? B.r, alpha: 0.4, duration: 220, yoyo: true, repeat: 4 });
     }
     if (name === 'absorb' && B) { // dissolves into motes that stream into the hero, who flashes white
       if (!this.textures.exists('spark'))
@@ -1775,13 +1784,15 @@ class Room extends Phaser.Scene {
 
   updateStag(B, dt) {
     const R = this.rooms[B.room].rect, p = this.player;
-    B.antlers.setVisible(B.r.visible).clear().lineStyle(B.waveClock > 13 ? 7 : 3, B.waveClock > 13 ? 0xdf89ff : 0xd9f3ff);
-    B.img?.setTint(B.waveClock > 13 ? 0xdf89ff : B.phase === 'beam' ? 0x65baff : 0xffffff);
+    B.antlers.setVisible(B.r.visible && !B.img).clear().lineStyle(B.waveClock > 13 ? 7 : 3, B.waveClock > 13 ? 0xdf89ff : 0xd9f3ff);
     for (const dx of [-28, 28]) {
       B.antlers.lineBetween(B.r.x + dx, B.r.y - 32, B.r.x + dx, B.r.y - 66);
       B.antlers.lineBetween(B.r.x + dx, B.r.y - 48, B.r.x + dx + Math.sign(dx) * 17, B.r.y - 62);
     }
-    B.img?.setPosition(B.r.x, B.r.y).setVisible(B.r.visible);
+    const pose = this.time.now < B.introUntil ? 'intro' : B.phase === 'beam' ? 'beam'
+      : B.waveClock >= 14 ? 'wave' : B.phase === 'charge' ? 'charge' : 'idle';
+    this.bossPose(B, 'stag', pose, 180, pose === 'wave' || pose === 'intro' ? 1 : 0.7, pose === 'charge' || pose === 'idle');
+    B.img?.setPosition(B.r.x, B.r.y + 32 + (B.artFoot ?? 0)).setVisible(B.r.visible).setTint(B.waveClock > 13 ? 0xdf89ff : B.phase === 'beam' ? 0x65baff : 0xffffff);
     if (this.dead > 0 || this.transit || this.talk.line || this.talk.queue.length) return;
     if (p.x > R.x + 1.5 * T) this.gates.filter((g) => g.active && g.room === B.room).forEach((g) => { g.body.enable = true; });
     if (!Dialogue.seen.has('stagArrival')) { Dialogue.play(this, 'stagArrival'); return; }
@@ -1817,6 +1828,7 @@ class Room extends Phaser.Scene {
       c.buried = 0; c.body.enable = true; c.setAlpha(1); c.sprites?.forEach((s) => s.setAlpha(0.6));
     }
     const B = this.boss;
+    if (B?.hp <= 0) return;
     if (B?.stag) return this.updateStag(B, dt);
     if (B?.kind === 'tree') return this.updateTree(B, dt);
     if (B?.img) B.img.setPosition(B.r.x, B.r.y).setVisible(B.r.visible).setAlpha(B.r.alpha).setFlipX(B.dir > 0) // sheet faces left
@@ -1840,16 +1852,48 @@ class Room extends Phaser.Scene {
     B.r.setAlpha(B.hurt > 0 ? 0.4 : 1);
   }
 
-  updateTree(B, dt) {
-    const pose = B.hidden ? 'intro' : ['swing', 'slam', 'throw', 'intro'].includes(B.phase) ? B.phase : 'idle';
-    if (B.img && this.textures.exists(`tree-${pose}`)) {
-      const tex = this.textures.get(`tree-${pose}`), info = this.cache.json.get(`tree-${pose}-frames`);
-      const fw = info?.frameWidth || tex.getSourceImage().width, fh = info?.frameHeight || tex.getSourceImage().height;
-      const count = Math.max(1, Math.floor(tex.getSourceImage().width / fw));
-      if (!tex.has(0)) for (let i = 0; i < count; i++) tex.add(i, 0, i * fw, 0, fw, fh);
-      B.img.setTexture(`tree-${pose}`, B.hidden ? 0 : Math.floor(this.time.now / 140) % count).setScale(224 / fh).setAlpha(B.hidden && B.hp <= 0 ? B.r.alpha : 1);
-      B.img.setTint(B.hidden && B.hp <= 0 ? 0xffffff : B.phase === 'slam' ? 0x69cfff : B.phase === 'swing' || B.phase === 'throw' ? 0xffd76a : 0xffffff);
+  // Attack sheets start at the wind-up and hold their recovery frame.
+  bossPose(B, kind, pose, height, duration, loop = false) {
+    const key = `${kind}-${pose}`;
+    if (!B.img || !this.textures.exists(key)) return;
+    const tex = this.textures.get(key), info = this.cache.json.get(`${key}-frames`);
+    if (!info) return;
+    const { frameWidth: fw, frameHeight: fh } = info, source = tex.getSourceImage();
+    const cols = Math.floor(source.width / fw), count = cols * Math.floor(source.height / fh);
+    if (!tex.has(0)) for (let i = 0; i < count; i++) tex.add(i, 0, (i % cols) * fw, Math.floor(i / cols) * fh, fw, fh);
+    if (B.artPose !== key) { B.artPose = key; B.artStart = this.time.now; }
+    const frame = Math.floor((this.time.now - B.artStart) / (duration * 1000) * count);
+    const sourceHeight = kind === 'stag' ? { idle: 486, intro: 584, charge: 500, beam: 555, wave: 617 }[pose] : fh;
+    const scale = height / sourceHeight;
+    B.artFoot = kind === 'stag' ? (fh - { idle: 660, intro: 677, charge: 676, beam: 653, wave: 676 }[pose]) * scale : 0;
+    B.img.setTexture(key, loop ? frame % count : Math.min(count - 1, frame)).setScale(scale);
+    if (pose === 'idle') B.img.setFrame(0).setScale(scale, scale * (1 + Math.sin(this.time.now / 320) * 0.012));
+  }
+
+  fallenBoss(B) {
+    const kind = B.stag ? 'stag' : B.kind === 'tree' ? 'tree' : 'moth', key = `${kind}-fallen`;
+    if (!this.textures.exists(key)) return;
+    if (!B.img) {
+      B.img = this.add.image(B.r.x, B.r.y, key).setDepth(4);
+      B.r.on('destroy', () => B.img.destroy());
     }
+    const floor = this.rooms[B.room].rect.bottom - T;
+    const tex = this.textures.get(key);
+    // Fallen paintings have wide transparent margins.
+    const [x, y, w, h] = { moth: [464, 310, 344, 104], tree: [512, 270, 250, 158], stag: [558, 306, 136, 86] }[kind];
+    if (!tex.has('pose')) tex.add('pose', 0, x, y, w, h);
+    B.img.setTexture(key, 'pose').setOrigin(0.5, 1).setVisible(true).setAlpha(1).clearTint().setFlipX(false);
+    B.img.setScale((kind === 'tree' ? 150 : kind === 'stag' ? 160 : 170) / w);
+    B.img.setPosition(B.r.x, kind === 'moth' ? B.r.y : floor);
+    B.r.setFillStyle(0, 0);
+    B.antlers?.setVisible(false);
+    if (kind === 'moth') this.tweens.add({ targets: B.img, y: floor, duration: 650, ease: 'Quad.easeIn' });
+  }
+
+  updateTree(B, dt) {
+    const pose = ['swing', 'slam', 'throw', 'intro'].includes(B.phase) ? B.phase : 'idle';
+    this.bossPose(B, 'tree', pose, 224, pose === 'slam' ? TREE_GLOW : pose === 'intro' ? 1 : 0.6, pose === 'idle');
+    B.img?.setVisible(B.r.visible).setTint(B.phase === 'slam' ? 0x69cfff : B.phase === 'swing' || B.phase === 'throw' ? 0xffd76a : 0xffffff);
     if (B.hidden || this.dead > 0 || this.talk.line || this.talk.queue.length || this.transit) return;
     B.hurt -= dt;
     if (this.player.body.blocked.down || this.player.body.touching.down) B.stompReady = true;
@@ -1910,6 +1954,7 @@ class Room extends Phaser.Scene {
     }
     if (--B.hp <= 0 && B.story) { // a story boss stops still; its script dissolves it (cue 'absorb')
       B.hidden = true;
+      this.fallenBoss(B);
       if (B.stag) Dialogue.seen.delete(B.story);
       Dialogue.play(this, B.story);
       if (B.story === 'treeDown') Dialogue.play(this, 'guideCrack');
