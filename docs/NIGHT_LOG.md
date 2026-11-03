@@ -12,3 +12,4 @@ HOW (for after compaction): scratchpad = /private/tmp/claude-501/-Users-mrchuang
 22:28 chain done 969d74c (took 3 Codex rounds: narrow-landing physics bug, then leftover test state). Started W1 The long pit.
 23:03 The long pit done 1434b9f (1 sendback: stage 2 repeated stage 1). Tests now ~3m20s.
 DECISION: the user asked for parallel agents. Three Codex workers, one per world, in worktrees ../Game-Week-w1, w2, w3 (branches night-w1/2/3). Each works through its world's rooms in order, boss last, without changing room sizes or doorways. worker.sh commits each task; Claude reviews, merges into night/2026-11-02 and runs the full suite.
+23:05 workers w1, w2 and w3 started (first launch fed Codex no task: worker.sh read task files from the wrong folder; fixed, relaunched)
