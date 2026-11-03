@@ -20,3 +20,4 @@ DECISION: the user asked for parallel agents. Three Codex workers, one per world
 00:57 Codex usage limit hit mid stag second pass (resets 02:54). Its edits are uncommitted; Claude is running the full suite on them.
 01:19 stag second pass committed 75399f9; full suite OK in 10m37s. The 'hang' was the suite outgrowing the runner's 10-min limit.
 01:19 started 3 Claude playtesters (W1, W2, W3) on the night branch. DECISION: Claude, not Codex, because Codex is locked out until 02:54 and a different model gives a more independent playtest.
+06:07 W2 playtest in: docs/playtests/2026-11-03-w2.md (2 major skips: plates open every door; tree stomps not gated by the slam).
