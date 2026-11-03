@@ -223,16 +223,12 @@ He writes the note while the hero sleeps: he's incorporeal, so he drifts ahead t
 
 ## World 2 script: Overgrown Ruins
 
-Rooms are in [LEVELS.md](LEVELS.md). Silent rooms: 3 Above the jump, 5 The spring, 6 The race.
+Rooms are in [LEVELS.md](LEVELS.md). Silent rooms: 2 Off the edge, 3 Above the jump, 4 The beam, 5 The spring, 6 The race, 8 Wrong order. The rooms teach their own tricks.
 
 ### 1. Let go — *on entry (room 1)*
 His first chosen death. Keys come from an on-screen prompt, not from the guide.
 > **Hero** [thinking]: No spikes. No thorns. No bugs. …Why does that make it worse?  
-> **Guide** [thinking]: Because this time, nothing's going to do it for you.  
-> **Hero** [scared]: You mean I have to… on my own?  
-> **Guide** [solemn]: Hold on to it. Feel it build. Let go early if you change your mind.  
-> **Hero** [scared]: And if I don't let go?  
-> **Guide** [wry]: Then you'll have something to stand on.
+> **Guide** [thinking]: Because this time, nothing's going to do it for you.
 
 ### 2. After the first chosen death — *he comes back*
 > *(A beat.)*  
@@ -240,18 +236,7 @@ His first chosen death. Keys come from an on-screen prompt, not from the guide.
 > **Guide** [sad]: I know.  
 > **Guide** [wry]: It gets easier. That's the bad part.
 
-### 3. Off the edge — *on entry (room 2)*
-> **Guide** [mischievous]: You know you don't have to stand still while you do it.  
-> **Hero** [curious]: …Wait. I can keep going while it builds?  
-> **Guide** [amused]: Took me forty tries to figure that out. You're welcome.
-
-### 4. The beam — *on entry (room 4)*
-> **Hero** [startled]: Whoa! What is THAT?  
-> **Guide** [thinking]: The tribe's handiwork. Burns anything living that crosses it.  
-> **Hero** [thinking]: Anything living.  
-> **Guide** [wry]: You're catching on faster these days. It's unsettling.
-
-### 5. The carvings — *The moving ledge (room 7), partway in*
+### 3. The carvings — *The moving ledge (room 7), partway in*
 The wall behind the room is carved; it needs its own background art.
 > **Hero** [curious]: Hey. Look at the wall.  
 > *(Carvings: a crowd of figures, each with a gold circle on its chest.)*  
@@ -266,12 +251,7 @@ The wall behind the room is carved; it needs its own background art.
 > **Hero** [determined]: Well. I'm not ending up as a carving.  
 > **Guide** [wry]: That's the spirit. Ha. Spirit.
 
-### 6. Wrong order — *only after his 3rd death first erases a soul he needed (room 8)*
-> **Guide** [amused]: Oldest goes first. Bit late now.  
-> **Hero** [annoyed]: You could've mentioned that.  
-> **Guide** [wry]: I could've.
-
-### 7. The tree guardian arrives — *room 9, partway in*
+### 4. The tree guardian arrives — *room 9, partway in*
 > **Hero** [thinking]: Big tree. Old tree. Very… still tree.  
 > **Guide** [warning]: Don't.  
 > **Hero** [annoyed]: Don't what?  
@@ -279,14 +259,14 @@ The wall behind the room is carved; it needs its own background art.
 > *(Its eyes open.)*  
 > **Hero** [scared]: …It's not just a tree.
 
-### 8. The slam — *after his 2nd and about his 25th deaths in the fight*
+### 5. The slam — *after his 2nd and about his 25th deaths in the fight*
 > **Hero** [shouting]: It smashed me! The other me! It keeps smashing me!  
 > **Guide** [thinking]: Watch where it looks before it swings.
 
 *After about 25:*
 > **Guide** [thinking]: It always goes for the one closest to you. Use that.
 
-### 9. The tree falls — *on the last stomp; same staging as the moth*
+### 6. The tree falls — *on the last stomp; same staging as the moth*
 > **Hero** [exhausted]: Is it…  
 > **Hero** [annoyed]: Don't you dare get back up.  
 > *(It glows white and dissolves into motes that stream into him. He flashes white.)*  
@@ -297,7 +277,7 @@ The wall behind the room is carved; it needs its own background art.
 > **Hero** [relieved]: Finally. One that doesn't hurt.  
 > **Guide** [wry]: Don't get used to it.
 
-### 10. The guide's crack — *straight on from 9*
+### 7. The guide's crack — *straight on from 6*
 > **Hero** [thinking]: Hey. Can I ask you something?  
 > **Guide** [wry]: You're going to anyway.  
 > **Hero** [thinking]: In your timeline. Did you ever get it off?  
@@ -316,7 +296,7 @@ The wall behind the room is carved; it needs its own background art.
 
 ## World 3 script: Sanctum
 
-The grounds outside the tribe's pyramid. Silent rooms: 1 Three high, 3 The drop, 4 Three jobs, 5 Spring tower. The guide is quieter here; his care shows a little more.
+The grounds outside the tribe's pyramid. Silent rooms: 1 Three high, 2 In my own way, 3 The drop, 4 Three jobs, 5 Spring tower. The guide is quieter here; his care shows a little more.
 
 ### 1. The pyramid — *a few steps in*
 The pyramid needs to be visible in the background, its top lost in cloud.
@@ -327,24 +307,18 @@ The pyramid needs to be visible in the background, its top lost in cloud.
 > **Guide** [wry]: More than ninety.  
 > **Hero** [determined]: …Then let's get to the front door.
 
-### 2. In my own way — *on entry (room 2)*
-> **Hero** [annoyed]: Great. My bridge is in my way.  
-> **Guide** [amused]: Your bridge is you.  
-> **Hero** [thinking]: …And I can take me back. Right.
-
-### 3. Almost competent — *Everything (room 6), at its shrine*
+### 2. Almost competent — *Everything (room 6), at its shrine*
 > **Hero** [thinking]: You've been quiet.  
 > **Guide** [wry]: Savoring it. You're almost competent.  
 > **Hero** [cocky]: Almost?  
 > **Guide** [warm]: …More than I was.
 
-### 4. The breaking beam — *The rehearsal (room 7), after the beam first breaks a soul*
+### 3. The breaking beam — *The rehearsal (room 7), after the beam first breaks a soul*
 > **Hero** [startled]: It broke it! It broke my soul!  
 > **Guide** [solemn]: Those beams don't push. They break. Whatever they hit doesn't come back.  
-> **Hero** [scared]: Whatever?  
-> **Guide** [thinking]: Keep it pointed away from what you need.
+> **Hero** [scared]: Whatever?
 
-### 5. The promise — *by an old tree before the stag's arena*
+### 4. The promise — *by an old tree before the stag's arena*
 > *(The guide stops. The hero walks a few steps before noticing.)*  
 > **Hero** [curious]: What? You never stop.  
 > **Guide** [thinking]: Can you promise me something?  
@@ -356,18 +330,18 @@ The pyramid needs to be visible in the background, its top lost in cloud.
 > **Guide** [warm]: Promise me.  
 > **Hero** [exhausted]: …Fine. I promise.
 
-### 6. The stag arrives — *room 8, partway in*
+### 5. The stag arrives — *room 8, partway in*
 > *(Silence. Then hoofbeats, from everywhere at once.)*  
 > **Hero** [scared]: Tell me you remember this one.  
 > **Guide** [solemn]: I remember this one.  
 > *(The spectral stag steps out of the light.)*  
-> **Hero** [determined]: …Okay. Wall first. Then stomps.  
-> **Guide** [warm]: Look at you, with a plan.
+> **Hero** [determined]: …Okay. I've got this.  
+> **Guide** [warm]: Look at you.
 
-### 7. A nudge — *after about 10 deaths in the fight (the beam was taught in the room before)*
+### 6. A nudge — *after about 10 deaths in the fight (the beam was taught in the room before)*
 > **Guide** [thinking]: You did this an hour ago. Lead it away.
 
-### 8. The guide's last stand — *on the last stomp*
+### 7. The guide's last stand — *on the last stomp*
 "Eleven" and "Twelve" use the real death count for this fight (the guide's number, then one more).
 > **Hero** [excited]: We did it! Did you see that? Three stomps, and I barely—  
 > **Guide** [amused]: You died eleven times.  
@@ -388,7 +362,7 @@ The pyramid needs to be visible in the background, its top lost in cloud.
 > **Guide** [warm]: I was never alive in the first place, right?  
 > *(He fades.)*
 
-### 9. The note — *behind the tree*
+### 8. The note — *behind the tree*
 *(He keeps his promise. Behind the tree, a patch of earth has been smoothed flat, and words are scratched into it in his own handwriting.)*
 > If you're reading this… then it must mean I've kicked the bucket.  
 > Don't make that face. I can see it from here. Well. Could.  
@@ -400,7 +374,7 @@ The pyramid needs to be visible in the background, its top lost in cloud.
 > — You  
 > P.S. The amulet's still not worth anything. I checked.
 
-### 10. Floor one — *the pyramid's entrance; the game ends*
+### 9. Floor one — *the pyramid's entrance; the game ends*
 > **Hero** [sad]: …Idiot.  
 > **Hero** [determined]: Ninety floors, huh.  
 > **Hero** [determined]: Then I'm not stopping at ninety.  
@@ -425,7 +399,7 @@ The pyramid needs to be visible in the background, its top lost in cloud.
 
 - **Respawn versus timelines:** Normal play returns him to a checkpoint and leaves an echo. How that relates to the guide's other timeline needs one clear rule before anyone explains it. Avoid "your body forgets" as a substitute.
 - **What the guide knows:** He met his own guide once; being the guide is new. Decide what differed in his timeline and what he can't predict, so his knowledge has a consistent basis (he forgot the moth, he's sure about the pit).
-- **To build for the story:** the carved wall (World 2 room 7), the pyramid backdrop (World 3), an on-screen "hold" prompt for self-destruct, the stag's death count in the last stand, and triggers for "after a mistake" moments (a soul erased, a soul broken).
+- **To build for the story:** the carved wall (World 2 room 7), the pyramid backdrop (World 3), an on-screen "hold" prompt for self-destruct, the stag's death count in the last stand, and a trigger for the first soul the beam breaks (World 3 room 7).
 - **Save for later:** "How many times have you done this?" / "I stopped counting." fits a quieter moment, probably World 2.
 
 Related: [ideas](IDEAS.md), [level plan](LEVELS.md), [in-game dialogue](../dialogue.js).
