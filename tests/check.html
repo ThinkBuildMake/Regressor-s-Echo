@@ -940,8 +940,12 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     const deaths = stats.deaths;
     await descend(15.5);
     await jumpTo(19);
-    await walkTo(20);
-    key('keydown', 39); await wait(900); key('keyup', 39);
+    // The unshielded spring can kill us before we stop over its column.
+    if (stats.deaths === deaths) {
+      key('keydown', 39);
+      await until(() => stats.deaths > deaths, 4000, 'unshielded spring launch');
+      key('keyup', 39);
+    }
     await alive();
     check(stats.deaths > deaths,
       'The spring: extra deaths erase the high shield and the next launch hits the laser');
@@ -1170,9 +1174,15 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   }
 
   if (matches('The rehearsal')) {
+    let initialClocks;
+    // Capture before setup waits consume part of the entrance grace period.
+    room().events.once('create', () => {
+      initialClocks = room().aimedBeams.filter((b) => b.room === room().index).map((b) => b.clock);
+    });
     s = await cleanSolveRoom('The rehearsal');
     const relics = s.aimedBeams.filter((b) => b.room === s.index);
-    check(relics.every(b => b.clock < -1.5), 'The rehearsal: two extra seconds before the first lock');
+    check(initialClocks?.length === relics.length && initialClocks.every((clock) => clock === -2),
+      'The rehearsal: two extra seconds before the first lock');
     relics.forEach((b) => b.clock = -100);
     await place(12, 2); await place(13, 4);
     s.player.body.reset(O().x + 3 * 32 + 16, O().y + 16 * 32 - 16);
