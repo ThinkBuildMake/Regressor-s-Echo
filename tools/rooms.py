@@ -100,8 +100,13 @@ def spring(o, p):
 room('The spring', [436, 84], 30, 17, 2, '9-high ledge: hold during the launch so a soul hangs beside the spring, then land on it', spring)
 
 def wrong_order(o, p):
-    o(1, 1, 28, 15); o(0, 14, 0, 15); o(1, 12, 4, 12, '#'); p(2, 11, '_')   # plate on a shelf over the start, out of the way
-    o(11, 16, 18, 16, '^'); o(25, 1, 25, 12, '#'); o(25, 13, 25, 15, 'D'); o(29, 13, 29, 15); p(1, 15, 'P')
+    o(1, 1, 28, 15); o(0, 14, 0, 15); o(29, 13, 29, 15); p(1, 15, 'P')
+    # Spend the first step reaching the plate; replace it with the pit bridge.
+    o(1, 12, 3, 12, '#'); p(2, 11, '_')
+    o(7, 16, 13, 16, '^'); o(14, 1, 14, 15, 'D'); p(15, 15, 'C')
+    # Spring to a temporary landing, then the high plate. Its replacement shields the next launch.
+    o(16, 7, 18, 11, '#'); p(17, 6, '_'); p(20, 15, 's')
+    o(22, 16, 27, 16, '^'); o(28, 1, 28, 15, 'D'); p(28, 9, '<')
 room('Wrong order', [466, 75], 30, 17, 2, 'step, plate, pit: in another order a soul you still need vanishes', wrong_order)
 
 def sawmill(o, p):
