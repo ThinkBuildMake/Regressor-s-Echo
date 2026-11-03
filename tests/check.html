@@ -301,7 +301,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   if (matches('Three high')) {
     s = await go(ROOMS.findIndex(([n]) => n === 'Three high'));
     await alive();
-    for (const tx of [5, 8, 11]) { s.player.body.reset(O().x + tx * 32 + 16, O().y + 15 * 32 + 17); await wait(50); s.die(); await alive(); }
+    for (const tx of [3, 5, 7]) { s.player.body.reset(O().x + tx * 32 + 16, O().y + 15 * 32 + 17); await wait(50); s.die(); await alive(); }
     const xs = s.corpses.map((c) => c.x);
     key('keydown', 81); await wait(60); key('keyup', 81); await wait(100);
     check(s.corpses.length === 2 && s.corpses.every((c, i) => c.x === xs[i]), `tapping Q recalls only the newest soul (${s.corpses.length} left)`);
@@ -455,12 +455,31 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     await wait(300);
     check(stats.deaths === deaths && near(s.player.y + 15, soul.y - 16), 'Wrong order: a narrow landing on the pit soul stays on top');
   }
-  await solve('Three high', [[18, 2], [19, 3], [20, 4]], [[17, 0, 3, 18], [20, 5, 8, 21]]);
+  await solve('Three high', [[7, 2], [8, 3], [9, 4]],
+    [[6, 0, 3, 7], [7, 3, 5, 9], [9, 5, 8, 12]]);
+  if (matches('Three high')) {
+    s = room();
+    check(s.start.x > O().x + 10 * 32, 'Three high: safe staircase reaches the shrine');
+    // New staircase: the last death in the beam makes both a step and a shield.
+    for (const [tx, b] of [[24, 2], [25, 3], [26, 4]]) await place(tx, b);
+    check(s.beams()[0].width < 32, 'Three high: highest step blocks the laser at its source');
+    for (const [tx, top, to, height] of [[23, 0, 24, 3], [24, 3, 26, 5], [26, 5, 28, 8]]) {
+      const r = await hop(tx, top, 16, to);
+      check(r.h >= height - 0.05 && r.x >= to - 0.4,
+        `Three high: laser staircase reaches ${height} up (got ${r.h}, column ${r.x})`);
+    }
+    const first = s.corpses[0];
+    await place(17, 0);
+    check(s.corpses.length === 3 && !s.corpses.includes(first),
+      'Three high: careless fourth death erases the bottom step');
+    const r = await hop(23, 0, 16, 25);
+    check(r.h < 4, 'Three high: erased bottom step leaves the next step out of reach');
+  }
   // ...and the same rooms can't be skipped: one soul short, the last jump falls short.
   await solve('The ladder', [[20, 2]], []);
   if (matches('The ladder')) { const r = await hop(20, 3, 16, 22); check(r.h < 7, `The ladder: a stack 3 high can't reach the ledge (${r.h})`); }
-  await solve('Three high', [[19, 2], [20, 3]], []);
-  if (matches('Three high')) { const r = await hop(20, 4, 16, 22); check(r.h < 8, `Three high: two souls can't reach the ledge (${r.h})`); }
+  await solve('Three high', [[8, 2], [9, 3]], []);
+  if (matches('Three high')) { const r = await hop(9, 4, 16, 12); check(r.h < 8, `Three high: two souls can't reach the ledge (${r.h})`); }
   if (matches('The spring')) { // the spring alone falls short of its ledge
     const s = await cleanSolveRoom('The spring');
     s.player.body.reset(s.springs[0].x, s.springs[0].y - 20); key('keydown', 39); await wait(1600); key('keyup', 39); await wait(300);

@@ -97,7 +97,10 @@ room('Sawmill', [496, 71], 44, 22, 2, 'SHOWCASE W2: spring + timed self-destruct
 
 # ---------- World 3 ----------
 def three_high(o, p):
-    o(1, 1, 20, 15); o(21, 1, 28, 7); o(0, 13, 0, 15); o(29, 6, 29, 7); p(1, 15, 'P')
+    # Safe staircase, then a shrine before dropping into the laser chamber.
+    o(1, 1, 9, 15); o(10, 1, 14, 7); p(12, 7, 'C')
+    o(15, 1, 26, 15); o(27, 1, 28, 7); p(27, 11, '<')
+    o(0, 13, 0, 15); o(29, 6, 29, 7); p(1, 15, 'P')
 room('Three high', [540, 75], 30, 17, 3, '8-high ledge: a 3-soul staircase (run off your top soul while holding K)', three_high)
 
 def own_way(o, p):
