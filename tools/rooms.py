@@ -113,8 +113,16 @@ def own_way(o, p):
 room('In my own way', [570, 73], 30, 17, 3, 'two lying souls bridge the tunnel pit; recall (Q) a standing one that blocks it', own_way)
 
 def three_jobs(o, p):
-    o(1, 1, 28, 15); o(0, 14, 0, 15); p(5, 15, '_'); o(9, 16, 16, 16, '^')
-    o(18, 1, 24, 12, '#'); p(21, 12, 'v'); o(26, 1, 26, 12, '#'); o(26, 13, 26, 15, 'D'); o(29, 14, 29, 15); p(1, 15, 'P')
+    # Climb to the safe three-job setup, then drop to the shrine.
+    o(0, 14, 0, 15); o(1, 4, 3, 15); p(1, 15, 'P')
+    o(4, 4, 13, 7); p(4, 7, '_'); o(6, 8, 12, 8, '^'); p(13, 3, 'v')
+    o(14, 6, 14, 7, 'D'); o(15, 4, 16, 14); p(16, 14, 'C')
+    # The second bridge has crumbling lips: commit to the jump, including the high laser death.
+    o(17, 10, 27, 14); p(18, 14, '_'); o(20, 15, 26, 15, '^')
+    for x in (19, 27):
+        p(x, 15, '~'); p(x, 16, '^')
+    p(27, 9, 'v'); o(28, 13, 28, 14, 'D'); o(29, 14, 29, 15)
+
 room('Three jobs', [600, 67], 30, 17, 3, 'plate, pit and a laser blocker at once; recall mistakes instead of dying over them', three_jobs)
 
 def everything(o, p):
