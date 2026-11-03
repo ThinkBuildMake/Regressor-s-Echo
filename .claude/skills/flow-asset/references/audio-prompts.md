@@ -79,3 +79,9 @@ Act as a critic before accepting a file:
 - **Does it sit with the others?** Play it next to the world's music and a couple of other effects. Too loud,
   too bright or too "cinematic" against the calm tone means redo or turn it down.
 - **Mark it done** in `docs/ASSETS.md` only after it's in the game and heard at the real moment.
+
+## Generating and reviewing (how it's done in this repo)
+
+- Generate: `node tools/audio.mjs assets/audio/sfx/<name>.ogg "<prompt from docs/ASSETS.md>"` (add `--music` and `--seconds=N` for loops). It trims leading silence, levels loudness (SFX -18 LUFS, music -20, peaks under -1.5 dB) and saves Opus in .ogg. The key is `ELEVENLABS_API_KEY` in `.env`.
+- Check: `sh tools/audio-check.sh <file.ogg> <out.png>` prints length, average/peak level and edge silence, and draws a waveform + spectrogram. Look at the picture: a "rumble" with only scattered clicks and no low band is wrong (the first earthquake), an event sound should start at 0 s.
+- Claude can't hear: judge only what the numbers and pictures show, then put every sound on a page with players (Opus .ogg plus an .mp3 fallback for Safari) for the user to listen to.
