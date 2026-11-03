@@ -13,17 +13,19 @@ Key: ✅ done · 🟡 started · blank = to do · — = not needed (a single ima
 |---|---|---|---|---|---|---|
 | Hero: idle, run, jump, fall, slide | (done) | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Hero idle (animated) | standing still while hair, scarf and cape sway in a breeze, ~4–6 frames looping. Replaces the single `idle.webp` | | ✅ `raw/hero/hero.jpg` | | | |
+| Hero wall slide + wall jump (coming with wall jump) | slide: clinging to a wall with one hand and one boot, body facing out, sliding down; scarf and cloak lifted upward by the slide, 2–3 frames looping. Kick-off: 1 frame pushing away from the wall. Facing right (the wall on his right); the game mirrors it | | ✅ `raw/hero/hero.jpg` | | | |
 | Hero death | arcade-style burst: he flashes pure white, then breaks apart into square pixels that fly outward, ~4–5 frames (white flash → white silhouette → breaking into pixels). The scattering pixels after the last frame are code particles | | — | | | |
 | Hero respawn | soul light gathers to the respawn point: pixels fly inward (code particles) → white silhouette → the hero. Plays the **death sheet in reverse**, so no new sheet unless it looks wrong | | — | — | | |
-| White ghost (appears when he picks up the amulet) | — single image: the hero entirely white, floating, legs hanging, toes pointed down. Glow and bob in code | | | — | | |
-| Hero release (World 3, die anywhere) | flames growing over 0.75 s wind-up, ~4 frames, or code flames over the idle pose | | — | | | |
+| White ghost (appears when he picks up the amulet) | — `raw/world1/ghost-white.jpg` approved by the user (standing pose fits the floating motif); glow, bob and alpha in code | | | — | | |
+| Hero self-destruct (World 2 on, hold) | blue-white flames grow over the ~0.75 s hold while he keeps moving: code flames over his current frame, no sheet. Letting go cancels | — | — | — | — | |
+| Recall (World 3) | a soul fades back into the hero, newest first: code effect (the respawn gather, reused), no sheet | — | — | — | — | |
 
 ## Story objects
 
 | Asset | Sheet (animations) | Prompt | Ref | Sheet | Sized | In game |
 |---|---|---|---|---|---|---|
 | Amulet: in the world (pickup) | — (glow and bob in code) | | | — | | |
-| Amulet: awakened (rune lit) | — (second image, same framing) | | | — | | |
+| Amulet: runes lit (1, 2, 3) | — one image per state, same framing: a rune lights after each boss (2nd after the moth, 3rd after the tree) | | | — | | |
 | Shrine: dormant | — | | | — | | |
 | Shrine: activated | — (same shrine, lit; glow pulse in code) | | | — | | |
 
@@ -32,6 +34,9 @@ Key: ✅ done · 🟡 started · blank = to do · — = not needed (a single ima
 | Asset | Sheet (animations) | Prompt | Ref | Sheet | Sized | In game |
 |---|---|---|---|---|---|---|
 | Walker (red beetle) | walk (2 poses + code bob) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Flyer (coming) | a small flying enemy: flap loop, 4 frames | | | | | |
+| Projectile enemy (coming) | idle + shoot, ~4 frames; its shot is code or one small image | | | | | |
+| Stomping enemy (coming) | idle + raise + slam, ~4 frames | | | | | |
 
 ## Bosses
 
@@ -43,9 +48,12 @@ bottom-left corner. The name card is text drawn in code, not an asset.
 |---|---|---|---|---|---|---|
 | **Moth** (World 1) | | ✅ | ✅ `raw/bosses/moth.jpg` | | | |
 | Moth: flying | wing-flap loop, 4 frames (up, flat, 45° down, flat) | ✅ | ✅ `moth-base.jpg` | ✅ `moth-fly.jpg` | ✅ | 🟡 playtest |
-| Moth: screaming (= its intro) | rear back, wings flared, mouth open, ~3–4 frames. Plays as the intro and before the wing-dust attack | | | | | |
-| Moth: wing-dust shot | — (single projectile image, or code particles) | | | — | | |
-| **Tree guardian** (World 2) | | ✅ | 🟡 `raw/bosses/tree.jpg`, top clipped, faces front | | | |
+| Moth: screaming (= its intro, and before each wing-dust attack) | no new sheet, and no mouth (moths don't have one): reuse the flying frames, beat from raised (1) to fully spread (2) and hold the spread, while code draws sound-wave rings pushing out in all directions, plus camera shake and the scream sound | — | — | — | — | |
+| Moth: intro (crash through the wall) | no new sheet: on the earthquake the moth bursts through the arena wall (flying frames + code movement), rocks fly, then it screams. Needs the two rows below | — | — | — | — | |
+| Rock chunks (wall burst debris) | — 6 chunks cut into `assets/world1/rocks.webp` (6 frames, natural sizes), flung by code; dust puffs are code particles | ✅ | ✅ `raw/world1/rocks.jpg` | — | ✅ | |
+| Broken wall edge (the hole the moth leaves) | — `assets/world1/wall-break.webp` (cropped: Flow painted a forest floor under the strip). Clean left side joins the wall, ragged right side; not seamless top-to-bottom, so mask or cap its ends in code | ✅ | ✅ `raw/world1/wall-break.jpg` | — | ✅ | |
+| Moth: wing dust (its attack) | — code particles. Room 11: you hide behind your soul from it; it can't break souls | — | — | — | — | |
+| **Tree guardian** (World 2) | reference: the ORIGINAL Flow tree (`raw/bosses/tree.jpg`, user's pick); the side-profile version is kept as `tree-profile.jpg` | ✅ | 🟡 `raw/bosses/tree.jpg`, top clipped, faces front | | | |
 | Tree: intro | mask eyes open, rises out of the ruins, arms spread, ~4 frames | | | | | |
 | Tree: idle | slow sway, ~3–4 frames | | | | | |
 | Tree: branch swing | wind-up → swing → recover, ~4–5 frames | | | | | |
@@ -65,11 +73,51 @@ bottom-left corner. The name card is text drawn in code, not an asset.
 |---|---|---|---|---|---|---|
 | Spikes (tileable strip) | — | | | — | | |
 | Spiky vine wall (the `x` tile) | — (static, tileable) | | | — | | |
-| Pressure plate: up / down | — (two images) | | | — | | |
-| Gate (held open by a pressure plate) | — one image per world (root gate, stone slab, carved shrine door); slides open in code | | | — | | |
+| Pressure plate: up / down | — up: `raw/world1/plate.jpg` approved. Down: no new art; when pressed the code sinks the plate so only a thin sliver of its top edge peeks above the ground | | | — | | |
+| Gate (held open by a pressure plate) | — one image per world: W1 root gate ✅, W2 stone slab, W3 carved shrine door; slides open in code | ✅ | 🟡 W1 | — | | |
+| Vine barrier (`V`, opens when the room's boss is beaten) | — `raw/world1/vine-barrier.jpg` approved; draw it **thinner** (about one tile wide) when sizing; it withers open in code | | | — | | |
 | Laser emitter (World 2) | — (beam in code) | | | — | | |
 | Spring (World 2) | idle / compressed / launch, 3 frames | | | | | |
-| Moving platform (World 3) | — | | | — | | |
+| Moving platform (World 2 room 7) | — | | | — | | |
+| Saw blade (coming) | — one round blade image, spun in code | | | — | | |
+| Crumbling platform (coming) | intact → cracked → breaking, 3 frames (or the platform art plus code cracks and falling chunks) | | | | | |
+| Falling spike (coming) | — one hanging stalactite/thorn spike, shakes then drops in code | | | — | | |
+
+## Story assets (requested by the story chat, 2026-11-02)
+
+Script: [STORY.md](STORY.md); § = the scene each asset serves. Done in priority order.
+
+**Priority 1: portraits** (used throughout World 1 and every world after)
+
+| Asset | Notes | Prompt | Ref | Sheet | Sized | In game |
+|---|---|---|---|---|---|---|
+| Hero expressions 2 → `assets/portraits/hero2.webp` | curious, annoyed, excited, scared, shouting, cocky (= `FACES2.hero` order in dialogue.js). Attach `hero.jpg` + the first sheet (`raw/portraits/hero-faces.jpg`) so face and framing match. Cut: `sheet.mjs <raw> <out> --grid --frames=3 --rows=2 --height=192` | ✅ PROMPTS item 3 | — | ✅ | ✅ | ✅ |
+| Guide expressions 2 → `assets/portraits/guide2.webp` | smug, mischievous, teasing, exasperated, warning, surprised (= `FACES2.guide`). Attach the first guide sheet so the ghost look matches. Same cut | ✅ PROMPTS item 4 | — | ✅ | ✅ | ✅ |
+
+**Priority 2: World 1 scene sounds** (in the game now, silent). Prompts in the Audio section below.
+
+| For | § | Done |
+|---|---|---|
+| Satchel clink (tools and a metal cup) | W1 §2 | |
+| Gold flash chime, warm and magical, as he puts the amulet on | W1 §2 | |
+| Ghost fading in, soft and airy | W1 §2 | |
+| Amulet refusing to come off: a low gold pulse | W1 §3 | |
+| Guide's quiet snicker "…heh" | W1 §4 | |
+| Guide's tired sigh | W1 §3 | |
+| Earthquake rumble, ~1.5 s (the moth arrives) | W1 §11 | |
+| Boss dissolving into light motes that get absorbed: shimmer into a whoosh | W1 §13 | |
+| Faint pen scratching on paper in the dark, during the nap (he's secretly writing the note; keep it subtle) | W1 §14 | |
+
+**Priority 3: Worlds 2 and 3 story scenes** (not built yet)
+
+| Asset | § | Notes | Prompt | Ref | Sized | In game |
+|---|---|---|---|---|---|---|
+| Carved wall relief | W2 §6 | reads left to right: a crowd of figures, each with a gold circle on its chest; then fewer; then a handful; then one. Ruins stone, as a background layer behind room 7 | ✅ | | | |
+| Pyramid backdrop | W3 §1 | a huge stepped pyramid, its top lost in cloud; a far parallax layer for the Sanctum | ✅ | | | |
+| The old tree | W3 §5 | by the stag's arena, with a hiding spot behind it (where the note is) | ✅ | | | |
+| The guide's note | written in the DIRT behind the old tree, not on paper (user): a blank smoothed patch of earth, the words scratched in by code | a folded, worn paper, for a close-up the note's text sits on | ✅ | | | |
+| Sound: the guide cracking like glass as the beam hits him | W3 §8 | sad, not violent | | — | | |
+| Music: the last-stand cue | W3 §8 | later | | — | | |
 
 ## Backgrounds (prompts already in PROMPTS.md)
 
@@ -109,6 +157,17 @@ game adds room sound. Rows marked *(3 takes)* repeat often, so make 2–3 variat
 | Hazards | Plate up | The same stone tile rising back up, a lighter clunk with a tiny grit rattle, close, dry, 0.3 s | |
 | Hazards | Door opens | A heavy stone slab door grinding upward in a stone groove, steady scrape, ends in a soft knock, medium distance, 1.2 s | |
 | Hazards | Door closes | A heavy stone slab dropping down a stone groove and landing with a deep thud and dust trickle, medium distance, 0.9 s | |
+| Story | Satchel clink (W1 §2) | A leather shoulder bag set down on a mossy log: a soft thud, then small metal tools and a tin cup clinking together inside it, close, dry, 0.7 s | |
+| Story | Gold flash as he puts the amulet on (W1 §2) | A small brass bell and a glass wind chime struck together once, warm and bright, with a soft rising shimmer of a finger circling a wine-glass rim, close, 2 s, natural decay | |
+| Story | Ghost fading in (W1 §2) | A long, soft breath of air through a slightly open window, with a faint airy hum like a bowed glass, swelling gently and settling, quiet, 2 s | |
+| Story | Amulet refusing to come off (W1 §3) | One low, dull hum of a large brass singing bowl touched by a palm, short and muffled, with a faint warm throb, close, 1 s | |
+| Story | Guide's quiet snicker "…heh" (W1 §4) | A young man's single quiet, amused breath-laugh through the nose, "heh", close, dry, 0.5 s | |
+| Story | Guide's tired sigh (W1 §3) | A young man's long, tired sigh out through the mouth, close, dry, 1.2 s | |
+| Story | Earthquake rumble (W1 §11) | A deep ground rumble of rocks shifting under a forest, low and rolling, with a few small stones and twigs rattling, outdoors, 1.5 s, fades out | |
+| Story | Boss dissolving into light, absorbed (W1 §13) | Fine glass beads poured slowly onto a metal tray, rising into a shimmer of finger-on-glass tones, then a quick soft rush of air drawn in through a narrow gap, 2.5 s | |
+| Story | Pen scratching in the dark (W1 §14) | A pencil writing slowly on rough paper in a quiet room, faint and slow, a few strokes with pauses, very quiet, close, 4 s | |
+| Story | Guide cracking like glass (W3 §8) | A thin pane of glass slowly splintering under pressure, soft crackles spreading, then a faint high ring fading out, sad and gentle, not a smash, close, 2 s | |
+| Bosses | Moth bursts through the wall | A dry earth bank collapsing as something heavy smashes through it: a sharp crack, then a rumble of clods and stones tumbling and scattering on the ground, outdoors, close, 2 s | |
 | Bosses | Name card appears (all bosses) | One deep low drum hit with a large gong swelling behind it, in a stone hall, 2 s, natural decay | |
 | Hazards | Laser hum (loop) | Steady electrical hum of a fluorescent tube, mid-pitch, close, constant level, seamless loop, 2 s | |
 | Hazards | Laser blocked by soul | Water flicked onto a hot iron pan, a short sizzle and hiss, close, dry, 0.4 s | |

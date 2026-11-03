@@ -47,6 +47,14 @@ Generate **one** image per run. Show the user the image and the critic's verdict
 ## Driving Flow (Claude in Chrome)
 
 - **Reference already in the project:** ⋮ (or right-click) on the image → **Add to prompt**.
+- **Picker search:** + ("Add ingredients") → type in "Search assets" → click the result to preview it → press **Add to prompt**. Remove leftover attachments (their x) before an edit so only the image being edited is attached.
+- **Edits keep the composition fixed:** they clean up, recolour or light things, but won't re-angle, sink, move or re-pose a subject. Flow also copies the pose of an attached character, so to get a new pose, attach a reference already in (or near) that pose. "See-through" on magenta bakes in a pink tint: make it opaque and set alpha in code.
+- **Anything cut off → make it smaller, then outpaint (user's rule):** never regenerate or ask to zoom out; shrink it onto a bigger magenta canvas and edit in only the missing part. Upscale afterwards (Flow's 2K/4K download) if it ends up too small.
+- **Fixing a crop (outpainting):** asking to "zoom out" copies the crop. Instead key the image onto pure magenta smaller and pad it (`art.mjs --key --height=<smaller> --bg=#ff00ff`, then `sips --padToHeightWidth ... --padColor FF00FF`), upload that, and edit: *"Keep everything already painted exactly as it is. Only continue the <cut part> past the straight cut into empty space…"* (tree guardian's crown, first try).
+- **True side view:** *"coin profile, only ONE eye visible; the body parallel to the picture plane, chest not toward the viewer, near legs overlapping far legs"* fixes three-quarter views.
+- **Tiles and strips:** Flow ignores "edge to edge" / "touches the top and bottom" on the first try; expect one fix edit. Check seams with `art.mjs --mirror` (strips) or a 2×2 view (tiles).
+- **Every attached image tends to get pasted in.** Attach only what the step needs, say *"Do not include the attached <X> itself"*, and expect one cleanup edit. Right-click → Add to prompt replaces earlier attachments.
+- **Earth/ground references** (`ground.jpg`) make Flow paint a soil band along the bottom: add *"no soil strip along the bottom, the prop floats on magenta"*.
 - **Reference from the repo, not yet in Flow:** "Upload media" opens a native file dialog you can't drive. Instead open the prompt's + ("Add ingredients") picker, then run this, then `find` the file input and `file_upload` the repo path:
   ```js
   const orig = HTMLInputElement.prototype.click;
@@ -55,6 +63,9 @@ Generate **one** image per run. Show the user the image and the critic's verdict
   ```
   Then select it in the picker → Add to prompt.
 - **Prompt:** click the "What do you want to create?" box, type the style block + prompt, check the attached thumbnail is right, submit (→). Settings button next to → (shows "Nano Banana 2.1 ▭ xN"): model Nano Banana 2.1, count **x1**, aspect 1:1 for single sprites, 16:9 for sheets. Image gen costs 0 credits.
-- **Wait:** ~30 s; new results appear top-left of All media.
+- **The ring-and-three-rays mark:** Flow keeps inventing a 4th stroke below the ring on re-dressed or new props; say *"three short rays above the ring, nothing below the circle"*.
+- **Downloads stop after ~15 in a session:** Chrome blocks Flow's "multiple automatic downloads". The user has to allow it (Chrome's prompt, or Site settings → Automatic downloads → allow flow.google.com); don't change browser settings yourself. Until then, note which Flow tile holds the result and move on.
+- **Submit exactly once:** click the arrow OR press Enter, never both, then screenshot and confirm exactly ONE new tile appeared. Never resubmit because a result is slow (wait up to ~60 s). Every retry and fix edit also leaves an image in the project, so allow at most one extra attempt per image; the user doesn't want duplicates.
+- **Wait:** ~30 s; new results appear top-left of All media. The grid **crops thumbnails**: judge only the downloaded file (the wall strip looked clean in the grid but had a painted forest floor under it).
 - **Download:** right-click → `find` "Download" menuitem → click → `find` the **first** "Upscaled" menuitem (2K; the second is 4K, paid) → click. It lands in `~/Downloads` as `<Flow_title>_<hash>_2K.jpg` after ~10–20 s; `ls -t ~/Downloads | head` and `mv` it to the raw path.
 - Don't trash or delete anything in Flow without asking.

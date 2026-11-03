@@ -59,6 +59,9 @@ I mirror the end cap for right-hand ends.
 
 ## Worlds 2 and 3: same layers, different setting
 
+**Preferred method (learned on World 2): re-dress the World 1 layer.** Attach the World 1 raw layer only (`assets/raw/world1/<layer>.jpg`) and edit: *"Edit the attached image. Keep the layout exactly as it is: the same shapes, positions, spacing, edges and magenta areas. Only change the setting: <the world's setting sentence>. Do not paint anything into the magenta areas."* Edits keep composition, so the layer keeps World 1's silhouettes, repeat margins and tiling, and the worlds line up. Fresh generations with the setting sentence tend to paint a whole scene or backdrop panels.
+Add per layer: far *"as pale and low-contrast as the original"*; mid *"the gaps between trunks stay flat magenta"*; near *"keep the painted areas as sparse as the original"*; sky *"sky only, no silhouettes"*; ground tiles *"flat even lighting, no vignette or edge rim; keep the edges matching so it stays tileable"*. Flow outputs 16:9 while the World 1 layers are wider (2.36:1), so trees get re-spaced slightly.
+
 Make each layer for all three worlds in one sitting (World 1 far trees, then World 2 far trees, then World 3), with the World 1 reference image attached each time. Keep the style block and layer prompt word for word, and add the world's setting sentence at the end. Save to `assets/raw/world2/` and `assets/raw/world3/` with the same file names.
 
 - **World 2, Overgrown ruins:** *"Setting: overcast dusk among mossy grey stone ruins overgrown with vines, broken pillars and arches between the trees. Muted olive and slate palette with soft amber light from the upper left."*
@@ -82,6 +85,7 @@ ChatGPT can make transparent backgrounds. If it won't, use the magenta backgroun
 
 3. **World 3, Spectral stag → `stag.png`**
    > A spectral great stag, guardian of a moonlit forest sanctuary. Tall and translucent with a pale silver body, enormous branching antlers wrapped in faint violet light, mist streaming from its legs, head lowered as if about to charge.
+   **Pose (user, 2026-11-02): proud and upright, not stalking.** Append: *"Standing tall and proud in side profile facing left, head raised high, chest out, neck upright, all four legs straight and planted, the great antlers held high. Majestic and still, not crouching or charging."*
 
 Each boss image above is the **reference**. The animation sheets come from it (attach the approved reference). Sheets never have effects: dust, mist, glow and particles are added in code.
 
@@ -96,8 +100,7 @@ For the moth add: *"Hovering with wings raised, both wings visible, legs visible
 4. **Moth flying → `moth-fly.png`** (attach the approved `moth-base.png`, wide 16:9)
    > Using the attached moth exactly (same wings, patterns, eyespots, body and antennae), paint a flying animation sprite sheet: one horizontal row of 4 evenly spaced frames of a looping wing-flap while hovering. Frame 1: wings raised high above the body. Frames 2 and 4: identical, wings straight out horizontal. Frame 3: wings swept down below the body. The body is exactly the same in every frame: same size, same angle, same height, legs visible; only the wings move. No haze or smudges anywhere.
 
-5. **Moth screaming → `moth-scream.png`** (attach the approved `moth-base.png`, wide 16:9)
-   > Using the attached moth exactly, paint an attack wind-up sprite sheet: one horizontal row of 4 evenly spaced frames: hovering normally; rearing back, wings lifting; wings flared wide open and head thrown forward, screaming; holding the scream at full flare.
+5. **Moth screaming:** no sheet. The scream reuses the flying frames (wings spread) with code sound-wave rings; the moth has no mouth to open.
 
 ## Enemies (Flow, Nano Banana 2.1)
 
@@ -112,6 +115,95 @@ Save to `assets/raw/enemies/`. Attach the World 1 reference image (`anchor.png`)
 
 2. **Walker sheet → `walker-sheet.png`** (attach the approved `walker.png`)
    > Using the attached creature exactly (same shell, colors, legs and proportions), paint a walking animation sprite sheet in one horizontal row of 6 evenly spaced frames, all the same size, all with feet on the same baseline, facing left: a looping six-legged scuttle cycle. Every frame faces LEFT with the head on the left side, exactly like the reference, never mirrored. The legs move in an alternating tripod gait with clearly different foot positions in each frame. Clear magenta gaps between frames. Wide 21:9.
+
+## Props for the moth's entrance (Flow, Nano Banana 2.1)
+
+On the earthquake the moth bursts through the arena wall. Save to `assets/raw/world1/`. Attach `ground.jpg` (the earth front face) so the material matches the wall, plus `anchor.png` for the brushwork. Wide 16:9, x1.
+
+**Prop style block:**
+> Hand-painted 2D game prop, painterly, soft brush edges, matching the attached forest earth texture exactly: dark packed soil with roots, small stones and patches of moss, soft light from the upper left. Side view. Isolated on a flat solid magenta #FF00FF background. No dust, no mist, no particles, no motion blur, no text, no ground line, no shadow.
+
+1. **Rock chunks → `rocks.png`**
+   > Six separate broken chunks of this earth bank, as if smashed out of a wall: three large, two medium, one small, each a chunky irregular lump of packed soil with a stone or two, a root end and a bit of moss on top. Arranged in two rows of three, every chunk well apart from the others with wide magenta gaps, none touching, none touching the image edges.
+
+2. **Broken wall edge → `wall-break.png`**
+   > A tall vertical strip of this earth bank's broken edge, as if something burst through it: a jagged, crumbled outline with snapped roots poking out, loose clods and a few stones on the break, darker inside the break. The left side is the clean solid earth face (so it joins the wall), the right side is the ragged broken edge. The strip fills the full height of the image so it can repeat top to bottom. Centered, about a quarter of the image wide.
+
+## World 1 props (Flow, Nano Banana 2.1)
+
+Save to `assets/raw/world1/`. Attach `anchor.png` (brushwork) and, for anything made of earth, `ground.jpg`. With `ground.jpg` attached, add *"no soil strip along the bottom, the prop floats on magenta"* (otherwise Flow paints one). One image per run, x1. Gold appears only on the amulet, its runes and the shrine's mark (the colour rule in IDEAS.md).
+
+**World 1 prop style block:**
+> Hand-painted 2D game prop for a misty forest platformer, painterly, soft brush edges, matching the attached painting: muted teal-green and moss palette, soft light from the upper left. Side view, level horizon. Isolated on a flat solid magenta #FF00FF background, the whole prop inside the frame with space around it. No dust, no mist, no glow effects, no particles, no text, no ground line, no shadow. Do not use bright blue-white anywhere. Do not include the attached painting itself.
+
+1. **Shrine, dormant → `shrine.png`** (square 1:1)
+   > A small ancient waystone shrine at the forest edge: a single weathered standing stone about chest height to a person, mossy at the base and the top, with one carved symbol on its face: a simple circular mark with three short rays, the grooves dark and empty. A few roots and ferns at its foot. Old, quiet, a little sacred.
+
+2. **Shrine, activated → `shrine-lit.png`** (edit `shrine.png`, don't regenerate)
+   > Edit the attached image. Keep everything exactly as it is. Only make this change: the carved symbol's grooves are filled with warm soft gold light, as if lit from inside. No glow spilling outside the grooves, no rays, no particles.
+
+3. **Amulet → `amulet.png`** (square 1:1; attach `hero.jpg` too, for the amulet he wears)
+   > A small round gold amulet on a short broken leather cord, lying flat, seen straight on, the same amulet the attached hero wears: a worn gold disc with the same carved circular mark with three short rays, and three small empty rune slots around the rim. Slightly tarnished, ancient. Centered, filling about half the frame.
+
+4. **Amulet, runes lit → `amulet-rune1.png`, `amulet-rune2.png`, `amulet-rune3.png`** (edit each from the previous one)
+   Flow paints the amulet with the central mark and **two** rim slots (at about 4 and 8 o'clock), so the three runes are: 1 = the central mark (World 1: it brings him back), 2 = the 8 o'clock slot (after the moth), 3 = the 4 o'clock slot (after the tree).
+   > Edit the attached image. Keep everything exactly as it is. Only make this change: the carved central mark (the ring and its three rays) is filled with warm soft gold light. *(rune2, edit rune1: "…the small rune slot at the lower left (8 o'clock) is filled with a small warm gold-lit rune." rune3, edit rune2: same for the lower right (4 o'clock).)* No glow spilling outside the grooves, no rays, no particles.
+
+5. **Spikes → `spikes.png`** (wide 16:9)
+   > A long horizontal strip of sharp hazard spikes for a forest platformer: a row of dark, splintered, thorn-like wooden stakes and old iron points jutting up from a thin mossy base, evenly spaced, all the same height, clearly dangerous. The strip runs the full width of the image and is the same all the way across so it can repeat left to right.
+
+6. **Spiky vine wall → `thorns.png`** (square 1:1)
+   > A square tile of dense thorny bramble vines for a forest platformer hazard wall: tangled dark-green and brown vines covered in long sharp thorns, filling the whole square edge to edge so the tile can repeat in every direction, evenly dense, no gaps, no flowers. Clearly painful to touch.
+
+7. **Vine barrier → `vine-barrier.png`** (tall 9:16)
+   > A thick barrier of living woven vines blocking a doorway-sized gap: heavy twisted green vines and roots knotted tightly together from top to bottom, a few leaves, no thorns, the weave filling a tall rectangle that touches the top and bottom edges of the image. It looks like it could wither and pull apart.
+
+8. **Pressure plate → `plate.png`, then `plate-down.png`** (wide 16:9; down = edit)
+   > A flat ancient pressure plate set into mossy forest ground: a wide, low, square-edged slab of weathered grey stone with the same carved circular mark with three rays, raised a finger's width above a thin strip of soil, seen from the side and slightly above. *(Down: "Edit the attached image. Only change: the slab is pressed down flush with the soil.")*
+
+9. **Root gate → `gate.png`** (tall 9:16)
+   > A gate of interlocking thick old tree roots and a weathered wooden frame, closing a doorway-sized gap in an earth wall, roots woven like bars from top to bottom, touching the top and bottom edges of the image. Heavy, old, closed.
+
+10. **White ghost → `ghost-white.png`** (square 1:1; attach `hero.jpg`)
+   > The attached young treasure hunter as a ghostly apparition: exactly his face, hair, cloak, scarf and satchel, but his whole figure is pure soft white, like pale porcelain light, slightly see-through, no other colours. He floats in the air, body upright and relaxed, legs hanging loosely with toes pointed down, arms at his sides, facing right. Calm, eerie. No glow halo, no particles.
+
+## World 2 and 3 props (Flow, Nano Banana 2.1)
+
+Save to `assets/raw/world2/` and `assets/raw/world3/`. Use the World 1 prop style block (attach `anchor.png` for the brushwork) and add the world's setting sentence from "Worlds 2 and 3" above at the end. Gold only for amulet/rune marks; no bright blue-white.
+
+1. **Laser emitter (World 2) → `laser.png`** (1:1)
+   > A small ancient stone device mounted on a ruin wall: a squat carved block of mossy grey stone with a round opening in its face, a dull amber crystal set deep inside the opening, cracked and old. Side view, the opening facing right. The beam itself is not painted (it's drawn in code).
+
+2. **Spring (World 2) → `spring.png`** (1:1)
+   > A launch pad made of a thick, coiled living root wound tight like a spring under a flat round wooden cap, set into mossy stone ruins, clearly springy. Side view.
+
+3. **Moving platform (World 2) → `platform.png`** (16:9)
+   > A floating slab of carved grey ruin stone, wide and flat on top, broken and mossy at the edges, a few vines hanging from its underside, the top surface level. Side view, about four times as wide as it is tall.
+
+4. **Stone slab gate (World 2) → `gate.png`** (9:16)
+   > A tall, heavy slab of carved grey ruin stone closing a doorway-sized gap, faint old carvings on its face, moss and vines in the cracks, touching the top and bottom edges of the image.
+
+5. **Shrine door (World 3) → `gate.png`** (9:16, World 3 setting sentence)
+   > A tall carved stone door closing a doorway in an ancient sanctuary, standing-stone grey with deep carved bands and the ring-and-three-rays mark in the centre (grooves dark, not lit), touching the top and bottom edges of the image.
+
+6. **Shrine, Worlds 2 and 3 → `shrine.png`, `shrine-lit.png`**: the World 1 shrine re-dressed for the world: attach `assets/raw/world1/shrine.jpg`, "Edit the attached image. Keep the stone's shape and carved mark exactly as they are. Only change its setting to match: <the world's setting sentence>." Then the lit version as an edit, as in World 1.
+
+## Story scenes, Worlds 2 and 3 (Flow, Nano Banana 2.1; from the story chat)
+
+Use the matching world's layer method or the World 1 prop style block, plus the world's setting sentence. Gold only for the amulet circles on the carving.
+
+1. **Carved wall relief (World 2 §6) → `assets/raw/world2/carvings.png`** (16:9; re-dress `assets/raw/world2/mid.jpg`'s palette but a NEW composition, so generate fresh, attaching `world2/far.jpg` for palette)
+   > A long weathered wall of grey ruin stone, carved with a shallow relief that reads left to right like a story: on the left a dense crowd of simple carved human figures standing together, each with a small round gold inlay on its chest; moving right, fewer figures; then a handful; at the far right a single figure standing alone. Moss and vines in the cracks, soft amber light from the upper left, calm and low-contrast like a background layer. The wall fills the whole image edge to edge. No text, no letters.
+
+2. **Pyramid backdrop (World 3 §1) → `assets/raw/world3/pyramid.png`** (16:9; attach `world3/far.jpg` for palette)
+   > A far background layer: a colossal stepped stone pyramid rising out of the moonlit forest far away, so tall its upper half disappears into a thick bank of cloud, pale and hazy with distance, blue-violet and silver, low contrast. Only the pyramid and the cloud bank around its top; everything else flat solid magenta #FF00FF, including the sky. Centered, the base wide, running to the bottom edge.
+
+3. **The old tree (World 3 §5) → `assets/raw/world3/old-tree.png`** (9:16; World 1 prop style block + World 3 setting; attach `anchor.png`)
+   > A single enormous, ancient forest tree with a thick gnarled trunk and great roots, the roots forming a dark hollow at its base big enough to hide a folded letter behind, moss and a few hanging vines, its canopy running off the top of the image. Calm and a little sacred. The trunk and roots stand on flat magenta (no ground strip).
+
+4. **The guide's note (World 3 §9) → `assets/raw/world3/note.png`** (16:9; World 1 prop style block + World 3 setting; attach `world3/ground.jpg` for the earth)
+   The note is NOT on paper: the guide wrote it in the dirt behind the old tree. The painting is the blank ground; the game scratches the words into it.
+   > A patch of bare forest earth seen from above at a low angle, smoothed flat as if brushed clean by a hand, roughly oval, framed by moss, roots and fallen leaves around its edges. The smoothed dirt in the middle is completely blank, with room for several lines of writing scratched into it with a stick (the writing is added in code). Moonlit, soft. No text, no letters, no marks in the smoothed area. Isolated on flat magenta, no soil strip along the bottom.
 
 ## Hero (AI Studio, Nano Banana Pro)
 
@@ -131,6 +223,9 @@ Save to `assets/raw/hero/`. Attach the World 1 reference image for the brushwork
 
 3. **Slide → `slide.png`**
    > Using the attached character exactly, paint him sliding feet first along the ground, body low and leaning back, one leg extended forward, scarf and cloak streaming behind him. Wide 21:9, character centered.
+
+4. **Wall slide → `wall-slide.png`** (wide 16:9, attach `hero.jpg`; one-shot sheet, follow the sheet rules in the skill)
+   > Using the attached character exactly (same proportions, hair, colours, scarf and satchel), paint a wall-slide sprite sheet in one horizontal row of 4 evenly spaced frames, all the same size, on flat magenta: frames 1–3 he clings to a vertical wall on his right with one hand and the sole of one boot, body turned out to the left, knees bent, sliding down, his scarf and cloak lifted upward by the slide (slightly different in each frame so it flutters); frame 4 he kicks off the wall, pushing away up and to the left, arms out. Do not paint the wall itself. Every frame the same character size, nothing touching, no effects.
 
 **Fallback, if the frames don't match each other → `parts.png`:**
    > Using the attached character exactly, paint the same character separated into parts for cut-out animation, each part apart from the others: head with blond hair, torso with cloak front, back cloak flap, scarf tail, left arm, right arm, left leg with boot, right leg with boot, satchel. Same scale and colors as the attached image. Wide 21:9.
