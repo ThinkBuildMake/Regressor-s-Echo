@@ -18,3 +18,4 @@
 02:40 sfx batch done: 64 files, 32 below 8 (worst: boss defeats, wing-dust shot, shrine activates, seed-pod burst, mask hit, stag charge at 3–4). Footsteps/landings mostly 5–7: the critic is strict on plain foley; ears should decide those.
 02:40 SPEND ElevenLabs 13,605 credits tonight (92,303 left, overage off). Vertex via OpenRouter BYOK $1.89 tonight (OpenRouter's own usage $0).
 02:45 pass 2 started: 3 fresh takes for each of the 16 sounds scoring <= 5; a file is replaced only if the new best scores higher.
+03:30 pass 2 done: up to 9 → land-1, respawn, shrine activates, seed-pod burst; 8 → stag wave, stag defeat; 7 → wing-dust shot, branch swing; 6 → mask hit. Still weak: tree defeat 4, stag charge 4, moth defeat 5, door closes 5, plate down 5, footstep W2–3 take 2 at 5. NEEDS REVIEW (by ear; may need clearer descriptions).
