@@ -19,3 +19,4 @@ DECISION: the user asked for parallel agents. Three Codex workers, one per world
 00:28 W2 breakage = my resolve-check.py deleted 4 new solve() lines in the tree merge. Restored; 9 W2 rooms + bosses pass. Script deleted. Full suite now times out in the stag test (passes alone); folded into the stag second pass.
 00:57 Codex usage limit hit mid stag second pass (resets 02:54). Its edits are uncommitted; Claude is running the full suite on them.
 01:19 stag second pass committed 75399f9; full suite OK in 10m37s. The 'hang' was the suite outgrowing the runner's 10-min limit.
+01:19 started 3 Claude playtesters (W1, W2, W3) on the night branch. DECISION: Claude, not Codex, because Codex is locked out until 02:54 and a different model gives a more independent playtest.

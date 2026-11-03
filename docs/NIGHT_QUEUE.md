@@ -5,11 +5,11 @@ Goal: Worlds 1–3 playable end to end, every room in the showcase style (docs/L
 **Every room task is done when:** its intended solution is a replay in tests/check.html and passes; `node tools/validate-rooms.mjs game.js` passes; the room is in the world's chain; LEVELS.md says Built; the full suite passes after merging.
 
 ## Todo
-- [ ] Playtests: one Claude playtester per world, playing from its first room through its boss with real key presses, reporting skips, softlocks and unfair deaths; fix what they find
 - [ ] Full run from the clearing to the ending card without dev keys
 - [ ] Morning summary at the top of NIGHT_LOG.md
 
 ## Doing
+- [ ] Playtests: one Claude playtester per world, playing from its first room through its boss with real key presses, reporting skips, softlocks and unfair deaths; fix what they find — 3 running
 
 ## Done
 - [x] W2 tree guardian merged — ae47049 (+ f314874 restoring 4 replays my conflict script dropped)
