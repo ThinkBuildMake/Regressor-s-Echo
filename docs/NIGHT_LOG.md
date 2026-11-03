@@ -12,8 +12,8 @@
   - The stag's waves: the first at 15s, later ones every 25s, pushed back by a stomp; the wave warning is violet.
   - Tall rooms: the camera looks further down instead of a pan.
   - The Long pit, The well and Let go share a "death revives the guard" idea; later rooms were told not to reuse it.
-- **Not yet verified:** the full test suite passing twice in a row after the last merge (Codex is fixing a flaky Spring replay and a Rehearsal timing check). No playtest after the fixes, and nobody has played it start to finish by hand.
-- **Left out:** polish items in the playtest reports (Thornwood's chimney kick works about 1 in 4, the Sawmill thrower shield does nothing, standing on a wall seam in Reliquary, the saw in Everything running through an open door). The full suite now takes 7-11 minutes (3 before the bosses).
+- **Verified:** the full test suite passes 3 times in a row (about 6 min each) after every merge, including the 8 story scenes that were missing (now wired in). The tests now step the game at a fixed 60 fps, so they no longer flake when the machine is busy. Nobody has played it start to finish by hand yet.
+- **Left out:** polish items in the playtest reports (Thornwood's chimney kick works about 1 in 4, the Sawmill thrower shield does nothing, standing on a wall seam in Reliquary, the saw in Everything running through an open door). 
 - **Art over file://:** the playtesters saw stand-in shapes because the game opened from disk; serve it over http to see the art.
 
 
@@ -43,3 +43,4 @@ DECISION: the user asked for parallel agents. Three Codex workers, one per world
 07:07 merged W2 fixes (87e7e63) and W1 fixes (8b696f3). The Gatehouse fails with both (stage-door rule vs the new post); Codex fixing. W3 fix worker still running.
 08:04 story wiring merged (8 missing STORY.md scenes). Spring and Rehearsal test fixes committed. Full suite still fails in Reliquary (twice); Codex on it. User is playing at http://localhost:8010/.
 08:22 full suite: Reliquary now passes, In my own way failed instead (13 min run while the user plays). DECISION: the replays are timing-flaky under load; Codex is making check.html step the game at a fixed 60fps (tests only, game unchanged), done when 3 full runs pass in a row.
+08:51 deterministic tests committed; full suite OK x3 (365s, 392s, 377s).
