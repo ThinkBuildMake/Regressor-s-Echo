@@ -15,7 +15,11 @@ const until = async (done, timeout = 15000) => {
   for (let t = 0; t < timeout && !done(); t += 20) await wait(20);
 };
 const only = (new URLSearchParams(location.search).get('only') || '').toLowerCase().split(',').map((s) => s.trim()).filter(Boolean);
-const matches = (name) => !only.length || only.some((part) => name.toLowerCase().includes(part));
+const matches = (name) => {
+  const yes = !only.length || only.some((part) => name.toLowerCase().includes(part));
+  if (yes) console.info('at ' + name); // run.mjs reports the last one if the run hangs
+  return yes;
+};
 const defaultRules = { ...rules };
 const near = (a, b) => Math.abs(a - b) < 1.5;
 const room = () => game.scene.getScene('room');
