@@ -36,10 +36,14 @@ def well(o, p):
 room('The well', [180, 94], 30, 33, 1, 'aim your fall: the soul must land near the exit side', well)
 
 def gatehouse(o, p):
-    o(0, 1, 28, 15); o(13, 1, 13, 12, '#'); o(13, 13, 13, 15, 'D')
-    o(0, 1, 0, 12, '#'); o(0, 15, 2, 15, '#'); p(1, 14, 'P')
-    p(7, 15, '_'); p(11, 15, 'e'); p(15, 15, 'C'); o(29, 14, 29, 15)
-    o(17, 16, 24, 16, '^')
+    # First pen: let the walker hit the plate from the door side, then hop the soul.
+    o(1, 11, 12, 15); o(0, 13, 0, 14); p(1, 14, 'P')
+    o(0, 15, 2, 15, '#'); p(7, 15, '_'); p(11, 15, 'e')
+    o(13, 13, 13, 15, 'D')
+    # The second plate soul also reaches the four-high ledge. A bad death steals that step.
+    o(14, 8, 23, 15); p(14, 15, '#'); p(15, 15, 'C'); p(21, 15, '_'); p(23, 15, 'e')
+    o(24, 8, 25, 11); o(26, 8, 26, 15, 'D')
+    o(27, 8, 28, 15); o(29, 14, 29, 15)
 room('The gatehouse', [210, 108], 30, 17, 1, 'get killed on the plate so the walker ends up on the right side', gatehouse)
 
 def thornwood(o, p):

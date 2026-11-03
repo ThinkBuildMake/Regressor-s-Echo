@@ -359,6 +359,46 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
       check(r.h >= wantH - 0.05 && r.h < wantH + 0.5 && r.x >= minTx - 0.4, `${name}: jump from ${top} up at column ${tx} reaches ${wantH} up (got ${r.h} up, column ${r.tx}; souls ${where})`);
     }
   };
+  if (matches('The gatehouse')) {
+    s = await cleanSolveRoom('The gatehouse');
+    const onPlate = async (tx) => {
+      s.player.body.reset(O().x + tx * 32 + 16, O().y + 16 * 32 - 16);
+      const deaths = stats.deaths;
+      for (let t = 0; t < 20000 && stats.deaths === deaths; t += 50) await wait(50);
+      await alive();
+      check(stats.deaths === deaths + 1 && Math.abs(s.corpses[0].x - (O().x + tx * 32 + 16)) < 20,
+        `The gatehouse: walker from the right leaves a soul on plate ${tx}`);
+    };
+    await onPlate(7);
+    const a = await hop(5, 0, 16, 7);
+    check(a.h >= 0.95, 'The gatehouse: jump onto the first plate soul');
+    const b = await hop(7, 1, 16, 12);
+    check(b.x >= 11.6, 'The gatehouse: jump over the penned walker');
+    await hop(12, 0, 16, 15.5);
+    check(s.start.x > O().x + 14 * 32, 'The gatehouse: first pen reaches the shrine');
+    await onPlate(21);
+    const step = s.corpses[0];
+    const guard = s.enemies.find((e) => O().contains(e.x, e.y) && e.x > O().x + 14 * 32);
+    await until(() => guard.x > O().x + 23.2 * 32, 4000);
+    s.player.body.reset(guard.x, guard.y);
+    await wait(200); await alive();
+    check(s.corpses[0] !== step && Math.abs(s.corpses[0].x - step.x) > 20,
+      'The gatehouse: careless guard contact moves the plate step');
+    s = await cleanSolveRoom('The gatehouse');
+    await onPlate(21);
+    const c = await hop(19, 0, 16, 21);
+    check(c.h >= 0.95, 'The gatehouse: mount the second plate soul');
+    const d = await hop(21, 1, 16, 24.5);
+    check(d.x >= 24 && d.h >= 3.95, `The gatehouse: plate soul reaches the four-high ledge (${d.x}, ${d.h})`);
+    const crossed = stats.deaths;
+    const exit = await hop(24.5, 4, 16, 28);
+    check(exit.x >= 27.6 && stats.deaths === crossed,
+      'The gatehouse: the plate stays held while jumping through the upper door to the exit');
+    s = await cleanSolveRoom('The gatehouse');
+    const short = await hop(21, 0, 16, 24.5);
+    check(short.x < 24 && short.h < 3.95,
+      'The gatehouse: the four-high ledge cannot be jumped without the plate soul');
+  }
   if (matches('The long pit')) {
     s = await cleanSolveRoom('The long pit');
     const slideTo = async (from, to, die = false) => {
