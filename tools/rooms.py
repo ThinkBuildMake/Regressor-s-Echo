@@ -57,7 +57,12 @@ room('Thornwood', [240, 101], 46, 25, 1, 'SHOWCASE W1: wall jump, thorn anchor, 
 
 # ---------- World 2 ----------
 def let_go(o, p):
-    o(1, 1, 28, 15); o(0, 13, 0, 15); o(22, 11, 29, 16, '#'); o(29, 9, 29, 10); p(1, 15, 'P')
+    o(1, 1, 28, 15); o(0, 13, 0, 15); p(1, 15, 'P')
+    # Safe stack, then a shrine before dropping into the guard's lane.
+    o(9, 11, 13, 16, '#'); p(11, 10, 'C')
+    # The bottom soul holds the door; a third death erases it.
+    p(15, 15, '#'); p(17, 15, 'e'); p(21, 15, '_')
+    o(22, 11, 29, 16, '#'); o(24, 1, 24, 10, 'D'); o(29, 9, 29, 10)
 room('Let go', [316, 104], 30, 17, 2, 'hold K: two souls stacked reach a 5-high ledge', let_go)
 
 def off_edge(o, p):
