@@ -118,7 +118,7 @@ Make each clean base first (the "Clean base" prompt above, attaching the approve
 - `stag-idle.png`: standing proud; a slow breath and a small head toss across 4 frames, legs planted.
 - `stag-walk.png`: a 4-frame walking loop, proud and unhurried, head held high, legs moving in a clear four-beat walk (each frame a clearly different leg position), body level. For moving between attacks.
 - `stag-charge.png`: a 4-frame gallop loop, head lowered, antlers forward.
-- `stag-beam.png`: 1 head lowering; 2 antlers aimed forward, braced; 3 holding the aim; 4 holding (the beam and its blue glow are code).
+- `stag-beam.png` (redo, user: "just lean forward so the beam can come from its mouth"): legs stay planted in the same place in every frame. 1 standing proud; 2 leaning its body forward, neck stretching out level, head lowering; 3 fully leaning forward, neck and head stretched straight out in front, mouth open; 4 identical to 3, holding (the beam fires from the mouth in code).
 - `stag-wave.png`: 1 rearing; 2 up on hind legs; 3 forelegs stamping down; 4 forelegs planted, head low (the wave is code).
 
 **Spring (World 2)** → `spring-sheet.png` (attach the approved spring): 1 idle; 2 compressed low, cap pushed down; 3 fully extended, cap thrown up; (3 frames, same base position).

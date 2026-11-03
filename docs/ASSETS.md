@@ -160,14 +160,14 @@ game adds room sound. Rows marked *(3 takes)* repeat often, so make 2–3 variat
 | Hazards | Door opens | A heavy stone slab door grinding upward in a stone groove, steady scrape, ends in a soft knock, medium distance, 1.2 s | |
 | Hazards | Door closes | A heavy stone slab dropping down a stone groove and landing with a deep thud and dust trickle, medium distance, 0.9 s | |
 | Story | Satchel clink (W1 §2) | Small metal tools and a tin cup knocking together inside a leather satchel as it is set down: several bright, clear metallic clinks and clanks, iron against tin, close, dry, 0.8 s | ✅ |
-| Story | Gold flash as he puts the amulet on (W1 §2) | A small brass bell and a glass wind chime struck together once, warm and bright, with a soft rising shimmer of a finger circling a wine-glass rim, close, 2 s, natural decay || ✅ |
-| Story | Ghost fading in (W1 §2) | A long, soft breath of air through a slightly open window, with a faint airy hum like a bowed glass, swelling gently and settling, quiet, 2 s || ✅ |
+| Story | Gold flash as he puts the amulet on (W1 §2) | Acoustic foley recording: a small brass bell struck gently once with a soft mallet, warm and round, then a soft rising shimmer of a wet finger circling a wine-glass rim, soft high frequencies, close, 2 s, natural decay || ✅ |
+| Story | Ghost fading in (W1 §2) | A long, soft, natural breath of air drifting through a slightly open window, gently swelling and settling, airy and quiet, only the faintest hint of a hum, close, 2 s || ✅ |
 | Story | Amulet refusing to come off (W1 §3) | One low, dull hum of a large brass singing bowl touched by a palm, short and muffled, with a faint warm throb, close, 1 s || ✅ |
 | Story | Guide's quiet snicker "…heh" (W1 §4) | A young man's single quiet, amused breath-laugh through the nose, "heh", close, dry, 0.5 s || ✅ |
-| Story | Guide's tired sigh (W1 §3) | A young man's long, tired sigh out through the mouth, close, dry, 1.2 s || ✅ |
-| Story | Earthquake rumble (W1 §11) | A continuous, deep, low-frequency earthquake rumble you can feel in your chest, the ground groaning under a forest, swelling up then fading, with a few small stones rattling on top, outdoors, 1.5 s || ✅ |
-| Story | Boss dissolving into light, absorbed (W1 §13) | Fine glass beads poured slowly onto a metal tray, rising into a shimmer of finger-on-glass tones, then a quick soft rush of air drawn in through a narrow gap, 2.5 s || ✅ |
-| Story | Pen scratching in the dark (W1 §14) | A pencil writing slowly on rough paper in a quiet room, faint and slow, a few strokes with pauses, very quiet, close, 4 s || ✅ |
+| Story | Guide's tired sigh (W1 §3) | A young man's unvoiced, breathy exhale out through the mouth, tired and resigned, no voice or groan in it, close, dry, 1.2 s || ✅ |
+| Story | Earthquake rumble (W1 §11) | A heavy, resonant sub-bass ground tremor rolling under a forest, swelling up then fading, with distinct gravel and pebbles clattering and small stones knocking together on top, outdoors, close, 1.5 s || ✅ |
+| Story | Boss dissolving into light, absorbed (W1 §13) | Gentle tiny beads trickling softly onto a felt cloth, rising into a soft shimmer of a finger circling a wine-glass rim, then a quick soft rush of air drawn inward, nothing breaking, 2.5 s || ✅ |
+| Story | Pen scratching in the dark (W1 §14) | Light, soft graphite strokes of a pencil writing slowly on smooth paper in a quiet room, a few gentle strokes with pauses between them, very quiet and delicate, close, 4 s || ✅ |
 | Story | Guide cracking like glass (W3 §8) | A thin pane of glass slowly splintering under pressure, soft crackles spreading, then a faint high ring fading out, sad and gentle, not a smash, close, 2 s | |
 | Bosses | Moth bursts through the wall | A dry earth bank collapsing as something heavy smashes through it: a sharp crack, then a rumble of clods and stones tumbling and scattering on the ground, outdoors, close, 2 s | |
 | Bosses | Name card appears (all bosses) | One deep low drum hit with a large gong swelling behind it, in a stone hall, 2 s, natural decay | |
