@@ -365,12 +365,11 @@ The pyramid needs to be visible in the background, its top lost in cloud.
 
 ### 8. The note — *behind the tree*
 *(He keeps his promise. Behind the tree, a patch of earth has been smoothed flat, and words are scratched into it in his own handwriting.)*
-> If you're reading this… then it must mean I've kicked the bucket.  
-> Don't make that face. I can see it from here. Well. Could.  
-> I know I'll never say it to your face, but I really did enjoy our time together.  
-> A few thousand deaths, and the best part was listening to you complain through them.  
-> Thanks for putting up with me. I know I'm not great company. I'd know.  
-> Go get further than I did.  
+> If you're reading this… then I guess I've finally kicked the bucket.  
+> Don't make that face. I know that face. It's mine.  
+> I spent a few thousand deaths alone with this amulet. Then you showed up. Loud, stubborn, complaining the whole way.  
+> I know I'd never say it to your face, but I really did enjoy our time together.  
+> You're going to get further than I did. I'm sure of it.  
 > — You  
 > P.S. The amulet's still not worth anything. I checked.
 
