@@ -63,7 +63,7 @@ bottom-left corner. The name card is text drawn in code, not an asset.
 | **Spectral stag** (World 3) | | ✅ | | | | |
 | Stag: intro | rears up on its hind legs, antlers raised, ~4 frames | | | | | |
 | Stag: idle | no sheet (user: the painted idle was useless): the standing frame from the clean base plus a slight breathing bob in code (scale ~1–2%, ~2 s per breath). `assets/bosses/stag-idle.webp` stays only as a fallback | — | ✅ | — | | |
-| Stag: walk | proud walking loop for moving between attacks, 4 frames (user asked for boss walking; the moth flies, the tree is stationary by design) | ✅ | ✅ | | | |
+| Stag: walk | proud walking loop, `assets/bosses/stag-walk.webp` (reads as a prance, not a four-beat walk; user's call). **Stag sheets are drawn at different sizes** (walk and beam ~555 px tall, idle ~486 px): code scales each sheet so the body height matches | ✅ | ✅ | 🟡 | ✅ | |
 | Stag: charge | gallop loop, ~6 frames | | | | | |
 | Stag: beam | lower antlers, charge, fire, ~3–4 frames (beam itself in code) | | | | | |
 | Stag: wave | rear up → stamp, ~4 frames (the wave itself in code) | | | | | |
