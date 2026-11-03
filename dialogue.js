@@ -48,10 +48,9 @@ const SCRIPT = {
     G('thinking', 'Where am I?'),
     H('annoyed', "You're asking ME?"),
     W(0.9), // his eyes settle on the hero
-    G('solemn', '…Oh. Oh, no.'),
-    G('wry', "Must've died one too many times. Guess I'm the guide now."),
-    H('thinking', 'Died? Guide? What are you—'),
-    G('wry', 'Anyways, enough about me moping. Which death are you on right now?'),
+    G('solemn', '…Oh.'), // he realizes what he's become; the player learns why in World 2
+    W(1.2),
+    G('wry', 'Anyways. Which death are you on right now?'),
     H('thinking', 'Which… death?'),
     G('amused', 'A first-timer! Introductions, then.'),
     H('curious', 'Hang on. You look like me.'),

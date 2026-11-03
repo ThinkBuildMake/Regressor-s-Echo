@@ -53,7 +53,7 @@ Let each line respond to what the other just said or did. Give them room to hesi
 ## Story spine
 
 - **The tribe** built the amulet to cheat death. The marks lead through their ruins (World 2) to their pyramid temple. Carvings show many people wearing it, then fewer and fewer: it didn't save them, it used them up.
-- **Deaths have a limit.** The guide believed they didn't. He reached floor 90 of the pyramid, ran out, and became a guide ("must've died one too many times").
+- **Deaths have a limit.** The guide believed they didn't. He reached floor 90 of the pyramid, ran out, and became a guide. His "…Oh." when he first sees the hero is that realization; he only explains it in World 2.
 - **The loop:** every guide dies protecting his younger self after the stag, as the guide's own guide did for him. Before that, he hides a note behind a tree.
 - **The game ends** with the hero walking into floor 1 of the pyramid, set on climbing the whole thing.
 
@@ -77,10 +77,9 @@ The game's text lives in [dialogue.js](../dialogue.js); this is the source it's 
 > **Guide** [thinking]: Where am I?  
 > **Hero** [annoyed]: You're asking ME?  
 > *(His eyes settle on the hero. A beat.)*  
-> **Guide** [solemn]: …Oh. Oh, no.  
-> **Guide** [wry]: Must've died one too many times. Guess I'm the guide now.  
-> **Hero** [thinking]: Died? Guide? What are you—  
-> **Guide** [wry]: Anyways, enough about me moping. Which death are you on right now?  
+> **Guide** [solemn]: …Oh.  
+> *(A long beat. He realizes what he's become; the player only learns why in World 2.)*  
+> **Guide** [wry]: Anyways. Which death are you on right now?  
 > **Hero** [thinking]: Which… death?  
 > **Guide** [amused]: A first-timer! Introductions, then.  
 > **Hero** [curious]: Hang on. You look like me.  
