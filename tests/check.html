@@ -530,7 +530,26 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     check(onto.h >= top - 0.05 && across.x >= 10.6 && across.h >= -0.05,
       'Off the edge: the step made by a held jump really bridges the pit');
   }
-  await solve('The ladder', [[19, 2], [20, 3]], [[18, 0, 3, 19], [20, 4, 7, 21]]);
+  await solve('The ladder', [[8, 2], [9, 3]],
+    [[7, 0, 3, 8], [8, 3, 4, 9], [9, 4, 7, 10], [10, 7, 7, 12]]);
+  if (matches('The ladder')) {
+    s = room();
+    check(s.start === s.shrines.find((sh) => O().contains(sh.x, sh.y))?.spawn,
+      'The ladder: the safe staircase reaches the shrine');
+    // Stage two: the lower stair hangs over spikes instead of safe ground.
+    await place(22, 2);
+    await place(23, 3);
+    const a = await hop(20, 0, 16, 22);
+    const b = await hop(22, 3, 16, 23);
+    const c = await hop(23, 4, 16, 24);
+    check(a.h >= 2.95 && b.h >= 3.95 && c.h >= 6.95,
+      'The ladder: airborne stairs bridge the spikes and climb the second ledge');
+    await place(18, 0);
+    const deaths = stats.deaths;
+    await hop(20, 0, 16, 22);
+    check(stats.deaths > deaths && s.start.x > O().x + 11 * 32,
+      'The ladder: an extra death erases the bridge; the next approach falls into spikes and returns to the shrine');
+  }
   await solve('The beam', [[23, 1], [24, 4]], [[22, 0, 2, 23], [23, 2, 5, 24], [24, 5, 8, 25]]);
   await solve('The spring', [[20, 6]], [[20, 7, 9, 22]]);
   await solve('Wrong order', [[5, 0], [2, 4], [14, 0]], [[10.4, 0, 1, 14], [14, 1, 0, 19]]); // jump from the pit's edge
@@ -547,8 +566,8 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   }
   await solve('Three high', [[18, 2], [19, 3], [20, 4]], [[17, 0, 3, 18], [20, 5, 8, 21]]);
   // ...and the same rooms can't be skipped: one soul short, the last jump falls short.
-  await solve('The ladder', [[20, 2]], []);
-  if (matches('The ladder')) { const r = await hop(20, 3, 16, 22); check(r.h < 7, `The ladder: a stack 3 high can't reach the ledge (${r.h})`); }
+  await solve('The ladder', [[9, 2]], []);
+  if (matches('The ladder')) { const r = await hop(9, 3, 16, 10); check(r.h < 7, `The ladder: a stack 3 high can't reach the ledge (${r.h})`); }
   await solve('Three high', [[19, 2], [20, 3]], []);
   if (matches('Three high')) { const r = await hop(20, 4, 16, 22); check(r.h < 8, `Three high: two souls can't reach the ledge (${r.h})`); }
   if (matches('The spring')) { // the spring alone falls short of its ledge

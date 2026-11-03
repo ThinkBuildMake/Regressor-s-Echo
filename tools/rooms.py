@@ -74,7 +74,12 @@ def off_edge(o, p):
 room('Off the edge', [346, 107], 30, 17, 2, 'jump off the edge holding K: the soul appears mid-pit', off_edge)
 
 def ladder(o, p):
-    o(1, 1, 20, 15); o(21, 1, 28, 8); o(0, 14, 0, 15); o(29, 7, 29, 8); p(1, 15, 'P')
+    # Safe staircase, then bank the climb before dropping to the spike approach.
+    o(1, 1, 9, 15); o(10, 1, 14, 8); p(12, 8, 'C')
+    o(15, 1, 23, 15); o(24, 1, 28, 8)
+    # Both offset souls are also the bridge; a third death removes the lower step.
+    o(21, 16, 23, 16, '^')
+    o(0, 14, 0, 15); o(29, 7, 29, 8); p(1, 15, 'P')
 room('The ladder', [376, 99], 30, 17, 2, '7-high ledge: stack to 3, then run off your top soul holding K for a step beside it', ladder)
 
 def beam(o, p):
