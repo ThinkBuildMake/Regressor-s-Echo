@@ -9,3 +9,6 @@
 00:30 boss-dissolve: 3 approaches (loop, 3 takes; layered shimmer + inhale; prompt realigned to the story chat's "shimmer into a whoosh"): best 6/10. Kept the 6 as boss-dissolve.ogg; layered version saved as boss-dissolve-alt-layered.ogg. NEEDS REVIEW.
 00:30 earthquake: 3 approaches (loop; ElevenLabs rumble + pebbles mixed; ffmpeg-synthesized sub-bass rumble + pebbles): best 4–5/10. Kept the loop's best as earthquake.ogg; synth version saved as earthquake-alt-synth.ogg. NEEDS REVIEW. Note: Gemini may under-hear deep bass, so trust ears over its score here.
 00:30 DECISION: boss-dissolve prompt realigned to the story chat's intent ("shimmer into a whoosh"), dropping the beads.
+00:45 sfx batch started (first run died on Python SSL certs for the credit check; switched that check to node). 105,583 credits left.
+00:50 music batch started in parallel (2 concurrent ElevenLabs requests, limit is 5). Loops: generated one bar long, trimmed to whole bars, the extra bar faded over the start; seam = end vs start RMS.
+00:50 DECISION: critic told when it is judging music (--music) so it doesn't grade a loop as a sound effect.

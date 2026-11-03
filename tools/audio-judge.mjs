@@ -1,6 +1,6 @@
 // Audio critic: Gemini listens to a generated sound and says what it actually hears, whether that matches
 // the prompt, and whether the loudness suits it. Runs through OpenRouter, pinned to Google Vertex (no fallback).
-//   node tools/audio-judge.mjs <sound.ogg> "<prompt>" [--level=quiet|normal|loud]
+//   node tools/audio-judge.mjs <sound.ogg> "<prompt>" [--level=quiet|normal|loud] [--music]
 // Prints one JSON line: { hears, match (1-10), loudness, fix, rewrite }. Key: OPENROUTER_API_KEY in .env.
 import { readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
@@ -11,10 +11,11 @@ if (!inPath || !prompt) { console.error('usage: node tools/audio-judge.mjs <soun
 const key = (readFileSync(new URL('../.env', import.meta.url), 'utf8').match(/^OPENROUTER_API_KEY=(.+)$/m) ?? [])[1]?.trim();
 if (!key) { console.error('OPENROUTER_API_KEY is missing from .env'); process.exit(1); }
 const level = flags.find((f) => f.startsWith('--level='))?.split('=')[1] ?? 'normal';
+const kind = flags.includes('--music') ? 'looping background music track' : 'sound effect';
 
 // Gemini takes wav/mp3, not Opus: convert in memory.
 const wav = execFileSync('ffmpeg', ['-loglevel', 'error', '-i', inPath, '-ac', '1', '-ar', '22050', '-f', 'wav', '-']);
-const ask = `You are a strict sound designer reviewing one sound effect for a calm, painterly 2D game.
+const ask = `You are a strict sound designer reviewing one ${kind} for a calm, painterly 2D game.
 The sound was generated from this description: "${prompt}".
 It should sit at a ${level} loudness in the mix (quiet = breaths, sighs, faint foley; normal = most effects; loud = impacts, quakes).
 Listen carefully, then answer with only JSON, no prose:
