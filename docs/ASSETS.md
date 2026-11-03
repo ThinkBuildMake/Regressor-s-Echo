@@ -34,9 +34,8 @@ Key: ✅ done · 🟡 started · blank = to do · — = not needed (a single ima
 | Asset | Sheet (animations) | Prompt | Ref | Sheet | Sized | In game |
 |---|---|---|---|---|---|---|
 | Walker (red beetle) | walk (2 poses + code bob) | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Flyer (coming) | a small flying enemy: flap loop, 4 frames | | | | | |
-| Projectile enemy (coming) | idle + shoot, ~4 frames; its shot is code or one small image | | | | | |
-| Stomping enemy (coming) | idle + raise + slam, ~4 frames | | | | | |
+| Flyer | flies over soul walls; a small red flying beetle (the walker's family); wing-buzz loop, 4 frames | ✅ | | | | |
+| Thrower | stands still and shoots seeds along the ground (souls block them); a red toadstool creature; idle + spit, 4 frames, plus a seed pellet | ✅ | | | | |
 
 ## Bosses
 
@@ -67,7 +66,8 @@ bottom-left corner. The name card is text drawn in code, not an asset.
 | Stag: charge | gallop loop, ~6 frames | | | | | |
 | Stag: beam | lower antlers, charge, fire, ~3–4 frames (beam itself in code) | | | | | |
 | Stag: wave | rear up → stamp, ~4 frames (the wave itself in code) | | | | | |
-| All bosses: hurt | one hit-flash pose each (or code flash) | | | | | |
+| All bosses: hurt | code flash (user's call), no art | — | — | — | — | |
+| All bosses: death | 1 painted **fallen pose** each (moth on the ground wings drooped; tree slumped, mask dark; stag lying down), then code: white glow → dissolves into motes that stream into the hero → he flashes (STORY.md W1 §13) | ✅ | | — | | |
 
 ## Hazards and room objects
 
@@ -81,9 +81,9 @@ bottom-left corner. The name card is text drawn in code, not an asset.
 | Laser emitter (World 2) | — (beam in code) | | | — | | |
 | Spring (World 2) | idle / compressed / launch, 3 frames | | | | | |
 | Moving platform (World 2 room 7) | — | | | — | | |
-| Saw blade (coming) | — one round blade image, spun in code | | | — | | |
-| Crumbling platform (coming) | intact → cracked → breaking, 3 frames (or the platform art plus code cracks and falling chunks) | | | | | |
-| Falling spike (coming) | — one hanging stalactite/thorn spike, shakes then drops in code | | | — | | |
+| Saw blade (all worlds) | — one round blade image, spun in code | | | — | | |
+| Crumbling block (all worlds; breaks 0.45 s after landing, back 2.5 s later) | intact → cracked → breaking, 3 frames (or the platform art plus code cracks and falling chunks) | | | | | |
+| Falling spike (all worlds; drops as you pass under) | — one hanging stalactite/thorn spike, shakes then drops in code | | | — | | |
 
 ## Story assets (requested by the story chat, 2026-11-02)
 

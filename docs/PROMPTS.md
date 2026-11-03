@@ -226,6 +226,36 @@ Use the matching world's layer method or the World 1 prop style block, plus the 
    The note is NOT on paper: the guide wrote it in the dirt behind the old tree. The painting is the blank ground; the game scratches the words into it.
    > A patch of bare forest earth seen from above at a low angle, smoothed flat as if brushed clean by a hand, roughly oval, framed by moss, roots and fallen leaves around its edges. The smoothed dirt in the middle is completely blank, with room for several lines of writing scratched into it with a stick (the writing is added in code). Moonlit, soft. No text, no letters, no marks in the smoothed area. Isolated on flat magenta, no soil strip along the bottom.
 
+## Batch 3: fallen bosses, new enemies and hazards, World 2/3 hazard variants (Flow, Nano Banana 2.1)
+
+Enemy colour language: enemies are red (the walker beetle), so new enemies share its glossy deep-red shell. Hazards stay in each world's palette. Same skill rules as before (shrunk base for sheets, one-shot sheets, no effects, facing LEFT, mirror back if Flow flips frames).
+
+**Fallen bosses** (one image each, attach the boss's shrunk clean base; the dissolve into light is code):
+- `moth-fallen.png`: "The attached moth fallen to the ground and lying still, body resting on the ground, both wings drooped and spread flat on either side, antennae limp, eyespots dull. Same moth, same size."
+- `tree-fallen.png`: "The attached tree guardian slumped forward and collapsed, its trunk bent low, branch arms hanging limp to the ground, the stone mask's eyes dark. Same tree, same size."
+- `stag-fallen.png`: "The attached stag lying down, all four legs folded beneath it, head lowered to the ground, antlers resting, still. Same stag, same size."
+
+**Flyer** (`assets/raw/enemies/flyer.png`, then a sheet; enemy style block + attach the walker `walker.jpg` for the red shell):
+> A small hostile flying forest beetle, the same family as the attached red beetle: a round glossy deep-red shell split open with two pairs of fast dark translucent wings, short dangling legs, small mandibles, about the size of a crow. Hovering in profile, facing left.
+- `flyer-sheet.png` (attach the shrunk flyer): a 4-frame wing-buzz loop, wings up / mid / down / mid, body still.
+
+**Thrower** (`assets/raw/enemies/thrower.png`, then a sheet; enemy style block + attach `walker.jpg`):
+> A squat hostile forest creature that stays rooted in place: a stout red toadstool with a glossy deep-red cap speckled darker crimson, a thick pale stem with a small dark mouth hole facing left, little root feet gripping the ground. It spits hard seeds. Knee height to a person, side view facing left.
+- `thrower-sheet.png` (attach the shrunk thrower): 1 idle; 2 the cap puffs up, mouth drawn back; 3 the mouth thrusts forward (spitting); 4 recoil back to idle. Plus `seed-shot.png` (1:1): one small hard dark seed pellet, on magenta.
+
+**Saw blade** (`assets/raw/world1/saw.png`, 1:1; World 1 prop style block, attach `anchor.png`):
+> An old round iron saw blade seen flat-on, a perfect circle with jagged teeth around the edge, rust, scratches and a few strands of moss, a square hole at the centre. Clearly dangerous. The whole disc inside the frame. (Spun in code.)
+
+**Crumbling block** (`assets/raw/world1/crumble.png`, 1:1; World 1 prop style block, attach `ground.jpg` + `anchor.png`):
+> One square block of packed forest earth with roots and a mossy top, like a single tile of the ledges, with a few hairline cracks. The whole block inside the frame, no soil strip below it.
+- `crumble-cracked.png`: edit: "...Only make this change: the block is split by deep cracks, chunks loosening at the edges."
+- `crumble-breaking.png`: edit of cracked: "...Only make this change: the block is breaking apart into separate chunks with gaps between them."
+
+**Falling spike** (`assets/raw/world1/falling-spike.png`, 9:16; World 1 prop style block, attach `anchor.png`):
+> One long, sharp, hanging thorn spike of hard dark wood with a mossy root clump at its top where it hangs from a ceiling, pointing straight down. The whole spike inside the frame. (It shakes and drops in code.)
+
+**World 2 and 3 hazard variants** (re-dress edits of the World 1 images, like the shrines; one per world): attach the World 1 image only and "Edit the attached image. Keep the shape, size, layout and edges exactly as they are. Only change the setting and materials to match: <the world's setting sentence>." Keep the mark on the plate as three rays above the ring, nothing below the circle. Files to `assets/raw/world2/` and `assets/raw/world3/`: `spikes`, `thorns` (World 2: thorny ruin vines; World 3: thorny dark-violet brambles), `plate`, `vine-barrier`, and the saw, crumble set and falling spike (World 2: rusted ruin metal and grey stone; World 3: carved dark stone).
+
 ## Hero (AI Studio, Nano Banana Pro)
 
 Save to `assets/raw/hero/`. Attach the World 1 reference image for the brushwork, and from step 2 on, also attach the hero image from step 1.
