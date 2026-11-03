@@ -114,13 +114,13 @@ From here the guide appears only for conversations he's part of: he fades in at 
 ### 5. First death — *he comes back at the room's start*
 > *(A beat.)*  
 > **Hero** [pained]: AAGH!  
-> **Hero** [pained]: …Okay. Okay. I'm alive. I think?  
+> **Hero** [pained]: Am… I alive?  
 > **Hero** [pained]: Why does it feel like someone scooped out half my insides?  
 > **Guide** [wry]: Mm. That fades. Mostly.  
 > **Hero** [annoyed]: You. You said I'd make it.  
 > **Guide** [thinking]: And you will.  
 > **Hero** [shouting]: I landed on SPIKES. I trusted you!  
-> **Guide** [wry]: Hey, it's not like you actually died. …Well. Not for long.  
+> **Guide** [wry]: Hey, it's not like you actually died. …Well, sorta.  
 > **Hero** [startled]: That's NOT better!  
 > **Guide** [thinking]: That empty feeling's real, though. You left a piece of yourself out there.  
 > **Guide** [wry]: Come take a look.
