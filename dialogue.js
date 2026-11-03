@@ -124,6 +124,8 @@ const SCRIPT = {
     H('annoyed', "You promised I'd make it, too."),
     G('weary', '…Fine. Touch it, and when you die, you come back there instead of all the way at the start.'),
     H('thinking', "Huh. That's actually useful."),
+  ],
+  shrineMark: [ // first time he touches a shrine
     H('curious', "Wait. That mark… it's the same as the one on the amulet."),
     G('wry', "Told you you'd see it before long."),
   ],

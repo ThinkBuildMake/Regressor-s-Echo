@@ -1050,6 +1050,7 @@ class Room extends Phaser.Scene {
     for (const sh of this.shrines) if (hit(bounds(p), bounds(sh)) && this.start !== sh.spawn) {
       this.start = sh.spawn;
       this.shrines.forEach((o) => o.rune.setAlpha(o === sh ? 1 : 0.35));
+      if (this.rooms[this.index].world) Dialogue.play(this, 'shrineMark'); // the first touch only
     }
 
     const b = p.body;

@@ -157,7 +157,9 @@ From here the guide appears only for conversations he's part of: he fades in at 
 > **Guide** [warm]: It won't hurt. Promise.  
 > **Hero** [annoyed]: You promised I'd make it, too.  
 > **Guide** [weary]: …Fine. Touch it, and when you die, you come back there instead of all the way at the start.  
-> **Hero** [thinking]: Huh. That's actually useful.  
+> **Hero** [thinking]: Huh. That's actually useful.
+
+*When he first touches the shrine:*
 > **Hero** [curious]: Wait. That mark… it's the same as the one on the amulet.  
 > **Guide** [wry]: Told you you'd see it before long.
 
