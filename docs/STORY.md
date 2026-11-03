@@ -123,7 +123,8 @@ From here the guide appears only for conversations he's part of: he fades in at 
 > **Guide** [wry]: Hey, it's not like you actually died. …Well, sorta.  
 > **Hero** [startled]: That's NOT better!  
 > **Guide** [thinking]: That empty feeling's real, though. You left a piece of yourself out there.  
-> **Guide** [wry]: Come take a look.
+> **Hero** [shouting]: A PIECE OF ME?!  
+> **Guide** [amused]: Seeing's believing. Come take a look.
 
 ### 6. His soul — *back at the pit's edge, his soul hanging over the spikes*
 > **Hero** [startled]: Is that… me?  

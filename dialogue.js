@@ -89,7 +89,8 @@ const SCRIPT = {
     G('wry', "Hey, it's not like you actually died. …Well, sorta."),
     H('startled', "That's NOT better!"),
     G('thinking', "That empty feeling's real, though. You left a piece of yourself out there."),
-    G('wry', 'Come take a look.'),
+    H('shouting', 'A PIECE OF ME?!'),
+    G('amused', "Seeing's believing. Come take a look."),
   ],
   soul: [ // back at the pit's edge
     H('startled', 'Is that… me?'),
