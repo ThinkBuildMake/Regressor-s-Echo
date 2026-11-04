@@ -43,20 +43,19 @@ Three **showcase rooms**, one per world, are in the greybox to judge this style 
 
 | # | Room | Teaches | The trick | Story beat | Status |
 |---|---|---|---|---|---|
-| 1 | The clearing | Moving and jumping | None (story room) | Finds the amulet, puts it on | Built |
-| 2 | The ghost | | None (story room) | The opening conversation (below) | Built |
-| 3 | First death | A death leaves a soul | A pit too wide to jump: die in it, and your soul is a stepping stone over the spikes | "AGH! THAT HURT!" | Built |
-| 4 | The thorn wall | Aiming a death | Where you touch the thorns is where your soul hangs. Touch them while rising about two tiles above the floor to leave a reachable three-high step; full jump height leaves an unreachable four-high step | The guide teaches timing | Built |
-| 5 | The patrol | Switches, walkers | You choose where the walker catches you: get killed standing on the switch so your soul holds the door | "I want you to get killed *efficiently*." | Built |
-| 6 | The chain | Shrines | Bridge the pit, reach the shrine, die again for a step up | "How many times have you done this?" | Built |
-| 7 | The long pit | Slide | Slide into a low spike tunnel: the flat soul bridges it, a standing soul plugs it. Hop to the shrine; stomp the tunnel guard from the ledge before sliding to place the second bridge. That death revives the guard: stomp it again to use the bridge, then hop the exit post. Touching the guard moves your bridge into the approach | Guide: "Lie down. No, really." | Built |
-| 8 | The well | Aiming a fall | Aim a fall beside the first exit, then drop onto your soul and jump to the shrine. In the second well, fall straight beside the exit, clear of the upper thorns; jump from the soul to the guard’s shelf and stomp it. A thorn or guard death steals your landing | | Built |
-| 9 | The gatehouse | Which side the walker ends up on | Let the walker kill you on the plate from the door side, then hop your soul and its pen. After the shrine, a low post keeps the patrol away from your respawn; the plate soul is also the step to a four-high ledge. Careless guard contact steals the step | | Built |
-| 10 | The moth | Boss 1 | Bait a locked Lantern Dive into the soul placed on the arena's thorns, step aside, then stomp during its 2s stun. Dust Loom → Dive → Pollen Curtain → reposition; after hit 1, Ground Skimmer tests standing on the soul. After hit 2, Loom fires 4 pods. Only recovery gaps shrink (×0.8 per hit); death heals all 3 hits. The arena stays sealed until victory | "Careful. It remembers too." | Built |
+| 1 | The clearing | Moving and jumping | None (story room) | Finds the amulet, puts it on; The ghost conversation (below) | Built |
+| 2 | First death | A death leaves a soul | A pit too wide to jump: die in it, and your soul is a stepping stone over the spikes | "AGH! THAT HURT!" | Built |
+| 3 | The thorn wall | Aiming a death | Where you touch the thorns is where your soul hangs. Touch them while rising about two tiles above the floor to leave a reachable three-high step; full jump height leaves an unreachable four-high step | The guide teaches timing | Built |
+| 4 | The patrol | Switches, walkers | You choose where the walker catches you: get killed standing on the switch so your soul holds the door | "I want you to get killed *efficiently*." | Built |
+| 5 | The chain | Shrines | Bridge the pit, reach the shrine, die again for a step up | "How many times have you done this?" | Built |
+| 6 | The long pit | Slide | Slide into a low spike tunnel: the flat soul bridges it, a standing soul plugs it. Hop to the shrine; stomp the tunnel guard from the ledge before sliding to place the second bridge. That death revives the guard: stomp it again to use the bridge, then hop the exit post. Touching the guard moves your bridge into the approach | Guide: "Lie down. No, really." | Built |
+| 7 | The well | Aiming a fall | Aim a fall beside the first exit, then drop onto your soul and jump to the shrine. In the second well, fall straight beside the exit, clear of the upper thorns; jump from the soul to the guard’s shelf and stomp it. A thorn or guard death steals your landing | | Built |
+| 8 | The gatehouse | Which side the walker ends up on | Let the walker kill you on the plate from the door side, then hop your soul and its pen. After the shrine, a low post keeps the patrol away from your respawn; the plate soul is also the step to a four-high ledge. Careless guard contact steals the step | | Built |
+| 9 | The moth | Boss 1 | Bait a locked Lantern Dive into the soul placed by any death in the arena, step aside, then stomp during its 2s stun. Dust Loom → Dive → Pollen Curtain → reposition; after hit 1, Ground Skimmer tests standing on the soul. After hit 2, Loom fires 4 pods. Only recovery gaps shrink (×0.8 per hit); death heals all 3 hits. The arena stays sealed until victory | "Careful. It remembers too." | Built |
 
 After the moth: the amulet's 2nd rune lights up and you earn a **2nd soul**, **self-destruct** and **recall**, leading into World 2.
 
-## Opening conversation (room 2)
+## Opening conversation (inside The clearing)
 
 The dialogue lives in [dialogue.js](../dialogue.js). The guide is playful, mischievous and witty; the one serious line is marked.
 
@@ -113,9 +112,9 @@ Cut: *Spring tower* (a spring-placed soul has to land within a few frames, too t
 All three follow the moth's rules: 3 stomps from above, it speeds up after each one (attack gaps × 0.8), any death heals it to full, yellow attacks never break souls, and an attack that breaks souls is warned by a blue glow.
 
 ### The moth (W1 boss, 1 soul + slide; 2026-11-03)
-- **Arena:** unchanged 30 × 17; thorn at column 14, floor row 16. Flight and dive centres stay between columns 8 and 22, beyond wall-jump reach. Place a standing soul with a thorn death; no self-destruct.
+- **Arena:** unchanged 30 × 17; thorn at column 14, floor row 16. Flight and dive centres stay between columns 8 and 22, beyond wall-jump reach. Any death in the arena makes a usable soul; a thorn death is the simplest setup. No self-destruct.
 - **Loop:** Dust Loom (0.6s wing-shake tell, 3 aimed lemon-yellow pods at 0.35s intervals, speed 210 px/s) → Lantern Dive (0.8s yellow lane tell, locks the player's column clamped to the flight range; 320 px/s downward for at most 0.5s) → Pollen Curtain (1s ceiling tell, three 6-tile strips starting at columns 3, 11, 19, spaced 0.45s; dust falls at 280 px/s) → reposition (2s). Two-tile curtain gaps allow escape without a hanging soul.
-- **Damage:** the dive stops on a soul, opens a fixed 2s stun, and allows one stomp. Other top contacts bounce without damage; side contacts still kill. Bait beside the thorn soul, retreat from the marked lane, then jump onto the stopped moth. Yellow dust stops on souls and never consumes them.
+- **Damage:** the dive stops on a soul, opens a fixed 2s stun, and allows one stomp. Other top contacts bounce without damage; side contacts are harmless during the stun. Bait beside the thorn soul, retreat from the marked lane, then jump onto the stopped moth. Yellow dust stops on souls and never consumes them.
 - **Phases:** after hit 1, a 0.8s visible descent adds Ground Skimmer after Curtain: a 24px-high sweep at 360 px/s from column 22 to 8, cleared by standing on the soul. Torn wings show damage. After hit 2, Loom fires 4 pods. The 1.2s inter-attack gaps and 2s reposition pause multiply by 0.8 per hit; tells, attack speeds and stun never shorten. Death resets the loop and HP, clears dust and gives a 1.5s approach pause. Intro, defeat and second-rune reward stay intact.
 
 ### The tree guardian (W2 boss, 2 souls + self-destruct + recall)

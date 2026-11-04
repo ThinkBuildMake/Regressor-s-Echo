@@ -1668,6 +1668,10 @@ class Room extends Phaser.Scene {
   }
 
   updateEnemies() {
+    if (this.dead > 0) {
+      for (const e of this.enemies) e.body.setVelocity(0, 0);
+      return;
+    }
     const solids = this.statics.getChildren().filter((s) => s.body.enable).map(bounds);
     for (const e of this.enemies) {
       const b = e.body;
@@ -1719,7 +1723,7 @@ class Room extends Phaser.Scene {
     const solid = (box, skip) => this.statics.getChildren().find((s) => s !== skip && s.body.enable && hit(box, bounds(s)));
     const walls = (box) => this.statics.getChildren().find((s) => s.body.enable && !this.corpses.includes(s) && hit(box, bounds(s)));
     const R = this.rooms[this.index].rect, p = this.player, t = this.time.now / 1000;
-    for (const f of this.flyers) {
+    for (const f of this.dead > 0 ? [] : this.flyers) {
       const nx = f.x + f.dir * FLYER_SPEED * dt;
       if (walls(new Phaser.Geom.Rectangle(nx - 12, f.y - 8, 24, 16)) || nx < R.x + 16 || nx > R.right - 16) f.dir *= -1;
       else f.x = nx;
@@ -1938,7 +1942,13 @@ class Room extends Phaser.Scene {
     if (!B.phase) { enter('pause'); B.r.y = floor - 96; B.fired = 0; }
     B.clock += dt;
     B.pose = ['diveTell', 'dive'].includes(B.phase) ? 2 : undefined;
-    B.img?.setAngle(B.phase === 'loomTell' ? Math.sin(B.clock * 40) * 6 : 0);
+    B.img?.setAngle(B.phase === 'stunned' ? 25 : B.phase === 'loomTell' ? Math.sin(B.clock * 40) * 6 : 0);
+    const flyTo = (x, y) => {
+      const distance = Math.hypot(x - B.r.x, y - B.r.y), step = Math.min(1, 900 * dt / (distance || 1));
+      B.dir = Math.sign(x - B.r.x) || B.dir;
+      B.r.x += (x - B.r.x) * step; B.r.y += (y - B.r.y) * step;
+      return distance <= 900 * dt;
+    };
     B.r.setAlpha(B.hurt > 0 ? 0.4 : 1);
     if (B.hp < BOSS_HP) {
       B.warn.lineStyle(4, 0x352e48).lineBetween(B.r.x - 45, B.r.y - 18, B.r.x - 25, B.r.y + 10);
@@ -1955,9 +1965,10 @@ class Room extends Phaser.Scene {
         if (++B.fired >= (B.hp === 1 ? 4 : 3)) enter('loomGap');
       }
     } else if (B.phase === 'loomGap' && B.clock >= gap) {
-      enter('diveTell');
+      enter('diveApproach');
       B.lane = Phaser.Math.Clamp(p.x, B.min, B.max);
-      B.r.x = B.lane; B.r.y = floor - 160;
+    } else if (B.phase === 'diveApproach') {
+      if (flyTo(B.lane, floor - 160)) enter('diveTell');
     } else if (B.phase === 'diveTell') {
       B.warn.strokeRect(B.lane - BOSS_W / 2, floor - 200, BOSS_W, 200);
       if (B.clock >= 0.8) enter('dive');
@@ -1967,22 +1978,28 @@ class Room extends Phaser.Scene {
       if (soul) {
         B.r.y = bounds(soul).top - BOSS_H / 2;
         enter('stunned'); B.open = true;
-        if (this.textures.exists('mothImpact')) {
-          const flash = this.add.image(B.r.x, bounds(soul).top, 'mothImpact').setDisplaySize(T, T).setDepth(5);
-          this.time.delayedCall(250, () => flash.destroy());
-        }
+        const flash = this.textures.exists('mothImpact')
+          ? this.add.image(B.r.x, bounds(soul).top, 'mothImpact').setDisplaySize(2 * T, 2 * T)
+          : this.add.star(B.r.x, bounds(soul).top, 8, 12, 32, 0xffef72);
+        flash.setDepth(5);
+        this.tweens.add({ targets: flash, alpha: 0, y: flash.y - 12, duration: 500, onComplete: () => flash.destroy() });
       } else if (B.clock >= 0.5) enter('diveGap');
     } else if (B.phase === 'stunned') {
-      B.warn.strokeCircle(B.r.x, B.r.y - BOSS_H / 2 - 8, 9);
+      for (let i = 0; i < 3; i++) {
+        const a = B.clock * 5 + i * Math.PI * 2 / 3;
+        B.warn.strokeCircle(B.r.x + Math.cos(a) * 30, B.r.y - BOSS_H / 2 - 12 + Math.sin(a) * 6, 5);
+      }
       if (B.clock >= 2) { B.open = false; enter('diveGap'); }
     } else if (B.phase === 'diveGap' && B.clock >= gap) {
-      B.r.x = B.max; B.r.y = floor - 96; enter('curtainTell');
+      enter('curtainApproach');
+    } else if (B.phase === 'curtainApproach') {
+      if (flyTo(B.max, floor - 96)) enter('curtainTell');
     } else if (B.phase === 'curtainTell') {
       for (let i = 0; i < 3; i++) B.warn.strokeRect(R.x + (3 + i * 8) * T, R.y + T, 6 * T, 10);
       if (B.clock >= 1) { enter('curtain'); B.fired = 0; }
     } else if (B.phase === 'curtain') {
       if (B.clock >= B.fired * 0.45) {
-        for (let j = 0; j < 12; j++) pod(R.x + (3 + B.fired * 8 + j / 2) * T, R.y + T, 0, 280);
+        for (let j = 0; j < 12; j++) pod(R.x + (3.25 + B.fired * 8 + j / 2) * T, R.y + T, 0, 280);
         if (++B.fired === 3) enter('curtainGap');
       }
     } else if (B.phase === 'curtainGap' && B.clock >= gap) {
@@ -1995,7 +2012,9 @@ class Room extends Phaser.Scene {
       B.r.x = Math.max(B.min, B.max - B.clock * 360);
       if (B.r.x <= B.min) enter('pause');
     } else if (B.phase === 'pause' && B.clock >= 2 * 0.8 ** (BOSS_HP - B.hp)) {
-      B.r.setSize(BOSS_W, BOSS_H); B.r.x = B.max; B.r.y = floor - 96; enter('loomTell'); B.fired = 0;
+      B.r.setSize(BOSS_W, BOSS_H); enter('loomApproach');
+    } else if (B.phase === 'loomApproach') {
+      if (flyTo(B.max, floor - 96)) { enter('loomTell'); B.fired = 0; }
     }
   }
 
@@ -2124,7 +2143,10 @@ class Room extends Phaser.Scene {
     const top = bounds(B.r).top;
     const falling = p.body.velocity.y >= 0;
     if (!falling && p.y + 15 <= top + 18) return false;
-    if (!falling || (this.bossPreviousFeet ?? p.body.prev.y + p.body.height) > top + 1) { this.die(); return true; }
+    if (!falling || (this.bossPreviousFeet ?? p.body.prev.y + p.body.height) > top + 1) {
+      if (B.story === 'mothDown' && (B.phase === 'stunned' || B.phase?.endsWith('Approach'))) return false;
+      this.die(); return true;
+    }
     p.body.reset(p.x, top - p.height / 2);
     p.body.velocity.y = -JUMP * 0.8;
     if (B.hurt > 0 || (B.story === 'mothDown' && !B.open) || (B.stag && (B.phase !== 'dazed' || B.stomped)) || (B.kind === 'tree' && (B.stompReady === false || B.open <= 0))) return false;
@@ -2185,6 +2207,10 @@ class Room extends Phaser.Scene {
     }
 
     this.updateHud();
+    const room = this.rooms[this.index];
+    this.cameras.main.setZoom(room.name === 'Thornwood' && p.x > room.rect.x + 27 * T ? 0.68 : 1);
+    for (const layer of this.art.layers) if (layer.ts.depth === 10)
+      layer.ts.setAlpha(room.name === 'The well' ? 0.15 : 1);
     // Look into drops in every tall room, including drops after a shrine.
     this.cameras.main.setFollowOffset(0, this.rooms[this.index].rect.height > this.cameras.main.height ? -this.cameras.main.height * 0.4 : 0);
     if (this.transit) return;
