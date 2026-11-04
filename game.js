@@ -17,7 +17,7 @@ const HERO_HEIGHT = 46;                                // painted hero's on-scre
 const HERO_SRC = 112;                                  // his typical height in the processed images (tools/sheet.mjs --height)
 // Run cycle: which frames of assets/hero/run.webp to loop, and how far he moves per frame.
 // Try orders and pacing in tools/preview.html, then copy the settings here.
-const RUN_FRAMES = [6, 7, 8, 9, 10], RUN_STEP = 15; // 11 dropped: it repeats 6
+const RUN_FRAMES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], RUN_STEP = 12; // Veo run: one full stride in 12 frames
 // Slide: loop the first row of assets/hero/slide.webp so the cape flutters.
 const SLIDE_FRAMES = [0, 1, 2, 3], SLIDE_FPS = 8;
 const BODY_STAND = [30, 32], BODY_LYING = [62, 16];    // body left behind
@@ -33,7 +33,7 @@ const BOSS_HP = 3, BOSS_SPEED = 100, BOSS_SPEEDUP = 50;
 // MOTH_SIZE grows painting and hitbox together. Its top stays 4 tiles up: out of jump reach from the
 // floor (~3.4 tiles), in reach from one soul, so stomping it always takes a death.
 const MOTH_SIZE = 1.3, BOSS_W = 96 * MOTH_SIZE, BOSS_H = 48 * MOTH_SIZE;
-const MOTH_FRAMES = [0, 1, 2, 1], MOTH_FPS = 8, MOTH_SCALE = 0.243 * MOTH_SIZE; // frames are full size (700 px tall); frame 2 reused for 4 so the loop can't shimmer
+const MOTH_FRAMES = [...Array(12).keys()], MOTH_FPS = 16, MOTH_SCALE = 0.243 * MOTH_SIZE; // frames are full size (700 px tall); frame 2 reused for 4 so the loop can't shimmer
 // Its intro: it bursts out of the right wall at these rows (top, bottom) of its room. The hole is only
 // painted; the wall keeps its colliders, so the arena stays closed.
 const MOTH_HOLE = [2, 9];
@@ -907,13 +907,14 @@ class Room extends Phaser.Scene {
     if (!this.textures.exists('heroSheet')) {
       this.load.image('heroSheet', 'assets/hero/sheet.webp'); // 8 frames: run 0-5, jump 6, fall 7
       this.load.image('heroIdle', 'assets/hero/idle.webp');
-      this.load.image('heroRun', 'assets/hero/run.webp'); // 12 run frames: top row 0-5, bottom row 6-11
+      this.load.image('heroRun', 'assets/hero/run-veo.webp'); // 12 run frames in one row
       this.load.image('heroSlide', 'assets/hero/slide.webp'); // 12 slide frames, 3 rows of 4
       this.load.json('heroSlideMeta', 'assets/hero/slide.json');  // each frame's head and feet x
     }
     for (const [key, path, width, height] of [
-      ['heroIdleAnim', 'hero/idle-anim', 98, 112],
-      ['heroWall', 'hero/wall-slide', 141, 141],
+      ['heroIdleAnim', 'hero/idle-veo', 106, 112],
+      ['heroWall', 'hero/wall-slide-veo', 141, 141],
+      ['heroKick', 'hero/wall-slide', 141, 141], // the old sheet's frame 3 is the wall kick-off
       ['flyer', 'enemies/flyer', 115, 112],
       ['thrower', 'enemies/thrower', 123, 112],
     ]) if (!this.textures.exists(key)) this.load.spritesheet(key, `assets/${path}.webp`, { frameWidth: width, frameHeight: height });
@@ -938,7 +939,7 @@ class Room extends Phaser.Scene {
     if (!this.textures.exists('seedPod')) this.load.image('seedPod', 'assets/bosses/seed-pod.webp');
     if (!this.textures.exists('mothImpact')) this.load.image('mothImpact', 'assets/effects/impact.webp');
     if (!this.textures.exists('mothDust')) this.load.image('mothDust', 'assets/bosses/moth-dust.webp');
-    if (!this.textures.exists('mothFly')) this.load.image('mothFly', 'assets/bosses/moth-fly.webp');
+    if (!this.textures.exists('mothFly')) this.load.image('mothFly', 'assets/bosses/moth-fly-12.webp'); // Veo: one full wingbeat in 12 frames
     if (!this.textures.exists('rocks')) this.load.image('rocks', 'assets/world1/rocks.webp'); // 6 earth chunks
     if (!this.textures.exists('wallBreak')) this.load.image('wallBreak', 'assets/world1/wall-break.webp');
   }
@@ -1010,13 +1011,13 @@ class Room extends Phaser.Scene {
               let w = 1;
               while (row[tx + w] === '#') w++;
               this.statics.add(rect(x, y, w * T, T, 0).setVisible(false)); // hitbox; painted below
-              Art.platform(this, x, y, w * T, T, Array.from({ length: w }, (_, i) => !'#^'.includes(rows[ty - 1]?.[tx + i] ?? '#')));
+              Art.platform(this, x, y, w * T, T, Array.from({ length: w }, (_, i) => !'#^'.includes(rows[ty - 1]?.[tx + i] ?? '#')), world);
               tx += w - 1;
               break;
             }
             case '^': // solid lower half, deadly upper half
               this.statics.add(rect(x, y + 16, T, 16, 0).setVisible(false));
-              Art.platform(this, x, y + 16, T, 16, [false]);
+              Art.platform(this, x, y + 16, T, 16, [false], world);
               this.spikes.push(rect(x + 2, y + 6, T - 4, 10, 0xcd5c5c));
               hazard(this.spikes.at(-1), 'spikes', T, 16, -3);
               break;
@@ -1062,8 +1063,8 @@ class Room extends Phaser.Scene {
                 }
                 B.r.on('destroy', () => { B.img?.destroy(); B.pods.forEach((p) => p.r.destroy()); });
               } else if (this.textures.exists('mothFly')) {
-                const B = this.bosses.at(-1), tex = this.textures.get('mothFly'), fw = tex.getSourceImage().width / 4;
-                if (!tex.has(0)) for (let i = 0; i < 4; i++) tex.add(i, 0, i * fw, 0, fw, tex.getSourceImage().height);
+                const B = this.bosses.at(-1), tex = this.textures.get('mothFly'), fw = tex.getSourceImage().width / 12;
+                if (!tex.has(0)) for (let i = 0; i < 12; i++) tex.add(i, 0, i * fw, 0, fw, tex.getSourceImage().height);
                 B.r.setFillStyle(0, 0); // hitbox only
                 B.img = this.add.image(B.r.x, B.r.y, 'mothFly', 0).setScale(MOTH_SCALE).setDepth(4);
                 B.r.on('destroy', () => B.img.destroy());
@@ -1117,12 +1118,12 @@ class Room extends Phaser.Scene {
     }
     // Fill a screen's height of solid ground above and below every room (stopping at any other room),
     // so the camera's diagonal slide between rooms at different heights never shows empty space.
-    for (const { rect: R } of this.rooms) {
+    for (const { rect: R, world } of this.rooms) {
       const others = this.rooms.map((r) => r.rect).filter((O) => O !== R && O.x < R.right && O.right > R.x);
       const top = Math.max(R.y - 544, ...others.filter((O) => O.bottom <= R.y).map((O) => O.bottom));
       const bottom = Math.min(R.bottom + 544, ...others.filter((O) => O.y >= R.bottom).map((O) => O.y));
-      if (top < R.y) Art.platform(this, R.x, top, R.width, R.y - top, []);
-      if (bottom > R.bottom) Art.platform(this, R.x, R.bottom, R.width, bottom - R.bottom, []);
+      if (top < R.y) Art.platform(this, R.x, top, R.width, R.y - top, [], world);
+      if (bottom > R.bottom) Art.platform(this, R.x, R.bottom, R.width, bottom - R.bottom, [], world);
     }
     for (const B of [...this.bosses]) {
       if ((B.stag && stats.stagFinished) || (B.kind === 'tree' && stats.treePower) ||
@@ -1140,6 +1141,7 @@ class Room extends Phaser.Scene {
     this.litRune = this.wearing ? (stats.treePower ? 3 : stats.mothFinished ? 2 : 1) : undefined;
     this.roomDeaths = 0;
     this.drawStagGrounds();
+    Art.setWorld(this, this.rooms[this.index].world);
     if (this.retry) this.world = this.rooms[this.index].world; // Shift+R keeps you in the same world: no title card
     else this.showWorld(this.rooms[this.index].world);
 
@@ -1296,6 +1298,7 @@ class Room extends Phaser.Scene {
   // The world's name fades in when you arrive in a new world.
   showWorld(w) {
     this.world = w;
+    Art.setWorld(this, w);
     if (!WORLD_NAMES[w]) return;
     const t = this.add.text(480, 200, WORLD_NAMES[w], { fontFamily: 'Georgia, serif', fontSize: '42px', color: '#f1e3b8' })
       .setOrigin(0.5).setScrollFactor(0).setDepth(45).setAlpha(0).setShadow(0, 2, '#000', 8);
@@ -1449,8 +1452,8 @@ class Room extends Phaser.Scene {
     const B = this.boss;
     if (!B) return done?.();
     GameAudio.play('moth-scream');
-    B.pose = 0;
-    this.time.delayedCall(150, () => { B.pose = 1; this.cameras.main.shake(500, 0.008); });
+    B.pose = 6; // wings up (Veo sheet: 0 down, 3 flat, 6 up)
+    this.time.delayedCall(150, () => { B.pose = 3; this.cameras.main.shake(500, 0.008); });
     for (let i = 0; i < 6; i++) this.time.delayedCall(150 + i * 160, () => {
       for (const [w, col, a] of [[10, 0x2a2018, 0.35], [4, 0xffffff, 0.95]]) { // pale wave with a dark halo, readable on any backdrop
         const ring = this.add.circle(B.r.x, B.r.y, 50).setStrokeStyle(w, col, a).setDepth(5.9);
@@ -1520,9 +1523,9 @@ class Room extends Phaser.Scene {
       // A soul is the hero's painting, frozen in the pose he died in, glowing blue-white.
       const [key, frame] = this.lying ? ['heroSlide', SLIDE_FRAMES[0]] : this.heroFrame; // pose may not be drawn yet
       const feet = c.y + c.height / 2, flip = this.face < 0;
-      const body = this.add.image(c.x, feet, key, frame).setOrigin(0.5, 1).setScale(key === 'heroWall' ? HERO_HEIGHT / 141 : this.heroScale).setFlipX(flip)
+      const body = this.add.image(c.x, feet, key, frame).setOrigin(0.5, 1).setScale(key === 'heroWall' || key === 'heroKick' ? HERO_HEIGHT / 141 : this.heroScale).setFlipX(flip)
         .setTintFill(0x6fb6ee).setAlpha(0.45).setDepth(4.5);
-      const glow = this.add.image(c.x, feet, key, frame).setOrigin(0.5, 1).setScale(key === 'heroWall' ? HERO_HEIGHT / 141 : this.heroScale).setFlipX(flip)
+      const glow = this.add.image(c.x, feet, key, frame).setOrigin(0.5, 1).setScale(key === 'heroWall' || key === 'heroKick' ? HERO_HEIGHT / 141 : this.heroScale).setFlipX(flip)
         .setTint(0xbfe6ff).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.9).setDepth(4.6);
       c.sprites = [body, glow];
       c.on('destroy', () => c.sprites.forEach((sp) => sp.destroy()));
@@ -1652,20 +1655,20 @@ class Room extends Phaser.Scene {
     // (one frame per RUN_STEP px, so steps match speed), or the standing painting when still.
     const wallPose = !grounded && b.velocity.y > 0 && this.wallSide() === this.face && this.textures.exists('heroWall');
     this.heroFrame = this.lying ? ['heroSlide', SLIDE_FRAMES[Math.floor(t * SLIDE_FPS) % SLIDE_FRAMES.length]]
-      : !grounded && this.kick > 0 && this.textures.exists('heroWall') ? ['heroWall', 3]
-      : wallPose ? ['heroWall', Math.floor(t * 8) % Math.min(3, this.textures.get('heroWall').frameTotal - 1)]
+      : !grounded && this.kick > 0 && this.textures.exists('heroKick') ? ['heroKick', 3]
+      : wallPose ? ['heroWall', Math.floor(t * 8) % 6]
       : !grounded ? ['heroSheet', b.velocity.y < 0 ? 6 : 7]
       : Math.abs(b.velocity.x) > 20
         ? (this.textures.exists('heroRun') ? ['heroRun', RUN_FRAMES[Math.floor(this.walk / RUN_STEP) % RUN_FRAMES.length]] : ['heroSheet', Math.floor(this.walk / RUN_STEP) % 6])
-      : this.textures.exists('heroIdleAnim') ? ['heroIdleAnim', Math.floor(t * 6) % 4] : ['heroIdle', undefined];
+      : this.textures.exists('heroIdleAnim') ? ['heroIdleAnim', Math.floor(t * 8) % 8] : ['heroIdle', undefined];
     const [key, frame] = this.heroFrame;
     // Standing frames center on him. The slide is anchored by its feet (the frame's leading edge),
     // a little ahead of center, so the body trails behind and getting up moves him forward.
     // Position from the physics body, which has already moved this frame (the rectangle only catches
     // up after drawing, so using it made the painting trail one frame behind the body).
-    const flip = (key === 'heroWall' && frame === 3 ? this.lastWall : this.face) < 0, slide = key === 'heroSlide', bx = b.center.x, feet = b.bottom;
-    this.heroSprite.setTexture(key, frame).setScale(key === 'heroWall' ? HERO_HEIGHT / 141 : this.heroScale).setFlipX(flip)
-      .setOrigin(slide ? this.slideOrigin(frame, flip) : key === 'heroIdleAnim' ? (flip ? 0.25 : 0.75) : 0.5, 1)
+    const flip = (key === 'heroKick' ? this.lastWall : this.face) < 0, slide = key === 'heroSlide', bx = b.center.x, feet = b.bottom;
+    this.heroSprite.setTexture(key, frame).setScale(key === 'heroWall' || key === 'heroKick' ? HERO_HEIGHT / 141 : this.heroScale).setFlipX(flip)
+      .setOrigin(slide ? this.slideOrigin(frame, flip) : key === 'heroIdleAnim' ? (flip ? 0.27 : 0.73) : 0.5, 1) // idle feet sit 73% across the frame
       .setPosition(bx + (slide ? this.face * 12 : 0), feet + 1);
     // the amulet's glow, on his chest (only placed for upright poses)
     if (slide || !this.wearing) return;
@@ -2068,7 +2071,7 @@ class Room extends Phaser.Scene {
     };
     if (!B.phase) { enter('pause'); B.r.y = floor - 96; B.fired = 0; }
     B.clock += dt;
-    B.pose = ['diveTell', 'dive'].includes(B.phase) ? 2 : undefined;
+    B.pose = ['diveTell', 'dive'].includes(B.phase) ? 0 : undefined; // wings down
     B.img?.setAngle(B.phase === 'stunned' ? 25 : B.phase === 'loomTell' ? Math.sin(B.clock * 40) * 6 : 0);
     const flyTo = (x, y) => {
       const distance = Math.hypot(x - B.r.x, y - B.r.y), step = Math.min(1, 900 * dt / (distance || 1));

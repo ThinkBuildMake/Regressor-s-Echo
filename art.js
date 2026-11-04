@@ -1,5 +1,6 @@
 // Painted look: parallax backdrop, textured platforms, light and atmosphere.
-// Real art lives in assets/world1/<name>.webp (sky, far, mid, near, ground, moss). Any missing file
+// Real art lives in assets/world<N>/<name>.webp (sky, far, mid, near, ground, moss). Worlds 2-3 use their own
+// file when it exists (key `w2-sky`), else World 1's. Any missing World 1 file
 // falls back to a painted stand-in drawn in code, so the game always runs.
 // Note: browsers block image files opened via file://, so real art needs a local server
 // (e.g. `python3 -m http.server` in this folder, then open http://localhost:8000).
@@ -12,6 +13,26 @@ const Art = {
     this.preloadHazards(scene);
     scene.load.on('loaderror', () => {}); // missing file → stand-in below
     for (const k of this.FILES) if (!scene.textures.exists(k)) scene.load.image(k, `assets/world1/${k}.webp`);
+    for (const w of [2, 3]) for (const k of this.FILES)
+      if (!scene.textures.exists(`w${w}-${k}`)) scene.load.image(`w${w}-${k}`, `assets/world${w}/${k}.webp`);
+  },
+
+  // This world's texture for a layer, or World 1's.
+  key(scene, world, k) {
+    return world > 1 && scene.textures.exists(`w${world}-${k}`) ? `w${world}-${k}` : k;
+  },
+
+  // Swap the screen-fixed backdrop to a world's layers (called when you arrive in a new world).
+  setWorld(scene, world) {
+    for (const L of scene.art?.layers ?? []) {
+      const key = this.key(scene, world, L.base);
+      // World 1's foliage strips don't belong in other worlds: hide them unless that world has its own.
+      L.ts.setVisible(!(L.base.startsWith('near') && world > 1 && key === L.base));
+      if (L.ts.texture.key === key) continue;
+      L.ts.setTexture(key);
+      const s = L.scale ?? this.H / scene.textures.get(key).getSourceImage().height;
+      L.ts.setTileScale(s, s);
+    }
   },
 
   preloadHazards(scene) {
@@ -175,7 +196,7 @@ const Art = {
       const ts = scene.add.tileSprite(0, atBottom ? this.H - h : 0, this.W, h, key).setOrigin(0).setDepth(depth).setScrollFactor(0);
       const s = scale ?? this.H / scene.textures.get(key).getSourceImage().height;
       ts.setTileScale(s, s);
-      return { ts, f };
+      return { ts, f, base: key, scale };
     };
     // Painted foreground comes as two strips: branches hanging from the top, and only the tips of the
     // ferns along the bottom, so foliage never hides the hero on the floor.
@@ -203,21 +224,22 @@ const Art = {
   },
 
   // A wall run: tiled ground texture, plus moss on every tile whose top is open to the air.
-  platform(scene, x, y, w, h, mossTop) {
-    const tex = scene.textures.get('ground').getSourceImage();
-    const ts = scene.add.tileSprite(x, y, w, h, 'ground').setOrigin(0).setDepth(1);
+  platform(scene, x, y, w, h, mossTop, world = 1) {
+    const ground = this.key(scene, world, 'ground'), lip = this.key(scene, world, 'lip');
+    const tex = scene.textures.get(ground).getSourceImage();
+    const ts = scene.add.tileSprite(x, y, w, h, ground).setOrigin(0).setDepth(1);
     ts.setTileScale(256 / tex.height).setTilePosition(x / ts.tileScaleX, y / ts.tileScaleY); // one repeat = 256px on screen
     const shade = scene.add.graphics().setDepth(1); // darker toward the bottom, for weight
     shade.fillGradientStyle(0x000000, 0x000000, 0x000000, 0x000000, 0, 0, 0.35, 0.35);
     shade.fillRect(x, y, w, h);
-    if (scene.textures.exists('lip')) {
+    if (scene.textures.exists(lip)) {
       // Painted top lip: one continuous strip per run of open tiles. Grass pokes ~12px above the
       // surface, moss hangs over the front; it repeats by world position so neighbours line up.
       for (let i = 0; i < mossTop.length; i++) {
         if (!mossTop[i]) continue;
         let n = 1;
         while (mossTop[i + n]) n++;
-        const lx = x + i * 32 - 3, m = scene.add.tileSprite(lx, y - 12, n * 32 + 6, 48, 'lip').setOrigin(0).setDepth(2);
+        const lx = x + i * 32 - 3, m = scene.add.tileSprite(lx, y - 12, n * 32 + 6, 48, lip).setOrigin(0).setDepth(2);
         m.setTileScale(0.5).setTilePosition(lx / 0.5, 0);
         i += n - 1;
       }
