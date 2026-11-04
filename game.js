@@ -902,6 +902,8 @@ class Room extends Phaser.Scene {
       if (!this.cache.json.exists(`tree-${pose}-frames`)) this.load.json(`tree-${pose}-frames`, `assets/bosses/tree-${pose}.json`);
     }
     if (!this.textures.exists('seedPod')) this.load.image('seedPod', 'assets/bosses/seed-pod.webp');
+    if (!this.textures.exists('mothImpact')) this.load.image('mothImpact', 'assets/effects/impact.webp');
+    if (!this.textures.exists('mothDust')) this.load.image('mothDust', 'assets/bosses/moth-dust.webp');
     if (!this.textures.exists('mothFly')) this.load.image('mothFly', 'assets/bosses/moth-fly.webp');
     if (!this.textures.exists('rocks')) this.load.image('rocks', 'assets/world1/rocks.webp'); // 6 earth chunks
     if (!this.textures.exists('wallBreak')) this.load.image('wallBreak', 'assets/world1/wall-break.webp');
@@ -1200,7 +1202,7 @@ class Room extends Phaser.Scene {
 
   bossDefeated(B) {
     if (B.stag) this.stagFinished = stats.stagFinished = true;
-    if (B.story === 'mothDown') { stats.mothFinished = true; rules.max = 2; rules.selfDestruct = true; }
+    if (B.story === 'mothDown') { B.warn?.destroy(); stats.mothFinished = true; rules.max = 2; rules.selfDestruct = true; }
     if (B.kind === 'tree') { this.treePower = stats.treePower = true; rules.max = 3; }
     B.r.destroy();
     this.bosses.splice(this.bosses.indexOf(B), 1);
@@ -1428,7 +1430,7 @@ class Room extends Phaser.Scene {
       if (this.boss.kind === 'tree') { this.boss.phase = 'idle'; this.boss.timer = 4; this.boss.attack = 2; this.boss.slamOpen = false; this.boss.pods.forEach((p) => p.r.destroy()); this.boss.pods = []; }
     } // your death heals the boss
     if (this.boss?.story === 'mothDown' && !this.boss.hidden) {
-      this.boss.dust = 2.4;
+      this.boss.r.setSize(BOSS_W, BOSS_H); this.boss.phase = null; this.boss.open = false; this.boss.warn?.clear();
       this.boss.resetWait = 1.5;
       this.boss.r.x = this.rooms[this.index].rect.x + 22 * T;
       this.boss.dir = 1;
@@ -1705,7 +1707,7 @@ class Room extends Phaser.Scene {
       sh.x += sh.vx * dt;
       sh.y += (sh.vy ?? 0) * dt;
       sh.img?.setPosition(sh.x, sh.y);
-      if (sh.mothDust && sh.y >= R.bottom - T - 16) { sh.y = R.bottom - T - 16; sh.vy = 0; }
+      if (sh.mothDust && sh.y >= R.bottom - T - 4) { sh.destroy(); return false; }
       if (!solid(new Phaser.Geom.Rectangle(sh.x - 4, sh.y - 4, 8, 8)) && R.contains(sh.x, sh.y)) return true;
       sh.destroy();
       return false;
@@ -1850,18 +1852,89 @@ class Room extends Phaser.Scene {
       if (this.player.x > this.rooms[B.room].rect.x + 1.5 * T)
         this.gates.filter((g) => g.room === B.room).forEach((g) => { g.body.enable = true; });
       if ((B.resetWait = Math.max(0, (B.resetWait ?? 0) - dt)) > 0) return;
-      B.dust = (B.dust ?? 2.4) - dt;
-      if (B.dust <= 0) {
-        B.dust = 2.4 * 0.8 ** (BOSS_HP - B.hp);
-        const a = Math.atan2(this.rooms[B.room].rect.bottom - T - 16 - B.r.y, this.player.x - B.r.x);
-        this.shots.push(Object.assign(this.add.circle(B.r.x, B.r.y, 6, 0xffdf63).setDepth(4),
-          { vx: Math.cos(a) * 210, vy: Math.sin(a) * 210, mothDust: true }));
-      }
+      return this.updateMoth(B, dt);
     }
     B.hurt -= dt;
     B.r.x += B.dir * (BOSS_SPEED + (BOSS_HP - B.hp) * BOSS_SPEEDUP) * dt;
     if (B.r.x < B.min || B.r.x > B.max) { B.r.x = Phaser.Math.Clamp(B.r.x, B.min, B.max); B.dir *= -1; }
     B.r.setAlpha(B.hurt > 0 ? 0.4 : 1);
+  }
+
+  updateMoth(B, dt) {
+    const R = this.rooms[B.room].rect, p = this.player, floor = R.bottom - T;
+    B.hurt = Math.max(0, B.hurt - dt);
+    B.warn ??= this.add.graphics().setDepth(5);
+    B.warn.clear();
+    if (this.dead > 0 || this.transit || this.talk.line || this.talk.queue.length) return;
+    const gap = 1.2 * 0.8 ** (BOSS_HP - B.hp);
+    const enter = (phase) => { B.phase = phase; B.clock = 0; };
+    const pod = (x, y, vx, vy) => {
+      const sh = this.textures.exists('mothDust') ? this.add.image(x, y, 'mothDust').setDisplaySize(16, 16)
+        : this.add.circle(x, y, 8, 0xffef72);
+      this.shots.push(Object.assign(sh.setDepth(4), { vx, vy, mothDust: true }));
+    };
+    if (!B.phase) { enter('pause'); B.r.y = floor - 96; B.fired = 0; }
+    B.clock += dt;
+    B.pose = ['diveTell', 'dive'].includes(B.phase) ? 2 : undefined;
+    B.img?.setAngle(B.phase === 'loomTell' ? Math.sin(B.clock * 40) * 6 : 0);
+    B.r.setAlpha(B.hurt > 0 ? 0.4 : 1);
+    if (B.hp < BOSS_HP) {
+      B.warn.lineStyle(4, 0x352e48).lineBetween(B.r.x - 45, B.r.y - 18, B.r.x - 25, B.r.y + 10);
+      if (B.hp === 1) B.warn.lineBetween(B.r.x + 25, B.r.y + 10, B.r.x + 45, B.r.y - 18);
+    }
+    B.warn.lineStyle(2, 0xffef72, 0.8);
+    if (B.phase === 'loomTell') {
+      B.warn.strokeCircle(B.r.x, B.r.y, 40 + Math.sin(B.clock * 40) * 5);
+      if (B.clock >= 0.6) { enter('loom'); B.fired = 0; }
+    } else if (B.phase === 'loom') {
+      if (B.clock >= B.fired * 0.35) {
+        const a = Math.atan2(p.y - B.r.y - BOSS_H / 2, p.x - B.r.x);
+        pod(B.r.x, B.r.y + BOSS_H / 2, Math.cos(a) * 210, Math.sin(a) * 210);
+        if (++B.fired >= (B.hp === 1 ? 4 : 3)) enter('loomGap');
+      }
+    } else if (B.phase === 'loomGap' && B.clock >= gap) {
+      enter('diveTell');
+      B.lane = Phaser.Math.Clamp(p.x, B.min, B.max);
+      B.r.x = B.lane; B.r.y = floor - 160;
+    } else if (B.phase === 'diveTell') {
+      B.warn.strokeRect(B.lane - BOSS_W / 2, floor - 200, BOSS_W, 200);
+      if (B.clock >= 0.8) enter('dive');
+    } else if (B.phase === 'dive') {
+      B.r.y += 320 * dt;
+      const soul = this.corpses.find((c) => hit(bounds(c), bounds(B.r)));
+      if (soul) {
+        B.r.y = bounds(soul).top - BOSS_H / 2;
+        enter('stunned'); B.open = true;
+        if (this.textures.exists('mothImpact')) {
+          const flash = this.add.image(B.r.x, bounds(soul).top, 'mothImpact').setDisplaySize(T, T).setDepth(5);
+          this.time.delayedCall(250, () => flash.destroy());
+        }
+      } else if (B.clock >= 0.5) enter('diveGap');
+    } else if (B.phase === 'stunned') {
+      B.warn.strokeCircle(B.r.x, B.r.y - BOSS_H / 2 - 8, 9);
+      if (B.clock >= 2) { B.open = false; enter('diveGap'); }
+    } else if (B.phase === 'diveGap' && B.clock >= gap) {
+      B.r.x = B.max; B.r.y = floor - 96; enter('curtainTell');
+    } else if (B.phase === 'curtainTell') {
+      for (let i = 0; i < 3; i++) B.warn.strokeRect(R.x + (3 + i * 8) * T, R.y + T, 6 * T, 10);
+      if (B.clock >= 1) { enter('curtain'); B.fired = 0; }
+    } else if (B.phase === 'curtain') {
+      if (B.clock >= B.fired * 0.45) {
+        for (let j = 0; j < 12; j++) pod(R.x + (3 + B.fired * 8 + j / 2) * T, R.y + T, 0, 280);
+        if (++B.fired === 3) enter('curtainGap');
+      }
+    } else if (B.phase === 'curtainGap' && B.clock >= gap) {
+      enter(B.hp < BOSS_HP ? 'skimmerTell' : 'pause');
+    } else if (B.phase === 'skimmerTell') {
+      B.r.y = Phaser.Math.Linear(floor - 96, floor - 12, Math.min(1, B.clock / 0.8));
+      B.warn.strokeRect(B.min, floor - 24, B.max - B.min, 24);
+      if (B.clock >= 0.8) { B.r.setSize(BOSS_W, 24); enter('skimmer'); }
+    } else if (B.phase === 'skimmer') {
+      B.r.x = Math.max(B.min, B.max - B.clock * 360);
+      if (B.r.x <= B.min) enter('pause');
+    } else if (B.phase === 'pause' && B.clock >= 2 * 0.8 ** (BOSS_HP - B.hp)) {
+      B.r.setSize(BOSS_W, BOSS_H); B.r.x = B.max; B.r.y = floor - 96; enter('loomTell'); B.fired = 0;
+    }
   }
 
   // Attack sheets start at the wind-up and hold their recovery frame.
@@ -1955,12 +2028,12 @@ class Room extends Phaser.Scene {
     if (!falling || (this.bossPreviousFeet ?? p.body.prev.y + p.body.height) > top + 1) { this.die(); return true; }
     p.body.reset(p.x, top - p.height / 2);
     p.body.velocity.y = -JUMP * 0.8;
-    if (B.hurt > 0 || (B.stag && B.stomped) || (B.kind === 'tree' && (B.stompReady === false || !B.slamOpen || !B.target?.buried))) return false;
+    if (B.hurt > 0 || (B.story === 'mothDown' && !B.open) || (B.stag && B.stomped) || (B.kind === 'tree' && (B.stompReady === false || !B.slamOpen || !B.target?.buried))) return false;
     if (B.stag) { B.stomped = true; if (B.waves) B.waveClock = -10; B.clock = Math.min(B.clock, 0.5); }
     if (B.kind === 'tree') { B.stompReady = false; B.slamOpen = false; }
     B.hurt = 0.5;
     if (B.story === 'mothDown') {
-      B.dust = 2.4 * 0.8 ** (BOSS_HP - B.hp + 1);
+      B.open = false; B.phase = 'diveGap'; B.clock = 0; B.warn?.clear();
       for (const sh of this.shots.filter((sh) => sh.mothDust)) sh.destroy();
       this.shots = this.shots.filter((sh) => !sh.mothDust);
     }

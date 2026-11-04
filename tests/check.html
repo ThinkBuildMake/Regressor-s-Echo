@@ -344,8 +344,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     key('keyup', 39); Dialogue.skip(s); await alive(); Dialogue.skip(s);
     const soul = s.corpses[0];
     check(soul && stats.deaths === deaths + 1, 'one thorn death places the launch soul');
-    // Approach from the safe side, jump onto the soul, then time vertical jumps
-    // for the moth's next crossing. No player or boss repositioning during combat.
+    // Reach the thorn soul with real inputs; combat uses only movement and jumps.
     key('keydown', 39); key('keydown', 83);
     await until(() => s.player.x >= soul.x - 90, 3000);
     key('keyup', 83); key('keyup', 39);
@@ -359,22 +358,44 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     await until(() => s.player.body.blocked.down || s.dead > 0, 2000);
     check(Math.abs(s.player.x - soul.x) < 20 && s.player.y < soul.y - 25, `jump onto the thorn soul (${s.player.x-O().x},${s.player.y-O().y})`);
     const fightDeaths = stats.deaths;
-    let lastHp = M.hp, bouncing = false, bounceCleared = false;
-    for (let t = 0; t < 45000 && M.hp > 0 && stats.deaths === fightDeaths; t += 20) {
+    let lastHp = M.hp, bouncing = false, bounceCleared = false, plainBounce = false;
+    const phases = new Set(), trace = [], loomCounts = new Set();
+    for (let t = 0; t < 90000 && M.hp > 0 && stats.deaths === fightDeaths; t += 20) {
+      if (trace.at(-1)?.phase !== M.phase) trace.push({phase:M.phase,hp:M.hp,x:((s.player.x-O().x)/T).toFixed(1),feet:((s.player.y+15-O().y)/T).toFixed(1)});
+      phases.add(M.phase);
+      if (M.phase === 'loomGap') loomCounts.add(M.fired);
       const grounded = s.player.body.blocked.down || s.player.body.touching.down;
-      const speed = BOSS_SPEED + (3 - M.hp) * BOSS_SPEEDUP;
-      const crossing = (soul.x - M.r.x) / (M.dir * speed);
-      if (grounded && crossing > 0.25 + (BOSS_W / 2 + 12) / speed && crossing < 0.33 + (BOSS_W / 2 + 12) / speed) key('keydown', 32);
+      let target = soul.x - 50;
+      if (['diveTell', 'dive'].includes(M.phase)) target = M.r.x - BOSS_W / 2 - 40;
+      if (M.phase === 'stunned') {
+        target = M.r.x - BOSS_W / 2 - 28;
+        if (grounded) key('keydown', 32);
+        if (s.player.y + 15 < bounds(M.r).top) target = M.r.x;
+        else if (!grounded && s.player.body.velocity.y >= 0) key('keyup', 32);
+      } else if (['curtainTell', 'curtain', 'curtainGap'].includes(M.phase)) target = O().x + 10 * T;
+      else if (['skimmerTell', 'skimmer'].includes(M.phase)) {
+        target = soul.x;
+        if (grounded && s.player.y > soul.y - 25) key('keydown', 32);
+        else if (s.player.body.velocity.y >= 0) key('keyup', 32);
+      }
       else if (s.player.body.velocity.y >= 0) key('keyup', 32);
+      if (M.phase === 'skimmerTell' && M.clock < 0.65) { target = O().x + 10 * T; key('keyup', 32); }
+      if (Math.abs(s.player.x - target) < 6) { key('keyup', 37); key('keyup', 39); }
+      else { key(s.player.x > target ? 'keydown' : 'keyup', 37); key(s.player.x < target ? 'keydown' : 'keyup', 39); }
       s.shots.filter((sh) => sh.mothDust).forEach((sh) => dust.add(sh));
+      const closedFall = !M.open && s.player.body.velocity.y > 0;
       await wait(20);
+      if (closedFall && M.phase === 'diveGap' && M.hp === lastHp && s.player.body.velocity.y < 0) plainBounce = true;
       if (M.hp < lastHp && M.hp > 0) bouncing = true;
       if (bouncing && s.player.body.velocity.y < 0 && s.player.y + 15 < bounds(M.r).top) bounceCleared = true;
       lastHp = M.hp;
     }
-    key('keyup', 32);
+    key('keyup', 32); key('keyup', 37); key('keyup', 39);
+    check(phases.has('curtain') && phases.has('skimmer'), `moth: loop (${JSON.stringify(trace.slice(-6))}, hp=${M.hp}, deaths=${stats.deaths-fightDeaths}, x=${(s.player.x-O().x)/T}, y=${(s.player.y-O().y)/T})`);
+    check(loomCounts.has(3) && loomCounts.has(4), 'moth: Loom adds its fourth aimed pod after hit two');
+    check(plainBounce, 'moth: a plain stomp after the stun closes bounces without damage');
     check(bounceCleared, 'moth: real stomp bounce clears the back and continues to the next stomp');
-    check(stats.deaths === deaths + 1 && s.corpses[0] === soul, 'three stomps keep the same thorn soul without dying');
+    check(stats.deaths === deaths + 1 && s.corpses[0] === soul, `three stomps keep the same thorn soul without dying (${JSON.stringify(trace.slice(-6))})`);
     // Probe dust at shield height independently of the stomp attack timer.
     const probe = Object.assign(s.add.circle(soul.x + 3 * T, soul.y, 6, 0xffdf63), { vx: -210, vy: 0, mothDust: true });
     s.shots.push(probe); dust.add(probe);
@@ -386,14 +407,22 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     await wait(200);
     check(rules.max === 2 && rules.selfDestruct, 'absorption grants the second rune and self-destruct');
     check(!s.boss && s.gates.every((g) => !g.active || g.room !== mi), `beating the moth opens the vines (hp ${M.hp})`);
-    key('keydown', 39);
-    for (let t = 0; t < 8000 && s.rooms[s.index].name !== 'Let go'; t += 20) {
-      if (s.player.body.blocked.down || s.player.body.touching.down) key('keydown', 32);
-      else if (s.player.body.velocity.y >= 0) key('keyup', 32);
-      await wait(20);
-    }
+    await until(() => s.player.body.blocked.down || s.player.body.touching.down, 2000, 'land after the victory bounce');
+    // Mount the soul, then jump from it over the still-live thorn.
+    key('keydown', 37);
+    await until(() => s.player.x <= soul.x - 90, 2000);
+    key('keyup', 37); await wait(150);
+    key('keydown', 32); key('keydown', 39);
+    await until(() => s.player.x >= soul.x, 1500);
     key('keyup', 32); key('keyup', 39);
-    check(s.rooms[s.index].name === 'Let go' && rules.max === 2, `walking on reaches World 2 with 2 souls (${s.rooms[s.index].name}, ${rules.max})`);
+    s.player.body.setVelocityX(0);
+    await until(() => s.player.body.blocked.down || s.player.body.touching.down, 2000);
+    await wait(100);
+    key('keydown', 32); key('keydown', 39);
+    await wait(600); key('keyup', 32);
+    await until(() => s.rooms[s.index].name === 'Let go', 8000, 'walk through the opened moth arena');
+    key('keyup', 39);
+    check(rules.max === 2, 'walking on reaches World 2 with 2 souls');
     s = await go(mi);
     check(!s.boss && rules.max === 2 && rules.selfDestruct && !s.gates.some(g => g.active && g.room === mi), 'moth: restart preserves victory and powers');
   }
