@@ -899,6 +899,10 @@ class Room extends Phaser.Scene {
   preload() {
     Art.preload(this);
     Dialogue.preload(this);
+    for (const [key, path] of [
+      ['amulet', 'world1/amulet'], ['ghost', 'world1/ghost'], ['old-tree', 'world3/old-tree'],
+      ...[1, 2, 3].flatMap((n) => [[`amulet-rune${n}`, `world1/amulet-rune${n}`], [`shrine${n}`, `world${n}/shrine`]]),
+    ]) if (!this.textures.exists(key)) this.load.image(key, `assets/${path}.webp`);
     if (!this.textures.exists('heroSheet')) {
       this.load.image('heroSheet', 'assets/hero/sheet.webp'); // 8 frames: run 0-5, jump 6, fall 7
       this.load.image('heroIdle', 'assets/hero/idle.webp');
@@ -960,6 +964,7 @@ class Room extends Phaser.Scene {
     Art.ensure(this);
     Art.backdrop(this);
     const rect = (x, y, w, h, color) => this.add.rectangle(x + w / 2, y + h / 2, w, h, color);
+    this.wornAmulet = this.hudAmulet = this.pips = undefined;
     this.amulets = [];
     this.shrines = [];
     this.lasers = [];
@@ -1064,11 +1069,19 @@ class Room extends Phaser.Scene {
             }
             case 's': this.springs.push(rect(x + 3, y + T - 12, T - 6, 12, 0xffc93c).setStrokeStyle(2, 0x7a5200).setDepth(3)); hazard(this.springs.at(-1), 'spring', T - 6, 24, -6); break;
             case 'P': room.spawns.push({ x: x + T / 2, y: y + T - 15 }); break;
-            case 'A': this.amulets.push(this.add.circle(x + T / 2, y + T - 10, 6, 0xffd774).setStrokeStyle(2, 0xb07a22).setDepth(3)); break;
+            case 'A': {
+              const a = this.add.circle(x + T / 2, y + T - 10, 6, 0xffd774).setStrokeStyle(2, 0xb07a22).setDepth(3);
+              this.storyPainting(a, 'amulet', 24);
+              if (a.img) a.setStrokeStyle(0);
+              this.amulets.push(a);
+              break;
+            }
             case 'C': { // shrine: a mossy stone with a gold rune; touching it moves your respawn here
               const sh = this.add.rectangle(x + T / 2, y + T - 14, 16, 28, 0x56605a).setStrokeStyle(1, 0x2b322e).setDepth(3);
               sh.rune = this.add.circle(x + T / 2, y + T - 18, 3, 0xe8b44a).setAlpha(0.35).setDepth(3);
               sh.spawn = { x: x + T / 2, y: y + T - 15 };
+              this.storyPainting(sh, `shrine${world}`, 44, 14);
+              if (sh.img) { sh.setStrokeStyle(0); sh.rune.setVisible(false); sh.img.setTint(0x626868).setAlpha(0.65); }
               this.shrines.push(sh);
               break;
             }
@@ -1106,6 +1119,7 @@ class Room extends Phaser.Scene {
     rules.max = this.treePower ? 3 : Math.max(stats.mothFinished ? 2 : 1, WORLD_SOULS[this.rooms[this.index].world] ?? 3);
     Dialogue.create(this);
     this.wearing = Dialogue.seen.has('amulet');
+    this.litRune = this.wearing ? (stats.treePower ? 3 : stats.mothFinished ? 2 : 1) : undefined;
     this.roomDeaths = 0;
     this.drawStagGrounds();
     this.showWorld(this.rooms[this.index].world);
@@ -1132,12 +1146,11 @@ class Room extends Phaser.Scene {
       this.heroSprite = this.add.image(0, 0, 'heroIdle').setOrigin(0.5, 1).setDepth(5.5);
       this.heroFrame = ['heroIdle', undefined];
     }
-    // The guide: the hero's own painting as a see-through, flameless blue-white ghost (a plain shape
-    // without the art). He appears in the amulet cutscene, then only for conversations he's in.
+    // The approved ghost replaces the tinted hero; conversation staging stays the same.
     if (!this.painted && !this.textures.exists('guideStandIn'))
       this.make.graphics({ add: false }).fillStyle(0xffffff).fillRoundedRect(0, 0, 22, 40, 10).generateTexture('guideStandIn', 22, 40).destroy();
-    this.guide = this.add.image(this.start.x + 60, this.start.y, this.painted ? 'heroIdle' : 'guideStandIn').setOrigin(0.5, 1)
-      .setScale(this.painted ? this.heroScale : 1).setTint(0xcfeaff).setBlendMode(Phaser.BlendModes.ADD).setDepth(4.4).setAlpha(0);
+    this.guide = this.add.image(this.start.x + 60, this.start.y, this.textures.exists('ghost') ? 'ghost' : this.painted ? 'heroIdle' : 'guideStandIn').setOrigin(0.5, 1)
+      .setScale(this.textures.exists('ghost') ? HERO_HEIGHT / 112 : this.painted ? this.heroScale : 1).setTint(0xcfeaff).setBlendMode(Phaser.BlendModes.ADD).setDepth(4.4).setAlpha(0);
     this.guide.on = Dialogue.seen.has('amulet') && !this.stagFinished;
     this.guide.hoverY = this.guide.y;
     this.guide.away = 0;
@@ -1212,6 +1225,42 @@ class Room extends Phaser.Scene {
       }
       e.room = this.rooms[i].rect;
       this.enemies.push(e);
+    }
+  }
+
+  storyPainting(object, key, height, feet = 0) {
+    if (!this.textures.exists(key)) return;
+    object.setFillStyle(0, 0);
+    const image = this.textures.get(key).getSourceImage();
+    object.img = this.add.image(object.x, object.y + feet, key).setOrigin(0.5, feet ? 1 : 0.5)
+      .setScale(height / image.height).setDepth(3);
+    object.on('destroy', () => object.img.destroy());
+  }
+
+  drawStoryArt(t) {
+    const g = this.fx, p = this.player, b = p.body;
+    for (const a of this.amulets) {
+      const y = a.y + Math.sin(t * 2) * 3;
+      a.img?.setY(y);
+      g.fillStyle(0xffd774, 0.12 + Math.sin(t * 2) * 0.04).fillCircle(a.x, y, 16);
+    }
+    for (const sh of this.shrines) {
+      const active = this.start === sh.spawn;
+      sh.img?.setTint(active ? 0xffffff : 0x626868).setAlpha(active ? 1 : 0.65);
+      if (active) g.fillStyle(0xffd774, 0.12 + Math.sin(t * 3) * 0.04).fillCircle(sh.x, sh.y - 4, 24);
+    }
+    const rune = stats.treePower ? 3 : stats.mothFinished ? 2 : 1;
+    const key = this.textures.exists(`amulet-rune${rune}`) ? `amulet-rune${rune}` : 'amulet';
+    if (!this.textures.exists(key)) return;
+    if (!this.wornAmulet) this.wornAmulet = this.add.image(0, 0, key).setDepth(5.6);
+    this.wornAmulet.setTexture(key).setDisplaySize(10, 10).setVisible(this.wearing && p.visible && !this.lying)
+      .setPosition(b.center.x + this.face * 2, b.bottom - HERO_HEIGHT * 0.5 - 2);
+    if (!this.hudAmulet) this.hudAmulet = this.add.image(0, 516, key).setScrollFactor(0).setDepth(40);
+    this.hudAmulet.setTexture(key).setDisplaySize(32, 32).setX(32 + rules.max * 22).setVisible(this.wearing);
+    if (this.wearing && this.litRune !== rune) {
+      this.litRune = rune;
+      const flash = this.add.image(p.x, p.y - 62, key).setDisplaySize(64, 64).setDepth(6);
+      this.tweens.add({ targets: flash, y: flash.y - 18, alpha: 0, duration: 1800, onComplete: () => flash.destroy() });
     }
   }
 
@@ -1538,6 +1587,7 @@ class Room extends Phaser.Scene {
   drawFigures(t, dt) {
     const g = this.fx, b = this.player.body, p = this.player;
     g.clear();
+    this.drawStoryArt(t);
     for (const c of this.corpses) {
       if (c.buried > 0) { g.fillStyle(0x69cfff, 0.5).fillRect(c.x - 15, c.y + c.height / 2 - 4, 30, 4); continue; }
       if (c.sprites) this.soulFlames(g, c, t);
@@ -1835,8 +1885,12 @@ class Room extends Phaser.Scene {
 
   drawStagGrounds() {
     const R = this.rooms.find((r) => r.name === 'The old tree').rect;
-    this.add.rectangle(R.x + 21 * T, R.y + 13 * T, 26, 128, 0x655d60).setDepth(1);
-    this.add.circle(R.x + 21 * T, R.y + 9 * T, 65, 0x526672).setDepth(1);
+    if (this.textures.exists('old-tree'))
+      this.add.image(R.x + 21 * T, R.y + 15 * T, 'old-tree').setOrigin(0.5, 1).setScale(0.5).setDepth(1);
+    else {
+      this.add.rectangle(R.x + 21 * T, R.y + 13 * T, 26, 128, 0x655d60).setDepth(1);
+      this.add.circle(R.x + 21 * T, R.y + 9 * T, 65, 0x526672).setDepth(1);
+    }
     this.add.ellipse(R.x + 19 * T, R.y + 14 * T, 200, 68, 0x705a43).setDepth(1);
     this.stagWriting = this.add.text(R.x + 16.5 * T, R.y + 13 * T, SCRIPT.stagNote.map((l) => l.text).join('\n'), {
       fontFamily: 'cursive', fontSize: '14px', color: '#382b23', fontStyle: 'italic', wordWrap: { width: 600 }
@@ -2466,6 +2520,8 @@ class Room extends Phaser.Scene {
     // Souls left: one flame per soul in this world, lit while it's still available (bottom left).
     const pips = this.pips ??= this.add.graphics().setScrollFactor(0).setDepth(40);
     pips.clear();
+    if (this.wearing && !this.hudAmulet)
+      pips.lineStyle(2, 0xffd774).strokeCircle(32 + rules.max * 22, 516, 9);
     for (let i = 0; i < rules.max; i++) {
       const free = i < rules.max - this.corpses.length, x = 22 + i * 22, y = 520;
       pips.fillStyle(0x7cc7ff, free ? 0.95 : 0.18).fillTriangle(x - 6, y + 6, x + 6, y + 6, x, y - 10);
