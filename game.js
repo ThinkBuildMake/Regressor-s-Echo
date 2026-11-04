@@ -21,7 +21,7 @@ const RUN_FRAMES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], RUN_STEP = 12; // Veo
 // Cutscene poses (dialogue.js `pose`): sheet, frame count (into the pose, then held), feet position across the frame.
 const HERO_POSES = { kneel: ['heroKneel', 4, 0.49], slump: ['heroSlump', 4, 0.36], sleep: ['heroSlump', 4, 0.36],
   hold: ['heroHold', 3, 0.67], pained: ['heroPained', 3, 0.56] };
-const RUN_SCALE = 1.12; // the Veo run draws him smaller in his cell than the idle does
+const RUN_SCALE = 1.12, WALL_SCALE = 1.3; // the Veo run and wall slide draw him smaller in their cells than the idle does
 // Slide: loop the first row of assets/hero/slide.webp so the cape flutters.
 const SLIDE_FRAMES = [0, 1, 2, 3], SLIDE_FPS = 8;
 const BODY_STAND = [30, 32], BODY_LYING = [62, 16];    // body left behind
@@ -1563,9 +1563,9 @@ class Room extends Phaser.Scene {
       // A soul is the hero's painting, frozen in the pose he died in, glowing blue-white.
       const [key, frame] = this.lying ? ['heroSlide', SLIDE_FRAMES[0]] : this.heroFrame; // pose may not be drawn yet
       const feet = c.y + c.height / 2, flip = this.face < 0;
-      const body = this.add.image(c.x, feet, key, frame).setOrigin(0.5, 1).setScale(key === 'heroWall' || key === 'heroKick' ? HERO_HEIGHT / 141 : this.heroScale).setFlipX(flip)
+      const body = this.add.image(c.x, feet, key, frame).setOrigin(0.5, 1).setScale(key === 'heroWall' ? HERO_HEIGHT / 141 * WALL_SCALE : key === 'heroKick' ? HERO_HEIGHT / 141 : this.heroScale).setFlipX(flip)
         .setTintFill(0x6fb6ee).setAlpha(0.45).setDepth(4.5);
-      const glow = this.add.image(c.x, feet, key, frame).setOrigin(0.5, 1).setScale(key === 'heroWall' || key === 'heroKick' ? HERO_HEIGHT / 141 : this.heroScale).setFlipX(flip)
+      const glow = this.add.image(c.x, feet, key, frame).setOrigin(0.5, 1).setScale(key === 'heroWall' ? HERO_HEIGHT / 141 * WALL_SCALE : key === 'heroKick' ? HERO_HEIGHT / 141 : this.heroScale).setFlipX(flip)
         .setTint(0xbfe6ff).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.9).setDepth(4.6);
       c.sprites = [body, glow];
       c.on('destroy', () => c.sprites.forEach((sp) => sp.destroy()));
@@ -1709,7 +1709,7 @@ class Room extends Phaser.Scene {
     // Position from the physics body, which has already moved this frame (the rectangle only catches
     // up after drawing, so using it made the painting trail one frame behind the body).
     const flip = (key === 'heroKick' ? this.lastWall : this.face) < 0, slide = key === 'heroSlide', bx = b.center.x, feet = b.bottom;
-    this.heroSprite.setTexture(key, frame).setScale(key === 'heroWall' || key === 'heroKick' ? HERO_HEIGHT / 141 : this.heroScale * (key === 'heroRun' ? RUN_SCALE : 1)).setFlipX(flip)
+    this.heroSprite.setTexture(key, frame).setScale(key === 'heroWall' ? HERO_HEIGHT / 141 * WALL_SCALE : key === 'heroKick' ? HERO_HEIGHT / 141 : this.heroScale * (key === 'heroRun' ? RUN_SCALE : 1)).setFlipX(flip)
       .setOrigin(slide ? this.slideOrigin(frame, flip) : key === 'heroIdleAnim' ? (flip ? 0.27 : 0.73) : cut ? (flip ? 1 - cut[2] : cut[2]) : 0.5, 1) // idle feet sit 73% across the frame
       .setPosition(bx + (slide ? this.face * 12 : 0), feet + 1);
   }
