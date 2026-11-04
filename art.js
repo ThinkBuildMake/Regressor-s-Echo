@@ -234,9 +234,7 @@ const Art = {
     const tex = scene.textures.get(ground).getSourceImage();
     const ts = scene.add.tileSprite(x, y, w, h, ground).setOrigin(0).setDepth(1);
     ts.setTileScale(256 / tex.height).setTilePosition(x / ts.tileScaleX, y / ts.tileScaleY); // one repeat = 256px on screen
-    const shade = scene.add.graphics().setDepth(1); // darker toward the bottom, for weight
-    shade.fillGradientStyle(0x000000, 0x000000, 0x000000, 0x000000, 0, 0, 0.35, 0.35);
-    shade.fillRect(x, y, w, h);
+    ts.setTint(0xffffff, 0xffffff, 0xa6a6a6, 0xa6a6a6); // darker toward the bottom, for weight (a tint, not a graphics layer per wall: much faster to build)
     if (scene.textures.exists(lip)) {
       // Painted top lip: one continuous strip per run of open tiles. Grass pokes ~12px above the
       // surface, moss hangs over the front; it repeats by world position so neighbours line up.

@@ -882,20 +882,7 @@ class Loading extends Phaser.Scene {
   constructor() { super('loading'); }
   preload() { this.load.image('heroRun', 'assets/hero/run-veo.webp'); } // just the runner, so he shows at once
   create() {
-    this.cameras.main.setBackgroundColor('#000000');
-    let runner;
-    if (this.textures.exists('heroRun')) {
-      const tex = this.textures.get('heroRun'), img = tex.getSourceImage(), fw = img.width / 12;
-      if (!tex.has(0)) for (let i = 0; i < 12; i++) tex.add(i, 0, i * fw, 0, fw, img.height);
-      runner = this.add.image(880, 520, 'heroRun', 0).setOrigin(0.5, 1).setScale(0.62);
-      runner.preFX?.addColorMatrix().grayscale(1);
-    }
-    const label = this.add.text(820, 498, 'Loading', { ...FONT, fontSize: '22px', color: '#d8d8d8' }).setOrigin(1, 0.5);
-    this.time.addEvent({ delay: 60, loop: true, callback: () => {
-      this.step = (this.step ?? 0) + 1;
-      runner?.setFrame(this.step % 12);
-      label.setText('Loading' + '.'.repeat(Math.floor(this.step / 6) % 4));
-    } });
+    UI.loadingScreen(this);
     if (!window.SKIP_WARNING) UI.preload(this);
     Room.prototype.preload.call(this);
     this.load.once('complete', () => this.scene.start('warning'));
@@ -1044,6 +1031,7 @@ class Room extends Phaser.Scene {
     this.droppers = [];
     this.shots = [];
     this.charge = 0;
+    this.platQueue = ROOMS.map(() => []); // wall art is built per room (see buildArt): all at once took ~2s
     this.rooms = ROOMS.map(([name, raw, pos, extra = {}], ri) => {
       const [ox, oy] = pos ?? [ri * 31, 0];
       const width = Math.max(30, ...raw.map((r) => r.length));
@@ -1060,13 +1048,13 @@ class Room extends Phaser.Scene {
               let w = 1;
               while (row[tx + w] === '#') w++;
               this.statics.add(rect(x, y, w * T, T, 0).setVisible(false)); // hitbox; painted below
-              Art.platform(this, x, y, w * T, T, Array.from({ length: w }, (_, i) => !'#^'.includes(rows[ty - 1]?.[tx + i] ?? '#')), world);
+              this.plat(ri, x, y, w * T, T, Array.from({ length: w }, (_, i) => !'#^'.includes(rows[ty - 1]?.[tx + i] ?? '#')), world);
               tx += w - 1;
               break;
             }
             case '^': // solid lower half, deadly upper half
               this.statics.add(rect(x, y + 16, T, 16, 0).setVisible(false));
-              Art.platform(this, x, y + 16, T, 16, [false], world);
+              this.plat(ri, x, y + 16, T, 16, [false], world);
               this.spikes.push(rect(x + 2, y + 6, T - 4, 10, 0xcd5c5c));
               hazard(this.spikes.at(-1), 'spikes', T, 16, -3);
               break;
@@ -1167,12 +1155,12 @@ class Room extends Phaser.Scene {
     }
     // Fill a screen's height of solid ground above and below every room (stopping at any other room),
     // so the camera's diagonal slide between rooms at different heights never shows empty space.
-    for (const { rect: R, world } of this.rooms) {
+    for (const [ri, { rect: R, world }] of this.rooms.entries()) {
       const others = this.rooms.map((r) => r.rect).filter((O) => O !== R && O.x < R.right && O.right > R.x);
       const top = Math.max(R.y - 544, ...others.filter((O) => O.bottom <= R.y).map((O) => O.bottom));
       const bottom = Math.min(R.bottom + 544, ...others.filter((O) => O.y >= R.bottom).map((O) => O.y));
-      if (top < R.y) Art.platform(this, R.x, top, R.width, R.y - top, [], world);
-      if (bottom > R.bottom) Art.platform(this, R.x, R.bottom, R.width, bottom - R.bottom, [], world);
+      if (top < R.y) this.plat(ri, R.x, top, R.width, R.y - top, [], world);
+      if (bottom > R.bottom) this.plat(ri, R.x, R.bottom, R.width, bottom - R.bottom, [], world);
     }
     for (const B of [...this.bosses]) {
       if ((B.stag && stats.stagFinished) || (B.kind === 'tree' && stats.treePower) ||
@@ -1190,6 +1178,7 @@ class Room extends Phaser.Scene {
     this.litRune = this.wearing ? (stats.treePower ? 3 : stats.mothFinished ? 2 : 1) : undefined;
     this.roomDeaths = 0;
     this.drawStagGrounds();
+    this.buildArt(this.index);
     Art.setWorld(this, this.rooms[this.index].world);
     if (this.retry) this.world = this.rooms[this.index].world; // Shift+R keeps you in the same world: no title card
     else this.showWorld(this.rooms[this.index].world);
@@ -1535,7 +1524,23 @@ class Room extends Phaser.Scene {
     this.time.delayedCall(1150, () => { B.pose = null; done?.(); });
   }
 
+  // Painted walls are slow to make (~1ms per run), so they're queued per room: the current room and its
+  // neighbours are built at once, the rest a few at a time in the background (buildArtSome, each frame).
+  plat(ri, ...args) { this.platQueue[ri].push(args); }
+  buildArt(i) {
+    const near = new Phaser.Geom.Rectangle(this.rooms[i].rect.x - 960, this.rooms[i].rect.y - 544, this.rooms[i].rect.width + 1920, this.rooms[i].rect.height + 1088);
+    this.rooms.forEach((r, ri) => {
+      if (ri !== i && !Phaser.Geom.Rectangle.Overlaps(near, r.rect)) return;
+      for (const args of this.platQueue[ri].splice(0)) Art.platform(this, ...args);
+    });
+  }
+  buildArtSome(budgetMs) {
+    const end = performance.now() + budgetMs;
+    for (const q of this.platQueue) while (q.length) { Art.platform(this, ...q.shift()); if (performance.now() > end) return; }
+  }
+
   enterRoom(i) {
+    this.buildArt(i);
     const p = this.player, R = this.rooms[i].rect, cam = this.cameras.main;
     this.index = i;
     cam.setZoom(1);
@@ -2431,6 +2436,7 @@ class Room extends Phaser.Scene {
       for (const beam of this.aimedBeams) if (beam.room === this.index) this.updateAimedBeam(beam, dt);
     this.drawHazards();
     Art.update(this, this.time.now / 1000);
+    this.buildArtSome(4); // the other rooms' walls, a few ms per frame
 
     const weights = [p, ...this.corpses].map(bounds);
     for (const pl of this.plates.filter(pl => pl.room === this.index)) {

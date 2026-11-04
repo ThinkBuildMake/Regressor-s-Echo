@@ -20,6 +20,25 @@ const UI = {
     if (dim) scene.add.rectangle(480, 272, 960, 544, 0x05080a, dim);
   },
 
+  // Black, a grey hero running in the lower right, and "Loading…" (the boot screen, and Start while the world is built).
+  loadingScreen(scene) {
+    scene.add.rectangle(480, 272, 960, 544, 0x000000).setDepth(100);
+    let runner;
+    if (scene.textures.exists('heroRun')) {
+      const tex = scene.textures.get('heroRun'), img = tex.getSourceImage(), fw = img.width / 12;
+      if (!tex.has(0)) for (let i = 0; i < 12; i++) tex.add(i, 0, i * fw, 0, fw, img.height);
+      runner = scene.add.image(880, 520, 'heroRun', 0).setOrigin(0.5, 1).setScale(0.62).setDepth(101);
+      runner.preFX?.addColorMatrix().grayscale(1);
+    }
+    const label = scene.add.text(820, 498, 'Loading', { ...FONT, fontSize: '22px', color: '#d8d8d8' }).setOrigin(1, 0.5).setDepth(101);
+    let step = 0;
+    scene.time.addEvent({ delay: 60, loop: true, callback: () => {
+      step++;
+      runner?.setFrame(step % 12);
+      label.setText('Loading' + '.'.repeat(Math.floor(step / 6) % 4));
+    } });
+  },
+
   panel(scene, y, w, h) {
     return scene.textures.exists('uiPanel')
       ? scene.add.image(480, y, 'uiPanel').setDisplaySize(w, h)
@@ -77,7 +96,7 @@ class Title extends Phaser.Scene {
     else this.add.text(480, 128, "Regressor's Echo", { ...FONT, fontSize: '52px', color: '#f1e3b8' }).setOrigin(0.5);
     UI.panel(this, 372, 330, 236);
     UI.menu(this, [
-      { label: 'Start', act: () => this.scene.start('room') },
+      { label: 'Start', act: () => { UI.loadingScreen(this); this.time.delayedCall(50, () => this.scene.start('room')); } }, // shown while the world is built
       { label: 'Settings', act: () => this.open('settings') },
       { label: 'Controls', act: () => this.open('controls') },
     ], 310);
