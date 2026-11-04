@@ -44,9 +44,9 @@ Key: ✅ done · 🟡 started · blank = to do · — = not needed (a single ima
 | Walker (red beetle) | walk (2 poses + code bob) | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Flyer | flies over soul walls; a small red flying beetle (the walker's family); wing-buzz loop, 4 frames | ✅ | | | | ✅ |
 | Thrower | stands still and shoots seeds along the ground (souls block them); a red toadstool creature; idle + spit, 4 frames, plus a seed pellet | ✅ | | | | ✅ |
-| Bramble spider (W1) | hangs on a silk thread, drops on you, climbs back; a red spider; hang/shake, drop, climb, 3–4 frames, plus a thread drawn in code. See LEVELS.md "Enemies per world" | ✅ | ✅ | ✅ | ✅ | |
-| Idol slider (W2) | a red carved-stone block on crab legs that slides while you're airborne or holding self-destruct; still, scuttle 2–3 frames | ✅ | ✅ | ✅ | ✅ | |
-| Reliquary scarab (W3) | a flat red scarab that patrols floors and soul bridges; walk 2–3 frames, plus a falling pose | ✅ | ✅ | ✅ | ✅ | |
+| Bramble spider (W1) | hangs on a silk thread, drops on you, climbs back; a red spider; hang/shake, drop, climb, 3–4 frames, plus a thread drawn in code. See LEVELS.md "Enemies per world" | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Idol slider (W2) | a red carved-stone block on crab legs that slides while you're airborne or holding self-destruct; still, scuttle 2–3 frames | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Reliquary scarab (W3) | a flat red scarab that patrols floors and soul bridges; walk 2–3 frames, plus a falling pose | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 ## Bosses
 

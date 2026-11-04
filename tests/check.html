@@ -1445,26 +1445,45 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     check(short.h < 7.9 && short.x < 11,
       'The beam: without the laser soul the first ledge is out of reach');
     // Real inputs: die standing on the low block for the step, then jump from it into the beam.
+    // The idol slider stands on the floor between the start and the block: hop onto it (it steps under you while
+    // you're in the air), then from its top onto the block.
+    const toBlock = async () => {
+      const idol = s.enemies.find((e) => e.kind === 'i');
+      await walkTo(Math.min(5.5, (idol.x - O().x) / T - 3));
+      key('keydown', 32); key('keydown', 39);
+      await until(() => s.player.x >= idol.x - 6 || s.dead > 0, 1500, 'jump over the idol'); key('keyup', 39); key('keydown', 37);
+      await until(() => s.player.body.velocity.x <= 0, 1000, 'brake over the idol'); key('keyup', 37);
+      await until(() => grounded() || s.dead > 0, 1500, 'land on the idol'); key('keyup', 32);
+      check(feet() < 15.5 && s.dead <= 0, `The beam: hop onto the idol slider (feet ${feet().toFixed(2)})`);
+      // A full jump from its top reaches the beam (it's as high as the block), so make a short hop to the block.
+      await frames(5);
+      const deaths = stats.deaths;
+      key('keydown', 32); key('keydown', 39); await frames(9); key('keyup', 32);
+      await until(() => tx() >= 8.9 || s.dead > 0, 1500, 'short hop to the block'); key('keyup', 39); key('keydown', 37);
+      await until(() => s.player.body.velocity.x <= 0, 1000, 'brake over the block'); key('keyup', 37);
+      await until(() => grounded() || s.dead > 0, 1500, 'land on the block'); await frames(6);
+      check(stats.deaths === deaths, 'The beam: short hop from the idol onto the block stays under the beam');
+      return { x: tx(), h: 16 - feet() };
+    };
     s = await cleanSolveRoom('The beam');
     const beamJump = async () => {
-      await walkTo(7.5); await jumpTo(9); await walkTo(9.4);
+      await toBlock(); await walkTo(9.4);
       const deaths = stats.deaths;
       key('keydown', 39); await wait(60); key('keydown', 32);
       await until(() => stats.deaths > deaths, 1500, 'jump into the beam'); key('keyup', 39); key('keyup', 32); await alive();
     };
     await beamJump();
     const lone = s.corpses[0];
-    await walkTo(7.5); await jumpTo(9); await walkTo(9.3);
+    await toBlock(); await walkTo(9.3);
     let loneBest = 0;
     key('keydown', 32); key('keydown', 39);
     for (let t = 0; t < 1500; t += 20) { await wait(20); if (s.player.body.blocked.down) loneBest = Math.max(loneBest, 16 - (s.player.y + 15 - O().y) / T); }
     key('keyup', 32); key('keyup', 39);
     check(loneBest < 4.9, `The beam: the beam soul alone is out of reach from the block (top ${16 - (lone.y - lone.height / 2 - O().y) / T}, stood at ${loneBest.toFixed(2)})`);
     s = await cleanSolveRoom('The beam');
-    await walkTo(7.5); await jumpTo(9); await walkTo(9.5); await sacrifice();
+    await toBlock(); await walkTo(9.5); await sacrifice();
     await beamJump();
-    await walkTo(7.5);
-    const stepA = await jumpTo(9), stepB = await jumpTo(10), ledgeA = await jumpTo(12); await walkTo(13);
+    const stepA = await toBlock(), stepB = await jumpTo(10), ledgeA = await jumpTo(12); await walkTo(13);
     check(stepA.h >= 1.95 && stepB.h >= 4.95 && ledgeA.h >= 7.95 && s.corpses.length === 2 && s.start.x > O().x + 10.5 * T,
       `The beam: a step soul on the low block and a beam soul reach the shrine with real inputs (${JSON.stringify([stepA, stepB, ledgeA])}, deaths ${stats.deaths}, start ${(s.start.x - O().x) / T})`);
   }
@@ -2225,6 +2244,8 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
       check(r.x >= to - 0.4 && r.h >= height - 0.1,
         `Everything: plate and saw passage reaches ${to} (${r.x}, ${r.h})`);
     }
+    // The scarab paces the spring floor: stomp it before standing on the spring.
+    check(await stompNearest() && stats.deaths === deaths, 'Everything: stomp the scarab on the spring floor');
     // Launch from the spring, steer onto the hanging soul, then jump to the ledge.
     const launch = await hop(34, 0, 20, 37);
     check(launch.h >= 6.95 && launch.x >= 36.6,
@@ -2239,6 +2260,86 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     const before = stats.deaths;
     await hop(5, 0, 20, 11);
     check(stats.deaths > before, 'Everything: jumping cannot skip the empty tunnel bridge');
+  }
+  // The three world enemies (2026-11-04): bramble spider, idol slider, reliquary scarab.
+  if (matches('The well')) {
+    s = await cleanSolveRoom('The well');
+    const sp = s.flyers.find((f) => f.kind === 'w');
+    // Stand at the shrine, run off its block and stop over the spider's column: it shakes, then drops after you.
+    s.player.body.reset(O().x + 14.5 * T, O().y + 19 * T - 15); await wait(300);
+    key('keydown', 39); await until(() => tx() >= 18.9, 2000, 'drift over the spider column'); key('keyup', 39);
+    key('keydown', 37); await until(() => s.player.body.velocity.x <= 0, 1000, 'brake'); key('keyup', 37);
+    check(sp.state === 'shake', `The well: passing under the spider makes it shake (${sp.state})`);
+    await until(() => stats.deaths > 0, 3000, 'land on the spikes in its column');
+    const soul = s.corpses.at(-1);
+    await alive();
+    await until(() => sp.state === 'rest', 3000, 'spider drop');
+    check(Math.floor((soul.x - O().x) / T) === 19 && Math.abs(bounds(sp).bottom - bounds(soul).top) < 1,
+      `The well: the spider's drop stops on top of the soul in its column (${((bounds(sp).bottom - O().y) / T).toFixed(2)} vs ${((bounds(soul).top - O().y) / T).toFixed(2)}, x ${((sp.x - O().x) / T).toFixed(2)} vs ${((soul.x - O().x) / T).toFixed(2)}, ${s.corpses.includes(soul)})`);
+    await until(() => sp.state === null, 8000, 'spider climbs back');
+    check(sp.y === sp.y0, 'The well: the spider climbs back up its thread');
+    // Touching it kills: drop onto that soul again and wait there; the spider comes down on you. Your new soul
+    // sits a tile higher in its column, and its next drop stops on that one.
+    const d = stats.deaths;
+    key('keydown', 39); await until(() => tx() >= 18.9, 2000, 'drift over the spider column again'); key('keyup', 39);
+    key('keydown', 37); await until(() => s.player.body.velocity.x <= 0, 1000, 'brake'); key('keyup', 37);
+    await until(() => grounded() || stats.deaths > d, 2000, 'land on the soul');
+    check(stats.deaths === d && feet() < 30.1, `The well: the soul in the spider's column is a landing (feet ${feet().toFixed(2)})`);
+    await until(() => stats.deaths > d, 3000, 'the spider lands on you');
+    const high = s.corpses.at(-1);
+    await alive(); await until(() => sp.state === 'rest', 3000, 'spider drop');
+    check(Math.round((bounds(high).top - O().y) / T) === 29 && Math.abs(bounds(sp).bottom - bounds(high).top) < 1,
+      'The well: the spider kills you on the soul; its next drop stops on your new, higher soul');
+  }
+  if (matches('The beam')) {
+    s = await cleanSolveRoom('The beam');
+    const idol = s.enemies.find((e) => e.kind === 'i'), ix = () => (idol.x - O().x) / T;
+    await walkTo(2.5); const x0 = ix(); await wait(800);
+    check(ix() === x0, 'The beam: the idol slider stays still while you stand');
+    key('keydown', 75); await wait(400); key('keyup', 75); await wait(200);
+    const x1 = ix();
+    check(x1 < x0 - 0.5 && stats.deaths === 0, `The beam: holding K (short of letting go) steps the idol toward you (${x0.toFixed(2)} -> ${x1.toFixed(2)})`);
+    key('keydown', 32); await wait(150); key('keyup', 32);
+    await until(() => grounded(), 2000, 'land');
+    await frames(10);
+    check(feet() < 15.2 && stats.deaths === 0, `The beam: jumping brings the idol under you; you stand on its top (feet ${feet().toFixed(2)})`);
+    // A soul stops it: with a soul between you and the idol, jumping no longer brings it to you.
+    s = await cleanSolveRoom('The beam');
+    const idol2 = s.enemies.find((e) => e.kind === 'i');
+    await place(3, 0);
+    for (let k = 0; k < 4; k++) { key('keydown', 32); await wait(100); key('keyup', 32); await wait(900); }
+    const fence = s.corpses.at(-1);
+    check(bounds(idol2).left >= bounds(fence).right - 1 && stats.deaths === 1, 'The beam: a soul between you and the idol stops it');
+    // Its side kills: walk into it.
+    s = await cleanSolveRoom('The beam');
+    key('keydown', 39); await until(() => stats.deaths > 0, 3000, 'walk into the idol'); key('keyup', 39); await alive();
+    check(Math.floor((s.corpses[0].x - O().x) / T) === 4, 'The beam: walking into the idol\'s side kills you');
+    // Plates and lasers: its weight holds stage B's plate, its stone blocks stage A's beam.
+    s = await cleanSolveRoom('The beam');
+    const idol3 = s.enemies.find((e) => e.kind === 'i'), full = s.beams()[0].width;
+    idol3.body.reset(O().x + 6.5 * T, O().y + 11.5 * T);
+    check(s.beams()[0].width < full - 3 * T, 'The beam: the idol blocks a laser');
+    idol3.body.reset(O().x + 23.5 * T, O().y + 15 * T - 14); await wait(100);
+    check(s.doors.filter((dr) => dr.room === s.index).every((dr) => !dr.body.enable), 'The beam: the idol on the plate holds the door');
+  }
+  if (matches('Everything')) {
+    s = await cleanSolveRoom('Everything');
+    const sc = s.enemies.find((e) => e.kind === 'b');
+    // A soul on the spring floor turns it back.
+    await place(35, 0, 20);
+    const wall = s.corpses.at(-1);
+    await wait(4000);
+    check(bounds(sc).left >= bounds(wall).right - 1, 'Everything: the scarab turns at a soul');
+    // It walks the top of a soul and falls when you recall that soul (Q).
+    await place(33, 3, 20);
+    const ledge = s.corpses.at(-1);
+    sc.body.reset(ledge.x, bounds(ledge).top - 9); await wait(300);
+    check(Math.abs(bounds(sc).bottom - bounds(ledge).top) < 1, 'Everything: the scarab stands on a soul');
+    key('keydown', 81); await wait(60); key('keyup', 81); await wait(800);
+    check(bounds(sc).bottom > O().y + 19.9 * T && !s.corpses.includes(ledge), 'Everything: recalling the soul under the scarab drops it to the floor');
+    // Its weight holds a plate.
+    sc.body.reset(O().x + 19.5 * T, O().y + 20 * T - 9); await wait(100);
+    check(s.doors.filter((dr) => dr.room === s.index).every((dr) => !dr.body.enable), 'Everything: the scarab on the plate holds the door');
   }
   await solve('Three high', [[7, 2], [8, 5], [9, 8]],
     [[6, 0, 3, 7], [7, 3, 6, 8], [8, 6, 9, 9], [9, 9, 12, 12]]);
