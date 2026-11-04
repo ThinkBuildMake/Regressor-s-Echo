@@ -400,9 +400,16 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     check(s.talk.line !== line, 'story input: Enter advances while gameplay input is blocked');
     s.talk.line = null; s.talk.queue.length = 0;
     s.player.body.blocked.down = s.player.body.touching.down = false;
-    await wait(1200);
-    check(!s.talk.active, 'story input: floating scene also finishes after a timeout');
+    key('keydown', 37);
+    Dialogue.update(s, 0, false);
+    check(!s.talk.active, 'story input: floating scene closes without a second landing wait');
+    check(s.blockedKeys.has(s.keys.LEFT), 'story input: closing snapshots the held left key');
     s.player.body.moves = true;
+    key('keydown', 39);
+    await wait(100);
+    check(s.player.body.velocity.x > 0 && !s.blockedKeys.has(s.keys.RIGHT),
+      'story input: right pressed immediately after closing works while airborne');
+    key('keyup', 37); key('keyup', 39);
     const start = Dialogue.mark(s, 10);
     s.player.body.reset(start.x, start.y);
     s.wearing = false;

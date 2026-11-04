@@ -2226,7 +2226,6 @@ class Room extends Phaser.Scene {
         key._justDown = key._justUp = false;
         this.blockedKeys.delete(key);
       }
-      else if (this.talk.active && key.isDown) this.blockedKeys.add(key);
     }
     const k = Object.fromEntries(Object.entries(raw).map(([name, key]) => {
       if (!this.blockedKeys.has(key)) return [name, key];

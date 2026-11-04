@@ -579,9 +579,9 @@ const Dialogue = {
     camera.setFollowOffset(0, r.height > camera.height ? -camera.height * 0.4 : 0);
     scene.talk.ui.setVisible(false);
     scene.blockedKeys ??= new Set();
+    scene.blockedKeys.clear();
     for (const key of Object.values(scene.keys)) if (key.isDown) scene.blockedKeys.add(key);
     scene.talk.landing = 0;
-    scene.talk.settling = 0;
     scene.talk.active = false;
   },
 
@@ -616,12 +616,10 @@ const Dialogue = {
     }
     if (!t.line) {
       if (!t.queue.length) {
-        if (t.active && !scene.player.body.blocked.down && !scene.player.body.touching.down) {
-          scene.player.body.setVelocityX(0);
-          t.settling = (t.settling || 0) + dt;
-          if (t.settling < 1) return true;
+        if (t.active) {
+          this.finish(scene);
+          return true; // This frame's input was read before the closing snapshot.
         }
-        if (t.active) this.finish(scene);
         return false;
       }
       t.line = t.queue.shift();
