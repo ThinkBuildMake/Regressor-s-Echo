@@ -946,7 +946,7 @@ class Room extends Phaser.Scene {
     for (const [key, path] of [
       ['amulet', 'world1/amulet'], ['ghost', 'world1/ghost'], ['old-tree', 'world3/old-tree'],
       ...[1, 2, 3].flatMap((n) => [[`amulet-rune${n}`, `world1/amulet-rune${n}`], [`shrine${n}`, `world${n}/shrine`], [`shrineLit${n}`, `world${n}/shrine-lit`], [`gate${n}`, `world${n}/gate`]]),
-      ['uiSoulFull', 'ui/soul-full'], ['uiSoulEmpty', 'ui/soul-empty'], ['carvings', 'world2/carvings'], ['laserEmitter', 'world2/laser'],
+      ['uiSoulFull', 'ui/soul-full'], ['uiSoulEmpty', 'ui/soul-empty'], ['carvings', 'world2/carvings'], ['notePatch', 'world3/note'], ['laserEmitter', 'world2/laser'],
     ]) if (!this.textures.exists(key)) this.load.image(key, `assets/${path}.webp`);
     if (!this.textures.exists('heroSheet')) {
       this.load.image('heroSheet', 'assets/hero/sheet.webp'); // 8 frames: run 0-5, jump 6, fall 7
@@ -1248,7 +1248,7 @@ class Room extends Phaser.Scene {
     if (!this.painted && !this.textures.exists('guideStandIn'))
       this.make.graphics({ add: false }).fillStyle(0xffffff).fillRoundedRect(0, 0, 22, 40, 10).generateTexture('guideStandIn', 22, 40).destroy();
     this.guide = this.add.image(this.start.x + 60, this.start.y, this.textures.exists('ghost') ? 'ghost' : this.painted ? 'heroIdle' : 'guideStandIn').setOrigin(0.5, 1)
-      .setScale(this.textures.exists('ghost') ? HERO_HEIGHT / 112 : this.painted ? this.heroScale : 1).setTint(0xcfeaff).setBlendMode(Phaser.BlendModes.ADD).setDepth(4.4).setAlpha(0);
+      .setScale(this.textures.exists('ghost') ? HERO_HEIGHT / 112 : this.painted ? this.heroScale : 1).setTint(0xa8d4ff).setDepth(4.4).setAlpha(0); // normal blend: additive washed the pale ghost out to white on bright fog
     this.guide.on = Dialogue.seen.has('amulet') && !this.stagFinished;
     this.guide.hoverY = this.guide.y;
     this.guide.away = 0;
@@ -2097,7 +2097,9 @@ class Room extends Phaser.Scene {
       this.add.rectangle(R.x + 21 * T, R.y + 13 * T, 26, 128, 0x655d60).setDepth(1);
       this.add.circle(R.x + 21 * T, R.y + 9 * T, 65, 0x526672).setDepth(1);
     }
-    this.add.ellipse(R.x + 19 * T, R.y + 14 * T, 200, 68, 0x705a43).setDepth(1);
+    if (this.textures.exists('notePatch')) // the dirt patch he writes the note in, ringed with roots and stones
+      this.add.image(R.x + 19 * T, R.y + 14 * T, 'notePatch').setDisplaySize(220, 74).setDepth(1); // flattened to lie on the ground
+    else this.add.ellipse(R.x + 19 * T, R.y + 14 * T, 200, 68, 0x705a43).setDepth(1);
     this.stagWriting = this.add.text(R.x + 16.5 * T, R.y + 13 * T, SCRIPT.stagNote.map((l) => l.text).join('\n'), {
       fontFamily: 'cursive', fontSize: '14px', color: '#382b23', fontStyle: 'italic', wordWrap: { width: 600 }
     }).setScale(0.28, 0.14).setAngle(-4).setDepth(2).setVisible(false);
