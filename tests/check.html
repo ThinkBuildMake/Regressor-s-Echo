@@ -354,6 +354,42 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     }
   }
 
+  if (matches('The clearing')) {
+    Object.keys(SCRIPT).forEach((k) => Dialogue.seen.add(k));
+    s = await go(ROOMS.findIndex(([n]) => n === 'The clearing'));
+    Dialogue.skip(s); await alive();
+    const start = Dialogue.mark(s, 10);
+    s.player.body.reset(start.x, start.y);
+    s.wearing = false;
+    Dialogue.seen.delete('amulet'); Dialogue.play(s, 'amulet');
+    Dialogue.update(s, 0, false);
+    await wait(80);
+    check(s.talk.line.audioIndex === 0 && s.talk.shown > 0 && s.player.x > start.x,
+      'amulet: walking and typing run together');
+    Dialogue.update(s, 0, true);
+    check(s.talk.line.audioIndex === 1 && Math.abs(s.player.x - (O().x + 11 * 32)) < 3,
+      'amulet: Enter mid-walk snaps to the mark and starts the next line');
+    check(s.amuletPose === 'hold' && s.heldAmulet.visible && !s.lying,
+      'amulet: the next line picks up and holds the amulet');
+    Dialogue.update(s, 0, true);
+    check(s.talk.line.audioIndex === 2 && s.amuletPose === 'hand' &&
+      Math.abs(s.player.x - (O().x + 11.5 * 32)) < 3,
+      'amulet: advancing settles the pickup and lowers it to his hand');
+    Dialogue.update(s, 0, true);
+    check(s.talk.line.audioIndex === 3 && s.wearing && !s.heldAmulet.visible,
+      'amulet: wearing starts with its spoken line');
+    while (s.talk.line.audioIndex < 6) Dialogue.update(s, 0, true);
+    check(s.talk.line.audioIndex === 6 && s.player.body.velocity.y < 0,
+      'amulet: surprise starts a hop with the spoken line');
+    Dialogue.update(s, 0, true);
+    check(s.talk.line.audioIndex === 7 && Math.abs(s.player.x - (O().x + 11 * 32)) < 3,
+      'amulet: interrupting the startled step settles it before the next line');
+    Dialogue.skip(s);
+    check(!s.talk.active && Math.abs(s.player.x - (O().x + 11.5 * 32)) < 3 &&
+      s.wearing && !s.heldAmulet.visible && s.guide.on,
+      'amulet: Esc applies the final hero, amulet and ghost states');
+  }
+
   Dialogue.seen = stagingSeen;
 
   if (matches('The clearing')) {
