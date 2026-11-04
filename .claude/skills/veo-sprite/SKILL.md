@@ -26,9 +26,9 @@ Read `.claude/skills/flow-asset/SKILL.md` "Driving Flow" first. It covers upload
 - The prompt is the creature's description plus the motion and the fixed rules:
   > Locked-off static camera, pure side view, flat solid magenta background that never changes. The <creature> <motion> in place, like on a treadmill, <gait detail>. Body level, stays in the centre of the frame and does not change size. Solid legs, no motion blur. No camera movement, no ground, no shadows, no particles, no glow, no other objects.
 - **Faces drift.** Veo redraws the face every frame, so a character's expression wanders: a deeper frown, an open mouth, blush marks (hero idle, 2026-11-04; the user caught it).
-  - Start from the **original full-resolution reference painting**, never from a small game sprite.
+  - Start from the **high-resolution source of the in-game art** (the raw sheet the game sprite was cut from), never from a small game sprite. The original concept painting can differ from the game look: the hero's painting has amber eyes, but in the game they're green, and starting from the painting gave him grey eyes (user rejected it, 2026-11-04).
   - Add to the prompt: "his face stays exactly as in the image the whole time: same expression, eyes, eyebrows and closed mouth; no blush, no sparkles".
-  - Check it before passing: crop the head from 4 frames across the loop, put them next to the reference, and fail the take if the face changes.
+  - Check it before passing: crop the head from 4 frames across the loop, put them next to the in-game art, and fail the take if the face changes. Also zoom in on the final sheet at game size and check the eye colour.
 - **Veo exaggerates wind and cloth.** "Soft breeze" came out as strong flapping, and the user wants it gentle. For idles, ask for near-still air: "the air is almost still; the scarf ends and cape hem drift very slightly and slowly, barely moving".
 - Gait details that worked or will help (the walker beetle's "tripod gait" came out as a readable scuttle, not a clean tripod):
   - **Walk:** "a calm natural four-beat walk: one hoof lifts at a time, left hind, left fore, right hind, right fore".
@@ -41,7 +41,7 @@ Read `.claude/skills/flow-asset/SKILL.md` "Driving Flow" first. It covers upload
 ```sh
 mkdir -p <scratch>/f && ffmpeg -i <name>.mp4 -vf fps=24 <scratch>/f/%03d.png
 node tools/video-loop.mjs <name>.mp4 [minLen] [maxLen]        # best loop windows: first=… next=…
-node tools/video-frames.mjs <scratch>/f <scratch>/native <first> <next> 12 [--anchor=feet|fixed] [--mirror] [--rot=k]
+node tools/video-frames.mjs <scratch>/f <scratch>/native <first> <next> 12 [--anchor=fixed|feet] [--mirror] [--rot=k]
 node tools/colormatch.mjs <scratch>/native.png <painted keyed sheet of the same creature>.webp <scratch>/cm.png [--despill] [--blue-cap=6]
 node tools/video-fit.mjs <scratch>/cm.png 12 assets/<kind>/<current sheet>.webp <scratch>/<name> [--match=i:j] [--grow]
 tools/sheet-gif.sh <scratch>/<name>.png <frameWidth> 12 <scratch>/<name>.gif
@@ -50,7 +50,11 @@ node tools/onion.mjs <scratch>/<name>.webp 12 <scratch>/onion.png
 - **video-loop:** it finds the window whose last frame best matches its first. For a walk, check that the window is one full stride, where the same foot lifts again. A half stride also scores well, but it swaps the sides.
   - Set the length range to the motion: a walk stride ran 35–37 frames at 24 fps; wingbeats are much shorter.
 - **video-frames:** it keys the background (video shifts the magenta, so it keys on the median border colour) and lays the frames into one sheet.
-  - Use `--anchor=feet` for anything standing: one shared ground line, so a lifted foot can't bob the body. Use `--anchor=fixed` for flying or hanging things: the locked camera already holds them still, and aligning on their outline makes the body jump as the wings move (moth, 2026-11-04).
+  - **Use `--anchor=fixed` by default.** Veo's locked camera already holds the creature in place, so the frames are aligned; re-aligning them only adds drift.
+    - Aligning on the outline made the moth's body jump as its wings moved.
+    - Aligning on the torso made the hero idle slide left and right with his swinging cape, while his boots never moved in the video (user caught it, 2026-11-04).
+  - Use `--anchor=feet` only if the creature drifts across the video. It keeps one shared ground line and aligns on the torso, which works for a walking stag but not for anything with a big cape.
+  - Check it: the boots or planted feet must sit at the same x in every frame. Measure the opaque centroid of the bottom 12% of each cell.
   - `--mirror` flips the result to face left. `--rot=k` starts the loop on frame k.
 - **colormatch:** video tints white and pale colours towards lavender. This shifts the colours to match the painting, then removes leftover pink without turning dark areas green.
   - The reference must be a **keyed** painted sheet (.webp with transparency), not a JPG on magenta.
