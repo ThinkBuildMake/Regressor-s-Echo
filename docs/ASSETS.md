@@ -146,6 +146,18 @@ Script: [STORY.md](STORY.md); § = the scene each asset serves. Done in priority
 | World 2 layers (sky, far, mid, near, lip, ground, cap) | ✅ | | | |
 | World 3 layers (sky, far, mid, near, lip, ground, cap) | ✅ | | | |
 
+## Menus and UI (added 2026-11-03)
+The game has no title screen, pause menu or on-screen soul count yet (the content warning and ending card are code text). Art for them; the screens themselves are code-chat work. Prompts: PROMPTS.md "## Menus and UI".
+
+| Asset | Used for | Prompt | Ref | Sized | In game |
+|---|---|---|---|---|---|
+| Title key art (16:9) | title screen background; dimmed behind the content warning | ✅ | | | |
+| Logo: "Regressor's Echo" | title screen and ending card (painted lettering + the amulet mark; fall back to code text if the lettering is off) | ✅ | | | |
+| Ending art (16:9) | behind the ending card: the hero small at the pyramid door at dawn | ✅ | | | |
+| Amulet mark icon | menu cursor, favicon | ✅ | | | |
+| Soul pips: full / empty | HUD soul count (1–3 by world) | ✅ | | | |
+| Menu panel | pause and settings menus (plain centre so it stretches) | ✅ | | | |
+
 ## Audio
 
 How to write and check these prompts: [.claude/skills/flow-asset/references/audio-prompts.md](../.claude/skills/flow-asset/references/audio-prompts.md).
