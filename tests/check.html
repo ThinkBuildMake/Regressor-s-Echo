@@ -318,7 +318,36 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     check(s.enemies.every((e) => s.rooms[wi].rect.contains(e.x, e.y)), 'walker stays inside its room');
   }
 
+  // The story-input and staging checks mark every scene seen; restore the real story state after them.
   const stagingSeen = new Set(Dialogue.seen);
+  if (matches('First death')) {
+    for (const sliding of [false, true]) {
+      Object.keys(SCRIPT).forEach((k) => Dialogue.seen.add(k));
+      s = await go(ROOMS.findIndex(([n]) => n === 'First death'));
+      Dialogue.skip(s); await alive();
+      const start = Dialogue.mark(s, 6);
+      s.player.body.reset(start.x, start.y);
+      Dialogue.seen.delete('firstPit');
+      key('keydown', 39);
+      await wait(120);
+      if (sliding) { key('keydown', 83); await wait(40); key('keyup', 83); }
+      check(!sliding || s.lying, 'story input: approach starts a slide');
+      await until(() => s.talk.active, 2000, 'firstPit spot');
+      await wait(1200);
+      const x = s.player.x;
+      await wait(200);
+      check(near(s.player.x, x) && !s.slide && !s.charge,
+        `story input: ${sliding ? 'slide' : 'run'} stops at the scripted walk mark`);
+      Dialogue.skip(s);
+      const end = s.player.x;
+      await wait(200);
+      check(near(s.player.x, end), 'story input: held right stays blocked after dialogue');
+      key('keyup', 39); await wait(40);
+      key('keydown', 39); await wait(100); key('keyup', 39);
+      check(s.player.x > end + 3, 'story input: a fresh right press moves again');
+    }
+  }
+
   // Replay staging with real physics, then replay the same scene with Esc.
   for (const [name, script, mark] of [
     ['The clearing', 'amulet', 11.5], ['First death', 'firstPit', 9],
@@ -352,6 +381,66 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
       check(s.player.x < x - 3, `${script}: player regains control`);
       s.cue = originalCue;
     }
+  }
+
+  if (matches('The clearing')) {
+    Object.keys(SCRIPT).forEach((k) => Dialogue.seen.add(k));
+    s = await go(ROOMS.findIndex(([n]) => n === 'The clearing'));
+    Dialogue.skip(s); await alive();
+    const landing = Dialogue.mark(s, 10);
+    s.player.body.reset(landing.x, landing.y - 64);
+    s.player.body.moves = false;
+    s.player.body.blocked.down = s.player.body.touching.down = false;
+    Dialogue.seen.delete('amulet'); Dialogue.play(s, 'amulet');
+    await wait(200);
+    check(!s.talk.line, 'story input: waits for landing before walking');
+    await wait(1000);
+    check(!!s.talk.line, 'story input: landing timeout starts a floating scene');
+    const line = s.talk.line;
+    key('keydown', 13); await wait(40); key('keyup', 13);
+    check(s.talk.line !== line, 'story input: Enter advances while gameplay input is blocked');
+    s.talk.line = null; s.talk.queue.length = 0;
+    s.player.body.blocked.down = s.player.body.touching.down = false;
+    key('keydown', 37);
+    Dialogue.update(s, 0, false);
+    check(!s.talk.active, 'story input: floating scene closes without a second landing wait');
+    check(s.blockedKeys.has(s.keys.LEFT), 'story input: closing snapshots the held left key');
+    s.player.body.moves = true;
+    key('keydown', 39);
+    await wait(100);
+    check(s.player.body.velocity.x > 0 && !s.blockedKeys.has(s.keys.RIGHT),
+      'story input: right pressed immediately after closing works while airborne');
+    key('keyup', 37); key('keyup', 39);
+    const start = Dialogue.mark(s, 10);
+    s.player.body.reset(start.x, start.y);
+    s.wearing = false;
+    Dialogue.seen.delete('amulet'); Dialogue.play(s, 'amulet');
+    Dialogue.update(s, 0, false);
+    await wait(80);
+    check(s.talk.line.audioIndex === 0 && s.talk.shown > 0 && s.player.x > start.x,
+      'amulet: walking and typing run together');
+    Dialogue.update(s, 0, true);
+    check(s.talk.line.audioIndex === 1 && Math.abs(s.player.x - (O().x + 11 * 32)) < 3,
+      'amulet: Enter mid-walk snaps to the mark and starts the next line');
+    check(s.amuletPose === 'hold' && s.heldAmulet.visible && !s.lying,
+      'amulet: the next line picks up and holds the amulet');
+    Dialogue.update(s, 0, true);
+    check(s.talk.line.audioIndex === 2 && s.amuletPose === 'hand' &&
+      Math.abs(s.player.x - (O().x + 11.5 * 32)) < 3,
+      'amulet: advancing settles the pickup and lowers it to his hand');
+    Dialogue.update(s, 0, true);
+    check(s.talk.line.audioIndex === 3 && s.wearing && !s.heldAmulet.visible,
+      'amulet: wearing starts with its spoken line');
+    while (s.talk.line.audioIndex < 6) Dialogue.update(s, 0, true);
+    check(s.talk.line.audioIndex === 6 && s.player.body.velocity.y < 0,
+      'amulet: surprise starts a hop with the spoken line');
+    Dialogue.update(s, 0, true);
+    check(s.talk.line.audioIndex === 7 && Math.abs(s.player.x - (O().x + 11 * 32)) < 3,
+      'amulet: interrupting the startled step settles it before the next line');
+    Dialogue.skip(s);
+    check(!s.talk.active && Math.abs(s.player.x - (O().x + 11.5 * 32)) < 3 &&
+      s.wearing && !s.heldAmulet.visible && s.guide.on,
+      'amulet: Esc applies the final hero, amulet and ghost states');
   }
 
   Dialogue.seen = stagingSeen;
@@ -1329,11 +1418,19 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     // Walk the whole return route and onward; no room restart or position reset.
     const walkTo = async (name, column, direction, timeout) => {
       key('keydown', direction);
+      let lastX = s.player.x;
       await until(() => {
+<<<<<<< HEAD
         // Hop onto the wall soul, then walk left through the raised doorway.
         if (!s.transit && s.rooms[s.index].name === 'The spectral stag' && s.player.x < O().x + 10 * 32 &&
           (direction === 39 || s.player.y + 15 > O().y + 11.1 * 32) &&
           s.player.body.blocked.down) key('keydown', 32);
+=======
+        // Hop only when something stops him (a soul on the floor), like a player would; hopping
+        // everywhere can land him on a seal soul above the low exit, where he is stuck.
+        const stuck = Math.abs(s.player.x - lastX) < 0.2; lastX = s.player.x;
+        if (!s.transit && s.rooms[s.index].name === 'The spectral stag' && stuck && s.player.body.blocked.down) key('keydown', 32);
+>>>>>>> night-w1
         else if (s.player.body.velocity.y >= 0) key('keyup', 32);
         return s.rooms[s.index].name === name && !s.transit &&
           (direction === 37 ? s.player.x < O().x + column * 32 : s.player.x > O().x + column * 32);

@@ -49,3 +49,4 @@ DECISION: the user asked for parallel agents. Three Codex workers, one per world
 
 ## Night 2 (2026-11-04)
 00:53 user went to bed: 'continue to run until I wake up'. Claude subagents allowed (weekly reset tonight). Cutscene-input fix, W2 and W3 QA-and-fix agents running.
+01:32 cutscene fix verified by its agent (6 rooms + full suite OK), merged. Started W1 QA-and-fix.

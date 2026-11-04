@@ -1,6 +1,6 @@
 // Dialogue: a panel at the top of the screen, the hero's portrait on the left and the guide's on the
-// right, a name, and text that types out. Space, Enter or E continues (pressing early shows the whole
-// line). While it's open the hero can't move. Each script plays once per session.
+// right, a name, and text that types out. Space, Enter or E advances and settles the current action.
+// While open, the scene controls the hero. Each script plays once per session.
 //
 // Portraits: assets/portraits/hero.webp and guide.webp (8 faces each), cut from the expression
 // sheets with: node tools/sheet.mjs <sheet> assets/portraits/hero.webp --grid --frames=4 --rows=2 --height=192
@@ -318,14 +318,24 @@ const SCRIPT = {
   ],
 };
 
-// Lines accept walk (tile x), face, wait (seconds), pose (idle/slide), guide ({x, y}) and cue.
+// Staging: walk (tile x), face, pose, hop, gesture, amulet, guide ({x, y}), guideBy (tiles), cue.
 // Marks are room-local tile coordinates; spoken text stays in SCRIPT above.
-const stage = (key, index, action) => Object.assign(SCRIPT[key][index], action);
+const stage = (key, index, { face, ...action }) => Object.assign(SCRIPT[key][index],
+  action, face ? { facing: face } : {});
 for (const key of Object.keys(SCRIPT)) stage(key, 0, { face: 'guide', pose: 'idle' });
-stage('clearing', 0, { walk: 5, face: 'right' });
-stage('amulet', 0, { walk: 11.5, face: 'right', pose: 'slide' });
-stage('amulet', 3, { pose: 'idle' });
-stage('amulet', 6, { face: 'guide' });
+stage('clearing', 0, { walk: 4, face: 'right' });
+stage('clearing', 1, { walk: 5, face: 'right' });
+stage('clearing', 2, { walk: 6, face: 'right' });
+stage('amulet', 0, { walk: 11, face: 'right', pose: 'slide', amulet: 'ground' });
+stage('amulet', 1, { walk: 11.5, pose: 'idle', amulet: 'hold', turnAmulet: true });
+stage('amulet', 2, { amulet: 'hand' });
+stage('amulet', 3, { pose: 'idle', amulet: 'wear' });
+stage('amulet', 6, { walk: 11, face: 'guide', hop: true });
+stage('amulet', 7, { face: 'guide' });
+stage('amulet', 9, { lookAround: true });
+stage('amulet', 11, { guideBy: -0.5 });
+stage('amulet', 17, { walk: 11.5, face: 'guide' });
+stage('amulet', 20, { face: 'left' });
 stage('curse', 0, { walk: 16.5, face: 'right' });
 stage('firstPit', 0, { walk: 9, face: 'right' });
 stage('firstPit', 6, { face: 'right' });
@@ -336,10 +346,12 @@ for (const key of ['thorns', 'patrol', 'chain', 'shrineMark', 'carvings', 'pyram
   stage(key, 0, { face: 'right' });
 for (const [key, x] of [['thorns', 4], ['patrol', 4], ['chain', 4], ['tree', 8], ['pyramid', 5], ['carvings', 12.5]])
   stage(key, 0, { walk: x });
-stage('carvings', 4, { walk: 13.5 });
-stage('moth', 0, { walk: 9, face: 'right' });
-stage('moth', 1, { walk: 10, face: 'right' });
-stage('moth', 2, { walk: 11, face: 'right' });
+stage('carvings', 3, { walk: 13, face: 'right' });
+stage('carvings', 4, { walk: 13.5, face: 'right' });
+stage('moth', 0, { walk: 9, face: 'right', speed: 22 });
+stage('moth', 1, { walk: 10, face: 'right', speed: 22 });
+stage('moth', 2, { walk: 11, face: 'right', speed: 22 });
+stage('mothDown', 25, { pose: 'slide' });
 stage('mothDown', 26, { pose: 'slide' });
 stage('mothDown', 31, { pose: 'idle', face: 'guide' });
 stage('stagPromise', 0, { walk: 20, guide: { x: 18, y: 13 }, face: 'guide' });
@@ -347,6 +359,47 @@ stage('stagNote', 0, { walk: 19.5, face: 'left', pose: 'slide' });
 stage('stagNote', 11, { pose: 'idle' });
 stage('floorOne', 0, { walk: 23, face: 'right' });
 stage('floorOne', 3, { walk: 26, face: 'right' });
+
+// Small reactions also give the quieter exchanges a body beat on each panel.
+for (const lines of Object.values(SCRIPT)) for (const l of lines) {
+  if (!l.text) continue;
+  l.gesture = ['sad', 'exhausted', 'pained'].includes(l.face) ? 'bow' : 'nod';
+  l.facing ??= l.who === 'guide' ? 'guide' :
+    ['thinking', 'exhausted', 'sad'].includes(l.face) ? 'right' : 'guide';
+  if (['startled', 'shouting'].includes(l.face)) l.hop ??= true;
+}
+stage('curse', 0, { amulet: 'pull', pose: 'slide' });
+stage('curse', 1, { amulet: 'wear', pose: 'idle', hop: true });
+stage('curse', 3, { walk: 17, face: 'right' });
+stage('curse', 5, { amulet: 'hold' });
+stage('curse', 7, { amulet: 'wear', walk: 17.5, face: 'right' });
+stage('firstPit', 3, { pose: 'slide', face: 'right', camera: { x: -32, y: -20 } });
+stage('firstPit', 6, { pose: 'idle', face: 'right' });
+stage('firstDeath', 1, { pose: 'slide' });
+stage('firstDeath', 5, { pose: 'idle', face: 'guide' });
+stage('firstDeath', 12, { guideBy: 1 });
+stage('soul', 4, { pose: 'slide', face: 'right' });
+stage('soul', 8, { pose: 'idle', face: 'right' });
+stage('chain', 1, { face: 'right' });
+stage('chain', 2, { guideBy: 0.5 });
+stage('chain', 3, { face: 'guide' });
+stage('chain', 9, { walk: 4.5, face: 'right' });
+stage('shrineMark', 0, { pose: 'slide', amulet: 'hold' });
+stage('shrineMark', 1, { pose: 'idle', amulet: 'wear' });
+stage('pyramid', 1, { face: 'right', camera: { x: -24, y: 32 } });
+stage('tree', 4, { walk: 7.5, hop: true, face: 'right' });
+stage('mothDown', 4, { hop: true });
+stage('mothDown', 12, { amulet: 'hold' });
+stage('mothDown', 13, { amulet: 'wear' });
+stage('mothDown', 27, { guideBy: 0.5 });
+stage('stagPromise', 3, { face: 'left' });
+stage('stagPromise', 4, { walk: 20.5, face: 'left' });
+stage('stagPromise', 5, { walk: 20, face: 'guide' });
+stage('stagDown', 5, { hop: true, face: 'guide' });
+stage('stagDown', 6, { pose: 'slide' });
+stage('stagDown', 13, { pose: 'idle', face: 'guide' });
+stage('floorOne', 1, { walk: 23.5, face: 'right' });
+stage('floorOne', 2, { walk: 24, face: 'right' });
 
 const Dialogue = {
   seen: new Set(), // survives room restarts, so lines don't repeat
@@ -401,6 +454,14 @@ const Dialogue = {
   play(scene, key) {
     if (!SCRIPT[key] || this.seen.has(key)) return false;
     this.seen.add(key);
+    if (!scene.talk.active) {
+      scene.player.body.setVelocityX(0);
+      scene.slide = scene.charge = scene.kick = scene.buffer = scene.wallCoyote = 0;
+      scene.sdLock = true;
+      scene.setLying(false);
+      scene.talk.landing = 1;
+      GameAudio.loop(scene, 'hero-release-wind-up', false, 0.5);
+    }
     scene.talk.active = true;
     scene.talk.queue.push(...SCRIPT[key].map((l, i) => ({ ...l, audioScript: key, audioIndex: i })));
     return true;
@@ -429,29 +490,97 @@ const Dialogue = {
 
   act(scene, l, skip = false) {
     const p = scene.player, g = scene.guide, r = scene.rooms[scene.index].rect;
-    if (l.guide && g) {
-      g.setPosition(r.x + l.guide.x * 32, r.y + l.guide.y * 32);
-      g.hoverY = g.y;
-      g.setAlpha(0.7);
+    if (!skip) {
+      scene.talk.motion = { elapsed: 0, feet: p.y + p.height / 2, height: p.height,
+        mark: l.walk === undefined ? null : this.mark(scene, l.walk),
+        guideX: g.x, guideTarget: l.guide ? r.x + l.guide.x * 32 : g.x + (l.guideBy || 0) * 32 };
     }
+    const m = scene.talk.motion;
+    if (l.lookAround) g.looking = !skip;
+    if (l.guide && g) g.hoverY = r.y + l.guide.y * 32;
+    if (skip && (l.guide || l.guideBy)) g.x = m?.guideTarget ??
+      (l.guide ? r.x + l.guide.x * 32 : g.x + l.guideBy * 32);
     if (skip && l.walk !== undefined) {
-      const mark = this.mark(scene, l.walk);
-      p.body.reset(mark.x, mark.y);
+      const mark = m?.mark ?? this.mark(scene, l.walk);
+      p.body.reset(mark.x, mark.y + (m?.mark ? m.height - p.height : 0) / 2);
+    } else if (skip && l.hop && m) p.body.reset(p.x, m.feet - p.height / 2);
+    if (l.pose) scene.setLying(l.pose === 'slide');
+    if (l.facing) scene.face = l.facing === 'guide' ? (g.x < p.x ? -1 : 1) : l.facing === 'left' ? -1 : 1;
+    if (l.amulet) {
+      scene.amuletPose = l.amulet;
+      if (l.amulet === 'wear') scene.wearing = true;
     }
-    if (l.pose && (skip || l.walk === undefined)) scene.setLying(l.pose === 'slide');
-    if (l.who === 'guide' && !l.face) scene.face = g.x < p.x ? -1 : 1;
-    if (l.face) scene.face = l.face === 'guide' ? (g.x < p.x ? -1 : 1) : l.face === 'left' ? -1 : 1;
+    if (skip) {
+      this.settleCue(scene, l);
+      p.body.setVelocity(0, 0);
+      scene.heroSprite?.setAngle(0);
+      g.setAngle(0);
+    }
+  },
+
+  settleCue(scene, l) {
+    const g = scene.guide;
+    if (l.cue === 'ghost' || l.cue === 'guideBreak') {
+      scene.tweens.killTweensOf(g);
+      g.fading = false;
+      g.setAlpha(l.cue === 'ghost' ? 0.7 : 0);
+    }
+    if (l.cue === 'lookaround' || l.lookAround) { g.looking = false; g.setFlipX(g.x > scene.player.x); }
+    if ((l.cue === 'dim' || l.cue === 'undim') && scene.dimmer) {
+      scene.tweens.killTweensOf(scene.dimmer);
+      scene.dimmer.setAlpha(l.cue === 'dim' ? 0.88 : 0);
+    }
+  },
+
+  move(scene, dt) {
+    const t = scene.talk, l = t.line, m = t.motion, p = scene.player;
+    m.elapsed += dt;
+    const camera = scene.cameras.main, tall = scene.rooms[scene.index].rect.height > camera.height;
+    camera.setFollowOffset(l.camera?.x || 0, (tall ? -camera.height * 0.4 : 0) + (l.camera?.y || 0));
+    if (m.mark) {
+      const delta = m.mark.x - p.x;
+      p.body.setVelocityX(Math.abs(delta) > 2 ? Math.sign(delta) * (l.speed || 100) : 0);
+      if (Math.abs(delta) > 2) scene.face = Math.sign(delta);
+      else if (l.facing) scene.face = l.facing === 'guide' ? (scene.guide.x < p.x ? -1 : 1) : l.facing === 'left' ? -1 : 1;
+    }
+    if (l.hop && !m.hopped) { p.body.setVelocityY(-140); m.hopped = true; }
+    if (l.cue === 'lookaround' || l.lookAround) scene.guide.setFlipX(m.elapsed < 0.5 ? false : m.elapsed < 1 ? true : scene.guide.x > p.x);
+    if (l.guide || l.guideBy) scene.guide.x = Phaser.Math.Linear(m.guideX, m.guideTarget, Math.min(1, m.elapsed / 0.6));
+    if (l.gesture) {
+      const beat = Math.sin(Math.min(1, m.elapsed / 0.5) * Math.PI);
+      const actor = l.who === 'guide' ? scene.guide : scene.heroSprite;
+      actor?.setAngle(beat * (l.gesture === 'bow' ? 7 : -4) * scene.face);
+    }
+    const pose = scene.amuletPose;
+    if (pose && pose !== 'wear') {
+      if (!scene.heldAmulet) scene.heldAmulet = (scene.textures.exists('amulet')
+        ? scene.add.image(0, 0, 'amulet').setDisplaySize(14, 18)
+        : scene.add.circle(0, 0, 6, 0xffd774).setStrokeStyle(2, 0xb07a22)).setDepth(6);
+      scene.heldAmulet.setVisible(true).setPosition(p.x + scene.face * (pose === 'ground' ? 8 : 14),
+        p.body.bottom - (pose === 'ground' ? 5 : pose === 'hold' ? 40 : 23) -
+          (pose === 'pull' ? Math.sin(m.elapsed * 20) * 3 : 0));
+      scene.heldAmulet.setAngle(l.turnAmulet ? Math.sin(Math.min(1, m.elapsed / 0.8) * Math.PI) * 160 : 0);
+    } else scene.heldAmulet?.setVisible(false);
   },
 
   finish(scene) {
     scene.player.body.setVelocityX(0);
+    scene.heldAmulet?.setVisible(false);
+    scene.heroSprite?.setAngle(0);
+    scene.guide.setAngle(0);
+    scene.amuletPose = null;
     scene.setLying(false);
     const p = scene.player, r = scene.rooms[scene.index].rect;
     if (scene.spikes.some((h) => hit(bounds(p), bounds(h))) || scene.laserHit()) {
       const mark = this.mark(scene, (p.x - r.x) / 32);
       p.body.reset(mark.x, mark.y);
     }
+    const camera = scene.cameras.main;
+    camera.setFollowOffset(0, r.height > camera.height ? -camera.height * 0.4 : 0);
     scene.talk.ui.setVisible(false);
+    scene.blockedKeys = new Map();
+    for (const key of Object.values(scene.keys)) if (key.isDown) scene.blockedKeys.set(key, key.timeDown);
+    scene.talk.landing = 0;
     scene.talk.active = false;
   },
 
@@ -461,9 +590,11 @@ const Dialogue = {
     if (!t.line && !t.queue.length) return;
     if (t.line) this.act(scene, t.line, true);
     for (const l of t.queue) {
+      t.motion = null;
       this.act(scene, l, true);
       if (l.reveal) NAMES.guide = 'Yourself';
-      if (l.cue) scene.cue?.(l.cue);
+      if (l.cue && l.cue !== 'lookaround') scene.cue?.(l.cue);
+      this.settleCue(scene, l);
     }
     t.queue.length = 0;
     t.line = null;
@@ -476,19 +607,30 @@ const Dialogue = {
   // Returns true while the scene owns the hero's movement.
   update(scene, dt, advance) {
     const t = scene.talk;
+    if (t.active && t.landing) {
+      scene.player.body.setVelocityX(0);
+      t.landing = Math.max(0, t.landing - dt);
+      if (t.landing && !scene.player.body.blocked.down && !scene.player.body.touching.down) return true;
+      t.landing = 0;
+    }
     if (!t.line) {
       if (!t.queue.length) {
-        if (t.active && !scene.player.body.blocked.down && !scene.player.body.touching.down) { scene.player.body.setVelocityX(0); return true; }
-        if (t.active) this.finish(scene);
+        if (t.active) {
+          this.finish(scene);
+          return true; // This frame's input was read before the closing snapshot.
+        }
         return false;
       }
       t.line = t.queue.shift();
       t.shown = 0;
       this.act(scene, t.line);
       scene.player.body.setVelocityX(0);
+      this.move(scene, 0);
+      t.text.setText('');
       GameAudio.line(t.line.audioScript, t.line.audioIndex);
       if (t.line.reveal) NAMES.guide = 'Yourself';
-      if (t.line.cue) scene.cue?.(t.line.cue);
+      if (t.line.cue === 'lookaround') scene.guide.looking = true;
+      else if (t.line.cue) scene.cue?.(t.line.cue);
       if (t.line.cue === 'lastBeam') scene.guide.hoverY = scene.guide.y;
       t.ui.setVisible(!!t.line.text);
       if (!t.line.text) return true;
@@ -506,25 +648,21 @@ const Dialogue = {
       t[other].setAlpha(0.3);
       return true;
     }
-    let walking = false;
-    if (t.line.walk !== undefined) {
-      const p = scene.player, target = scene.rooms[scene.index].rect.x + t.line.walk * 32;
-      const delta = target - p.x;
-      walking = Math.abs(delta) > 2;
-      p.body.setVelocityX(walking ? Math.sign(delta) * 100 : 0);
-      if (walking) scene.face = Math.sign(delta);
-      else this.act(scene, { face: t.line.face, pose: t.line.pose });
+    this.move(scene, dt);
+    if (advance && (t.motion.mark && Math.abs(t.motion.mark.x - scene.player.x) > 2 || t.line.wait)) {
+      this.act(scene, t.line, true);
+      t.line = null;
+      return this.update(scene, 0, false);
     }
-    if (t.line.wait) { // silent beat: no panel, no input, just time passing
+    if (t.line.wait) {
       t.line.wait = Math.max(0, t.line.wait - dt);
-      if (!t.line.wait && !walking) t.line = null;
+      if (!t.line.wait) { this.act(scene, t.line, true); t.line = null; }
       return true;
     }
-    if (!t.line.text) { if (!walking) t.line = null; return true; }
+    if (!t.line.text) { this.act(scene, t.line, true); t.line = null; return true; }
     const full = t.line.text.length;
     if (advance) {
-      if (t.shown < full) t.shown = full;
-      else if (!walking) { t.line = null; return t.queue.length > 0 || this.update(scene, 0, false); }
+      this.act(scene, t.line, true); t.line = null; return this.update(scene, 0, false);
     }
     const before = Math.floor(t.shown / 3);
     t.shown = Math.min(full, t.shown + dt * 45);
