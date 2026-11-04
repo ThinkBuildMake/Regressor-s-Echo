@@ -37,7 +37,7 @@ const UI = {
       const text = scene.add.text(480, y, item.label, { ...FONT, fontSize: '22px', color: '#f1e3b8' }).setOrigin(0.5).setShadow(0, 2, '#000', 4);
       bg.setInteractive({ useHandCursor: true })
         .on('pointerover', () => select(i))
-        .on('pointerdown', () => press(i));
+        .on('pointerdown', (pointer) => press(i, pointer));
       return { bg, text, item };
     });
     const select = (i) => {
@@ -52,7 +52,7 @@ const UI = {
       mark?.setPosition(480 - 140, rows[current].bg.y);
       if (ready) GameAudio.play('ui-menu-move', 0, 0.5);
     };
-    const press = (i) => { select(i); GameAudio.play('ui-menu-select'); rows[current].item.act(); };
+    const press = (i, pointer) => { select(i); GameAudio.play('ui-menu-select'); rows[current].item.act(pointer); };
     const keys = (e) => {
       if (['ArrowUp', 'KeyW'].includes(e.code)) select(current - 1);
       else if (['ArrowDown', 'KeyS'].includes(e.code)) select(current + 1);
@@ -132,7 +132,7 @@ class Menu extends Phaser.Scene {
     const mute = () => `Sound   ${GameAudio.muted ? 'Off' : 'On'}`;
     const nudge = (d) => { GameAudio.master = Math.round(Math.max(0, Math.min(1, GameAudio.master + d)) * 10) / 10; GameAudio.save(); this.list.rows[0].text.setText(volume()); };
     this.list = UI.menu(this, [
-      { label: volume(), act: () => nudge(GameAudio.master >= 1 ? -1 : 0.1),
+      { label: volume(), act: (pointer) => nudge(pointer ? (pointer.x < 480 ? -0.1 : 0.1) : GameAudio.master >= 1 ? -1 : 0.1), // click ◀ or ▶ side
         key: (e) => (e.code === 'ArrowLeft' || e.code === 'KeyA' ? nudge(-0.1) : e.code === 'ArrowRight' || e.code === 'KeyD' ? nudge(0.1) : 0) },
       { label: mute(), act: () => { GameAudio.muted = !GameAudio.muted; GameAudio.save(); this.list.rows[1].text.setText(mute()); } },
       { label: 'Back', act: () => (this.back === 'title' ? this.close() : this.show('pause')) },
@@ -145,7 +145,7 @@ class Menu extends Phaser.Scene {
     this.layer.push(UI.panel(this, 272, 640, 470));
     this.text(480, 66, 'Controls', '30px');
     const rows = [
-      [['←', '→'], 'or A D: move'], [['Space'], 'jump (again on a wall: wall jump)'], [['Shift'], 'or ↓ while running: slide'],
+      [['A', 'D'], 'move (or ← →)'], [['Space'], 'jump (again on a wall: wall jump)'], [['Shift'], 'or ↓ while running: slide'],
       [['K'], 'hold: let go (World 2 on)'], [['Q'], 'take back your newest soul (World 2 on)'], [['E'], 'swap with your newest soul (World 3 on)'],
       [['Shift', 'R'], 'retry the room'], [['Enter'], 'or Space: next line · Esc skips a scene'], [['Esc'], 'this menu'], [['M'], '− / =: mute, volume'],
     ];
