@@ -1420,17 +1420,10 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
       key('keydown', direction);
       let lastX = s.player.x;
       await until(() => {
-<<<<<<< HEAD
-        // Hop onto the wall soul, then walk left through the raised doorway.
-        if (!s.transit && s.rooms[s.index].name === 'The spectral stag' && s.player.x < O().x + 10 * 32 &&
-          (direction === 39 || s.player.y + 15 > O().y + 11.1 * 32) &&
-          s.player.body.blocked.down) key('keydown', 32);
-=======
         // Hop only when something stops him (a soul on the floor), like a player would; hopping
         // everywhere can land him on a seal soul above the low exit, where he is stuck.
         const stuck = Math.abs(s.player.x - lastX) < 0.2; lastX = s.player.x;
         if (!s.transit && s.rooms[s.index].name === 'The spectral stag' && stuck && s.player.body.blocked.down) key('keydown', 32);
->>>>>>> night-w1
         else if (s.player.body.velocity.y >= 0) key('keyup', 32);
         return s.rooms[s.index].name === name && !s.transit &&
           (direction === 37 ? s.player.x < O().x + column * 32 : s.player.x > O().x + column * 32);
