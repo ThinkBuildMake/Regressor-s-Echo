@@ -134,6 +134,17 @@ All three follow the moth's rules: 3 stomps from above, it speeds up after each 
 - **Route:** The rehearsal → The old tree (30 × 17, promise beside the tree at column 21) → arena → The pyramid entrance (30 × 17). Both arena gates and the vine buttress under the platform open after the last stand, clearing the way back. Return behind the tree to the dirt note at columns 18–20, then walk through the arena to the pyramid door at column 22; entering fades to the ending card.
 - **Story:** STORY.md W3 scenes 5 (arrives), 6 (nudge after about 10 deaths), 7 (the guide's last stand), 8 (the note behind the old tree), 9 (floor one, ending card).
 
+## Enemies per world (planned 2026-11-03, not built)
+Each world gets its own creature built around that world's trick, not a reskin. Brainstormed with Codex and agy; the level chat places them in rooms. All are red (readability rule), stompable from above unless noted, and drawn as 2–4 frame sheets. The walker stays in World 1, the thrower in World 2 and the flyer in World 3 as each world's second enemy.
+
+| World | Enemy | Looks | Behaviour (codeable) | Soul puzzle it creates | Fits |
+|---|---|---|---|---|---|
+| 1 | **Bramble spider** | A red spider hanging on a dark silk thread from ceiling roots | When you pass under its column, it shakes (~0.5s warning), drops straight down, pauses 1s, then climbs back. A soul in its column stops the drop on top of the soul | Vertical death aiming without self-destruct: jump into its drop to choose the height your soul hangs at (e.g. a wall-jump kick point in a chimney); that soul then also stops its later drops | *The well* (W1-8), the Thornwood chimney |
+| 2 | **Idol slider** | A block of red carved stone on short crab legs | Moves toward you only while you're airborne or holding self-destruct (K); stands still otherwise. Turns around at walls and souls. Solid on top: presses plates, blocks lasers | World 2's trick is timing, and every self-destruct hold also moves it. Fence it with your 2 souls onto a plate or into a beam so it takes over a soul's job | *The beam* (W2-4), *Wrong order* (W2-6) |
+| 3 | **Reliquary scarab** | A flat red scarab with a hard shell | Patrols floors and the tops of souls (walks along soul bridges), turns at walls and soul ends. Presses plates, its shell blocks lasers. Falls when the soul under it is recalled | Recall becomes a weapon: walk it out over a gap on your souls, then recall the soul under it so it drops onto a plate you can't reach, or into a beam | *Three jobs* (W3-3), *Everything* (W3-4) |
+
+Runner-up for World 2: **rubble toad** (a red stone-backed toad hopping between two marked landings on a timer; each landing starts a crumbling tile's countdown; a soul above a landing catches it so the floor survives).
+
 ## Measured movement (design to these)
 Measured in the game; the greybox tests (`tests/check.html`) replay each tight room's solution with real physics.
 - Jump: **3.4 tiles** up. A ledge 3 up is reachable, 4 is not.
