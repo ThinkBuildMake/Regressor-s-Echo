@@ -151,12 +151,13 @@ The game has no title screen, pause menu or on-screen soul count yet (the conten
 
 | Asset | Used for | Prompt | Ref | Sized | In game |
 |---|---|---|---|---|---|
-| Title key art (16:9) | title screen background; dimmed behind the content warning | ✅ | | | |
+| Title key art (16:9) | title screen background (the logo and the stone menu box sit centred over it); dimmed behind the content warning | ✅ | | | |
 | Logo: "Regressor's Echo" | title screen and ending card (painted lettering + the amulet mark; fall back to code text if the lettering is off) | ✅ | | | |
 | Ending art (16:9) | behind the ending card: the hero small at the pyramid door at dawn | ✅ | | | |
 | Amulet mark icon | menu cursor, favicon | ✅ | | | |
 | Soul pips: full / empty | HUD soul count (1–3 by world) | ✅ | | | |
-| Menu panel | pause and settings menus (plain centre so it stretches) | ✅ | | | |
+| Menu panel | grey stone box holding the menu buttons, centred on screen (title, pause, settings); plain centre so it stretches. Replaces the first wooden panel (user: "a grey stone box") | ✅ | | | |
+| Stone button: normal / highlighted | Start, Settings, Resume… as stone buttons inside the box; blank, the words are code text; highlighted = the selected one | ✅ | | | |
 
 ## Audio
 
