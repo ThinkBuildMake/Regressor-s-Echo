@@ -834,7 +834,7 @@ const START_ROOM = ((q) => q == null ? ROOMS.findIndex((r) => r[0] === 'The clea
 const hit = (A, B) => A.x < B.right && A.right > B.x && A.y < B.bottom && A.bottom > B.y;
 const bounds = (o) => o.getBounds();
 
-const stats = { deaths: 0, mothFinished: false, treePower: false, stagFinished: false }; // run progress survives room restarts
+const stats = { deaths: 0, stagDeaths: 0, mothFinished: false, treePower: false, stagFinished: false }; // run progress survives room restarts
 const FONT = { fontFamily: 'Georgia, serif', align: 'center' };
 
 // First screen: the content warning. Any key or click continues (that click also lets the browser play audio).
@@ -882,7 +882,7 @@ class End extends Phaser.Scene {
     this.time.delayedCall(12000, () => this.input.keyboard.once('keydown', () => {
       GameAudio.ending = false;
       GameAudio.play('ui-menu-select');
-      stats.deaths = 0; stats.treePower = false; stats.mothFinished = false; stats.stagFinished = false;
+      stats.deaths = stats.stagDeaths = 0; stats.treePower = false; stats.mothFinished = false; stats.stagFinished = false;
       rules.selfDestruct = rules.recall = false; // the moth grants these again on the next run
       Dialogue.seen.clear();
       NAMES.guide = '???';
@@ -895,7 +895,7 @@ class End extends Phaser.Scene {
 class Room extends Phaser.Scene {
   constructor() { super('room'); }
 
-  init(data) { this.index = Phaser.Math.Wrap(data.index ?? START_ROOM, 0, ROOMS.length); }
+  init(data) { this.index = Phaser.Math.Wrap(data.index ?? START_ROOM, 0, ROOMS.length); this.retry = !!data.retry; }
 
   preload() {
     Art.preload(this);
@@ -1041,7 +1041,7 @@ class Room extends Phaser.Scene {
               this.bosses.at(-1).r.setVisible(!this.bosses.at(-1).hidden);
               if (name === 'The spectral stag') {
                 const B = this.bosses.at(-1);
-                Object.assign(B, { stag: true, hidden: !Dialogue.seen.has('stagArrival'), story: 'stagDown', phase: 'setup', clock: 0, bells: 0, deaths: 0 });
+                Object.assign(B, { stag: true, hidden: !Dialogue.seen.has('stagArrival'), story: 'stagDown', phase: 'setup', clock: 0, bells: 0, deaths: stats.stagDeaths }); // the whole run's deaths here, across Shift+R
                 B.r.setVisible(!B.hidden).setSize(192, 64).setPosition(x, (oy + 14) * T).setFillStyle(0xbceaff);
                 B.antlers = this.add.graphics().setDepth(5);
                 B.r.on('destroy', () => B.antlers.destroy());
@@ -1140,7 +1140,8 @@ class Room extends Phaser.Scene {
     this.litRune = this.wearing ? (stats.treePower ? 3 : stats.mothFinished ? 2 : 1) : undefined;
     this.roomDeaths = 0;
     this.drawStagGrounds();
-    this.showWorld(this.rooms[this.index].world);
+    if (this.retry) this.world = this.rooms[this.index].world; // Shift+R keeps you in the same world: no title card
+    else this.showWorld(this.rooms[this.index].world);
 
     this.spawnWalkers(this.index);
     this.physics.add.collider(this.enemies, this.statics);
@@ -1546,7 +1547,7 @@ class Room extends Phaser.Scene {
     p.body.moves = false; // Gravity must pause with the enemies during respawn.
     this.dead = RESPAWN_DELAY;
     if (this.boss) { this.boss.hp = BOSS_HP; this.boss.hurt = 0;
-      if (this.boss.stag) { this.boss.deaths++; this.boss.phase = 'setup'; this.boss.clock = 0; this.boss.bells = 0; this.boss.beam = null; this.boss.pulse = -1; this.boss.r.x = this.rooms[this.boss.room].rect.right - 5 * T; }
+      if (this.boss.stag) { this.boss.deaths = ++stats.stagDeaths; this.boss.phase = 'setup'; this.boss.clock = 0; this.boss.bells = 0; this.boss.beam = null; this.boss.pulse = -1; this.boss.r.x = this.rooms[this.boss.room].rect.right - 5 * T; }
       if (this.boss.kind === 'tree') { this.boss.phase = 'idle'; this.boss.timer = 4; this.boss.attack = -1; this.boss.open = 0; this.boss.stone?.r.destroy(); this.boss.stone = null; this.boss.pods.forEach((p) => p.r.destroy()); this.boss.pods = []; }
     } // your death heals the boss
     if (this.boss?.story === 'mothDown' && !this.boss.hidden) {
@@ -2321,7 +2322,7 @@ class Room extends Phaser.Scene {
     this.bossPreviousFeet = this.bossFeet;
     this.bossFeet = p.y + p.height / 2;
 
-    if (JD(k.R) && k.SHIFT.isDown) return this.scene.restart({ index: this.index }); // Shift+R: retry the room (if you've trapped yourself)
+    if (JD(k.R) && k.SHIFT.isDown) return this.scene.restart({ index: this.index, retry: true }); // Shift+R: retry the room (if you've trapped yourself)
     if (DEV && JD(k.N)) return this.scene.restart({ index: this.index + 1 });
     if (DEV && JD(k.ONE)) rules.freeze = !rules.freeze;
     if (DEV && JD(k.TWO)) rules.snap = !rules.snap;
