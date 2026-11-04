@@ -19,8 +19,8 @@ Read `.claude/skills/flow-asset/SKILL.md` "Driving Flow" first. It covers upload
 
 ## 2. Generate in Flow
 - Use Flow's video mode with **Frames** (start frame).
-  - **Veo 3.1 Lite** (10 credits a take) is the default. Tested 2026-11-04: on the stag walk it gave the same correct gait as Fast and a steadier body, only slightly softer, with less fur texture.
-  - **Veo 3.1 Fast** (20 credits) is for big boss sheets where brush detail shows.
+  - **Veo 3.1 Lite** (10 credits a take): small enemies and minor characters (user's call, 2026-11-04). Tested 2026-11-04: on the stag walk it gave the same correct gait as Fast and a steadier body, only slightly softer, with less fur texture.
+  - **Veo 3.1 Fast** (20 credits): the hero and the bosses, the important characters.
 - Read the cost and balance in the UI and log them. Allow at most 2 takes per sheet.
 - Credits refill monthly at the start of the billing cycle (Google AI Pro: 1,000) and don't roll over.
 - The prompt is the creature's description plus the motion and the fixed rules:
