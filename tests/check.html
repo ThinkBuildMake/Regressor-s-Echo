@@ -318,6 +318,34 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     check(s.enemies.every((e) => s.rooms[wi].rect.contains(e.x, e.y)), 'walker stays inside its room');
   }
 
+  if (matches('First death')) {
+    for (const sliding of [false, true]) {
+      Object.keys(SCRIPT).forEach((k) => Dialogue.seen.add(k));
+      s = await go(ROOMS.findIndex(([n]) => n === 'First death'));
+      Dialogue.skip(s); await alive();
+      const start = Dialogue.mark(s, 6);
+      s.player.body.reset(start.x, start.y);
+      Dialogue.seen.delete('firstPit');
+      key('keydown', 39);
+      await wait(120);
+      if (sliding) { key('keydown', 83); await wait(40); key('keyup', 83); }
+      check(!sliding || s.lying, 'story input: approach starts a slide');
+      await until(() => s.talk.active, 2000, 'firstPit spot');
+      await wait(1200);
+      const x = s.player.x;
+      await wait(200);
+      check(near(s.player.x, x) && !s.slide && !s.charge,
+        `story input: ${sliding ? 'slide' : 'run'} stops at the scripted walk mark`);
+      Dialogue.skip(s);
+      const end = s.player.x;
+      await wait(200);
+      check(near(s.player.x, end), 'story input: held right stays blocked after dialogue');
+      key('keyup', 39); await wait(40);
+      key('keydown', 39); await wait(100); key('keyup', 39);
+      check(s.player.x > end + 3, 'story input: a fresh right press moves again');
+    }
+  }
+
   const stagingSeen = new Set(Dialogue.seen);
   // Replay staging with real physics, then replay the same scene with Esc.
   for (const [name, script, mark] of [

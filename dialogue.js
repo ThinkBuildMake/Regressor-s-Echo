@@ -454,6 +454,14 @@ const Dialogue = {
   play(scene, key) {
     if (!SCRIPT[key] || this.seen.has(key)) return false;
     this.seen.add(key);
+    if (!scene.talk.active) {
+      scene.player.body.setVelocityX(0);
+      scene.slide = scene.charge = scene.kick = scene.buffer = scene.wallCoyote = 0;
+      scene.sdLock = true;
+      scene.setLying(false);
+      scene.talk.landing = true;
+      GameAudio.loop(scene, 'hero-release-wind-up', false, 0.5);
+    }
     scene.talk.active = true;
     scene.talk.queue.push(...SCRIPT[key].map((l, i) => ({ ...l, audioScript: key, audioIndex: i })));
     return true;
@@ -570,6 +578,8 @@ const Dialogue = {
     const camera = scene.cameras.main;
     camera.setFollowOffset(0, r.height > camera.height ? -camera.height * 0.4 : 0);
     scene.talk.ui.setVisible(false);
+    scene.blockedKeys ??= new Set();
+    for (const key of Object.values(scene.keys)) if (key.isDown) scene.blockedKeys.add(key);
     scene.talk.active = false;
   },
 
@@ -596,6 +606,11 @@ const Dialogue = {
   // Returns true while the scene owns the hero's movement.
   update(scene, dt, advance) {
     const t = scene.talk;
+    if (t.active && t.landing) {
+      scene.player.body.setVelocityX(0);
+      if (!scene.player.body.blocked.down && !scene.player.body.touching.down) return true;
+      t.landing = false;
+    }
     if (!t.line) {
       if (!t.queue.length) {
         if (t.active && !scene.player.body.blocked.down && !scene.player.body.touching.down) { scene.player.body.setVelocityX(0); return true; }

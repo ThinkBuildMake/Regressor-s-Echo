@@ -2219,7 +2219,19 @@ class Room extends Phaser.Scene {
 
   update(_t, ms) {
     const dt = Math.min(ms / 1000, 0.05);
-    const k = this.keys, JD = Phaser.Input.Keyboard.JustDown, p = this.player;
+    const raw = this.keys, JD = Phaser.Input.Keyboard.JustDown, p = this.player;
+    this.blockedKeys ??= new Set();
+    for (const key of Object.values(raw)) {
+      if (!key.isDown && this.blockedKeys.has(key)) {
+        key._justDown = key._justUp = false;
+        this.blockedKeys.delete(key);
+      }
+      else if (this.talk.active) this.blockedKeys.add(key);
+    }
+    const k = Object.fromEntries(Object.entries(raw).map(([name, key]) => {
+      if (!this.blockedKeys.has(key)) return [name, key];
+      return [name, { isDown: false, _justDown: false, _justUp: false }];
+    }));
     GameAudio.room(this, dt);
     this.bossPreviousFeet = this.bossFeet;
     this.bossFeet = p.y + p.height / 2;
@@ -2231,7 +2243,7 @@ class Room extends Phaser.Scene {
     if (DEV && JD(k.THREE)) rules.max = LIMITS[(LIMITS.indexOf(rules.max) + 1) % LIMITS.length];
     if (DEV && JD(k.FOUR)) rules.selfDestruct = !rules.selfDestruct;
     if (DEV && JD(k.FIVE)) rules.recall = !rules.recall;
-    if (JD(k.ESC)) Dialogue.skip(this);
+    if (JD(raw.ESC)) Dialogue.skip(this);
     if (DEV && JD(k.H)) { showHud = !showHud; this.hud.setVisible(showHud); }
 
     if (!rules.freeze) this.dropCorpses(dt);
@@ -2285,7 +2297,10 @@ class Room extends Phaser.Scene {
       if (next >= 0) return this.enterRoom(next);
       p.body.reset(this.start.x, this.start.y); // fell out of the world
     }
-    const space = JD(k.SPACE), jumpDown = space | JD(k.W) | JD(k.UP), swap = JD(k.E), talkKey = space | JD(k.ENTER) | swap;
+    const rawSpace = JD(raw.SPACE), rawSwap = JD(raw.E);
+    const talkKey = rawSpace | JD(raw.ENTER) | rawSwap;
+    const space = k.SPACE === raw.SPACE && rawSpace;
+    const jumpDown = space | JD(k.W) | JD(k.UP), swap = k.E === raw.E && rawSwap;
     const JU = Phaser.Input.Keyboard.JustUp, jumpUp = JU(k.SPACE) | JU(k.W) | JU(k.UP);
     const slideKey = JD(k.S) | JD(k.DOWN) | JD(k.SHIFT);
     this.showGuide(dt);
@@ -2353,6 +2368,7 @@ class Room extends Phaser.Scene {
       if (this.rooms[this.index].world) Dialogue.play(this, 'shrineMark'); // the first touch only
     }
 
+    if (this.talk.active) return; // A pickup, shrine or boss can open dialogue during this frame.
     const b = p.body;
     if (b.velocity.y > MAX_FALL) b.velocity.y = MAX_FALL; // cap falling only (a cap both ways held springs to 7.4 tiles)
     const grounded = b.blocked.down || b.touching.down;
