@@ -25,11 +25,13 @@ Three **showcase rooms**, one per world, are in the greybox to judge this style 
 | World | Souls | New power | The world's trick |
 |---|---|---|---|
 | 1. Forest Edge | 1 | **Slide** (a speed boost, and it leaves a flat soul 2 wide). Every death comes from the forest | **Where you get hit is where your soul hangs.** You aim your deaths with jumps and positioning |
-| 2. Overgrown Ruins | 2 | **Self-destruct** (hold the button) | **Timing.** You keep moving while you hold, so you press early to die where you'll be, and let go to cancel. A 3rd death erases the 1st, so order matters too |
-| 3. Sanctum | 3 | **Recall** (take souls back without dying, newest first) | **Three at once, in the right order.** Puzzles need all 3 souls doing different jobs at the same time. Recall clears mistakes without dying, and dropping through a soul only works if it's your newest |
+| 2. Overgrown Ruins | 2 | **Self-destruct** (hold the button), then **recall** a few rooms in (taught by In my own way, moved here from World 3) | **Timing.** You keep moving while you hold, so you press early to die where you'll be, and let go to cancel. A 3rd death erases the 1st, so order matters too. Recall takes your newest soul back without dying |
+| 3. Sanctum | 3 | **Soul swap** (a key swaps places with your newest soul: you appear where it was, it appears where you stood) | **Three at once, in the right order.** Puzzles need all 3 souls doing different jobs at the same time. Swap turns every soul into an escape hatch |
 
 **Self-destruct (World 2 on):** hold the button for about 0.75s while the blue-white flames grow. You keep running, jumping and falling while you hold. Let go early to cancel. A hazard that hits you mid-hold kills you on the spot, so the soul lands there instead.
-**Recall (World 3):** a tap removes your newest soul. Holding keeps removing them, newest first, faster the longer you hold. Recalling the soul you stand on drops you. It isn't a death, so it doesn't hurt and doesn't heal a boss.
+**Recall (World 2 on, decided 2026-11-03; was World 3):** a tap removes your newest soul. Holding keeps removing them, newest first, faster the longer you hold. Recalling the soul you stand on drops you. It isn't a death, so it doesn't hurt and doesn't heal a boss.
+**Soul swap (World 3, decided 2026-11-03):** a tap swaps you with your newest soul. Not a death, so it never heals a boss.
+**Boss damage (decided 2026-11-03):** each boss has one soul trick that opens it up, used for all three hits, and the stomp lands the hit: the moth's Lantern Dive crashes into a soul, the tree's falling stone is dropped onto its mask by recall, and the stag rams a soul you swap away from. No attack forces a death to recover from it. Details: docs/brainstorm/2026-11-03-bosses.md.
 **Bosses:** any death heals the boss to full, so a fight is a setup (die freely to place souls) followed by a run where you must not die. Self-destruct's burst is only visual: it never hurts enemies or bosses.
 **The amulet** gains one rune per boss, and each rune brings the next world's powers.
 
