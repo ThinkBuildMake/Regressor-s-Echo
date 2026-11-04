@@ -854,10 +854,12 @@ const FONT = { fontFamily: 'Georgia, serif', align: 'center' };
 // First screen: the content warning. Any key or click continues (that click also lets the browser play audio).
 class Warning extends Phaser.Scene {
   constructor() { super('warning'); }
+  preload() { if (!window.SKIP_WARNING) UI.preload(this); }
   update(_t, ms) { GameAudio.mix(ms / 1000); }
   create() {
     GameAudio.music('title');
     if (window.SKIP_WARNING) return this.scene.start('room'); // the test page
+    UI.backdrop(this, 0.78); // over the dimmed title art
     const t = (y, text, size, color, wrap = 640) =>
       this.add.text(480, y, text, { ...FONT, fontSize: size, color, wordWrap: { width: wrap }, lineSpacing: 6 }).setOrigin(0.5);
     t(150, 'Content warning', '30px', '#f1e3b8');
@@ -867,7 +869,7 @@ class Warning extends Phaser.Scene {
     const go = t(440, 'Click or press any key to continue', '15px', '#e8b44a');
     this.tweens.add({ targets: go, alpha: 0.35, duration: 900, yoyo: true, repeat: -1 });
     t(480, 'M mute · − / = volume', '13px', '#a8b8ad');
-    const next = () => { GameAudio.unlocked = true; GameAudio.play('ui-menu-select'); this.scene.start('room'); };
+    const next = () => { GameAudio.unlocked = true; GameAudio.play('ui-menu-select'); this.scene.start('title'); };
     this.input.keyboard.once('keydown', next);
     this.input.once('pointerdown', next);
   }
@@ -917,6 +919,7 @@ class Room extends Phaser.Scene {
     for (const [key, path] of [
       ['amulet', 'world1/amulet'], ['ghost', 'world1/ghost'], ['old-tree', 'world3/old-tree'],
       ...[1, 2, 3].flatMap((n) => [[`amulet-rune${n}`, `world1/amulet-rune${n}`], [`shrine${n}`, `world${n}/shrine`], [`shrineLit${n}`, `world${n}/shrine-lit`]]),
+      ['uiSoulFull', 'ui/soul-full'], ['uiSoulEmpty', 'ui/soul-empty'],
     ]) if (!this.textures.exists(key)) this.load.image(key, `assets/${path}.webp`);
     if (!this.textures.exists('heroSheet')) {
       this.load.image('heroSheet', 'assets/hero/sheet.webp'); // 8 frames: run 0-5, jump 6, fall 7
@@ -1001,7 +1004,7 @@ class Room extends Phaser.Scene {
     Art.ensure(this);
     Art.backdrop(this);
     const rect = (x, y, w, h, color) => this.add.rectangle(x + w / 2, y + h / 2, w, h, color);
-    this.hudAmulet = this.pips = undefined;
+    this.hudAmulet = this.pips = this.soulIcons = undefined;
     this.amulets = [];
     this.shrines = [];
     this.lasers = [];
@@ -2381,7 +2384,10 @@ class Room extends Phaser.Scene {
     if (DEV && JD(k.THREE)) rules.max = LIMITS[(LIMITS.indexOf(rules.max) + 1) % LIMITS.length];
     if (DEV && JD(k.FOUR)) rules.selfDestruct = !rules.selfDestruct;
     if (DEV && JD(k.FIVE)) rules.recall = !rules.recall;
-    if (JD(raw.ESC)) Dialogue.skip(this);
+    if (JD(raw.ESC)) { // Esc skips a scene; otherwise it opens the system menu
+      if (this.talk.active) Dialogue.skip(this);
+      else if (!this.transit) { this.scene.launch('menu', { page: 'pause', back: 'room' }); this.scene.pause(); return; }
+    }
     if (DEV && JD(k.H)) { showHud = !showHud; this.hud.setVisible(showHud); }
 
     if (!rules.freeze) this.dropCorpses(dt);
@@ -2634,7 +2640,12 @@ class Room extends Phaser.Scene {
     pips.clear();
     if (this.wearing && !this.hudAmulet)
       pips.lineStyle(2, 0xffd774).strokeCircle(32 + rules.max * 22, 516, 9);
-    for (let i = 0; i < rules.max; i++) {
+    const icons = this.textures.exists('uiSoulFull') && (this.soulIcons ??= []);
+    if (icons) for (let i = 0; i < 3; i++) {
+      icons[i] ??= this.add.image(22 + i * 22, 516, 'uiSoulFull').setScrollFactor(0).setDepth(40).setDisplaySize(24, 24);
+      icons[i].setVisible(i < rules.max).setTexture(i < rules.max - this.corpses.length ? 'uiSoulFull' : 'uiSoulEmpty').setDisplaySize(24, 24);
+    }
+    for (let i = 0; !icons && i < rules.max; i++) {
       const free = i < rules.max - this.corpses.length, x = 22 + i * 22, y = 520;
       pips.fillStyle(0x7cc7ff, free ? 0.95 : 0.18).fillTriangle(x - 6, y + 6, x + 6, y + 6, x, y - 10);
       pips.fillStyle(0xeef8ff, free ? 0.9 : 0.1).fillTriangle(x - 3, y + 6, x + 3, y + 6, x, y - 3);
@@ -2667,5 +2678,5 @@ const game = new Phaser.Game({
   backgroundColor: '#1f1f24',
   physics: { default: 'arcade', arcade: { gravity: { y: GRAVITY } } },
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
-  scene: [Warning, Room, End],
+  scene: [Warning, Title, Room, Menu, End],
 });

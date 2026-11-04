@@ -13,12 +13,16 @@ const GameAudio = {
       if (e.code === 'KeyM') this.muted = !this.muted;
       else if (e.code === 'Minus' || e.code === 'Equal') this.master = Math.max(0, Math.min(1, this.master + (e.code === 'Equal' ? 0.1 : -0.1)));
       else return;
-      try { localStorage.setItem('echo-audio', JSON.stringify({ master: this.master, muted: this.muted })); } catch {}
-      this.mix(0);
+      this.save();
     });
     const unlock = () => { this.unlocked = true; this.mix(0); };
     window.addEventListener('keydown', unlock, { once: true });
     window.addEventListener('pointerdown', unlock, { once: true });
+  },
+  // Keep the volume and mute between visits (the settings menu calls this too).
+  save() {
+    try { localStorage.setItem('echo-audio', JSON.stringify({ master: this.master, muted: this.muted })); } catch {}
+    this.mix(0);
   },
   media(key, music = false) {
     try {
