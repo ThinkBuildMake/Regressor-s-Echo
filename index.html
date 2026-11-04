@@ -8,10 +8,7 @@
 </head>
 <body>
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
-  <script src="art.js"></script>
-  <script src="dialogue.js"></script>
-  <script src="audio.js"></script>
-  <script src="ui.js"></script>
-  <script src="game.js"></script>
+  <!-- A fresh query string each visit, so browsers (and GitHub Pages' cache) never run old code. -->
+  <script>for (const f of ['art', 'dialogue', 'audio', 'ui', 'game']) document.write(`<script src="${f}.js?v=${Date.now()}"><\/script>`);</script>
 </body>
 </html>

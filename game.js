@@ -862,7 +862,6 @@ class Warning extends Phaser.Scene {
     GameAudio.music('title');
     if (window.SKIP_WARNING) return this.scene.start('room'); // the test page
     UI.backdrop(this, 0.78); // over the dimmed title art
-    this.scene.launch('preloader'); // the game's art loads while you read this and sit on the title
     const t = (y, text, size, color, wrap = 640) =>
       this.add.text(480, y, text, { ...FONT, fontSize: size, color, wordWrap: { width: wrap }, lineSpacing: 6 }).setOrigin(0.5);
     t(150, 'Content warning', '30px', '#f1e3b8');
@@ -878,10 +877,30 @@ class Warning extends Phaser.Scene {
   }
 }
 
-// Loads the game's art in the background from the content warning on, so Start doesn't sit on a blank screen.
-class Preloader extends Phaser.Scene {
-  constructor() { super('preloader'); }
-  preload() { Room.prototype.preload.call(this); }
+// The first screen: black, a grey hero running in the lower right and "Loading…", while all the game's art loads.
+class Loading extends Phaser.Scene {
+  constructor() { super('loading'); }
+  preload() { this.load.image('heroRun', 'assets/hero/run-veo.webp'); } // just the runner, so he shows at once
+  create() {
+    this.cameras.main.setBackgroundColor('#000000');
+    let runner;
+    if (this.textures.exists('heroRun')) {
+      const tex = this.textures.get('heroRun'), img = tex.getSourceImage(), fw = img.width / 12;
+      if (!tex.has(0)) for (let i = 0; i < 12; i++) tex.add(i, 0, i * fw, 0, fw, img.height);
+      runner = this.add.image(880, 520, 'heroRun', 0).setOrigin(0.5, 1).setScale(0.62);
+      runner.preFX?.addColorMatrix().grayscale(1);
+    }
+    const label = this.add.text(820, 498, 'Loading', { ...FONT, fontSize: '22px', color: '#d8d8d8' }).setOrigin(1, 0.5);
+    this.time.addEvent({ delay: 60, loop: true, callback: () => {
+      this.step = (this.step ?? 0) + 1;
+      runner?.setFrame(this.step % 12);
+      label.setText('Loading' + '.'.repeat(Math.floor(this.step / 6) % 4));
+    } });
+    if (!window.SKIP_WARNING) UI.preload(this);
+    Room.prototype.preload.call(this);
+    this.load.once('complete', () => this.scene.start('warning'));
+    this.load.start();
+  }
 }
 
 // The last screen, after he walks into the pyramid: "Floor 1", the title, the run's deaths, thanks and credits.
@@ -2690,5 +2709,5 @@ const game = new Phaser.Game({
   backgroundColor: '#1f1f24',
   physics: { default: 'arcade', arcade: { gravity: { y: GRAVITY } } },
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
-  scene: [Warning, Title, Room, Menu, End, Preloader],
+  scene: [Loading, Warning, Title, Room, Menu, End],
 });
