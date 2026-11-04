@@ -47,11 +47,11 @@ def gatehouse(o, p):
 room('The gatehouse', [210, 108], 30, 17, 1, 'get killed on the plate so the walker ends up on the right side', gatehouse)
 
 def thornwood(o, p):
-    # A: stomp or dodge the walker, then wall-jump up a 3-wide chimney. Thorns replace the right wall for 5 rows,
+    # A: stomp or dodge the walker, then wall-jump up a 3-wide chimney. Thorns replace the right wall for 4 rows,
     #    more than any kick sequence can cross. Your first death on them leaves a soul right where your arc meets
     #    them; next time kick off that soul (it leaves a 2-wide gap) to get past.
     o(0, 21, 0, 22); o(1, 18, 10, 22); p(1, 22, 'P'); p(8, 22, 'e')
-    o(11, 20, 11, 22); o(12, 3, 14, 22); o(15, 10, 15, 14, 'x')
+    o(11, 20, 11, 22); o(12, 3, 14, 22); o(15, 11, 15, 14, 'x')
     # B: shrine, then a crumbling bridge over spikes under falling spikes: keep running.
     o(15, 3, 30, 5); p(17, 5, 'C'); o(20, 6, 26, 6, '~'); o(20, 7, 26, 9); o(20, 10, 26, 10, '^')
     for x in (21, 23, 25): p(x, 3, '!')
@@ -60,6 +60,7 @@ def thornwood(o, p):
     #    Let it kill you: your soul jams it. Then wall-jump the 2-wide shaft to the exit.
     o(31, 3, 33, 16); o(31, 17, 36, 22); p(34, 22, 'e'); o(37, 21, 44, 22); o(43, 17, 44, 22); p(40, 22, 'o')
     p(36, 22, '#')   # a post at the corridor mouth: the saw only patrols inside the corridor (hop the post)
+    p(43, 22, '#')   # and one under the exit shaft, so you can't follow the saw into the shaft and climb out over it
     o(45, 17, 45, 18)
 room('Thornwood', [240, 101], 46, 25, 1, 'SHOWCASE W1: wall jump, thorn anchor, crumbling bridge, falling spikes, saw jam, stomps', thornwood)
 

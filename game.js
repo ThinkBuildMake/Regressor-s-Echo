@@ -297,8 +297,8 @@ const ROOMS = [
     '#                             ',
     '#                             ',
     '#               ##############',
-    '#               x#############',
-    '#               x#############',
+    '#               ##############',
+    '#               ##############',
     '                x#############',
     '                x#############',
     '  P             x#############',
@@ -335,8 +335,8 @@ const ROOMS = [
     '#                             ',
     '#                             ',
     '#                     ########',
-    '#                     x#######',
-    '#                     x#######',
+    '#                     ########',
+    '#                     ########',
     '                      x#######',
     '                      x#######',
     '  P              C    x#######',
@@ -427,7 +427,7 @@ const ROOMS = [
     '############   #####       ####   ############',
     '############   #####       ####   ############',
     '############   #####       ####   ############',
-    '############   x####^^^^^^^####   ############',
+    '############   #####^^^^^^^####   ############',
     '############   x###############   ############',
     '############   x###############   ############',
     '############   x###############   ############',
@@ -439,7 +439,7 @@ const ROOMS = [
     '#          #   ################      ######  #',
     '#              ################      ######  #',
     '               ################              #',
-    ' P      e      ################   e #   o    #',
+    ' P      e      ################   e #   o  # #',
     '##############################################',
     '##############################################',
   ], [240, 101], { world: 1 }],
@@ -1301,6 +1301,14 @@ class Room extends Phaser.Scene {
     if (!talking) g.inTalk = false;
     if (g.inTalk) {
       if (g.alpha === 0) { g.setPosition(p.x + 40, p.y - 34); g.hoverY = g.y; }
+      // Left far behind (he respawned, or walked on while the ghost lingered): drift back to his upper right.
+      const home = { x: p.x + 40, y: p.y - 34 };
+      if (Math.hypot(home.x - g.x, home.y - g.hoverY) > 160 && !t.line?.guide && !t.line?.guideBy) g.drifting = true;
+      if (g.drifting) {
+        const d = Math.hypot(home.x - g.x, home.y - g.hoverY), s = Math.min(1, 260 * dt / (d || 1));
+        g.x += (home.x - g.x) * s; g.hoverY += (home.y - g.hoverY) * s;
+        if (d < 8) g.drifting = false;
+      }
       g.setAlpha(Math.min(0.7, g.alpha + dt * 1.2));
       g.away = 0;
       if (!g.looking) g.setFlipX(g.x > p.x);
@@ -1575,9 +1583,9 @@ class Room extends Phaser.Scene {
     return 0;
   }
 
-  canStand() {
+  canStand(height = STAND[1]) {
     const p = this.player, feet = p.y + p.height / 2;
-    const r = new Phaser.Geom.Rectangle(p.x - STAND[0] / 2, feet - STAND[1], STAND[0], STAND[1]);
+    const r = new Phaser.Geom.Rectangle(p.x - STAND[0] / 2, feet - height, STAND[0], height);
     return !this.statics.getChildren().some((s) => s.body.enable && hit(r, bounds(s)));
   }
 
@@ -1746,7 +1754,7 @@ class Room extends Phaser.Scene {
   }
 
   updateEnemies() {
-    if (this.dead > 0) {
+    if (this.dead > 0 || this.talk.active) { // walkers wait while you are dead or in a conversation
       for (const e of this.enemies) e.body.setVelocity(0, 0);
       return;
     }
@@ -1801,7 +1809,7 @@ class Room extends Phaser.Scene {
     const solid = (box, skip) => this.statics.getChildren().find((s) => s !== skip && s.body.enable && hit(box, bounds(s)));
     const walls = (box) => this.statics.getChildren().find((s) => s.body.enable && !this.corpses.includes(s) && hit(box, bounds(s)));
     const R = this.rooms[this.index].rect, p = this.player, t = this.time.now / 1000;
-    for (const f of this.dead > 0 ? [] : this.flyers) {
+    for (const f of this.dead > 0 || this.talk.active ? [] : this.flyers) {
       const nx = f.x + f.dir * FLYER_SPEED * dt;
       if (walls(new Phaser.Geom.Rectangle(nx - 12, f.y - 8, 24, 16)) || nx < R.x + 16 || nx > R.right - 16) f.dir *= -1;
       else f.x = nx;
@@ -2327,7 +2335,8 @@ class Room extends Phaser.Scene {
 
     this.updateHud();
     const room = this.rooms[this.index];
-    this.cameras.main.setZoom(room.name === 'Thornwood' && p.x > room.rect.x + 27 * T ? 0.68 : 1);
+    const zoom = room.name === 'Thornwood' && p.x > room.rect.x + 27 * T ? 0.68 : 1, cam = this.cameras.main;
+    cam.setZoom(cam.zoom + (zoom - cam.zoom) * Math.min(1, dt * 6)); // eases out to show Thornwood's section C
     for (const layer of this.art.layers) if (layer.ts.depth === 10)
       layer.ts.setAlpha(room.name === 'The well' ? 0.15 : 1);
     // Look into drops in every tall room, including drops after a shrine.
@@ -2460,7 +2469,8 @@ class Room extends Phaser.Scene {
     }
     this.coyote = grounded ? COYOTE : this.coyote - dt;
     this.buffer = jumpDown ? BUFFER : this.buffer - dt;
-    if (this.buffer > 0 && this.coyote > 0) { GameAudio.play(this.lying ? 'hero-dive' : 'hero-jump', this.lying ? 0 : 3); b.velocity.y = -JUMP; this.buffer = this.coyote = 0; }
+    // No dive in a one-tile tunnel: a bonk off its ceiling would float a slide over a spike gap.
+    if (this.buffer > 0 && this.coyote > 0 && (!this.lying || this.canStand(T + 8))) { GameAudio.play(this.lying ? 'hero-dive' : 'hero-jump', this.lying ? 0 : 3); b.velocity.y = -JUMP; this.buffer = this.coyote = 0; }
     else if (this.buffer > 0 && this.wallCoyote > 0 && !grounded && this.lastWall !== this.kickSide) { // wall jump
       GameAudio.play('hero-jump', 3);
       b.velocity.y = -WALL_JUMP; b.velocity.x = -this.lastWall * WALL_KICK; this.face = -this.lastWall;
