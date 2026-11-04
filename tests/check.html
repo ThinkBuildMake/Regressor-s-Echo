@@ -675,7 +675,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   };
   const cleanSolveRoom = async (name) => {
     Object.assign(rules, defaultRules);
-    stats.deaths = 0;
+    stats.deaths = stats.stagDeaths = 0;
     stats.treePower = false; stats.mothFinished = false; stats.stagFinished = false;
     // Movement replays run after the story, independent of which dialogue checks ran.
     Dialogue.seen.clear();
@@ -1651,6 +1651,21 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     await until(() => s.player.x >= O().x + 3.5 * 32 && s.player.y + 15 < O().y + 12 * 32, 1800, 'climb onto arena platform');
     key('keyup', 39); await until(() => s.player.body.blocked.down, 1200, 'land on arena platform'); key('keyup', 32);
     check(s.player.y + 15 <= O().y + 12.1 * 32, 'The old tree: the wide opening reaches the platform with a normal jump');
+  }
+  if (matches('The clearing')) {
+    s = await cleanSolveRoom('The clearing');
+    const title = () => room().children.list.some((o) => o.type === 'Text' && o.text === 'Forest Edge');
+    check(title(), 'The clearing: entering World 1 shows its title');
+    s = await shiftR(); await wait(200);
+    check(!title(), 'The clearing: Shift+R does not show the world title again');
+  }
+  if (matches('The spectral stag')) {
+    s = await cleanSolveRoom('The spectral stag');
+    await sacrifice();
+    s = await shiftR(); await wait(200); await alive();
+    check(s.boss.deaths === 1, 'The spectral stag: the death count survives Shift+R');
+    await sacrifice();
+    check(s.boss.deaths === 2 && stats.stagDeaths === 2, `The spectral stag: deaths after Shift+R add to the fight count (${s.boss.deaths})`);
   }
   if (matches('The spectral stag') || matches('The pyramid entrance')) {
     s = await cleanSolveRoom('The spectral stag');
