@@ -292,11 +292,12 @@ const SCRIPT = {
     W(0.1, 'keys:slide'),
   ],
   wallJump: [ // Thornwood, at the foot of the climbing shaft
-    H('thinking', "Up there? There's nothing to grab."),
-    G('thinking', 'Remember the old well behind the inn?'),
-    H('annoyed', '…I was stuck down there for an hour.'),
-    G('wry', 'Fifty minutes of yelling for help. Ten of kicking off the walls.'),
-    H('exhausted', "…I should've led with the kicking."),
+    H('thinking', 'Too high to jump. Too narrow to… huh. Narrow.'),
+    G('wry', 'Go on. Say it.'),
+    H('thinking', "If I kick off one wall, I'd reach the other."),
+    G('thinking', 'And then?'),
+    H('determined', '…Kick off that one.'),
+    G('amused', 'There he is.'),
     W(0.1, 'keys:wallJump'),
   ],
   shrineMark: [ // first time he touches a shrine
@@ -370,7 +371,7 @@ stage('clearing', 0, { walk: 4, face: 'right' });
 stage('clearing', 1, { walk: 5, face: 'right' });
 stage('clearing', 2, { walk: 6, face: 'right' });
 stage('amulet', 0, { walk: 11, face: 'right', pose: 'kneel', amulet: 'ground' });
-stage('amulet', 1, { walk: 11.5, pose: 'idle', amulet: 'hold', turnAmulet: true });
+stage('amulet', 1, { walk: 11.5, pose: 'hold', amulet: 'hold', turnAmulet: true });
 stage('amulet', 2, { amulet: 'hand' });
 stage('amulet', 3, { pose: 'idle', amulet: 'wear' });
 stage('amulet', 6, { walk: 11, face: 'guide', hop: true });
@@ -417,11 +418,12 @@ for (const lines of Object.values(SCRIPT)) for (const l of lines) {
 stage('curse', 0, { amulet: 'pull', pose: 'kneel' });
 stage('curse', 1, { amulet: 'wear', pose: 'idle', hop: true });
 stage('curse', 4, { walk: 17, face: 'right' });
-stage('curse', 7, { amulet: 'hold' });
-stage('curse', 11, { amulet: 'wear', walk: 17.5, face: 'right' });
+stage('curse', 7, { pose: 'hold', amulet: 'hold' });
+stage('curse', 11, { pose: 'idle', amulet: 'wear', walk: 17.5, face: 'right' });
 stage('firstPit', 3, { pose: 'kneel', face: 'right', camera: { x: -32, y: -20 } });
 stage('firstPit', 6, { pose: 'idle', face: 'right' });
-stage('firstDeath', 1, { pose: 'slump' });
+stage('firstDeath', 1, { pose: 'pained' }); // AAGH!
+stage('firstDeath', 3, { pose: 'pained' }); // scooped out half my insides
 stage('firstDeath', 5, { pose: 'idle', face: 'guide' });
 stage('firstDeath', 17, { guideBy: 1 });
 stage('soul', 4, { pose: 'slump', face: 'right' });
@@ -430,13 +432,13 @@ stage('chain', 1, { face: 'right' });
 stage('chain', 2, { guideBy: 0.5 });
 stage('chain', 3, { face: 'guide' });
 stage('chain', 9, { walk: 4.5, face: 'right' });
-stage('shrineMark', 0, { pose: 'kneel', amulet: 'hold' });
+stage('shrineMark', 0, { pose: 'hold', amulet: 'hold' });
 stage('shrineMark', 1, { pose: 'idle', amulet: 'wear' });
 stage('pyramid', 1, { face: 'right', camera: { x: -24, y: 32 } });
 stage('tree', 4, { walk: 7.5, hop: true, face: 'right' });
 stage('mothDown', 4, { hop: true });
-stage('mothDown', 12, { amulet: 'hold' });
-stage('mothDown', 13, { amulet: 'wear' });
+stage('mothDown', 12, { pose: 'hold', amulet: 'hold' });
+stage('mothDown', 13, { pose: 'idle', amulet: 'wear' });
 stage('stagPromise', 5, { face: 'left' });
 stage('stagPromise', 6, { walk: 20.5, face: 'left' });
 stage('stagPromise', 7, { walk: 20, face: 'guide' });
@@ -549,7 +551,10 @@ const Dialogue = {
       const mark = m?.mark ?? this.mark(scene, l.walk);
       p.body.reset(mark.x, mark.y + (m?.mark ? m.height - p.height : 0) / 2);
     } else if (skip && l.hop && m) p.body.reset(p.x, m.feet - p.height / 2);
-    if (l.pose) scene.setLying(false); // ponytail: kneel/slump show idle until their sprites exist
+    if (l.pose) {
+      scene.setLying(false);
+      if (scene.cutPose !== l.pose) { scene.cutPose = l.pose; scene.cutPoseAt = scene.time.now; } // game.js draws it (HERO_POSES)
+    }
     if (l.facing) scene.face = l.facing === 'guide' ? (g.x < p.x ? -1 : 1) : l.facing === 'left' ? -1 : 1;
     if (l.amulet) {
       scene.amuletPose = l.amulet;
@@ -601,8 +606,9 @@ const Dialogue = {
       if (!scene.heldAmulet) scene.heldAmulet = (scene.textures.exists('amulet')
         ? scene.add.image(0, 0, 'amulet').setDisplaySize(14, 18)
         : scene.add.circle(0, 0, 6, 0xffd774).setStrokeStyle(2, 0xb07a22)).setDepth(6);
-      scene.heldAmulet.setVisible(true).setPosition(p.x + scene.face * (pose === 'ground' ? 8 : 14),
-        p.body.bottom - (pose === 'ground' ? 5 : pose === 'hold' ? 40 : 23) -
+      const cupped = pose === 'hold' && scene.cutPose === 'hold'; // in the palm of the holding-up pose
+      scene.heldAmulet.setVisible(true).setPosition(p.x + scene.face * (pose === 'ground' ? 8 : cupped ? 4 : 14),
+        p.body.bottom - (pose === 'ground' ? 5 : cupped ? 19 : pose === 'hold' ? 40 : 23) -
           (pose === 'pull' ? Math.sin(m.elapsed * 20) * 3 : 0));
       scene.heldAmulet.setAngle(l.turnAmulet ? Math.sin(Math.min(1, m.elapsed / 0.8) * Math.PI) * 160 : 0);
     } else scene.heldAmulet?.setVisible(false);

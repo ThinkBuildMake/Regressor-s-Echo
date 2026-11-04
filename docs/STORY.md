@@ -212,11 +212,13 @@ A hint at the move through shared history; the room teaches what the flat soul d
 *The well and the gatehouse are silent puzzle rooms.*
 
 ### 12. The wall jump — *Thornwood, at the foot of the climbing shaft*
-> **Hero** [thinking]: Up there? There's nothing to grab.  
-> **Guide** [thinking]: Remember the old well behind the inn?  
-> **Hero** [annoyed]: …I was stuck down there for an hour.  
-> **Guide** [wry]: Fifty minutes of yelling for help. Ten of kicking off the walls.  
-> **Hero** [exhausted]: …I should've led with the kicking.
+The hero works it out himself; the key prompt that follows confirms it.
+> **Hero** [thinking]: Too high to jump. Too narrow to… huh. Narrow.  
+> **Guide** [wry]: Go on. Say it.  
+> **Hero** [thinking]: If I kick off one wall, I'd reach the other.  
+> **Guide** [thinking]: And then?  
+> **Hero** [determined]: …Kick off that one.  
+> **Guide** [amused]: There he is.
 
 ### 13. The moth arrives — *The moth, a few steps in along the arena floor, while walking*
 > *(The ground shakes.)*  
