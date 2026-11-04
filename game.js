@@ -18,6 +18,9 @@ const HERO_SRC = 112;                                  // his typical height in 
 // Run cycle: which frames of assets/hero/run.webp to loop, and how far he moves per frame.
 // Try orders and pacing in tools/preview.html, then copy the settings here.
 const RUN_FRAMES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], RUN_STEP = 12; // Veo run: one full stride in 12 frames
+// Cutscene poses (dialogue.js `pose`): sheet, frame count (into the pose, then held), feet position across the frame.
+const HERO_POSES = { kneel: ['heroKneel', 4, 0.49], slump: ['heroSlump', 4, 0.36], sleep: ['heroSlump', 4, 0.36],
+  hold: ['heroHold', 3, 0.67], pained: ['heroPained', 3, 0.56] };
 const RUN_SCALE = 1.12; // the Veo run draws him smaller in his cell than the idle does
 // Slide: loop the first row of assets/hero/slide.webp so the cape flutters.
 const SLIDE_FRAMES = [0, 1, 2, 3], SLIDE_FPS = 8;
@@ -926,6 +929,10 @@ class Room extends Phaser.Scene {
       ['heroIdleAnim', 'hero/idle-veo', 106, 112],
       ['heroWall', 'hero/wall-slide-veo', 141, 141],
       ['heroKick', 'hero/wall-slide', 141, 141], // the old sheet's frame 3 is the wall kick-off
+      ['heroKneel', 'hero/pose-kneel', 112, 112],
+      ['heroSlump', 'hero/pose-slumped', 127, 112],
+      ['heroHold', 'hero/pose-holding-up', 111, 112],
+      ['heroPained', 'hero/pose-pained', 116, 112],
       ['flyer', 'enemies/flyer', 115, 112],
       ['thrower', 'enemies/thrower', 123, 112],
     ]) if (!this.textures.exists(key)) this.load.spritesheet(key, `assets/${path}.webp`, { frameWidth: width, frameHeight: height });
@@ -1690,7 +1697,9 @@ class Room extends Phaser.Scene {
     // Pick the frame: in the air, jump or fall; on the ground, run frames timed to distance covered
     // (one frame per RUN_STEP px, so steps match speed), or the standing painting when still.
     const wallPose = !grounded && b.velocity.y > 0 && this.wallSide() === this.face && this.textures.exists('heroWall');
-    this.heroFrame = this.lying ? ['heroSlide', SLIDE_FRAMES[Math.floor(t * SLIDE_FPS) % SLIDE_FRAMES.length]]
+    const cut = this.talk.active && grounded && Math.abs(b.velocity.x) < 20 && HERO_POSES[this.cutPose];
+    this.heroFrame = cut && this.textures.exists(cut[0]) ? [cut[0], Math.min(cut[1] - 1, Math.floor((this.time.now - this.cutPoseAt) / 1000 * 8))]
+      : this.lying ? ['heroSlide', SLIDE_FRAMES[Math.floor(t * SLIDE_FPS) % SLIDE_FRAMES.length]]
       : !grounded && this.kick > 0 && this.textures.exists('heroKick') ? ['heroKick', 3]
       : wallPose ? ['heroWall', Math.floor(t * 8) % 6]
       : !grounded ? ['heroSheet', b.velocity.y < 0 ? 6 : 7]
@@ -1704,7 +1713,7 @@ class Room extends Phaser.Scene {
     // up after drawing, so using it made the painting trail one frame behind the body).
     const flip = (key === 'heroKick' ? this.lastWall : this.face) < 0, slide = key === 'heroSlide', bx = b.center.x, feet = b.bottom;
     this.heroSprite.setTexture(key, frame).setScale(key === 'heroWall' || key === 'heroKick' ? HERO_HEIGHT / 141 : this.heroScale * (key === 'heroRun' ? RUN_SCALE : 1)).setFlipX(flip)
-      .setOrigin(slide ? this.slideOrigin(frame, flip) : key === 'heroIdleAnim' ? (flip ? 0.27 : 0.73) : 0.5, 1) // idle feet sit 73% across the frame
+      .setOrigin(slide ? this.slideOrigin(frame, flip) : key === 'heroIdleAnim' ? (flip ? 0.27 : 0.73) : cut ? (flip ? 1 - cut[2] : cut[2]) : 0.5, 1) // idle feet sit 73% across the frame
       .setPosition(bx + (slide ? this.face * 12 : 0), feet + 1);
     // the amulet's glow, on his chest (only placed for upright poses)
     if (slide || !this.wearing) return;
