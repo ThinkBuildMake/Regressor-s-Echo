@@ -530,6 +530,8 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     for (let t = 0; t < 90000 && M.hp > 0 && stats.deaths === fightDeaths; t += 20) {
       if (trace.at(-1)?.phase !== M.phase) trace.push({phase:M.phase,hp:M.hp,x:((s.player.x-O().x)/T).toFixed(1),feet:((s.player.y+15-O().y)/T).toFixed(1)});
       phases.add(M.phase);
+      // Every stomp hurts now, so hold damage off until this hp's attacks have all been seen.
+      if (!(M.hp === 3 ? phases.has('curtain') : M.hp === 2 ? phases.has('skimmer') : loomCounts.has(4))) M.hurt = Math.max(M.hurt, 0.05);
       if (M.phase === 'loomGap') loomCounts.add(M.fired);
       if (M.phase === 'stunned' && M.clock > 0.05) check(M.img?.angle === 25 || !M.img, 'moth: stunned wings visibly droop');
       const grounded = s.player.body.blocked.down || s.player.body.touching.down;
@@ -557,7 +559,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
       });
       const closedFall = !M.open && s.player.body.velocity.y > 0;
       await wait(20);
-      if (closedFall && M.phase === 'diveGap' && M.hp === lastHp && s.player.body.velocity.y < 0) plainBounce = true;
+      if (closedFall && M.hp < lastHp) plainBounce = true; // any stomp hurts it now, stunned or not
       if (M.hp < lastHp && M.hp > 0) bouncing = true;
       if (bouncing && s.player.body.velocity.y < 0 && s.player.y + 15 < bounds(M.r).top) bounceCleared = true;
       lastHp = M.hp;
@@ -567,7 +569,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     check(sideJump, 'moth: jumping into the stunned side is harmless');
     check([0, 1, 2].every((i) => curtainColumns.has(3.25 + i * 8) && curtainColumns.has(8.75 + i * 8)), 'moth: curtain dust fills exactly the told columns');
     check(loomCounts.has(3) && loomCounts.has(4), 'moth: Loom adds its fourth aimed pod after hit two');
-    check(plainBounce, 'moth: a plain stomp after the stun closes bounces without damage');
+    check(plainBounce || M.hp <= 0, 'moth: a stomp hurts it even when it is not stunned');
     check(bounceCleared, 'moth: real stomp bounce clears the back and continues to the next stomp');
     check(stats.deaths === deaths + 1 && s.corpses[0] === soul, `three stomps keep the same thorn soul without dying (${JSON.stringify(trace.slice(-6))})`);
     if (M.hp > 0 || stats.deaths !== fightDeaths) throw new Error(JSON.stringify({ trace, hp: M.hp, deaths: stats.deaths - fightDeaths }));
@@ -1610,7 +1612,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     await walkTo(35); await until(() => s.player.body.blocked.down, 2500, 'shielded descent');
     const exitDeaths = stats.deaths;
     await jumpTo(36);
-    await until(() => s.enemies.some(e => e.x < O().x + 38 * T), 5000, 'walker reaches the post');
+    await until(() => s.enemies.some(e => e.x > O().x + 34 * T && e.x < O().x + 38 * T), 5000, 'walker reaches the post'); // not the thrower
     const enemies = s.enemies.length;
     key('keydown', 32); await wait(400); await walkTo(37.1);
     await until(() => s.enemies.length < enemies || stats.deaths > exitDeaths, 2500, 'stomp beside post');

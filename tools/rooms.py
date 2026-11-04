@@ -141,9 +141,9 @@ def sawmill(o, p):
     #    Stomp the thrower from the soul.
     o(10, 1, 14, 10); o(15, 6, 30, 9); p(12, 10, 'C'); p(27, 9, '_'); o(19, 10, 25, 10, '~'); o(19, 11, 25, 13)
     o(19, 14, 25, 14, '^'); p(29, 9, 't'); o(31, 6, 31, 9, 'D')
-    # C: drop down to the shrine; a laser from the ceiling cuts the way out. Die in it mid-jump so the soul sits high
+    # C: shrine on a ledge in the shaft, drop down; a laser from the ceiling cuts the way out. Die in it mid-jump so the soul sits high
     #    and you can walk under it (a soul on the floor blocks the path with the beam still above it). Stomp the walker.
-    o(32, 6, 34, 19); p(33, 19, 'C'); o(35, 15, 42, 19); p(38, 14, 'v'); p(41, 19, 'e'); p(36, 19, '#'); o(43, 17, 43, 19)   # post keeps the walker off the landing
+    o(32, 6, 34, 19); o(32, 10, 33, 10, '#'); p(33, 9, 'C'); o(35, 15, 42, 19); p(38, 14, 'v'); p(41, 19, 'e'); p(36, 19, '#'); o(43, 17, 43, 19)   # post keeps the walker off the landing
 room('Sawmill', [496, 71], 44, 22, 2, 'SHOWCASE W2: spring + timed self-destruct jams a saw, plate soul as a shield, thrower, laser', sawmill)
 
 def tree_guardian(o, p):

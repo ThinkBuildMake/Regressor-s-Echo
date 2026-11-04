@@ -606,8 +606,8 @@ const ROOMS = [
     '#                              D   #########',
     '#                              D   #########',
     '#                              D   #########',
-    '#                          _ t D   #########',
-    '#           C  ####~~~~~~~######   #########',
+    '#                          _ t D C #########',
+    '#           C  ####~~~~~~~######## #########',
     '#         #########       ######   #########',
     '#         #########       ######   #########',
     '#         #########       ######   #########',
@@ -616,7 +616,7 @@ const ROOMS = [
     '#         ######################           #',
     '          ######################            ',
     '          ######################            ',
-    ' P    s   ###################### C  #    e  ',
+    ' P    s   ######################    #    e  ',
     '############################################',
     '############################################',
   ], [526, 71], { world: 2 }],
@@ -2283,7 +2283,7 @@ class Room extends Phaser.Scene {
     }
     p.body.reset(p.x, top - p.height / 2);
     p.body.velocity.y = -JUMP * (B.stag ? 1 : 0.8);
-    if (B.hurt > 0 || (B.story === 'mothDown' && !B.open) || (B.stag && (B.phase !== 'dazed' || B.stomped)) || (B.kind === 'tree' && (B.stompReady === false || B.open <= 0))) return false;
+    if (B.hurt > 0 || (B.stag && (B.phase !== 'dazed' || B.stomped)) || (B.kind === 'tree' && (B.stompReady === false || B.open <= 0))) return false;
     if (B.stag) B.stomped = true;
     if (B.kind === 'tree') { B.stompReady = false; B.open = 0; }
     GameAudio.play(`${GameAudio.kind(B)}-${B.kind === 'tree' ? 'mask-hit' : 'hit'}`);
