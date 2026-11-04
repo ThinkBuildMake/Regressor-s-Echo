@@ -3,14 +3,14 @@
 Goal: every room and boss in Worlds 1-3 verified possible, fair and skip-free by real play, with the new cutscenes, audio and story art working, merged into main by morning.
 
 ## Todo
-- [ ] Final start-to-finish playthrough (one Claude agent, real inputs, clearing to ending card, no dev keys); fix what it finds
-- [ ] Merge night into main when the full suite passes twice
+- [ ] Merge night into main — BLOCKED by uncommitted story edits in main's working copy (dialogue.js, STORY.md); leave for the user
 - [ ] Morning summary at the top of NIGHT_LOG.md
 
 ## Doing
-- [ ] Full suite twice after merging all three worlds
+- [ ] Final start-to-finish playthrough + fixes — Claude agent in ../Game-Week-w2
 
 ## Done
+- [x] All three worlds merged; full suite OK twice (37f5509)
 - [x] World 1 QA-and-fix merged
 - [x] World 2 QA-and-fix merged (a770aaf)
 - [x] World 3 QA-and-fix merged (9ae325b)
