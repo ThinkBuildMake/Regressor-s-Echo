@@ -322,9 +322,9 @@ const SCRIPT = {
     { ...G('warning', "Don't say it's just a tree."), cue: 'tree' },
     H('scared', "…It's not just a tree."),
   ],
-  treeSlam: [H('shouting', 'It smashed me! The other me! It keeps smashing me!'),
+  treeSlam: [H('shouting', 'It keeps flattening me!'),
     G('thinking', 'Watch where it looks before it swings.')],
-  treeSlam2: [G('thinking', 'It always goes for the one closest to you. Use that.')],
+  treeSlam2: [G('thinking', 'Put your other self where its fists come down.')],
   treeDown: [
     W(0.8), H('exhausted', 'Is it…'), H('annoyed', "Don't you dare get back up."),
     W(1.2, 'glow'), W(1.4, 'absorb'), H('startled', 'Again?!'),

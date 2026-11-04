@@ -779,78 +779,59 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     key('keyup', 75); await alive();
   };
   if (matches('The tree guardian')) {
+    const at = (tx, top = 0) => s.player.body.reset(O().x + tx * 32 + 16, O().y + (16 - top) * 32 - 15.5);
+    const attack = (i) => { const B = s.boss; B.phase = 'idle'; B.attack = i - 1; B.timer = 0; B.open = 0; };
+    const settle = async () => { await wait(50); await until(() => s.boss.phase === 'idle' || s.dead > 0, 4000, 'tree attack lands'); };
+    const floor = () => O().y + 16 * 32;
     s = await cleanSolveRoom('The tree guardian');
-    await walkTo(21); await sacrifice();
-    const B = s.boss;
-    await walkTo(18); await jumpTo(21);
-    const hp = B.hp;
-    key('keydown', 32); await wait(180); await walkTo(23.5); await wait(800); key('keyup', 32);
-    check(B.hp === hp, 'tree: plain stomp bounces without damaging the mask');
-    // Set up from the step with a held self-destruct jump, not a spawned support.
-    s = await cleanSolveRoom('The tree guardian');
-    await walkTo(21); await sacrifice();
-    await walkTo(18); await jumpTo(21);
-    key('keydown', 75); await wait(300);
-    key('keydown', 32); await wait(100); key('keydown', 39);
-    await until(() => s.dead > 0, 2000, 'airborne stone support');
-    key('keyup', 39);
-    key('keyup', 75); key('keyup', 32); await alive();
-    const tree = s.boss, step = s.corpses[0], support = s.corpses[1];
+    let B = s.boss;
+    check(!B.img || B.img.x === B.r.x, 'tree: painted face and mask share the same column');
+    const x0 = B.x; B.timer = 5; at(3); await wait(1000);
+    check(B.x < x0 - 20 && B.face === -1, `tree: lumbers toward you between attacks (moved ${((x0 - B.x) / 32).toFixed(1)} tiles)`);
+    s.player.body.reset(B.r.x, bounds(B.r).top - 14); s.player.body.velocity.y = 10; s.bossPreviousFeet = bounds(B.r).top; B.stompReady = true;
+    s.touchBoss();
+    check(B.hp === 3 && stats.deaths === 0, 'tree: plain stomp bounces without damaging the mask');
+    // Swing: deadly in front, safe out of reach.
+    s = await cleanSolveRoom('The tree guardian'); B = s.boss;
+    at(21); await wait(100); attack(0); await settle();
+    check(stats.deaths === 1, `tree: the swing hits in front of it (${stats.deaths} deaths)`);
+    await alive(); at(17); await wait(100); attack(0); await settle();
+    check(stats.deaths === 1, 'tree: the swing misses out of reach');
+    // Slam onto a soul: the fists stick (the soul is unharmed); the bowed mask is stompable from the floor.
+    s = await cleanSolveRoom('The tree guardian'); B = s.boss;
+    await place(10, 0); const soul = s.corpses[0];
+    at(9); await wait(100); attack(2); await wait(50);
+    check(B.phase === 'slam' && s.treeCatch(B) === soul, 'tree: the slam aims at you and your soul beside you will catch it');
+    at(6); await until(() => B.open > 0 || s.dead > 0, 4000, 'hands stuck'); await wait(50);
+    check(stats.deaths === 1 && !soul.buried && s.corpses.includes(soul), 'tree: the soul catches the fists and is not removed');
+    check(bounds(B.r).top > floor() - 3 * 32, `tree: stuck hands bow the mask into jump reach (top ${((floor() - bounds(B.r).top) / 32).toFixed(1)} up)`);
+    const maskTx = (B.r.x - O().x - 16) / 32;
+    await walkTo(maskTx - 3); await jumpTo(maskTx);
+    check(B.hp === 2 && stats.deaths === 1, 'tree: a stomp from the floor lands on the stuck mask');
+    // Slam with no soul in play lands on you.
+    s = await cleanSolveRoom('The tree guardian'); B = s.boss;
+    at(12); await wait(100); attack(2); await settle();
+    check(stats.deaths === 1 && B.open === 0, 'tree: a slam with no soul lands on you and sticks nothing');
+    // Burst: no dodging it; only a soul between you and the tree blocks it.
+    s = await cleanSolveRoom('The tree guardian'); B = s.boss;
+    at(8); await wait(100); attack(3); await settle();
+    check(stats.deaths === 1, 'tree: the burst kills you in the open');
+    await alive(); await place(8, 0); await wait(100); B.x = B.x0;
+    at(6); await wait(100); attack(3); await settle();
+    check(stats.deaths === 2, 'tree: a soul between you and the tree shields the burst');
+    at(8, 1); await wait(150); attack(3); await settle();
+    check(stats.deaths === 3, 'tree: standing on the soul leaves you exposed to the burst');
+    // Three stuck-hand stomps win.
+    s = await cleanSolveRoom('The tree guardian'); B = s.boss;
     Dialogue.seen.delete('treeDown'); Dialogue.seen.delete('guideCrack');
-    check(Math.abs(support.x - tree.r.x) < support.width / 2 + 12 && support.y - support.height / 2 < tree.r.y - 32,
-      `tree: timed self-destruct hangs the newest soul above the mask (${(support.x - tree.r.x) / 32}, top ${(support.y - support.height / 2 - O().y) / 32})`);
-    await walkTo(18); await jumpTo(21);
-    // The step clears the rake and the mortar is led away from the stone column.
-    const catchStone = async () => {
-      await until(() => tree.phase === 'mortar', 15000, 'mortar warning');
-      await walkTo(17);
-      await until(() => tree.attack === 1 && tree.phase === 'idle' && !tree.pods.length, 5000, 'mortar passes');
-      await jumpTo(21);
-      await until(() => tree.stone?.support === support, 15000, 'stone caught');
-    };
-    await catchStone();
-    check(tree.timer > 0.95 && tree.timer <= 1, 'tree: first lure gap starts at one second after landing');
-    check(tree.open === 0 && tree.hp === 3, 'tree: catching alone does not expose the mask');
-    const deaths = stats.deaths;
-    for (let hit = 0; hit < 3; hit++) {
-      if (hit) {
-        await walkTo(18); await jumpTo(21);
-        await catchStone();
-        check(tree.timer > 0.95 && tree.timer <= 1, 'tree: lure gap stays one second as the other attacks speed up');
-      }
-      await until(() => tree.phase === 'idle' && tree.attack === 2 && tree.timer < 0.6, 4000, 'jump before slam tell');
-      key('keydown', 32); await wait(180); await walkTo(23);
-      await until(() => tree.phase === 'slam', 2000, 'support slam tell');
-      key('keyup', 32);
-      check(tree.target === support, 'tree: blue tell locks the stone support');
-      await walkTo(21);
-      await until(() => tree.open > 0, 4000, 'burial drops stone onto bowed mask');
-      check(support.buried > 0 && s.corpses.includes(support) && s.corpses.includes(step), 'tree: buried support stays available for the next cycle');
-      key('keydown', 32); await wait(180); await walkTo(23);
-      await until(() => tree.hp < 3 - hit || s.dead > 0, 2000, 'exposed mask stomp');
-      key('keyup', 32);
-      check(tree.hp === 2 - hit && stats.deaths === deaths, 'tree: slam cycle ' + (hit + 1) + ' lands without a death');
+    for (let i = 0; i < 3; i++) {
+      B.open = 2; B.timer = 99; await wait(50); B.stompReady = true; B.hurt = 0;
+      s.player.body.reset(B.r.x, bounds(B.r).top - 14); s.player.body.velocity.y = 10; s.bossPreviousFeet = bounds(B.r).top;
+      s.touchBoss();
     }
-    check(tree.hp === 0 && tree.hidden && stats.deaths === deaths, 'tree: three slam openings win with the original two souls');
+    check(B.hp === 0 && B.hidden, `tree: three stuck-hand stomps win (hp ${B.hp})`);
     Dialogue.skip(s); await wait(200);
     check(stats.treePower && !s.boss, 'tree: victory grants the third soul');
-    s = await cleanSolveRoom('The tree guardian');
-    const mask = s.boss;
-    check(!mask.img || mask.img.x === mask.r.x, 'tree: painted face and mask share the same column');
-    s.player.body.reset(mask.r.x - 36, mask.r.y);
-    await wait(200);
-    check(stats.deaths === 0, 'tree: touching the mask side is harmless');
-    // Isolate the mortar while camping on an elevated soul.
-    await place(23, 5);
-    const perch = s.corpses[0];
-    s.player.body.reset(perch.x, perch.y - perch.height / 2 - 15);
-    mask.phase = 'idle'; mask.attack = 0; mask.timer = 0;
-    await wait(50);
-    check(mask.phase === 'mortar' && mask.landingY < mask.floor - 4 * T,
-      'tree: mortar warning targets the elevated perch');
-    const campDeaths = stats.deaths;
-    await until(() => stats.deaths > campDeaths, 3000, 'mortar hits the camper');
-    check(stats.deaths > campDeaths, 'tree: a soul perch cannot camp through mortar');
     s = await cleanSolveRoom('The tree guardian');
     Dialogue.seen.delete('treeSlam');
     await sacrifice();

@@ -41,9 +41,9 @@ const MOTH_FRAMES = [...Array(12).keys()], MOTH_FPS = 16, MOTH_SCALE = 0.243 * M
 // Its intro: it bursts out of the right wall at these rows (top, bottom) of its room. The hole is only
 // painted; the wall keeps its colliders, so the arena stays closed.
 const MOTH_HOLE = [2, 9];
-// Tree: lumbers toward you; swing, seed pods, slam, burst. A slam on a soul sticks its hands for TREE_STUCK s (stomp the bowed mask).
-// The burst can't be dodged: only a soul between you and the tree blocks it. A slammed soul stays buried through the next burst.
-const TREE_GLOW = 2.05, TREE_BURIED = 6, TREE_BURST = 1.5, TREE_STUCK = 2.5, TREE_WALK = 40, TREE_LUNGE = 240, TREE_FIST = 40;
+// Tree: lumbers toward you; swing, seed pods, slam, burst. A slam that lands on a soul sticks its hands for TREE_STUCK s
+// (stomp the bowed mask); the soul is unharmed. The burst can't be dodged: only a soul between you and the tree blocks it.
+const TREE_GLOW = 2.05, TREE_BURST = 1.5, TREE_STUCK = 2.5, TREE_WALK = 40, TREE_LUNGE = 240, TREE_FIST = 40;
 // Self-destruct (World 2 on): hold K/X this long. You keep moving while it charges; letting go cancels.
 const SD_HOLD = 0.75;
 // Recall (World 3): Q takes back your newest soul. Holding keeps going, each gap shorter, down to RECALL_MIN.
@@ -1979,9 +1979,9 @@ class Room extends Phaser.Scene {
     const B = this.boss;
     if (B?.kind === 'tree' && !B.hidden) {
       if (B.phase === 'slam') {
-        g.lineStyle(3, 0x69cfff, 1).strokeCircle(B.aimX, B.target?.y ?? B.floor - 16, 24);
-        if (B.target) g.strokeRect(B.target.x - B.target.width / 2 - 4, B.target.y - B.target.height / 2 - 4, B.target.width + 8, B.target.height + 8);
-        g.lineBetween(B.r.x, B.r.y, B.aimX, B.target?.y ?? B.floor);
+        g.lineStyle(3, 0x69cfff, 1).strokeCircle(B.aimX, B.floor - 16, 24).lineBetween(B.r.x, B.r.y, B.aimX, B.floor);
+        const c = this.treeCatch(B); // the soul that will catch the fists
+        if (c) g.strokeRect(c.x - c.width / 2 - 4, c.y - c.height / 2 - 4, c.width + 8, c.height + 8);
       } else if (B.phase === 'swing') {
         const box = this.treeSwingBox(B);
         g.fillStyle(0xf1f578, 0.25).fillRect(box.x, box.y, box.width, box.height);
@@ -2316,11 +2316,7 @@ class Room extends Phaser.Scene {
       B.phase = ['swing', 'throw', 'slam', 'burst'][B.attack];
       B.timer = [0.8, 0.7, TREE_GLOW, TREE_BURST][B.attack];
       if (B.phase === 'throw') { B.landingY = feet - 8; B.landings = [-64, 0, 64].map((dx) => Phaser.Math.Clamp(p.x + dx, R.x + T, R.right - T)); }
-      if (B.phase === 'slam') { // the soul nearest you, else you
-        B.target = this.corpses.filter((c) => !c.buried).sort((a, b) => Math.hypot(a.x - p.x, a.y - p.y) - Math.hypot(b.x - p.x, b.y - p.y))[0];
-        B.aimX = B.target?.x ?? p.x;
-        B.face = Math.sign(B.aimX - B.x) || B.face;
-      }
+      if (B.phase === 'slam') { B.aimX = p.x; B.face = Math.sign(B.aimX - B.x) || B.face; } // locks where you stand
       return;
     }
     if (B.phase === 'swing') {
@@ -2332,16 +2328,12 @@ class Room extends Phaser.Scene {
         GameAudio.play('tree-seed-pod-launch');
         B.pods.push({ r, vx: (x - B.x) / 0.9, vy: (B.landingY - y - 350 * 0.81) / 0.9 });
       }
-    } else if (B.phase === 'slam') {
-      const c = B.target, onSoul = c?.active && this.corpses.includes(c) && !c.buried;
-      this.treeImpact(B.aimX, onSoul ? bounds(c).top : B.floor);
+    } else if (B.phase === 'slam') { // a soul where the fists land catches them: they stick, and you're spared
+      const c = this.treeCatch(B);
+      this.treeImpact(B.aimX, c ? bounds(c).top : B.floor);
       this.cameras.main.shake(180, 0.005);
-      if (Math.abs(p.x - B.aimX) < TREE_FIST && feet > (onSoul ? bounds(c).top : B.floor) - 40) return this.die();
-      if (onSoul) {
-        GameAudio.play('hero-soul-erased-replaced');
-        c.buried = TREE_BURIED; c.body.enable = false; c.setAlpha(0.15); c.sprites?.forEach((s) => s.setAlpha(0.1));
-        B.open = TREE_STUCK;
-      }
+      if (c) B.open = TREE_STUCK;
+      else if (Math.abs(p.x - B.aimX) < TREE_FIST && feet > B.floor - 40) return this.die();
     } else if (B.phase === 'burst') { // no dodging it: only a soul between you and the tree blocks it
       GameAudio.play('tree-slam'); this.cameras.main.shake(300, 0.01);
       const ring = this.add.circle(B.r.x, B.r.y, 40).setStrokeStyle(6, 0x9dffb0).setDepth(6);
@@ -2350,6 +2342,8 @@ class Room extends Phaser.Scene {
     }
     B.timer = 1.6 * Math.pow(0.8, BOSS_HP - B.hp); B.phase = 'idle';
   }
+
+  treeCatch(B) { return this.corpses.find((c) => !c.buried && Math.abs(c.x - B.aimX) < TREE_FIST + c.width / 2); }
 
   treeSwingBox(B) { return new Phaser.Geom.Rectangle(B.face < 0 ? B.x - 4 * T : B.x, B.floor - 2.5 * T, 4 * T, 2.5 * T); }
 

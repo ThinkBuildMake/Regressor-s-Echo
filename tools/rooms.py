@@ -149,7 +149,7 @@ room('Sawmill', [496, 71], 44, 22, 2, 'SHOWCASE W2: spring + timed self-destruct
 def tree_guardian(o, p):
     o(1, 1, 28, 15); o(0, 13, 0, 15); o(29, 13, 29, 15)
     p(1, 15, 'P'); p(23, 15, 'B'); o(28, 1, 28, 15, 'V')
-room('The tree guardian', [540, 75], 30, 17, 2, 'step and decoy: lure the blue slam away from the mask', tree_guardian)
+room('The tree guardian', [540, 75], 30, 17, 2, 'lure the slam onto a spare soul to stick its hands; hide behind a soul from the burst', tree_guardian)
 
 # ---------- World 3 ----------
 def three_high(o, p):
