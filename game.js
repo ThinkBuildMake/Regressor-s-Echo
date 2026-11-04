@@ -491,14 +491,14 @@ const ROOMS = [
     '#                         D  #',
     '                          D   ',
     ' P           C  _         D   ',
-    '####       #######       #####',
-    '####       #######       #####',
-    '####       #######       #####',
-    '####       #######       #####',
-    '####       #######       #####',
-    '####       #######       #####',
-    '####       #######       #####',
-    '####^^^^^^^#######^^^^^^^#####',
+    '####       ########      #####',
+    '####       ########      #####',
+    '####       ########      #####',
+    '####       ########      #####',
+    '####       ########      #####',
+    '####       ########      #####',
+    '####       ########      #####',
+    '####^^^^^^^########^^^^^^#####',
     '##############################',
   ], [346, 107], { world: 2 }],
   ["Take it back", [ // recall a tunnel plug; preserve the plate while repairing a flat bridge
@@ -574,7 +574,7 @@ const ROOMS = [
     '#          ####          #####',
     '#          ####          #####',
     '           ####          #####',
-    ' P    s    ####     s    #####',
+    ' P    s    ####    s     #####',
     '##############################',
   ], [466, 84], { world: 2 }],
   ["Wrong order", [ // step, plate, pit: in another order a soul you still need vanishes
@@ -587,13 +587,13 @@ const ROOMS = [
     '#             D  _          D#',
     '#             D ###         D#',
     '#             D ###         D#',
-    '#             D ###         <#',
+    '#             D ###       < D#',
     '#             D ###         D#',
     '# _           D ###         D#',
-    '####          D             D#',
+    '####          D            #D#',
     '#             D             D ',
     '              D             D ',
-    ' P            DC    s       D ',
+    ' P            DC   s        D ',
     '#######^^^^^^^########^^^^^^##',
   ], [496, 75], { world: 2 }],
   ["Sawmill", [ // SHOWCASE W2: spring + timed self-destruct jams a saw, plate soul as a shield, thrower, laser
@@ -1027,7 +1027,7 @@ class Room extends Phaser.Scene {
                 B.floor = y + T;
                 B.r.on('destroy', () => { B.stone?.r.destroy(); B.pods.forEach((p) => p.r.destroy()); });
                 if (this.textures.exists('tree-idle')) {
-                  B.img = this.add.image(x + 3 * T, B.floor, 'tree-idle').setOrigin(0.5, 1).setDepth(4);
+                  B.img = this.add.image(x + 0.5 * T, B.floor, 'tree-idle').setOrigin(0.5, 1).setDepth(4);
                   B.r.setFillStyle(0, 0);
                 }
                 B.r.on('destroy', () => { B.img?.destroy(); B.pods.forEach((p) => p.r.destroy()); });
@@ -1267,7 +1267,7 @@ class Room extends Phaser.Scene {
       this.tweens.add({ targets: g, alpha: 0, duration: 1500, onComplete: () => { g.on = false; } });
     }
     if (name === 'stagGone' && this.boss?.stag) { this.bossDefeated(this.boss); this.stagFinished = true; }
-    if (name === 'tree' && this.boss?.kind === 'tree') { this.boss.hidden = false; this.boss.r.setVisible(true); this.boss.phase = 'intro'; this.boss.timer = 1; }
+    if (name === 'tree' && this.boss?.kind === 'tree') { this.boss.hidden = false; this.boss.r.setVisible(true); this.boss.phase = 'intro'; this.boss.timer = 3; }
     if (name === 'wear') this.wearing = true;
     if (name === 'flash') this.cameras.main.flash(600, 255, 215, 120);
     if (name === 'theEnd') { // he walks into the pyramid: fade out to the ending card
@@ -1403,6 +1403,7 @@ class Room extends Phaser.Scene {
 
   die(chosen = false) {
     if (this.dead > 0) return;
+    const treeSetup = this.boss?.kind === 'tree' && (chosen || this.corpses.length < 2);
     stats.deaths++;
     const p = this.player;
     const [w, h] = this.lying ? BODY_LYING : BODY_STAND;
@@ -1460,7 +1461,7 @@ class Room extends Phaser.Scene {
       this.shots = this.shots.filter((sh) => { if (!sh.mothDust) return true; sh.destroy(); return false; });
     }
     if (this.rooms[this.index].world) Dialogue.play(this, 'firstDeath'); // only the first time
-    const hint = this.rooms[this.index].deathTalk?.[++this.roomDeaths]; // hints after repeated deaths in a room
+    const hint = !treeSetup && this.rooms[this.index].deathTalk?.[++this.roomDeaths]; // hints after repeated deaths in a room
     if (hint) Dialogue.play(this, hint);
     if (chosen) Dialogue.play(this, 'chosenDeath');
   }
@@ -1781,7 +1782,7 @@ class Room extends Phaser.Scene {
         g.fillStyle(0xf1f578, 0.35).fillRect(B.r.x - 12 * T, B.floor - 24, 16 * T, 24);
         for (let x = B.r.x - 12 * T; x < B.r.x + 4 * T; x += T) g.fillTriangle(x, B.floor, x + 12, B.floor - 18, x + 24, B.floor);
       } else if (B.phase === 'mortar') {
-        for (const x of B.landings) g.lineStyle(2, 0xf1f578, 0.9).strokeEllipse(x, B.floor - 4, 76, 12);
+        for (const x of B.landings) g.lineStyle(2, 0xf1f578, 0.9).strokeEllipse(x, B.landingY + 4, 76, 12);
       } else if (B.phase === 'canopy') {
         g.fillStyle(0xf1f578, 0.2).fillRect(B.r.x - 16, B.floor - 14 * T, 32, 14 * T);
         for (let i = 0; i < 6; i++) g.fillStyle(0xf1f578, 0.7).fillEllipse(B.r.x - 50 + i * 20, B.floor - 12 * T + (t * 80 + i * 30) % 80, 6, 12);
@@ -2061,7 +2062,7 @@ class Room extends Phaser.Scene {
         stone.vy += 700 * dt; stone.r.y += stone.vy * dt;
         const support = this.corpses.filter((c) => !c.buried && Math.abs(c.x - stone.r.x) < c.width / 2 + 12 &&
           bounds(c).top >= bottom - 1 && bounds(c).top <= stone.r.y + 16).sort((a, b) => a.y - b.y)[0];
-        if (support) { stone.support = support; stone.r.y = bounds(support).top - 16; stone.vy = 0; }
+        if (support) { stone.support = support; stone.r.y = bounds(support).top - 16; stone.vy = 0; B.timer = 1; }
         else if (bottom <= bounds(B.r).top && stone.r.y + 16 >= bounds(B.r).top) {
           if (stone.armed) { B.open = 2; B.timer = Math.max(B.timer, 2); }
           this.treeImpact(stone.r.x, bounds(B.r).top);
@@ -2085,12 +2086,13 @@ class Room extends Phaser.Scene {
       }
     }
     if (B.open > 0) { B.open = Math.max(0, B.open - dt); return; }
+    if (B.phase === 'idle' && B.attack === 2 && B.stone && !B.stone.support) return;
     if ((B.timer -= dt) > 0) return;
     if (B.phase === 'idle' || B.phase === 'intro') {
       B.attack = (B.attack + 1) % 4;
       B.phase = ['rake', 'mortar', 'canopy', 'slam'][B.attack];
       B.timer = [0.8, 0.7, 1, TREE_GLOW][B.attack];
-      if (B.phase === 'mortar') B.landings = [-64, 0, 64].map((dx) => Math.max(this.rooms[B.room].rect.x + T, Math.min(p.x + dx, this.rooms[B.room].rect.right - T)));
+      if (B.phase === 'mortar') { B.landingY = feet - 8; B.landings = [-64, 0, 64].map((dx) => Math.max(this.rooms[B.room].rect.x + T, Math.min(p.x + dx, this.rooms[B.room].rect.right - T))); }
       if (B.phase === 'slam') {
         B.target = this.corpses.filter((c) => !c.buried).sort((a, b) => Math.hypot(a.x - p.x, a.y - p.y) - Math.hypot(b.x - p.x, b.y - p.y))[0];
         B.aimX = B.target?.x ?? p.x;
@@ -2106,8 +2108,8 @@ class Room extends Phaser.Scene {
       if (p.x > B.r.x - 12 * T && p.x < B.r.x + 4 * T && feet > B.floor - 24) return this.die();
     } else if (B.phase === 'mortar') {
       for (const x of B.landings) {
-        const r = this.textures.exists('seedPod') ? this.add.image(B.r.x, B.r.y, 'seedPod').setDisplaySize(20, 20) : this.add.rectangle(B.r.x, B.r.y, 20, 20, 0xf1f578);
-        B.pods.push({ r, vx: (x - B.r.x) / 0.9, vy: (B.floor - 8 - B.r.y - 350 * 0.81) / 0.9 });
+        const r = this.textures.exists('seedPod') ? this.add.image(B.r.x, B.floor - 14 * T, 'seedPod').setDisplaySize(20, 20) : this.add.rectangle(B.r.x, B.floor - 14 * T, 20, 20, 0xf1f578);
+        B.pods.push({ r, vx: (x - B.r.x) / 0.9, vy: (B.landingY - r.y - 350 * 0.81) / 0.9 });
       }
     } else if (B.phase === 'canopy') {
       B.stone?.r.destroy();
@@ -2124,7 +2126,7 @@ class Room extends Phaser.Scene {
     const top = bounds(B.r).top;
     const falling = p.body.velocity.y >= 0;
     if (!falling && p.y + 15 <= top + 18) return false;
-    if (!falling || (this.bossPreviousFeet ?? p.body.prev.y + p.body.height) > top + 1) { this.die(); return true; }
+    if (!falling || (this.bossPreviousFeet ?? p.body.prev.y + p.body.height) > top + 1) { if (B.kind === 'tree') return false; this.die(); return true; }
     p.body.reset(p.x, top - p.height / 2);
     p.body.velocity.y = -JUMP * 0.8;
     if (B.hurt > 0 || (B.story === 'mothDown' && !B.open) || (B.stag && (B.phase !== 'dazed' || B.stomped)) || (B.kind === 'tree' && (B.stompReady === false || B.open <= 0))) return false;
