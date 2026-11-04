@@ -1081,8 +1081,9 @@ class Room extends Phaser.Scene {
                 }
                 B.r.on('destroy', () => { B.img?.destroy(); B.pods.forEach((p) => p.r.destroy()); });
               } else if (this.textures.exists('mothFly')) {
-                const B = this.bosses.at(-1), tex = this.textures.get('mothFly'), fw = tex.getSourceImage().width / 12;
-                if (!tex.has(0)) for (let i = 0; i < 12; i++) tex.add(i, 0, i * fw, 0, fw, tex.getSourceImage().height);
+                const B = this.bosses.at(-1), tex = this.textures.get('mothFly'), src = tex.getSourceImage();
+                const fw = src.width / 6, fh = src.height / 2; // 12 frames in 2 rows of 6: one row would be 8256px, past many GPUs' 8192 limit
+                if (!tex.has(0)) for (let i = 0; i < 12; i++) tex.add(i, 0, (i % 6) * fw, Math.floor(i / 6) * fh, fw, fh);
                 B.r.setFillStyle(0, 0); // hitbox only
                 B.img = this.add.image(B.r.x, B.r.y, 'mothFly', 0).setScale(MOTH_SCALE).setDepth(4);
                 B.r.on('destroy', () => B.img.destroy());
