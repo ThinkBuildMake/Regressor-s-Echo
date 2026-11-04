@@ -32,10 +32,12 @@ const W = (wait, cue) => ({ wait, cue }); // a silent beat: the panel hides for 
 const SCRIPT = {
   lowDoor: [
     G("amused", "Well. You've locked yourself out. With yourself. That's a new one."),
+    W(0.1, 'keys:retry'),
   ],
   letGo: [
     H("thinking", "No spikes. No thorns. No bugs. …Why does that make it worse?"),
     G("thinking", "Because this time, nothing's going to do it for you."),
+    W(0.1, 'keys:letGo'),
   ],
   chosenDeath: [
     W(0.8), // A beat.
@@ -159,6 +161,7 @@ const SCRIPT = {
     W(0.6),
     H('neutral', "Mannn… treasure hunting's slow these days."),
     H('thinking', "One good find. That's all I need. Then I could relax. Take it easy for once."),
+    W(0.1, 'keys:move'),
   ],
   amulet: [ // the find and the meeting
     H('curious', "Hm? What's this?"),
@@ -267,6 +270,23 @@ const SCRIPT = {
     H('annoyed', "You promised I'd make it, too."),
     G('weary', '…Fine. Touch it, and when you die, you come back there instead of all the way at the start.'),
     H('thinking', "Huh. That's actually useful."),
+  ],
+  slide: [ // The long pit, at the tunnel mouth
+    H('thinking', "Spikes in a tunnel. I can't even jump in here."),
+    G('wry', "Then don't jump."),
+    H('annoyed', 'What, I just walk in?'),
+    G('amused', 'Remember sliding down the hill behind the house? Feet first, flat on your back?'),
+    H('exhausted', '…I ruined three pairs of pants doing that.'),
+    G('wry', 'Four.'),
+    W(0.1, 'keys:slide'),
+  ],
+  wallJump: [ // Thornwood, at the foot of the climbing shaft
+    H('thinking', "Up there? There's nothing to grab."),
+    G('thinking', 'Remember the old well behind the inn?'),
+    H('annoyed', '…I was stuck down there for an hour.'),
+    G('wry', 'Fifty minutes of yelling for help. Ten of kicking off the walls.'),
+    H('exhausted', "…I should've led with the kicking."),
+    W(0.1, 'keys:wallJump'),
   ],
   shrineMark: [ // first time he touches a shrine
     H('curious', "Wait. That mark… it's the same as the one on the amulet."),

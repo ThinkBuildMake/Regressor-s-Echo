@@ -50,6 +50,20 @@ Let each line respond to what the other just said or did. Give them room to hesi
 - **Each world adds a rune and a power.** The guide names the new power in a line or two; the next room lets the player try it.
 - **Keep the guide's mischief dry.** "Nope!" and "Where's the fun in that?" are the register: short, smiling, unhelpful at the right moment.
 
+## Key prompts (on screen, never spoken)
+
+The characters hint at a move; a prompt at the bottom of the screen gives the key. Each shows once per run, right after its scene (or on entering the room), and fades once the player does the move.
+
+| Move | Prompt | When |
+|---|---|---|
+| Move and jump | ← → move · Space jump | after the opening lines in the clearing |
+| Slide | Shift or ↓ while running: slide | after the slide scene (The long pit) |
+| Wall jump | In the air against a wall: press Space again | after the wall-jump scene (Thornwood) |
+| Retry | Shift + R: retry the room | after "You've locked yourself out" |
+| Self-destruct | Hold K: let go | after the Let go scene (World 2) |
+| Recall | Q: take back your newest soul | entering Take it back (World 2) |
+| Swap | E: swap places with your newest soul | entering Two places (World 3) |
+
 ## Story spine
 
 - **The tribe** built the amulet to cheat death. The marks lead through their ruins (World 2) to their pyramid temple. Carvings show many people wearing it, then fewer and fewer: it didn't save them, it used them up.
@@ -183,19 +197,35 @@ No hints: the player works out the plate. Just banter.
 > **Hero** [curious]: Wait. That mark… it's the same as the one on the amulet.  
 > **Guide** [wry]: Told you you'd see it before long.
 
-### 10. The low door — *The long pit, after his standing soul first blocks the tunnel*
+### 10. The slide — *The long pit, at the tunnel mouth*
+A hint at the move through shared history; the room teaches what the flat soul does.
+> **Hero** [thinking]: Spikes in a tunnel. I can't even jump in here.  
+> **Guide** [wry]: Then don't jump.  
+> **Hero** [annoyed]: What, I just walk in?  
+> **Guide** [amused]: Remember sliding down the hill behind the house? Feet first, flat on your back?  
+> **Hero** [exhausted]: …I ruined three pairs of pants doing that.  
+> **Guide** [wry]: Four.
+
+### 11. The low door — *The long pit, after his standing soul first blocks the tunnel*
 > **Guide** [amused]: Well. You've locked yourself out. With yourself. That's a new one.
 
 *The well and the gatehouse are silent puzzle rooms.*
 
-### 11. The moth arrives — *The moth, a few steps in along the arena floor, while walking*
+### 12. The wall jump — *Thornwood, at the foot of the climbing shaft*
+> **Hero** [thinking]: Up there? There's nothing to grab.  
+> **Guide** [thinking]: Remember the old well behind the inn?  
+> **Hero** [annoyed]: …I was stuck down there for an hour.  
+> **Guide** [wry]: Fifty minutes of yelling for help. Ten of kicking off the walls.  
+> **Hero** [exhausted]: …I should've led with the kicking.
+
+### 13. The moth arrives — *The moth, a few steps in along the arena floor, while walking*
 > *(The ground shakes.)*  
 > **Hero** [startled]: What's with this shaking… is this an earthquake?  
 > **Guide** [surprised]: Oh shoot, it's been so long that I forgot. Be careful! Watch out for…  
 > *(The moth bursts in through the right wall.)*  
 > **Guide** [wry]: …that.
 
-### 12. The dust — *after his 2nd death in the fight*
+### 14. The dust — *after his 2nd death in the fight*
 Blocking the dust with your soul should be taught in an earlier room, so the guide only nudges here. Dying heals the moth, but nobody says so; the player sees it.
 > **Hero** [shouting]: That's impossible! There's nowhere to hide from that!  
 > **Guide** [thinking]: I made it past here. There's a way.  
@@ -205,7 +235,7 @@ Blocking the dust with your soul should be taught in an earlier room, so the gui
 *After about 25 deaths there (each try costs about two, since dying heals the moth), one more nudge:*
 > **Guide** [thinking]: Your soul caught you over the thorns. Think it'd catch a little dust?
 
-### 13. The moth falls — *on the last stomp*
+### 15. The moth falls — *on the last stomp*
 > *(The moth drops still.)*  
 > **Hero** [exhausted]: Is it… over?  
 > **Hero** [relieved]: It's over.  
@@ -231,7 +261,7 @@ Blocking the dust with your soul should be taught in an earlier room, so the gui
 > **Hero** [curious]: Let go of what?  
 > **Guide** [wry]: Yourself. Trust me, it's worse when you choose it.
 
-### 14. The nap — *straight on from 13*
+### 16. The nap — *straight on from 15*
 He writes the note while the hero sleeps: he's incorporeal, so he drifts ahead to the old tree in World 3 and scratches it into the dirt there. Nothing gives it away until World 3 (a flashback could show it, but isn't needed).
 > *(A beat.)*  
 > **Hero** [exhausted]: …Great. Something to look forward to.  

@@ -241,6 +241,10 @@ out = []
 for name, pos, world, note, rows, extra in rooms:
     opts = {'world': world} if world else {}
     if name == 'Let go': opts.update(enter='letGo')
+    if name == 'The long pit': opts.update(spots=[[3, 'slide']])
+    if name == 'Take it back': opts.update(keys='recall')
+    if name == 'Two places': opts.update(keys='swap')
+    if name == 'Thornwood': opts.update(spots=[[10, 'wallJump']])
     if name == 'The ladder': opts.update(spots=[[12, 'carvings']])
     if name == 'Three high': opts.update(spots=[[4, 'pyramid']])
     if name == 'Everything': opts.update(shrineTalk='almostCompetent')

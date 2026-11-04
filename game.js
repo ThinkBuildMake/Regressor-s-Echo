@@ -50,6 +50,16 @@ const WALL_SLIDE = 110, WALL_KICK = 170, WALL_JUMP = 420, KICK_LOCK = 0.3;
 const SAW_SPEED = 90, SAW_R = 13;               // saws run along a row or column; a soul in the way jams them
 const CRUMBLE_TIME = 0.45, CRUMBLE_BACK = 2.5;  // crumbling blocks break this long after you land, return later
 const FLYER_SPEED = 80, SHOT_SPEED = 200, THROW_EVERY = 1.8, STOMP_BOUNCE = 420;
+// Key prompts: shown once each, on screen (the characters never name keys). Each hides once you've done it.
+const KEY_PROMPTS = {
+  move: ['← →  move     ·     Space  jump', (s) => s.player.body.velocity.y < -100],
+  slide: ['Shift  or  ↓  while running:  slide', (s) => s.lying && s.slide > 0],
+  wallJump: ['In the air against a wall:  press Space again', (s) => s.kick > 0],
+  retry: ['Shift + R:  retry the room', () => false],
+  letGo: ['Hold  K:  let go', (s) => s.charge > 0.2],
+  recall: ['Q:  take back your newest soul', (s) => s.recalled],
+  swap: ['E:  swap places with your newest soul', (s) => s.swapped],
+};
 const SPRING = 873; // launch speed: 8.5 tiles high (a 9-high ledge needs a soul)
 
 // Mechanic rules (persist across rooms)
@@ -361,7 +371,7 @@ const ROOMS = [
     '##############################',
     '##############################',
     '##############################',
-  ], [150, 94], { world: 1 }],
+  ], [150, 94], { world: 1, spots: [[3, "slide"]] }],
   ["The well", [ // aim your fall: the soul must land near the exit side
     '##############################',
     '##############################',
@@ -442,7 +452,7 @@ const ROOMS = [
     ' P      e      ################   e #   o    #',
     '##############################################',
     '##############################################',
-  ], [240, 101], { world: 1 }],
+  ], [240, 101], { world: 1, spots: [[10, "wallJump"]] }],
   ['The moth', [ // you walk in on the arena floor: one soul is the step that reaches its back
     '##############################',
     '#                            #',
@@ -519,7 +529,7 @@ const ROOMS = [
     '##############################',
     '##############################',
     '##############################',
-  ], [376, 107], { world: 2 }],
+  ], [376, 107], { world: 2, keys: "recall" }],
   ["The ladder", [ // 7-high ledge: stack to 3, then run off your top soul holding K for a step beside it
     '##############################',
     '#               #            #',
@@ -677,7 +687,7 @@ const ROOMS = [
     '####       ###################',
     '####       ###################',
     '####^^^^^^^###################',
-  ], [630, 73], { world: 3 }],
+  ], [630, 73], { world: 3, keys: "swap" }],
   ["Three jobs", [ // plate, pit and a laser blocker at once; recall mistakes instead of dying over them
     '##############################',
     '##############################',
@@ -1101,6 +1111,7 @@ class Room extends Phaser.Scene {
     this.roomDeaths = 0;
     this.drawStagGrounds();
     this.showWorld(this.rooms[this.index].world);
+    if (this.rooms[this.index].keys) this.showKeys(this.rooms[this.index].keys);
     Dialogue.play(this, this.rooms[this.index].enter);
 
     this.spawnWalkers(this.index);
@@ -1251,8 +1262,31 @@ class Room extends Phaser.Scene {
   }
 
   // Staging cues fired by dialogue lines (see `cue` in dialogue.js).
+  // A key prompt at the bottom of the screen, once per run. It stays until you do the move (or 25s pass).
+  showKeys(id) {
+    if (!KEY_PROMPTS[id] || Dialogue.seen.has('keys:' + id)) return;
+    Dialogue.seen.add('keys:' + id);
+    this.keyPrompt?.destroy();
+    this.keyPrompt = this.add.text(480, 500, KEY_PROMPTS[id][0], { fontFamily: 'Georgia, serif', fontSize: '18px', color: '#f1e3b8', backgroundColor: '#000000aa', padding: { x: 14, y: 8 } })
+      .setOrigin(0.5).setScrollFactor(0).setDepth(46).setAlpha(0);
+    this.keyPrompt.done = KEY_PROMPTS[id][1];
+    this.keyPrompt.until = this.time.now + 25000;
+    this.tweens.add({ targets: this.keyPrompt, alpha: 1, duration: 400 });
+  }
+
+  updateKeyPrompt() {
+    const k = this.keyPrompt;
+    if (!k || k.leaving || this.talk?.line || this.talk?.queue?.length) return;
+    if (k.done(this) || this.time.now > k.until) {
+      k.leaving = true;
+      this.tweens.add({ targets: k, alpha: 0, duration: 600, delay: 400, onComplete: () => k.destroy() });
+      this.keyPrompt = null;
+    }
+  }
+
   cue(name) {
     const g = this.guide, p = this.player;
+    if (name.startsWith('keys:')) return this.showKeys(name.slice(5));
     if (name === 'stagAppear' && this.boss?.stag) {
       this.boss.hidden = false; this.boss.introUntil = this.time.now + 1000; this.boss.r.setVisible(true); this.cameras.main.flash(450, 170, 225, 255);
     }
@@ -1377,6 +1411,7 @@ class Room extends Phaser.Scene {
     this.index = i;
     rules.max = this.treePower ? 3 : Math.max(stats.mothFinished ? 2 : 1, WORLD_SOULS[this.rooms[i].world] ?? rules.max);
     Dialogue.play(this, this.rooms[i].enter);
+    if (this.rooms[i].keys) this.showKeys(this.rooms[i].keys);
     this.roomDeaths = 0;
     this.corpses.forEach((c) => c.destroy());
     this.corpses = [];
@@ -1668,6 +1703,7 @@ class Room extends Phaser.Scene {
   }
 
   updateEnemies() {
+    if (this.talk?.line || this.talk?.queue?.length) { for (const e of this.enemies) e.body.velocity.x = 0; return; } // hold still while they talk
     const solids = this.statics.getChildren().filter((s) => s.body.enable).map(bounds);
     for (const e of this.enemies) {
       const b = e.body;
@@ -1708,6 +1744,7 @@ class Room extends Phaser.Scene {
 
   // Flyers, shots, saws, crumbling blocks and falling spikes (only the current room's move).
   updateHazards(dt) {
+    if (this.talk?.line || this.talk?.queue?.length) return; // saws, flyers and shots wait while they talk
     // A stomped enemy comes back once its starting spot is off screen, so it's there again when you return
     // (and you can't strand yourself without the walker a puzzle needs). Dying or re-entering the room also does it.
     const view = this.cameras.main.worldView;
@@ -2185,6 +2222,7 @@ class Room extends Phaser.Scene {
     }
 
     this.updateHud();
+    this.updateKeyPrompt();
     // Look into drops in every tall room, including drops after a shrine.
     this.cameras.main.setFollowOffset(0, this.rooms[this.index].rect.height > this.cameras.main.height ? -this.cameras.main.height * 0.4 : 0);
     if (this.transit) return;
@@ -2223,6 +2261,7 @@ class Room extends Phaser.Scene {
         p.body.reset(c.x, c.y); p.body.setVelocity(0, 0);
         c.setPosition(x, y); c.body.updateFromGameObject(); c.vy = 0;
         c.sprites?.forEach((sp) => sp.setPosition(c.x, c.y + c.height / 2));
+        this.swapped = true;
       }
     }
     const pb = bounds(p);
@@ -2244,7 +2283,8 @@ class Room extends Phaser.Scene {
     if ((rules.recall || world >= 2 || stats.mothFinished || this.treePower) && k.Q.isDown) {
       if (JD(k.Q)) { this.recallGap = RECALL_GAP; this.recallT = 0; }
       if ((this.recallT -= ms / 1000) <= 0) { // real time, like the physics (dt is capped)
-        this.corpses.pop()?.destroy();
+        const c = this.corpses.pop();
+        if (c) { c.destroy(); this.recalled = true; }
         this.recallT = this.recallGap;
         this.recallGap = Math.max(RECALL_MIN, this.recallGap * 0.7);
       }
