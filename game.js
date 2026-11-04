@@ -297,8 +297,8 @@ const ROOMS = [
     '#                             ',
     '#                             ',
     '#               ##############',
-    '#               x#############',
-    '#               x#############',
+    '#               ##############',
+    '#               ##############',
     '                x#############',
     '                x#############',
     '  P             x#############',
@@ -335,8 +335,8 @@ const ROOMS = [
     '#                             ',
     '#                             ',
     '#                     ########',
-    '#                     x#######',
-    '#                     x#######',
+    '#                     ########',
+    '#                     ########',
     '                      x#######',
     '                      x#######',
     '  P              C    x#######',
@@ -427,7 +427,7 @@ const ROOMS = [
     '############   #####       ####   ############',
     '############   #####       ####   ############',
     '############   #####       ####   ############',
-    '############   x####^^^^^^^####   ############',
+    '############   #####^^^^^^^####   ############',
     '############   x###############   ############',
     '############   x###############   ############',
     '############   x###############   ############',
@@ -439,7 +439,7 @@ const ROOMS = [
     '#          #   ################      ######  #',
     '#              ################      ######  #',
     '               ################              #',
-    ' P      e      ################   e #   o    #',
+    ' P      e      ################   e #   o  # #',
     '##############################################',
     '##############################################',
   ], [240, 101], { world: 1 }],
@@ -1313,6 +1313,14 @@ class Room extends Phaser.Scene {
     if (!talking) g.inTalk = false;
     if (g.inTalk) {
       if (g.alpha === 0) { g.setPosition(p.x + 40, p.y - 34); g.hoverY = g.y; }
+      // Left far behind (he respawned, or walked on while the ghost lingered): drift back to his upper right.
+      const home = { x: p.x + 40, y: p.y - 34 };
+      if (Math.hypot(home.x - g.x, home.y - g.hoverY) > 160 && !t.line?.guide && !t.line?.guideBy) g.drifting = true;
+      if (g.drifting) {
+        const d = Math.hypot(home.x - g.x, home.y - g.hoverY), s = Math.min(1, 260 * dt / (d || 1));
+        g.x += (home.x - g.x) * s; g.hoverY += (home.y - g.hoverY) * s;
+        if (d < 8) g.drifting = false;
+      }
       g.setAlpha(Math.min(0.7, g.alpha + dt * 1.2));
       g.away = 0;
       if (!g.looking) g.setFlipX(g.x > p.x);
@@ -1487,7 +1495,10 @@ class Room extends Phaser.Scene {
     // Snap: standing souls sit on a tile line, lying souls on a half-tile line (a spike death leaves
     // a lying soul flush with the floor, a standing one as a step one tile up).
     const feet = p.y + p.height / 2;
-    const bottom = !rules.snap ? feet : this.lying ? Math.ceil((feet - 1) / 16) * 16 : Math.round(feet / T) * T;
+    let bottom = !rules.snap ? feet : this.lying ? Math.ceil((feet - 1) / 16) * 16 : Math.round(feet / T) * T;
+    // World 1: a sideways saw that kills you mid-hop still gets your soul in its lane, so the soul jams it.
+    const saw = this.saws.find((sw) => sw.room === this.index && sw.dx && Math.abs(sw.x - p.x) < SAW_R + p.width / 2 && Math.abs(sw.y - p.y) < SAW_R + p.height / 2);
+    if (saw && rules.snap && this.rooms[this.index].world === 1) bottom = Math.max(bottom, Math.round((saw.y + SAW_R) / T) * T);
     const c = this.add.rectangle(x, bottom - h / 2, w, h, 0x7399d9);
     c.vy = 0;
     c.lying = this.lying;
@@ -1538,7 +1549,7 @@ class Room extends Phaser.Scene {
       this.boss.dir = 1;
       this.shots = this.shots.filter((sh) => { if (!sh.mothDust) return true; sh.destroy(); return false; });
     }
-    if (this.rooms[this.index].world) Dialogue.play(this, 'firstDeath'); // only the first time
+    if (this.rooms[this.index].name === 'First death') Dialogue.play(this, 'firstDeath'); // only the first time; its staging is that room's
     const hint = !treeSetup && this.rooms[this.index].deathTalk?.[++this.roomDeaths]; // hints after repeated deaths in a room
     if (hint) Dialogue.play(this, hint);
     if (chosen) Dialogue.play(this, 'chosenDeath');
@@ -1587,9 +1598,9 @@ class Room extends Phaser.Scene {
     return 0;
   }
 
-  canStand() {
+  canStand(height = STAND[1]) {
     const p = this.player, feet = p.y + p.height / 2;
-    const r = new Phaser.Geom.Rectangle(p.x - STAND[0] / 2, feet - STAND[1], STAND[0], STAND[1]);
+    const r = new Phaser.Geom.Rectangle(p.x - STAND[0] / 2, feet - height, STAND[0], height);
     return !this.statics.getChildren().some((s) => s.body.enable && hit(r, bounds(s)));
   }
 
@@ -1758,7 +1769,7 @@ class Room extends Phaser.Scene {
   }
 
   updateEnemies() {
-    if (this.dead > 0) {
+    if (this.dead > 0 || this.talk.active) { // walkers wait while you are dead or in a conversation
       for (const e of this.enemies) e.body.setVelocity(0, 0);
       return;
     }
@@ -1813,7 +1824,7 @@ class Room extends Phaser.Scene {
     const solid = (box, skip) => this.statics.getChildren().find((s) => s !== skip && s.body.enable && hit(box, bounds(s)));
     const walls = (box) => this.statics.getChildren().find((s) => s.body.enable && !this.corpses.includes(s) && hit(box, bounds(s)));
     const R = this.rooms[this.index].rect, p = this.player, t = this.time.now / 1000;
-    for (const f of this.dead > 0 ? [] : this.flyers) {
+    for (const f of this.dead > 0 || this.talk.active ? [] : this.flyers) {
       const nx = f.x + f.dir * FLYER_SPEED * dt;
       if (walls(new Phaser.Geom.Rectangle(nx - 12, f.y - 8, 24, 16)) || nx < R.x + 16 || nx > R.right - 16) f.dir *= -1;
       else f.x = nx;
@@ -2090,7 +2101,8 @@ class Room extends Phaser.Scene {
     } else if (B.phase === 'stunned') {
       for (let i = 0; i < 3; i++) {
         const a = B.clock * 5 + i * Math.PI * 2 / 3;
-        B.warn.strokeCircle(B.r.x + Math.cos(a) * 30, B.r.y - BOSS_H / 2 - 12 + Math.sin(a) * 6, 5);
+        const sx = B.r.x + Math.cos(a) * 34, sy = B.r.y - BOSS_H / 2 - 14 + Math.sin(a) * 8; // dizzy sparks: it's open
+        B.warn.fillStyle(0xffef72, 0.95).fillCircle(sx, sy, 6).fillStyle(0xffffff, 1).fillCircle(sx, sy, 2.5);
       }
       if (B.clock >= 2) { B.open = false; enter('diveGap'); }
     } else if (B.phase === 'diveGap' && B.clock >= gap) {
@@ -2340,7 +2352,8 @@ class Room extends Phaser.Scene {
     this.updateHud();
     const room = this.rooms[this.index];
     if (!this.boss?.stag) { // the stag frames its whole arena; after the win the camera follows again
-      this.cameras.main.setZoom(room.name === 'Thornwood' && p.x > room.rect.x + 27 * T ? 0.68 : 1);
+      const zoom = room.name === 'Thornwood' && p.x > room.rect.x + 27 * T ? 0.68 : 1, cam = this.cameras.main;
+      cam.setZoom(cam.zoom + (zoom - cam.zoom) * Math.min(1, dt * 6)); // eases out to show Thornwood's section C
       if (!this.cameras.main._follow && !this.transit) this.cameras.main.startFollow(p, true, 0.12, 0.12);
     }
     for (const layer of this.art.layers) if (layer.ts.depth === 10)
@@ -2476,7 +2489,8 @@ class Room extends Phaser.Scene {
     }
     this.coyote = grounded ? COYOTE : this.coyote - dt;
     this.buffer = jumpDown ? BUFFER : this.buffer - dt;
-    if (this.buffer > 0 && this.coyote > 0) { GameAudio.play(this.lying ? 'hero-dive' : 'hero-jump', this.lying ? 0 : 3); b.velocity.y = -JUMP; this.buffer = this.coyote = 0; }
+    // No dive in a one-tile tunnel: a bonk off its ceiling would float a slide over a spike gap.
+    if (this.buffer > 0 && this.coyote > 0 && (!this.lying || this.canStand(T + 8))) { GameAudio.play(this.lying ? 'hero-dive' : 'hero-jump', this.lying ? 0 : 3); b.velocity.y = -JUMP; this.buffer = this.coyote = 0; }
     else if (this.buffer > 0 && this.wallCoyote > 0 && !grounded && this.lastWall !== this.kickSide) { // wall jump
       GameAudio.play('hero-jump', 3);
       b.velocity.y = -WALL_JUMP; b.velocity.x = -this.lastWall * WALL_KICK; this.face = -this.lastWall;
