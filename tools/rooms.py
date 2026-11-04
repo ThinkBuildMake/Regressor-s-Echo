@@ -78,7 +78,7 @@ def off_edge(o, p):
     # Hang a step over the first pit, then bank the crossing at the shrine.
     o(4, 8, 10, 14); o(4, 15, 10, 15, '^'); p(13, 7, 'C')
     # Keep one soul on the plate and one in the air. An extra death shuts the exit.
-    p(16, 7, '_'); o(18, 8, 24, 14); o(18, 15, 24, 15, '^'); o(26, 1, 26, 7, 'D')
+    p(16, 7, '_'); o(19, 8, 24, 14); o(19, 15, 24, 15, '^'); o(26, 1, 26, 7, 'D')
 room('Off the edge', [346, 107], 30, 17, 2, 'jump off the edge holding K: the soul appears mid-pit', off_edge)
 
 def take_back(o, p):
@@ -114,7 +114,7 @@ def spring(o, p):
     # Safe launch: hang a soul beside the spring, land on it, then jump to the shrine.
     o(1, 1, 10, 15); o(11, 1, 14, 6); p(6, 15, 's'); p(13, 6, 'C')
     # The second landing must also shield the launch from the laser.
-    o(15, 1, 24, 15); o(25, 1, 28, 6); p(20, 15, 's'); p(25, 9, '<')
+    o(15, 1, 24, 15); o(25, 1, 28, 6); p(19, 15, 's'); p(25, 9, '<')
     o(16, 1, 16, 10, '#')  # drop under the beam before launching
     o(0, 14, 0, 15); o(29, 5, 29, 6); p(1, 15, 'P')
 room('The spring', [436, 84], 30, 17, 2, '9-high ledge: hold during the launch so a soul hangs beside the spring, then land on it', spring)
@@ -125,8 +125,8 @@ def wrong_order(o, p):
     o(1, 12, 3, 12, '#'); p(2, 11, '_')
     o(7, 16, 13, 16, '^'); o(14, 1, 14, 15, 'D'); p(15, 15, 'C')
     # Spring to a temporary landing, then the high plate. Its replacement shields the next launch.
-    o(16, 7, 18, 11, '#'); p(17, 6, '_'); p(20, 15, 's')
-    o(22, 16, 27, 16, '^'); o(28, 1, 28, 15, 'D'); p(28, 9, '<')
+    o(16, 7, 18, 11, '#'); p(17, 6, '_'); p(19, 15, 's')
+    o(22, 16, 27, 16, '^'); p(27, 12, '#'); o(28, 1, 28, 15, 'D'); p(26, 9, '<')
 room('Wrong order', [466, 75], 30, 17, 2, 'step, plate, pit: in another order a soul you still need vanishes', wrong_order)
 
 def sawmill(o, p):
