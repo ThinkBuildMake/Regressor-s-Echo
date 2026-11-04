@@ -361,19 +361,23 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     const fightDeaths = stats.deaths;
     let lastHp = M.hp, bouncing = false, bounceCleared = false, plainBounce = false;
     const phases = new Set(), trace = [], loomCounts = new Set();
+    let sideJump = false;
+    const curtainColumns = new Set();
     for (let t = 0; t < 90000 && M.hp > 0 && stats.deaths === fightDeaths; t += 20) {
       if (trace.at(-1)?.phase !== M.phase) trace.push({phase:M.phase,hp:M.hp,x:((s.player.x-O().x)/T).toFixed(1),feet:((s.player.y+15-O().y)/T).toFixed(1)});
       phases.add(M.phase);
       if (M.phase === 'loomGap') loomCounts.add(M.fired);
+      if (M.phase === 'stunned' && M.clock > 0.05) check(M.img?.angle === 25 || !M.img, 'moth: stunned wings visibly droop');
       const grounded = s.player.body.blocked.down || s.player.body.touching.down;
       let target = soul.x - 50;
       if (['diveTell', 'dive'].includes(M.phase)) target = M.r.x - BOSS_W / 2 - 40;
       if (M.phase === 'stunned') {
         target = M.r.x - BOSS_W / 2 - 28;
         if (grounded) key('keydown', 32);
-        if (s.player.y + 15 < bounds(M.r).top) target = M.r.x;
+        if (!sideJump || s.player.y + 15 < bounds(M.r).top) target = M.r.x;
+        if (!sideJump && hit(bounds(s.player), bounds(M.r))) sideJump = true;
         else if (!grounded && s.player.body.velocity.y >= 0) key('keyup', 32);
-      } else if (['curtainTell', 'curtain', 'curtainGap'].includes(M.phase)) target = O().x + 10 * T;
+      } else if (['curtainTell', 'curtain', 'curtainGap'].includes(M.phase)) target = O().x + 10.5 * T;
       else if (['skimmerTell', 'skimmer'].includes(M.phase)) {
         target = soul.x;
         if (grounded && s.player.y > soul.y - 25) key('keydown', 32);
@@ -383,7 +387,10 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
       if (M.phase === 'skimmerTell' && M.clock < 0.65) { target = O().x + 10 * T; key('keyup', 32); }
       if (Math.abs(s.player.x - target) < 6) { key('keyup', 37); key('keyup', 39); }
       else { key(s.player.x > target ? 'keydown' : 'keyup', 37); key(s.player.x < target ? 'keydown' : 'keyup', 39); }
-      s.shots.filter((sh) => sh.mothDust).forEach((sh) => dust.add(sh));
+      s.shots.filter((sh) => sh.mothDust).forEach((sh) => {
+        dust.add(sh);
+        if (sh.vx === 0 && sh.vy === 280) curtainColumns.add((sh.x - O().x) / T);
+      });
       const closedFall = !M.open && s.player.body.velocity.y > 0;
       await wait(20);
       if (closedFall && M.phase === 'diveGap' && M.hp === lastHp && s.player.body.velocity.y < 0) plainBounce = true;
@@ -393,10 +400,13 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     }
     key('keyup', 32); key('keyup', 37); key('keyup', 39);
     check(phases.has('curtain') && phases.has('skimmer'), `moth: loop (${JSON.stringify(trace.slice(-6))}, hp=${M.hp}, deaths=${stats.deaths-fightDeaths}, x=${(s.player.x-O().x)/T}, y=${(s.player.y-O().y)/T})`);
+    check(sideJump, 'moth: jumping into the stunned side is harmless');
+    check([0, 1, 2].every((i) => curtainColumns.has(3.25 + i * 8) && curtainColumns.has(8.75 + i * 8)), 'moth: curtain dust fills exactly the told columns');
     check(loomCounts.has(3) && loomCounts.has(4), 'moth: Loom adds its fourth aimed pod after hit two');
     check(plainBounce, 'moth: a plain stomp after the stun closes bounces without damage');
     check(bounceCleared, 'moth: real stomp bounce clears the back and continues to the next stomp');
     check(stats.deaths === deaths + 1 && s.corpses[0] === soul, `three stomps keep the same thorn soul without dying (${JSON.stringify(trace.slice(-6))})`);
+    if (M.hp > 0 || stats.deaths !== fightDeaths) throw new Error(JSON.stringify({ trace, hp: M.hp, deaths: stats.deaths - fightDeaths }));
     // Probe dust at shield height independently of the stomp attack timer.
     const probe = Object.assign(s.add.circle(soul.x + 3 * T, soul.y, 6, 0xffdf63), { vx: -210, vy: 0, mothDust: true });
     s.shots.push(probe); dust.add(probe);
@@ -672,6 +682,13 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   for (const name of ['The well', 'Thornwood']) if (matches(name)) {
     s = await cleanSolveRoom(name);
     check(s.cameras.main.followOffset.y < 0, `${name}: camera leads down from the real entrance`);
+    if (name === 'Thornwood') {
+      s.player.body.reset(O().x + 27 * T, O().y + 5 * T - 15);
+      key('keydown', 39);
+      await until(() => s.player.x > O().x + 28 * T, 2000, 'walk to Thornwood shrine 2');
+      key('keyup', 39); await wait(600);
+      check(s.cameras.main.worldView.bottom >= O().y + 23 * T, 'Thornwood: shrine 2 reveals the section C floor');
+    }
   }
   if (matches('The gatehouse')) {
     s = await cleanSolveRoom('The gatehouse');
@@ -808,7 +825,11 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     const fall = async (tx, row) => {
       const deaths = stats.deaths;
       s.player.body.reset(O().x + tx * 32 + 16, O().y + row * 32 + 16);
-      await until(() => stats.deaths > deaths); await alive();
+      await until(() => stats.deaths > deaths);
+      const walkers = s.enemies.map((e) => [e, e.x]);
+      await wait(150);
+      check(walkers.every(([e, x]) => Math.abs(e.x - x) < 2), 'The well: walkers freeze during respawn');
+      await alive();
       check(stats.deaths === deaths + 1 && Math.floor((s.corpses[0].x - O().x) / 32) === tx,
         `The well: aimed fall leaves the landing at column ${tx}`);
     };
@@ -816,13 +837,21 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     const a = await hop(11, 1, 22, 14);
     check(a.h >= 2.95 && s.start === s.shrines.find((sh) => O().contains(sh.x, sh.y))?.spawn,
       'The well: first landing and jump reach the shrine');
+    check(s.art.layers.filter((l) => l.ts.depth === 10).every((l) => l.ts.alpha <= 0.15),
+      'The well: foreground fades at the shrine so the hero stays visible');
     await fall(22, 18);
     check(s.start.x > O().x + 13 * 32, 'The well: second fall returns to the shrine');
     const deaths = stats.deaths;
     const guard = s.enemies.find((e) => O().contains(e.x, e.y));
-    const b = await hop(22.3, 1, 31, 26);
-    check(b.h >= 1.95 && stats.deaths === deaths, 'The well: jump from the landing clears the thorn wall');
-    check(!s.enemies.includes(guard) && stats.deaths === deaths, 'The well: jump from the soul stomps the exit guard');
+    await until(() => guard.dir < 0 && guard.x > O().x + 27.3 * T, 5000, 'wait for the well guard to approach the landing');
+    s.player.body.reset(O().x + 22.8 * T, O().y + 30 * T - 16); await wait(200);
+    key('keydown', 32); key('keydown', 39); await wait(1000);
+    key('keyup', 32); key('keyup', 39); await wait(150);
+    check(31 - (s.player.y + 15 - O().y) / T >= 1.95 && stats.deaths === deaths,
+      'The well: jump from the landing clears the thorn wall');
+    await until(() => guard.dir > 0 && guard.x > O().x + 26.2 * T && guard.x < O().x + 26.4 * T, 5000, 'wait for the guard below the shelf jump');
+    key('keydown', 32); await wait(700); key('keyup', 32); await wait(500);
+    check(!s.enemies.includes(guard) && stats.deaths === deaths, 'The well: vertical jump from the shelf stomps the exit guard');
     const exit = await hop(27, 0, 29, 28);
     check(exit.h >= 0.95, 'The well: after the stomp, hop onto the exit post');
     // A careless death replaces the useful landing and brings the guard back.
