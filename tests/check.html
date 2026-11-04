@@ -292,6 +292,44 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     check(s.enemies.every((e) => s.rooms[wi].rect.contains(e.x, e.y)), 'walker stays inside its room');
   }
 
+  const stagingSeen = new Set(Dialogue.seen);
+  // Replay staging with real physics, then replay the same scene with Esc.
+  for (const [name, script, mark] of [
+    ['The clearing', 'amulet', 11.5], ['First death', 'firstPit', 9],
+    ['The moth', 'moth', 11], ['The old tree', 'stagNote', 19.5],
+    ['The pyramid entrance', 'floorOne', 26],
+  ]) if (matches(name)) {
+    for (const skip of [false, true]) {
+      Object.keys(SCRIPT).forEach((k) => Dialogue.seen.add(k));
+      s = await go(ROOMS.findIndex(([n]) => n === name));
+      Dialogue.skip(s); await alive();
+      const originalCue = s.cue;
+      // Keep the ending scene open long enough to inspect its final mark.
+      s.cue = function (cue) { if (cue !== 'theEnd') originalCue.call(this, cue); };
+      const start = Dialogue.mark(s, mark - 1);
+      s.player.body.reset(start.x, start.y);
+      Dialogue.seen.delete(script); Dialogue.play(s, script);
+      key('keydown', 37);
+      if (skip) { key('keydown', 27); await wait(40); key('keyup', 27); }
+      else {
+        for (let i = 0; i < 500 && s.talk.active; i++) {
+          Dialogue.update(s, 0, true); await wait(50);
+        }
+      }
+      key('keyup', 37);
+      check(!s.talk.active && Math.abs(s.player.x - (O().x + mark * 32)) < 8,
+        `${script}: ${skip ? 'Esc' : 'played'} ends at its mark`);
+      check(s.player.body.blocked.down || s.player.body.touching.down,
+        `${script}: returns on solid ground`);
+      const x = s.player.x;
+      key('keydown', 37); await wait(150); key('keyup', 37);
+      check(s.player.x < x - 3, `${script}: player regains control`);
+      s.cue = originalCue;
+    }
+  }
+
+  Dialogue.seen = stagingSeen;
+
   if (matches('The clearing')) {
     Dialogue.seen.delete('amulet'); NAMES.guide = '???';  // the amulet cutscene, skipped with Esc
     s = await go(ROOMS.findIndex(([n]) => n === 'The clearing'));
@@ -331,7 +369,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     await until(() => s.talk.line || s.talk.queue.length, 3000);
     key('keyup', 39);
     check(s.talk.line || s.talk.queue.length, 'walking partway in starts the shaking');
-    for (let i = 0; i < 6 && (s.talk.line || s.talk.queue.length); i++) { Dialogue.update(s, 0, true); Dialogue.update(s, 0, true); }
+    for (let i = 0; i < 50 && (s.talk.line || s.talk.queue.length); i++) { Dialogue.update(s, 0, true); await wait(100); }
     for (let t = 0; t < 40 && s.boss?.hidden; t++) await wait(100); // bursts out, flies in, screams
     check(s.boss && !s.boss.hidden && s.boss.r.visible, 'moth arrives during the intro');
     check(!s.textures.exists('mothFly') || s.boss?.img?.active, 'the moth is painted once it arrives');

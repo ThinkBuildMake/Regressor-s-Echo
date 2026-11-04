@@ -318,6 +318,36 @@ const SCRIPT = {
   ],
 };
 
+// Lines accept walk (tile x), face, wait (seconds), pose (idle/slide), guide ({x, y}) and cue.
+// Marks are room-local tile coordinates; spoken text stays in SCRIPT above.
+const stage = (key, index, action) => Object.assign(SCRIPT[key][index], action);
+for (const key of Object.keys(SCRIPT)) stage(key, 0, { face: 'guide', pose: 'idle' });
+stage('clearing', 0, { walk: 5, face: 'right' });
+stage('amulet', 0, { walk: 11.5, face: 'right', pose: 'slide' });
+stage('amulet', 3, { pose: 'idle' });
+stage('amulet', 6, { face: 'guide' });
+stage('curse', 0, { walk: 16.5, face: 'right' });
+stage('firstPit', 0, { walk: 9, face: 'right' });
+stage('firstPit', 6, { face: 'right' });
+stage('firstDeath', 0, { walk: 2.5, pose: 'slide' });
+stage('firstDeath', 4, { pose: 'idle', face: 'guide' });
+stage('soul', 0, { walk: 9, face: 'right' });
+for (const key of ['thorns', 'patrol', 'chain', 'shrineMark', 'carvings', 'pyramid', 'tree', 'stagArrival'])
+  stage(key, 0, { face: 'right' });
+for (const [key, x] of [['thorns', 4], ['patrol', 4], ['chain', 4], ['tree', 8], ['pyramid', 5], ['carvings', 12.5]])
+  stage(key, 0, { walk: x });
+stage('carvings', 4, { walk: 13.5 });
+stage('moth', 0, { walk: 9, face: 'right' });
+stage('moth', 1, { walk: 10, face: 'right' });
+stage('moth', 2, { walk: 11, face: 'right' });
+stage('mothDown', 26, { pose: 'slide' });
+stage('mothDown', 31, { pose: 'idle', face: 'guide' });
+stage('stagPromise', 0, { walk: 20, guide: { x: 18, y: 13 }, face: 'guide' });
+stage('stagNote', 0, { walk: 19.5, face: 'left', pose: 'slide' });
+stage('stagNote', 11, { pose: 'idle' });
+stage('floorOne', 0, { walk: 23, face: 'right' });
+stage('floorOne', 3, { walk: 26, face: 'right' });
+
 const Dialogue = {
   seen: new Set(), // survives room restarts, so lines don't repeat
 
@@ -371,33 +401,96 @@ const Dialogue = {
   play(scene, key) {
     if (!SCRIPT[key] || this.seen.has(key)) return false;
     this.seen.add(key);
+    scene.talk.active = true;
     scene.talk.queue.push(...SCRIPT[key].map((l) => ({ ...l })));
     return true;
+  },
+
+  mark(scene, tile) {
+    const p = scene.player, r = scene.rooms[scene.index].rect;
+    const solids = scene.statics.getChildren().filter((s) => s.body.enable);
+    const hazards = [...scene.spikes.map(bounds), ...scene.beams()];
+    const target = r.x + tile * 32;
+    const overlap = (a, b) => a.x < b.right && a.right > b.x && a.y < b.bottom && a.bottom > b.y;
+    // Prefer the authored mark; if it is unsafe, use the nearest supported column.
+    for (let d = 0; d < r.width; d += 16) for (const x of d ? [target - d, target + d] : [target]) {
+      if (x < r.x + 20 || x > r.right - 20) continue;
+      const floors = solids.filter((s) => x >= s.body.left && x <= s.body.right &&
+        s.body.top >= p.y - 16 && s.body.top < r.bottom).sort((a, b) => a.body.top - b.body.top);
+      for (const floor of floors) {
+        const box = { x: x - p.width / 2, right: x + p.width / 2,
+          y: floor.body.top - 30, bottom: floor.body.top - 0.1 };
+        if (solids.some((s) => overlap(box, s.body)) || hazards.some((h) => overlap(box, h))) continue;
+        return { x, y: floor.body.top - p.height / 2 };
+      }
+    }
+    return { x: scene.start.x, y: scene.start.y };
+  },
+
+  act(scene, l, skip = false) {
+    const p = scene.player, g = scene.guide, r = scene.rooms[scene.index].rect;
+    if (l.guide && g) {
+      g.setPosition(r.x + l.guide.x * 32, r.y + l.guide.y * 32);
+      g.hoverY = g.y;
+      g.setAlpha(0.7);
+    }
+    if (skip && l.walk !== undefined) {
+      const mark = this.mark(scene, l.walk);
+      p.body.reset(mark.x, mark.y);
+    }
+    if (l.pose && (skip || l.walk === undefined)) scene.setLying(l.pose === 'slide');
+    if (l.who === 'guide' && !l.face) scene.face = g.x < p.x ? -1 : 1;
+    if (l.face) scene.face = l.face === 'guide' ? (g.x < p.x ? -1 : 1) : l.face === 'left' ? -1 : 1;
+  },
+
+  finish(scene) {
+    scene.player.body.setVelocityX(0);
+    scene.setLying(false);
+    const p = scene.player, r = scene.rooms[scene.index].rect;
+    if (scene.spikes.some((h) => hit(bounds(p), bounds(h))) || scene.laserHit()) {
+      const mark = this.mark(scene, (p.x - r.x) / 32);
+      p.body.reset(mark.x, mark.y);
+    }
+    scene.talk.ui.setVisible(false);
+    scene.talk.active = false;
   },
 
   // Esc: jump to the end of the conversation, still firing its cues (the ghost appears, the boss arrives).
   skip(scene) {
     const t = scene.talk;
     if (!t.line && !t.queue.length) return;
+    if (t.line) this.act(scene, t.line, true);
     for (const l of t.queue) {
+      this.act(scene, l, true);
       if (l.reveal) NAMES.guide = 'Yourself';
       if (l.cue) scene.cue?.(l.cue);
     }
     t.queue.length = 0;
     t.line = null;
+    const p = scene.player, r = scene.rooms[scene.index].rect;
+    const mark = this.mark(scene, (p.x - r.x) / 32);
+    p.body.reset(mark.x, mark.y);
+    this.finish(scene);
   },
 
-  // Call every frame. Returns true while a conversation is open (the hero should not move).
+  // Returns true while the scene owns the hero's movement.
   update(scene, dt, advance) {
     const t = scene.talk;
     if (!t.line) {
-      if (!t.queue.length) { t.ui.setVisible(false); return false; }
+      if (!t.queue.length) {
+        if (t.active && !scene.player.body.blocked.down && !scene.player.body.touching.down) { scene.player.body.setVelocityX(0); return true; }
+        if (t.active) this.finish(scene);
+        return false;
+      }
       t.line = t.queue.shift();
       t.shown = 0;
+      this.act(scene, t.line);
+      scene.player.body.setVelocityX(0);
       if (t.line.reveal) NAMES.guide = 'Yourself';
       if (t.line.cue) scene.cue?.(t.line.cue);
-      t.ui.setVisible(!t.line.wait);
-      if (t.line.wait) return true;
+      if (t.line.cue === 'lastBeam') scene.guide.hoverY = scene.guide.y;
+      t.ui.setVisible(!!t.line.text);
+      if (!t.line.text) return true;
       const speaking = t.line.who, other = speaking === 'hero' ? 'guide' : 'hero';
       t.name.setText(NAMES[speaking]);
       const pic = t[speaking];
@@ -412,14 +505,25 @@ const Dialogue = {
       t[other].setAlpha(0.3);
       return true;
     }
+    let walking = false;
+    if (t.line.walk !== undefined) {
+      const p = scene.player, target = scene.rooms[scene.index].rect.x + t.line.walk * 32;
+      const delta = target - p.x;
+      walking = Math.abs(delta) > 2;
+      p.body.setVelocityX(walking ? Math.sign(delta) * 100 : 0);
+      if (walking) scene.face = Math.sign(delta);
+      else this.act(scene, { face: t.line.face, pose: t.line.pose });
+    }
     if (t.line.wait) { // silent beat: no panel, no input, just time passing
-      if ((t.line.wait -= dt) <= 0) t.line = null;
+      t.line.wait = Math.max(0, t.line.wait - dt);
+      if (!t.line.wait && !walking) t.line = null;
       return true;
     }
+    if (!t.line.text) { if (!walking) t.line = null; return true; }
     const full = t.line.text.length;
     if (advance) {
       if (t.shown < full) t.shown = full;
-      else { t.line = null; return t.queue.length > 0 || this.update(scene, 0, false); }
+      else if (!walking) { t.line = null; return t.queue.length > 0 || this.update(scene, 0, false); }
     }
     t.shown = Math.min(full, t.shown + dt * 45);
     t.text.setText(t.line.text.slice(0, Math.floor(t.shown)));
