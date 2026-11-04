@@ -54,6 +54,11 @@ const WALL_SLIDE = 70, WALL_KICK = 170, WALL_JUMP = 420, KICK_LOCK = 0.3;
 const SAW_SPEED = 90, SAW_R = 13;               // saws run along a row or column; a soul in the way jams them
 const CRUMBLE_TIME = 0.45, CRUMBLE_BACK = 2.5;  // crumbling blocks break this long after you land, return later
 const FLYER_SPEED = 80, SHOT_SPEED = 200, THROW_EVERY = 1.8, STOMP_BOUNCE = 420;
+// Bramble spider (W1): pass under its column and it shakes, drops onto whatever is below (a soul too), rests, climbs.
+// Idol slider (W2): steps toward you only while you're airborne or holding K; you can stand on it.
+// Reliquary scarab (W3): a walker that patrols floors and soul bridges. Idols and scarabs press plates and block lasers.
+const SPIDER_SHAKE = 0.5, SPIDER_REST = 1, SPIDER_CLIMB = 150, IDOL_SPEED = 70, SCARAB_SPEED = 45;
+const heavy = (e) => e.kind === 'i' || e.kind === 'b';
 // Key prompts: shown once each, on screen (the characters never name keys). Each hides once you've done it.
 const KEY_PROMPTS = {
   move: ['← →  move     ·     Space  jump', (s) => s.player.body.velocity.y < -100],
@@ -85,6 +90,8 @@ const DEV = new URLSearchParams(location.search).has('dev'); // ?dev turns on th
 // > < v u laser emitter firing right/left/down/up (the beam kills; walls, doors and souls stop it)  s spring
 // o saw moving sideways  O saw moving up/down  ~ crumbling block  ! falling spike (drops when you pass under)
 // f flyer (flies over souls)  t thrower (shoots at you; souls block the shots). Stomp any enemy to kill it.
+// w bramble spider (put it right under the ceiling; its thread hangs from that tile's top)  i idol slider (not
+// stompable: stand on it; its sides kill)  b reliquary scarab
 // Rooms carry an optional [x, y] world position in tiles. Rooms that touch connect: walk through a gap
 // in the shared wall and the camera slides over. Rooms without a position are spread out so they don't
 // touch (the old test rooms). Every room is padded to at least one screen (30x17 tiles).
@@ -394,7 +401,7 @@ const ROOMS = [
     '######      ##################',
     '######      ##################',
     '######      ##################',
-    '######                  ######',
+    '######             w    ######',
     '######        C         ######',
     '######       ###       x######',
     '######       ###       x######',
@@ -569,7 +576,7 @@ const ROOMS = [
     '#          #### #        #####',
     '#          ####          #####',
     '           ####        _ #####',
-    ' P       # ####        # #####',
+    ' P   i   # ####        # #####',
     '##############################',
   ], [436, 92], { world: 2 }],
   ["The spring", [ // 9-high ledge: hold during the launch so a soul hangs beside the spring, then land on it
@@ -731,7 +738,7 @@ const ROOMS = [
     '##############        #########        ######',
     '##############        ######  #        ######',
     '   ###########  C             D        ######',
-    ' P             ##  _  #  o   #D   s    ######',
+    ' P             ##  _  #  o   #D   s  b ######',
     '#######^^^###################################',
     '#############################################',
   ], [690, 63], { world: 3, shrineTalk: "almostCompetent" }],
@@ -935,6 +942,9 @@ class Room extends Phaser.Scene {
       ['heroPained', 'hero/pose-pained', 116, 112],
       ['flyer', 'enemies/flyer', 115, 112],
       ['thrower', 'enemies/thrower', 123, 112],
+      ['spider', 'enemies/bramble-spider', 112, 112],
+      ['idol', 'enemies/idol-slider', 195, 116],
+      ['scarab', 'enemies/reliquary-scarab', 256, 137],
     ]) if (!this.textures.exists(key)) this.load.spritesheet(key, `assets/${path}.webp`, { frameWidth: width, frameHeight: height });
     if (!this.textures.exists('seedShot')) this.load.image('seedShot', 'assets/enemies/seed-shot.webp');
     if (!this.textures.exists('walker')) this.load.image('walker', 'assets/enemies/walker.webp');
@@ -1042,7 +1052,7 @@ class Room extends Phaser.Scene {
             case 'x': this.spikes.push(rect(x + 4, y + 2, T - 8, T - 4, 0x7a3550)); this.spikes.at(-1).audioVine = true; hazard(this.spikes.at(-1), 'thorns', T, T); break;
             case '_': this.plates.push(Object.assign(rect(x + 1, y + T - 8, T - 2, 8, 0xffd700).setStrokeStyle(2, 0x8a6a00).setDepth(3), { room: ri })); hazard(this.plates.at(-1), 'plate', T, 8); break;
             case 'D': { const d = Object.assign(rect(x, y, T, T, 0x8c6640), { room: ri }); this.statics.add(d); this.doors.push(d); break; }
-            case 'e': case 'f': case 't': this.walkerSpawns.push({ x, y, room: ri, kind: row[tx] }); break; // made on entry
+            case 'e': case 'f': case 't': case 'w': case 'i': case 'b': this.walkerSpawns.push({ x, y, room: ri, kind: row[tx] }); break; // made on entry
             case 'o': case 'O': {
               const sw = { room: ri, x: x + T / 2, y: y + T / 2, dx: row[tx] === 'o' ? 1 : 0, dy: row[tx] === 'O' ? 1 : 0, dir: 1 };
               const key = Art.hazardKey(this, world, 'saw');
@@ -1212,6 +1222,9 @@ class Room extends Phaser.Scene {
       return false;
     });
 
+    // Idols are solid only from above: land on one and stand there. Touching a side kills (the stomp loop in update).
+    this.physics.add.collider(this.player, this.enemies, null, (pl, e) => e.kind === 'i' && pl.body.prev.y + pl.body.height <= e.body.y + 4);
+
     this.keys = this.input.keyboard.addKeys('A,D,LEFT,RIGHT,SPACE,W,UP,K,X,Q,R,N,S,DOWN,SHIFT,ENTER,E,ESC,H,ONE,TWO,THREE,FOUR,FIVE');
     this.bossBar = this.add.text(480, 14, '', { fontFamily: 'Georgia, serif', fontSize: '22px', color: '#ffef72' })
       .setOrigin(0.5, 0).setScrollFactor(0).setDepth(30).setShadow(0, 2, '#000', 6);
@@ -1253,11 +1266,21 @@ class Room extends Phaser.Scene {
         this.flyers.push(Object.assign(f, { dir: -1, baseY: y + 16, kind, spawn: sp }));
         return;
       }
-      const e = kind === 't' ? rect(x + 4, y + T - 28, 24, 28, 0xe08a3c) : rect(x + 4, y + T - 24, 24, 24, 0xd0543c);
+      if (kind === 'w') { // spider: no physics body; it moves in updateSpider
+        const f = rect(x + 5, y + 4, 22, 20, 0xb03030).setDepth(4);
+        this.enemyPainting(f, 'spider', 64);
+        this.flyers.push(Object.assign(f, { kind, spawn: sp, top: y, y0: f.y, state: null }));
+        return;
+      }
+      const e = kind === 't' ? rect(x + 4, y + T - 28, 24, 28, 0xe08a3c) : kind === 'i' ? rect(x + 1, y + T - 28, 30, 28, 0x8a2a24)
+        : kind === 'b' ? rect(x + 1, y + T - 16, 30, 16, 0xa8322a) : rect(x + 4, y + T - 24, 24, 24, 0xd0543c);
       e.kind = kind;
       e.spawn = sp;
       if (kind === 't') { e.cool = THROW_EVERY; this.enemyPainting(e, 'thrower', 32); }
+      if (kind === 'i') this.enemyPainting(e, 'idol', 40);
+      if (kind === 'b') this.enemyPainting(e, 'scarab', 27);
       this.physics.add.existing(e);
+      if (kind === 'i') e.body.pushable = false; // you stand on it without pressing it into the floor
       e.dir = -1;
       if (kind === 'e' && this.textures.exists('walker')) {
         const tex = this.textures.get('walker'), img = tex.getSourceImage(), fw = img.width / 6;
@@ -1854,12 +1877,25 @@ class Room extends Phaser.Scene {
         }
         continue;
       }
+      if (e.kind === 'i') { // moves toward you only while you're in the air or holding K; walls and souls stop it
+        const p = this.player, pb = p.body, dx = p.x - e.x;
+        const air = !(pb.blocked.down || pb.touching.down) && !this.enemies.some((o) => o.kind === 'i' && Math.abs(pb.bottom - o.body.top) < 2 && pb.right > o.body.left && pb.left < o.body.right); // standing on an idol is the ground
+        const go = p.visible && (air || this.charge > 0) && Math.abs(dx) > 4 && (dx < 0 ? e.x > e.room.x + 16 : e.x < e.room.right - 16);
+        if (go) e.dir = Math.sign(dx);
+        b.velocity.x = go ? e.dir * IDOL_SPEED : 0;
+        const step = Math.floor((this.time.now / 1000) * 8);
+        e.img?.setPosition(e.x, b.bottom + 2).setOrigin(0.5, 1).setFlipX(e.dir > 0).setFrame(go && !b.blocked.left && !b.blocked.right ? 1 + (step % 2) : 0);
+        continue;
+      }
       if (b.blocked.left || b.touching.left || e.x < e.room.x + 16) e.dir = 1; // walls and the room's edges turn it
       else if (b.blocked.right || b.touching.right || e.x > e.room.right - 16) e.dir = -1;
       else if ((b.blocked.down || b.touching.down) && !solids.some((s) => s.contains(e.x + e.dir * 14, e.y + 14)))
         e.dir *= -1; // ledge ahead
-      b.velocity.x = e.dir * WALKER_SPEED;
-      if (e.img) {
+      b.velocity.x = e.dir * (e.kind === 'b' ? SCARAB_SPEED : WALKER_SPEED);
+      if (e.kind === 'b') { // three walk poses; on its back (frame 3) while falling
+        const step = Math.floor((this.time.now / 1000) * 6), down = b.blocked.down || b.touching.down;
+        e.img?.setPosition(e.x, b.bottom + 3).setOrigin(0.5, 1).setFlipX(e.dir > 0).setFrame(down ? step % 3 : 3);
+      } else if (e.img) {
         const step = Math.floor((this.time.now / 1000) * WALKER_FPS);
         e.img.setPosition(e.x, e.y + 12 - (step % 2)).setFlipX(e.dir > 0) // sheet faces left; 1px bob
           .setFrame(WALKER_FRAMES[step % WALKER_FRAMES.length]);
@@ -1882,6 +1918,7 @@ class Room extends Phaser.Scene {
     const walls = (box) => this.statics.getChildren().find((s) => s.body.enable && !this.corpses.includes(s) && hit(box, bounds(s)));
     const R = this.rooms[this.index].rect, p = this.player, t = this.time.now / 1000;
     for (const f of this.dead > 0 || this.talk.active ? [] : this.flyers) {
+      if (f.kind === 'w') { this.updateSpider(f, dt); continue; }
       const nx = f.x + f.dir * FLYER_SPEED * dt;
       if (walls(new Phaser.Geom.Rectangle(nx - 12, f.y - 8, 24, 16)) || nx < R.x + 16 || nx > R.right - 16) f.dir *= -1;
       else f.x = nx;
@@ -1929,10 +1966,33 @@ class Room extends Phaser.Scene {
     }
   }
 
+  // Bramble spider: hang; you pass under its column -> shake, drop onto the first wall or soul below, rest, climb back.
+  updateSpider(f, dt) {
+    const p = this.player, R = this.rooms[this.index].rect;
+    if (!f.state && p.visible && Math.abs(p.x - f.x) < 22 && p.y > f.y) { f.state = 'shake'; f.t = SPIDER_SHAKE; }
+    if (f.state === 'shake' && (f.t -= dt) <= 0) { f.state = 'drop'; f.vy = 0; }
+    if (f.state === 'drop') {
+      f.vy = Math.min(f.vy + GRAVITY * dt, MAX_FALL);
+      const b = bounds(f), next = new Phaser.Geom.Rectangle(b.x, b.y + f.vy * dt, b.width, b.height);
+      let floor = R.bottom;
+      for (const s of this.statics.getChildren()) {
+        const r = bounds(s);
+        if (s.body.enable && r.y > b.y && hit(next, r)) floor = Math.min(floor, r.y); // a soul made under it mid-drop counts too
+      }
+      if (next.bottom >= floor) { f.y = floor - b.height / 2; f.state = 'rest'; f.t = SPIDER_REST; } else f.y = next.centerY;
+    }
+    if (f.state === 'rest' && (f.t -= dt) <= 0) f.state = 'climb';
+    if (f.state === 'climb' && (f.y -= SPIDER_CLIMB * dt) <= f.y0) { f.y = f.y0; f.state = null; }
+    const t = this.time.now / 1000, shake = f.state === 'shake' ? Math.sin(t * 80) * 2 : 0;
+    const frame = { shake: Math.floor(t * 16) % 2, drop: 2, rest: 1, climb: 3 }[f.state] ?? 0;
+    f.img?.setPosition(f.x + shake, f.y + 4).setFrame(frame);
+  }
+
   resetDropper(d) { d.state = null; d.r.setPosition(d.x0, d.y0).setVisible(true); }
 
   drawHazards() {
     const g = this.fx, t = this.time.now / 1000;
+    for (const f of this.flyers) if (f.kind === 'w') g.lineStyle(1.5, 0x2a1c1c, 0.9).lineBetween(f.x, f.top, f.x, f.y - 6); // silk
     const B = this.boss;
     if (B?.kind === 'tree' && !B.hidden) {
       if (B.phase === 'slam') {
@@ -2395,7 +2455,7 @@ class Room extends Phaser.Scene {
     this.drawHazards();
     Art.update(this, this.time.now / 1000);
 
-    const weights = [p, ...this.corpses].map(bounds);
+    const weights = [p, ...this.corpses, ...this.enemies.filter(heavy)].map(bounds);
     for (const pl of this.plates.filter(pl => pl.room === this.index)) {
       const held = weights.some(w => hit(w, bounds(pl)));
       if (held !== !!pl.audioHeld) GameAudio.play(held ? 'hazards-plate-down' : 'hazards-plate-up');
@@ -2472,6 +2532,7 @@ class Room extends Phaser.Scene {
     // Land on an enemy from above to stomp it (it comes back when you re-enter the room); any other touch kills.
     for (const list of [this.enemies, this.flyers]) for (const e of [...list]) {
       if (!hit(pb, bounds(e))) continue;
+      if (e.kind === 'i') { if (pb.bottom - bounds(e).y > 6) return this.die(); continue; } // its top is a floor
       if (p.body.velocity.y > 0 && pb.bottom - bounds(e).y < 14) { list.splice(list.indexOf(e), 1); this.downed.push({ sp: e.spawn }); GameAudio.play('walker-crushed'); e.destroy(); p.body.velocity.y = -STOMP_BOUNCE; }
       else return this.die();
     }
@@ -2607,7 +2668,7 @@ class Room extends Phaser.Scene {
 
   // Each beam runs from its emitter to the first solid thing in its way (walls, closed doors, souls).
   beams() {
-    const solids = this.statics.getChildren().filter((s) => s.body.enable).map(bounds);
+    const solids = [...this.statics.getChildren().filter((s) => s.body.enable), ...this.enemies.filter(heavy)].map(bounds); // idol and scarab shells block too
     return this.lasers.filter((l) => l.room === this.index).map(({ e, dx, dy }) => {
       const E = bounds(e), cx = E.centerX, cy = E.centerY, w = 6;
       let d = 2000;

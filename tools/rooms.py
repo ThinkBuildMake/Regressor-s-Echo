@@ -33,6 +33,9 @@ def well(o, p):
     o(16, 17, 23, 30); o(23, 19, 23, 24, 'x'); o(24, 27, 24, 30)
     o(16, 31, 24, 31, '^'); o(24, 25, 28, 28); o(29, 27, 29, 28)
     p(27, 28, 'e'); p(28, 28, '#')
+    # A bramble spider hangs over the second shaft: it drops after you (too late to catch a fall) and stops on a
+    # soul in its column. Wait on that soul and it lands on you: the new soul is a tile higher, and so on.
+    p(19, 17, 'w')
 room('The well', [180, 94], 30, 33, 1, 'aim your fall: the soul must land near the exit side', well)
 
 def gatehouse(o, p):
@@ -105,6 +108,9 @@ def beam(o, p):
     # A: the laser death is both the high step and the shield.
     o(1, 1, 10, 15); o(11, 1, 14, 7); p(11, 11, '<'); p(13, 7, 'C')
     p(9, 15, '#')  # a low block beside the source: die standing on it for the step (as stage B's plate block)
+    # An idol slider guards the floor: it steps toward you whenever you jump or hold K, so it ends up against
+    # the low block (or a soul). Hop onto it rather than into its side; it's no higher than the block, so no shortcut.
+    p(5, 15, 'i')
     # B: the lower step must also hold the door; a third death removes it.
     o(15, 1, 24, 15); o(25, 1, 28, 7); p(25, 11, '<')
     o(16, 1, 16, 12, '#')  # sheltered drop beside the shrine
@@ -194,6 +200,9 @@ def everything(o, p):
     p(19, 19, '_'); o(22, 18, 29, 19); p(22, 19, '#'); p(25, 19, 'o'); p(29, 19, '#'); o(28, 17, 29, 17)  # the post keeps the saw in its lane; headroom to hop it
     o(30, 18, 30, 19, 'D')
     o(31, 1, 38, 19); p(34, 19, 's')
+    # A reliquary scarab paces the spring floor: stomp it or let a soul fence it off (it turns at souls and walks
+    # across flat ones). It can't reach the exit ledge or the hanging step, so it's no ladder.
+    p(37, 19, 'b')
     o(39, 1, 43, 10); o(44, 9, 44, 10)
     p(1, 19, 'P')
 room('Everything', [630, 63], 45, 22, 3, 'slide bridge, shrine; plate, saw jam and spring step together; recall a bad step', everything)
