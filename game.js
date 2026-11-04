@@ -1109,7 +1109,6 @@ class Room extends Phaser.Scene {
     this.roomDeaths = 0;
     this.drawStagGrounds();
     this.showWorld(this.rooms[this.index].world);
-    Dialogue.play(this, this.rooms[this.index].enter);
 
     this.spawnWalkers(this.index);
     this.physics.add.collider(this.enemies, this.statics);
@@ -1166,6 +1165,7 @@ class Room extends Phaser.Scene {
     cam.startFollow(this.player, true, 0.12, 0.12);
     cam.centerOn(this.player.x, this.player.y);
     this.transit = false;
+    Dialogue.play(this, this.rooms[this.index].enter);
   }
 
   // Walked into a neighbouring room: souls stay behind (cleared), respawn moves to the nearest
@@ -2226,7 +2226,7 @@ class Room extends Phaser.Scene {
         key._justDown = key._justUp = false;
         this.blockedKeys.delete(key);
       }
-      else if (this.talk.active) this.blockedKeys.add(key);
+      else if (this.talk.active && key.isDown) this.blockedKeys.add(key);
     }
     const k = Object.fromEntries(Object.entries(raw).map(([name, key]) => {
       if (!this.blockedKeys.has(key)) return [name, key];
@@ -2368,7 +2368,8 @@ class Room extends Phaser.Scene {
       if (this.rooms[this.index].world) Dialogue.play(this, 'shrineMark'); // the first touch only
     }
 
-    if (this.talk.active) return; // A pickup, shrine or boss can open dialogue during this frame.
+    // A pickup, shrine or boss can open dialogue during this frame.
+    if (this.talk.active) { Dialogue.update(this, dt, false); return; }
     const b = p.body;
     if (b.velocity.y > MAX_FALL) b.velocity.y = MAX_FALL; // cap falling only (a cap both ways held springs to 7.4 tiles)
     const grounded = b.blocked.down || b.touching.down;

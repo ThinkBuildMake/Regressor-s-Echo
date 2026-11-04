@@ -459,7 +459,7 @@ const Dialogue = {
       scene.slide = scene.charge = scene.kick = scene.buffer = scene.wallCoyote = 0;
       scene.sdLock = true;
       scene.setLying(false);
-      scene.talk.landing = true;
+      scene.talk.landing = 1;
       GameAudio.loop(scene, 'hero-release-wind-up', false, 0.5);
     }
     scene.talk.active = true;
@@ -580,6 +580,8 @@ const Dialogue = {
     scene.talk.ui.setVisible(false);
     scene.blockedKeys ??= new Set();
     for (const key of Object.values(scene.keys)) if (key.isDown) scene.blockedKeys.add(key);
+    scene.talk.landing = 0;
+    scene.talk.settling = 0;
     scene.talk.active = false;
   },
 
@@ -608,12 +610,17 @@ const Dialogue = {
     const t = scene.talk;
     if (t.active && t.landing) {
       scene.player.body.setVelocityX(0);
-      if (!scene.player.body.blocked.down && !scene.player.body.touching.down) return true;
-      t.landing = false;
+      t.landing = Math.max(0, t.landing - dt);
+      if (t.landing && !scene.player.body.blocked.down && !scene.player.body.touching.down) return true;
+      t.landing = 0;
     }
     if (!t.line) {
       if (!t.queue.length) {
-        if (t.active && !scene.player.body.blocked.down && !scene.player.body.touching.down) { scene.player.body.setVelocityX(0); return true; }
+        if (t.active && !scene.player.body.blocked.down && !scene.player.body.touching.down) {
+          scene.player.body.setVelocityX(0);
+          t.settling = (t.settling || 0) + dt;
+          if (t.settling < 1) return true;
+        }
         if (t.active) this.finish(scene);
         return false;
       }
