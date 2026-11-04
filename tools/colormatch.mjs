@@ -17,7 +17,7 @@ const res = await p.evaluate(async ([s, r, bc]) => {
   const [, , rd] = px(await load(r)); const [c, g, sd] = px(await load(s));
   const rs = stats(rd.data), ss = stats(sd.data), d = sd.data;
   for (let i = 0; i < d.length; i += 4) if (d[i + 3] > 0) for (let k = 0; k < 3; k++) d[i + k] = Math.max(0, Math.min(255, (d[i + k] - ss[k][0]) * (rs[k][1] / ss[k][1]) + rs[k][0]));
-  for (let i = 0; i < d.length; i += 4) if (d[i + 3] > 0) { if (d[i] > d[i + 1] + 3) d[i] = d[i + 1] + 3; const m = Math.max(d[i], d[i + 2]); if (d[i + 1] > m) d[i + 1] = m; if (bc >= 0) d[i + 2] = Math.min(d[i + 2], Math.max(d[i], d[i + 1]) + bc); } // no pink, no green
+  for (let i = 0; i < d.length; i += 4) if (d[i + 3] > 0) { if (d[i] > d[i + 1] + 3 && d[i + 2] > d[i + 1] + 3) d[i] = d[i + 1] + 3; const m = Math.max(d[i], d[i + 2]); if (d[i + 1] > m) d[i + 1] = m; if (bc >= 0) d[i + 2] = Math.min(d[i + 2], Math.max(d[i], d[i + 1]) + bc); } // pink (red AND blue above green = magenta spill) -> no pink; red creatures keep their red; no green cast
   g.putImageData(sd, 0, 0); return { url: c.toDataURL('image/png'), rs, ss };
 }, [uri(src), uri(ref), blueCap]);
 writeFileSync(out, Buffer.from(res.url.split(',')[1], 'base64')); await b.close();
