@@ -1001,7 +1001,7 @@ class Room extends Phaser.Scene {
     Art.ensure(this);
     Art.backdrop(this);
     const rect = (x, y, w, h, color) => this.add.rectangle(x + w / 2, y + h / 2, w, h, color);
-    this.wornAmulet = this.hudAmulet = this.pips = undefined;
+    this.hudAmulet = this.pips = undefined;
     this.amulets = [];
     this.shrines = [];
     this.lasers = [];
@@ -1294,9 +1294,6 @@ class Room extends Phaser.Scene {
     const rune = stats.treePower ? 3 : stats.mothFinished ? 2 : 1;
     const key = this.textures.exists(`amulet-rune${rune}`) ? `amulet-rune${rune}` : 'amulet';
     if (!this.textures.exists(key)) return;
-    if (!this.wornAmulet) this.wornAmulet = this.add.image(0, 0, key).setDepth(5.6);
-    this.wornAmulet.setTexture(key).setDisplaySize(10, 10).setVisible(this.wearing && p.visible && !this.lying)
-      .setPosition(b.center.x + this.face * 2, b.bottom - HERO_HEIGHT * 0.5 - 2);
     if (!this.hudAmulet) this.hudAmulet = this.add.image(0, 516, key).setScrollFactor(0).setDepth(40);
     this.hudAmulet.setTexture(key).setDisplaySize(32, 32).setX(32 + rules.max * 22).setVisible(this.wearing);
     if (this.wearing && this.litRune !== rune) {
@@ -1715,10 +1712,6 @@ class Room extends Phaser.Scene {
     this.heroSprite.setTexture(key, frame).setScale(key === 'heroWall' || key === 'heroKick' ? HERO_HEIGHT / 141 : this.heroScale * (key === 'heroRun' ? RUN_SCALE : 1)).setFlipX(flip)
       .setOrigin(slide ? this.slideOrigin(frame, flip) : key === 'heroIdleAnim' ? (flip ? 0.27 : 0.73) : cut ? (flip ? 1 - cut[2] : cut[2]) : 0.5, 1) // idle feet sit 73% across the frame
       .setPosition(bx + (slide ? this.face * 12 : 0), feet + 1);
-    // the amulet's glow, on his chest (only placed for upright poses)
-    if (slide || !this.wearing) return;
-    g.fillStyle(0xffd774, 0.25 + Math.sin(t * 3) * 0.08);
-    g.fillCircle(bx + this.face * 2, feet - HERO_HEIGHT * 0.5, 4);
   }
 
   // Origin for a slide frame: its feet (from tools/sheet.mjs's metadata), mirrored when facing left.
