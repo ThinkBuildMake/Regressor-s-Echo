@@ -933,7 +933,7 @@ class Room extends Phaser.Scene {
     Dialogue.preload(this);
     for (const [key, path] of [
       ['amulet', 'world1/amulet'], ['ghost', 'world1/ghost'], ['old-tree', 'world3/old-tree'],
-      ...[1, 2, 3].flatMap((n) => [[`amulet-rune${n}`, `world1/amulet-rune${n}`], [`shrine${n}`, `world${n}/shrine`], [`shrineLit${n}`, `world${n}/shrine-lit`]]),
+      ...[1, 2, 3].flatMap((n) => [[`amulet-rune${n}`, `world1/amulet-rune${n}`], [`shrine${n}`, `world${n}/shrine`], [`shrineLit${n}`, `world${n}/shrine-lit`], [`gate${n}`, `world${n}/gate`]]),
       ['uiSoulFull', 'ui/soul-full'], ['uiSoulEmpty', 'ui/soul-empty'], ['carvings', 'world2/carvings'], ['laserEmitter', 'world2/laser'],
     ]) if (!this.textures.exists(key)) this.load.image(key, `assets/${path}.webp`);
     if (!this.textures.exists('heroSheet')) {
@@ -1160,6 +1160,20 @@ class Room extends Phaser.Scene {
       const shrines = this.shrines.filter((sh) => R.contains(sh.x, sh.y));
       const stage = (x) => shrines.filter((sh) => sh.x < x).length;
       d.plates = this.plates.filter((pl) => pl.room === d.room && stage(pl.x) === stage(d.x));
+    }
+    // Gate art: one painting per column of door tiles (each world has its own gate).
+    for (const d of this.doors) {
+      if (d.gate !== undefined) continue;
+      const run = [d];
+      while (true) {
+        const next = this.doors.find((o) => o.room === d.room && o.x === d.x && o.y === run.at(-1).y + T);
+        if (!next) break;
+        run.push(next);
+      }
+      const key = `gate${this.rooms[d.room].world ?? 1}`;
+      const img = this.textures.exists(key)
+        ? this.add.image(d.x, d.y - T / 2, key).setOrigin(0.5, 0).setDisplaySize(T + 4, run.length * T).setDepth(2) : null;
+      for (const o of run) { o.gate = img; if (img) o.setFillStyle(0, 0); }
     }
     // Fill a screen's height of solid ground above and below every room (stopping at any other room),
     // so the camera's diagonal slide between rooms at different heights never shows empty space.
@@ -2453,6 +2467,7 @@ class Room extends Phaser.Scene {
       d.audioHeld = held;
       d.body.enable = !held;
       d.setAlpha(held ? 0.2 : 1);
+      d.gate?.setAlpha(held ? 0.2 : 1);
     }
 
     this.updateHud();
