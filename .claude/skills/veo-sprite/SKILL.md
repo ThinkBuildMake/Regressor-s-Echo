@@ -32,20 +32,24 @@ Read `.claude/skills/flow-asset/SKILL.md` "Driving Flow" first. It covers upload
 ```sh
 mkdir -p <scratch>/f && ffmpeg -i <name>.mp4 -vf fps=24 <scratch>/f/%03d.png
 node tools/video-loop.mjs <name>.mp4 [minLen] [maxLen]        # best loop windows: first=… next=…
-node tools/video-frames.mjs <scratch>/f <scratch>/native <first> <next> 12 [--anchor=feet|center] [--mirror] [--rot=k]
+node tools/video-frames.mjs <scratch>/f <scratch>/native <first> <next> 12 [--anchor=feet|fixed] [--mirror] [--rot=k]
 node tools/colormatch.mjs <scratch>/native.png <painted keyed sheet of the same creature>.webp <scratch>/cm.png
-node tools/video-fit.mjs <scratch>/cm.png 12 assets/<kind>/<current sheet>.webp <scratch>/<name>
+node tools/video-fit.mjs <scratch>/cm.png 12 assets/<kind>/<current sheet>.webp <scratch>/<name> [--match=i:j]
 tools/sheet-gif.sh <scratch>/<name>.png <frameWidth> 12 <scratch>/<name>.gif
 node tools/onion.mjs <scratch>/<name>.webp 12 <scratch>/onion.png
 ```
 - **video-loop:** it finds the window whose last frame best matches its first. For a walk, check that the window is one full stride, where the same foot lifts again. A half stride also scores well, but it swaps the sides.
   - Set the length range to the motion: a walk stride ran 35–37 frames at 24 fps; wingbeats are much shorter.
 - **video-frames:** it keys the background (video shifts the magenta, so it keys on the median border colour) and lays the frames into one sheet.
-  - Use `--anchor=feet` for anything standing: one shared ground line, so a lifted foot can't bob the body. Use `--anchor=center` for flying or hanging things.
+  - Use `--anchor=feet` for anything standing: one shared ground line, so a lifted foot can't bob the body. Use `--anchor=fixed` for flying or hanging things: the locked camera already holds them still, and aligning on their outline makes the body jump as the wings move (moth, 2026-11-04).
   - `--mirror` flips the result to face left. `--rot=k` starts the loop on frame k.
 - **colormatch:** video tints white and pale colours towards lavender. This shifts the colours to match the painting, then removes leftover pink without turning dark areas green.
   - The reference must be a **keyed** painted sheet (.webp with transparency), not a JPG on magenta.
+  - For warm or neutral creatures, add `--blue-cap=6` if thin parts such as antennae turn vivid blue. Leave it off for cool-white creatures like the stag.
 - **video-fit:** it scales and places the creature so its height and position match the current sheet's cells. The result drops in with no code change.
+  - When the new motion is bigger than the old (a wider wingbeat), size by one matching pose with `--match=i:j` (source frame i to target frame j, e.g. wings up), or the creature comes out too small. The fit always keeps every frame inside the cell, shrinking or shifting if it has to.
+- **Start frame for a hard pose:** if take 1 drifts out of the pose you need (the stag's charge lifted its head), start take 2 from a frame of the current sheet in that pose instead of the base.
+- **Leave room for the motion:** a big wingbeat clipped the frame edge at 65% height; the moth needed about 36%, placed higher.
 - 12 frames is smooth; 8 is lighter but choppier.
 - Sheets have no frame limit. `art.mjs` scales to 1088 px by default, so pass `--height` whenever you re-encode with it.
 

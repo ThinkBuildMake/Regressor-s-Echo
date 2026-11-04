@@ -1,8 +1,10 @@
 // Frames pulled from a Veo video (magenta background) -> one keyed, aligned sprite sheet, unscaled.
-//   node tools/video-frames.mjs <framesDir> <outBase> <first> <next> [n=8] [--mirror] [--anchor=feet|center] [--rot=0] [--t0=50 --t1=120]
+//   node tools/video-frames.mjs <framesDir> <outBase> <first> <next> [n=8] [--mirror] [--anchor=feet|fixed|center] [--rot=0] [--t0=50 --t1=120]
 // framesDir holds 001.png... (ffmpeg -i in.mp4 -vf fps=24 dir/%03d.png). first..next = one loop (from tools/video-loop.mjs):
 // n frames are taken evenly from it. Keys the background (median border colour, soft threshold t0..t1), then aligns every
-// frame: --anchor=feet (default) = torso centre x + one shared ground line; center = bbox centre (flyers, hanging things).
+// frame: --anchor=feet (default) = torso centre x + one shared ground line (walkers); fixed = no per-frame shift, the
+// locked camera already holds the creature still (flyers: wings move the bbox, so aligning on it makes the body jump);
+// center = bbox centre (only for small, rigid things).
 // Writes <outBase>.png at native size; then tools/colormatch.mjs and tools/video-fit.mjs.
 import { execFileSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
@@ -41,6 +43,7 @@ const frames = idx.map((i) => {
   let sx = 0, cnt = 0;
   for (let y = Math.round(y0 + 0.4 * (y1 - y0)); y < y0 + 0.65 * (y1 - y0); y++)
     for (let x = x0; x <= x1; x++) if (rgba[(y * W + x) * 4 + 3] > 128) { sx += x; cnt++; }
+  if (anchor === 'fixed') return { i, bg, rgba, box: [x0, y0, x1, y1], ax: W / 2, ay: H / 2 };
   if (anchor === 'center') return { i, bg, rgba, box: [x0, y0, x1, y1], ax: (x0 + x1) / 2, ay: (y0 + y1) / 2 };
   return { i, bg, rgba, box: [x0, y0, x1, y1], ax: sx / cnt, ay: y1 };
 });
@@ -48,7 +51,7 @@ const frames = idx.map((i) => {
 if (anchor === 'feet') { const gy = Math.max(...frames.map((f) => f.ay)); frames.forEach((f) => { f.ay = gy; }); }
 // Union box relative to each anchor.
 const L = Math.min(...frames.map((f) => f.box[0] - f.ax)) - 12, R = Math.max(...frames.map((f) => f.box[2] - f.ax)) + 12;
-const T = Math.min(...frames.map((f) => f.box[1] - f.ay)) - 12, B = anchor === 'center' ? Math.max(...frames.map((f) => f.box[3] - f.ay)) + 12 : 10;
+const T = Math.min(...frames.map((f) => f.box[1] - f.ay)) - 12, B = anchor !== 'feet' ? Math.max(...frames.map((f) => f.box[3] - f.ay)) + 12 : 10;
 const cw = Math.round(R - L), ch = Math.round(B - T);
 const sheet = Buffer.alloc(cw * n * ch * 4);
 frames.forEach((f, k) => {
