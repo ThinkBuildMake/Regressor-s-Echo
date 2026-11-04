@@ -256,6 +256,23 @@ Enemy colour language: enemies are red (the walker beetle), so new enemies share
 
 **World 2 and 3 hazard variants** (re-dress edits of the World 1 images, like the shrines; one per world): attach the World 1 image only and "Edit the attached image. Keep the shape, size, layout and edges exactly as they are. Only change the setting and materials to match: <the world's setting sentence>." Keep the mark on the plate as three rays above the ring, nothing below the circle. Files to `assets/raw/world2/` and `assets/raw/world3/`: `spikes`, `thorns` (World 2: thorny ruin vines; World 3: thorny dark-violet brambles), `plate`, `vine-barrier`, and the saw, crumble set and falling spike (World 2: rusted ruin metal and grey stone; World 3: carved dark stone).
 
+## Batch 4: enemies per world (Flow, Nano Banana 2.1)
+
+One new enemy per world (see LEVELS.md "Enemies per world"). All red, the walker's palette family (glossy deep red, darker crimson, faint dull-orange glints), no gold, no bright blue-white, no effects. Each belongs to its world through its shape and materials, but its body is red. Reference: enemy style block + attach `walker.jpg` + `anchor.png` + the prompt + "Do not include the attached images themselves." Then a shrunk base (`<name>-small.jpg`), and the sheet from the shrunk base only, with "N small creatures, each the same size as the attached one, no large one anywhere; big, clearly different poses." Same sheet rules as Batch 3 (one-shot, facing LEFT, mirror back if Flow flips frames).
+
+**Bramble spider, World 1** (`assets/raw/enemies/bramble-spider.png`; the thread is drawn in code, so no thread is painted):
+> A small hostile forest spider, the same family as the attached red beetle: a round glossy deep-red body with darker crimson markings and a few bramble-like thorny bristles, eight long thin dark legs splayed out, small mandibles. Hanging upside-down in the air as if from a thread, back toward the bottom, legs splayed, seen from the side. No thread, no web, nothing above it: the spider alone. About the size of a hand.
+- `bramble-spider-sheet.png` (attach the shrunk spider): 4 frames: 1 hang, legs tucked in close to the body; 2 shake, legs thrown straight out; 3 drop, legs spread wide, body tilted head-down 30°; 4 climb, legs reaching up above the body.
+
+**Idol slider, World 2** (`assets/raw/enemies/idol-slider.png`):
+> A small hostile creature from the overgrown ruins: a chunky block of red carved ruin stone, glossy deep red with darker crimson cracks and chips, a worn carved face on its front (left) side, sitting on 4 to 6 short dark crab legs underneath. Squat and heavy, knee height to a person. Side view facing left.
+- `idol-slider-sheet.png` (attach the shrunk slider): 3 frames: 1 still, legs folded under, the block resting on the ground; 2 scuttle A, front legs reaching forward, back legs pushing back; 3 scuttle B, front legs pulled back, back legs forward. The block stays level in every frame.
+
+**Reliquary scarab, World 3** (`assets/raw/enemies/reliquary-scarab.png`):
+> A small hostile scarab from a moonlit sanctum: very flat and wide, a low flat shell like a carved shield, about three times as long as it is tall, NOT round or domed like the attached beetle (only its red colours are shared). A hard glossy deep-red shell with faint carved sanctum patterns (thin engraved lines and circles, darker crimson) on it, a broad flat shovel-shaped head with small horns, six short dark legs. Low to the ground, knee height to a person. True side view facing left, coin profile, only one eye visible, near legs overlapping far legs.
+  (First try without the "NOT domed" line came out a tall domed beetle, a copy of the walker.)
+- `reliquary-scarab-sheet.png` (attach the shrunk scarab): 4 frames: 1 walk A, near front leg far forward, near back leg far back; 2 walk B, all near legs gathered straight down; 3 walk C, near front leg lifted high and bent, middle back, back leg forward; body level in 1–3; 4 fall, body tipped back 30°, belly showing, all six legs flung out and UP like a starfish. Say "all four heads point to the left edge of the image": the first try mirrored frame 3 and let the fall legs dangle.
+
 ## Hero (AI Studio, Nano Banana Pro)
 
 Save to `assets/raw/hero/`. Attach the World 1 reference image for the brushwork, and from step 2 on, also attach the hero image from step 1.
