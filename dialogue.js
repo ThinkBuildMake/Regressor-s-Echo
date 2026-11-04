@@ -277,7 +277,7 @@ const SCRIPT = {
     W(0.8), H('exhausted', 'Is it…'), H('annoyed', "Don't you dare get back up."),
     W(1.2, 'glow'), W(1.4, 'absorb'), H('startled', 'Again?!'),
     G('thinking', 'Third mark.'), H('curious', 'Three of me now. And…?'),
-    G('thinking', 'And you can take them back. All of them, at once. Without dying.'),
+    G('thinking', 'And you can trade places with one. Without dying.'),
     H('relieved', "Finally. One that doesn't hurt."), G('wry', "Don't get used to it."),
   ],
   mothDown: [ // the last stomp
@@ -297,6 +297,7 @@ const SCRIPT = {
     G('thinking', 'Means you can leave two of yourself behind now.'),
     H('exhausted', 'Wonderful. Twice the dying.'),
     G('wry', 'Twice the options.'),
+    G('thinking', 'And you can take the newest one back. No dying required.'),
     H('thinking', '…Will it hurt any less?'),
     G('amused', 'Nope!'),
     W(0.8),

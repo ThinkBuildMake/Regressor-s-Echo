@@ -202,6 +202,7 @@ Blocking the dust with your soul should be taught in an earlier room, so the gui
 > **Guide** [thinking]: Means you can leave two of yourself behind now.  
 > **Hero** [exhausted]: Wonderful. Twice the dying.  
 > **Guide** [wry]: Twice the options.  
+> **Guide** [thinking]: And you can take the newest one back. No dying required. (draft 2026-11-03)
 > **Hero** [thinking]: …Will it hurt any less?  
 > **Guide** [amused]: Nope!  
 > *(A beat. Let it land: no explanation, no comfort.)*  
@@ -273,7 +274,7 @@ The wall behind the room is carved; it needs its own background art.
 > **Hero** [startled]: Again?!  
 > **Guide** [thinking]: Third mark.  
 > **Hero** [curious]: Three of me now. And…?  
-> **Guide** [thinking]: And you can take them back. All of them, at once. Without dying.  
+> **Guide** [thinking]: And you can trade places with one. Without dying. (draft 2026-11-03)
 > **Hero** [relieved]: Finally. One that doesn't hurt.  
 > **Guide** [wry]: Don't get used to it.
 
@@ -394,9 +395,9 @@ The pyramid needs to be visible in the background, its top lost in cloud.
 
 ## Later story direction
 
-- **The amulet grows stronger each world** (one rune per boss), not one big awakening: World 1, it brings him back (1 echo). After the moth, the 2nd rune: 2 echoes and self-destruct. After the tree, the 3rd rune: 3 echoes and recall.
+- **The amulet grows stronger each world** (one rune per boss), not one big awakening: World 1, it brings him back (1 echo). After the moth, the 2nd rune: 2 echoes, self-destruct and recall. After the tree, the 3rd rune: 3 echoes and soul swap. (draft 2026-11-03)
 - **World 2 — Overgrown ruins:** He can now choose when he dies, and it's worse than being killed. His frustration and exhaustion build, and the banter continues. He gets better at spotting the guide's half-truths and answering back. Give him space to challenge the guide's assumptions and learn what happened in the guide's timeline. Let a specific discovery or conflict earn a serious conversation; reveal that history through incidents rather than a single long explanation.
-- **World 3 — Sanctum:** The third rune lets him recall his echoes, so a mistake no longer costs him more deaths. His growing control should come through planning and decisions; the pain remains real. The spectral stag tests everything he has learned.
+- **World 3 — Sanctum:** The third rune lets him trade places with his echoes, so a soul becomes an escape route. (draft 2026-11-03) His growing control should come through planning and decisions; the pain remains real. The spectral stag tests everything he has learned.
 - **Ending:** Decided (see the World 3 script): the guide dies blocking the stag's soul-breaking beam, the hero reads his note, and walks into the pyramid's first floor.
 
 ## Open questions

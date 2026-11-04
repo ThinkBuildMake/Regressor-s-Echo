@@ -109,7 +109,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     }],
     ['The tree guardian', 'guideCrack', (s) => {
       const b = s.boss; b.hidden = false; b.hp = 1; b.hurt = 0;
-      b.stompReady = true; b.slamOpen = true; b.target = { buried: true };
+      b.stompReady = true; b.open = 2;
       s.player.body.reset(b.r.x, b.r.y - b.r.height / 2 - 14);
       s.player.body.velocity.y = 10; s.bossPreviousFeet = b.r.y - b.r.height / 2;
       s.touchBoss();
@@ -131,6 +131,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   // Walk the inserted chain in ROOMS order and compare every doorway row in world space.
   for (const [from, to] of [
     ['The gatehouse', 'Thornwood'], ['Thornwood', 'The moth'],
+    ['Off the edge', 'Take it back'], ['Take it back', 'The ladder'],
     ['Wrong order', 'Sawmill'], ['Sawmill', 'The tree guardian'], ['The tree guardian', 'Three high'],
     ['Everything', 'Reliquary'], ['Reliquary', 'The rehearsal'], ['The rehearsal', 'The old tree'], ['The old tree', 'The spectral stag'],
     ['The spectral stag', 'The pyramid entrance'],
@@ -549,115 +550,52 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     key('keyup', 75); await alive();
   };
   if (matches('The tree guardian')) {
-    stats.treePower = false;
     s = await cleanSolveRoom('The tree guardian');
-    const floor = O().y + 16 * 32;
     await walkTo(21); await sacrifice();
-    await walkTo(13); await sacrifice();
-    const B = s.boss, step = s.corpses[0], decoy = s.corpses[1];
-    let buriedAt, recoveredAt;
-    const observeBurial = () => {
-      if (decoy.buried > 0 && buriedAt === undefined) buriedAt = s.time.now;
-      if (buriedAt !== undefined && decoy.buried === 0 && recoveredAt === undefined) recoveredAt = s.time.now;
-    };
-    s.events.on('update', observeBurial);
-    // Start each lure at the decoy; the approach and both jumps use real physics.
-    await walkTo(11);
-    await jumpTo(13);
-    const lure = async () => {
-      await until(() => B.phase === 'slam');
-      check(B.target === decoy, 'tree: glow locks the decoy');
-      const started = s.time.now;
-      key('keydown', 39);
-      if (s.player.y + 15 > floor - 24 && !(decoy.buried > 0.3)) {
-        key('keydown', 32);
-        await until(() => s.player.x > decoy.x + 1.5 * 32);
-        key('keyup', 32);
+    const B = s.boss;
+    await walkTo(18); await jumpTo(21);
+    const hp = B.hp;
+    key('keydown', 32); await wait(180); await walkTo(23.5); await wait(800); key('keyup', 32);
+    check(B.hp === hp, 'tree: plain stomp bounces without damaging the mask');
+    // Set up from the step with a held self-destruct jump, not a spawned support.
+    s = await cleanSolveRoom('The tree guardian');
+    await walkTo(21); await sacrifice();
+    await walkTo(18); await jumpTo(21);
+    key('keydown', 75); await wait(300);
+    key('keydown', 32); await wait(100); key('keydown', 39);
+    await until(() => s.dead > 0, 2000, 'airborne stone support');
+    key('keyup', 39);
+    key('keyup', 75); key('keyup', 32); await alive();
+    const tree = s.boss, step = s.corpses[0], support = s.corpses[1];
+    Dialogue.seen.delete('treeDown'); Dialogue.seen.delete('guideCrack');
+    check(Math.abs(support.x - tree.r.x) < support.width / 2 + 12 && support.y - support.height / 2 < tree.r.y - 32,
+      `tree: timed self-destruct hangs the newest soul above the mask (${(support.x - tree.r.x) / 32}, top ${(support.y - support.height / 2 - O().y) / 32})`);
+    await walkTo(18); await jumpTo(21);
+    // The step clears the rake and the mortar is led away from the stone column.
+    await until(() => tree.stone?.support === support, 15000, 'stone caught');
+    check(tree.open === 0 && tree.hp === 3, 'tree: catching alone does not expose the mask');
+    const deaths = stats.deaths;
+    for (let hit = 0; hit < 3; hit++) {
+      if (hit) {
+        await walkTo(18); await jumpTo(21);
+        await until(() => tree.stone?.support === support, 15000, 'next stone caught');
       }
-      await until(() => s.player.x > step.x - 3 * 32);
-      await until(() => s.player.body.blocked.down || s.player.body.touching.down, 1500, 'land before the step jump');
-      key('keydown', 32);
-      await until(() => s.player.x >= step.x - 18);
-      key('keyup', 39); key('keydown', 37);
-      await until(() => s.player.body.velocity.x <= 0);
-      key('keyup', 37); key('keyup', 32);
-      await until(() => s.player.body.blocked.down || s.dead > 0, 2000);
-      const spare = B.timer;
-      check(s.dead <= 0 && spare > 0.25 && spare < 0.85, `tree: reaches step with spare warning (${spare.toFixed(2)}s, ${s.time.now - started}ms)`);
-      await until(() => B.phase !== 'slam' || s.dead > 0);
-      check(s.dead <= 0 && decoy.buried > 0 && B.slamOpen, 'tree: survive this slam on the kept step');
-      const hp = B.hp;
-      key('keydown', 32); await wait(180); key('keydown', 39);
-      await until(() => s.player.x > B.r.x - 12 || s.dead > 0);
-      key('keyup', 39); key('keydown', 37);
-      await until(() => s.player.body.velocity.x <= 0);
-      key('keyup', 37);
-      await until(() => B.hp < hp || s.dead > 0, 2000);
+      await until(() => tree.phase === 'idle' && tree.attack === 2 && tree.timer < 0.6, 4000, 'jump before slam tell');
+      key('keydown', 32); await wait(180); await walkTo(23);
+      await until(() => tree.phase === 'slam', 2000, 'support slam tell');
       key('keyup', 32);
-      check(B.hp === hp - 1 && s.dead <= 0, `tree: stomp after decoy slam (${B.hp} hp)`);
-    };
-    for (let cycle = 0; cycle < 3; cycle++) {
-      await lure();
-      if (cycle === 2) break;
-      // React to the yellow warning, then lead the pod left and run underneath it.
-      key('keydown', 37);
-      await until(() => B.phase === 'swing' && B.timer < 0.35 && (s.player.body.blocked.down || s.player.body.touching.down), 4000, 'return swing warning');
-      await jumpTo(10);
-      await until(() => B.pods.length > 0);
-      await walkTo(12);
-      await until(() => B.phase === 'slam');
+      check(tree.target === support, 'tree: blue tell locks the stone support');
+      await walkTo(21);
+      await until(() => tree.open > 0, 4000, 'burial drops stone onto bowed mask');
+      check(support.buried > 0 && s.corpses.includes(support) && s.corpses.includes(step), 'tree: buried support stays available for the next cycle');
+      key('keydown', 32); await wait(180); await walkTo(23);
+      await until(() => tree.hp < 3 - hit || s.dead > 0, 2000, 'exposed mask stomp');
+      key('keyup', 32);
+      check(tree.hp === 2 - hit && stats.deaths === deaths, 'tree: slam cycle ' + (hit + 1) + ' lands without a death');
     }
-    s.events.off('update', observeBurial);
-    check(recoveredAt - buriedAt >= 4900 && recoveredAt - buriedAt < 5200, `tree: buried soul returns after five seconds (${recoveredAt - buriedAt}ms)`);
-    check(B.hp === 0 && B.hidden, 'tree: three intended stomps win');
-    Dialogue.seen.delete('treeDown');
-    // The clean replay marks scripts seen; play the actual defeat cues now.
-    Dialogue.play(s, 'treeDown'); Dialogue.skip(s);
-    check(!s.boss && rules.max === 3 && s.treePower && s.gates.every((g) => !g.active || g.room !== B.room), 'tree: defeat opens vines and grants three souls and recall');
-    const count = s.corpses.length, beforeRecall = stats.deaths;
-    key('keydown', 81); await wait(60); key('keyup', 81);
-    check(s.corpses.length === count - 1 && stats.deaths === beforeRecall, 'tree: Q recalls immediately after victory without dying');
-
-    s = await go(B.room);
-    check(!s.boss && s.treePower && !s.gates.some(g => g.active && g.room === s.index), 'tree: restart preserves victory');
-    stats.treePower = false;
-    s = await cleanSolveRoom('The tree guardian');
-    await walkTo(21); await sacrifice();
-    await walkTo(13); await sacrifice();
-    const tree = s.boss, target = s.corpses[0], deaths = stats.deaths;
-    await walkTo(11);
-    await jumpTo(13);
-    await walkTo(18);
-    await jumpTo(21);
-    await until(() => tree.phase === 'slam');
-    check(tree.target === target, 'tree: standing on step targets the step');
-    tree.hp = 1;
-    await until(() => stats.deaths > deaths, 3000);
-    check(stats.deaths > deaths && tree.hp === 3, 'tree: staying on targeted soul kills and heals');
-  }
-
-  if (matches('The tree guardian')) {
-    s = await cleanSolveRoom('The tree guardian');
-    await walkTo(21); await sacrifice();
-    const B = s.boss, deaths = stats.deaths;
-    check(B.timer > 3.7 && B.attack === 2, 'tree: respawn gives four seconds before the blue warning');
-    await walkTo(18);
-    await jumpTo(21);
-    check(stats.deaths === deaths, 'tree: the respawn run reaches the step before any swing');
-    let minHP = B.hp;
-    const watchRush = () => { minHP = Math.min(minHP, B.hp); };
-    s.events.on('update', watchRush);
-    key('keydown', 32); await wait(180); await walkTo(23); await wait(1200); key('keyup', 32);
-    s.events.off('update', watchRush);
-    check(minHP === 3, 'tree: repeated one-soul rush stomps cannot damage the mask before a decoy slam');
-    await alive();
-    s = await cleanSolveRoom('The tree guardian');
-    const deathsBeforeJump = stats.deaths;
-    await until(() => s.boss.phase === 'slam' && s.boss.timer < 0.2);
-    key('keydown', 32);
-    await until(() => stats.deaths > deathsBeforeJump, 1500);
-    key('keyup', 32); await alive();
-    check(stats.deaths === deathsBeforeJump + 1, 'tree: jumping from the floor cannot dodge a slam without a decoy and step');
+    check(tree.hp === 0 && tree.hidden && stats.deaths === deaths, 'tree: three slam openings win with the original two souls');
+    Dialogue.skip(s); await wait(200);
+    check(stats.treePower && !s.boss, 'tree: victory grants the third soul');
   }
 
   const solve = async (name, souls, hops, floor = 16) => {
@@ -1383,6 +1321,46 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     await hop(6.4, 0, 16, 10);
     check(stats.deaths > deaths,
       'Wrong order: pit first loses the bridge on the third death');
+  }
+  if (matches('Take it back')) {
+    s = await cleanSolveRoom('Take it back');
+    const flat = async (tx) => {
+      s.player.body.reset(O().x + tx * 32, O().y + 8 * 32 - 7);
+      s.setLying(true); s.die(); await alive();
+    };
+    const recall = async () => { key('keydown', 81); await wait(60); key('keyup', 81); await wait(100); };
+    const cross = async (from, to) => {
+      s.player.body.reset(O().x + from * 32 + 16, O().y + 8 * 32 - 16);
+      await wait(100);
+      const deaths = stats.deaths;
+      key('keydown', 39); await wait(180); key('keydown', 83); await wait(60); key('keyup', 83);
+      for (let t = 0; t < 2500 && stats.deaths === deaths && s.player.x < O().x + to * 32; t += 10) await wait(10);
+      key('keyup', 39); key('keydown', 37);
+      for (let t = 0; t < 500 && s.player.body.velocity.x > 0; t += 10) await wait(10);
+      key('keyup', 37); await wait(100);
+      return stats.deaths === deaths && s.player.x >= O().x + to * 32;
+    };
+    await place(3, 0, 8);
+    check(!(await cross(1, 10)), 'Take it back: standing soul plugs the tunnel');
+    const deaths = stats.deaths;
+    await recall();
+    check(s.corpses.length === 0 && stats.deaths === deaths, 'Take it back: Q works in World 2 without a death');
+    await flat(6.5);
+    check(await cross(1, 10), 'Take it back: flat bridge crosses stage A');
+    const a = await hop(10, 0, 8, 11);
+    check(a.h >= 0.95 && s.start.x > O().x + 10 * 32, 'Take it back: jump to the shrine');
+    await recall();
+    await place(16, 0, 8); await place(19, 0, 8);
+    const plate = s.corpses[0];
+    check(!(await cross(18, 27)), 'Take it back: bad standing bridge blocks stage B');
+    await recall(); await flat(22.5);
+    check(s.corpses[0] === plate && s.corpses.length === 2, 'Take it back: recall preserves the oldest plate');
+    check(await cross(18, 27), 'Take it back: plate and flat bridge reach the exit');
+    await place(18, 0, 8);
+    check(!s.corpses.includes(plate) && s.doors.filter((d) => d.room === s.index).every((d) => d.body.enable),
+      'Take it back: third death erases the plate and closes the door');
+    s = await cleanSolveRoom('Take it back');
+    check(!(await cross(1, 10)), 'Take it back: no-soul slide fails');
   }
   if (matches('In my own way')) {
     s = await cleanSolveRoom('In my own way');
