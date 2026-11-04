@@ -70,6 +70,17 @@ const go = async (i) => { console.info('at go ' + ROOMS[i]?.[0]);
   await wait(100);
   return room();
 };
+// Shift+R with real keys; like go(), wait on the real clock because the rebuild may load art.
+const shiftR = async () => {
+  const old = room().player;
+  key('keydown', 16); key('keydown', 82); await wait(50); key('keyup', 82); key('keyup', 16);
+  const ready = () => room().player && room().player !== old && room().player.body;
+  for (const end = nativeNow() + 15000; !ready(); await new Promise((r) => setTimeout(r, 5))) {
+    await advance();
+    if (nativeNow() > end) throw new Error('Timed out waiting for Shift+R');
+  }
+  return room();
+};
 const key = (type, keyCode) => {                     // synthetic key event Phaser will accept
   const e = new KeyboardEvent(type, { bubbles: true });
   Object.defineProperty(e, 'keyCode', { get: () => keyCode });
@@ -679,6 +690,58 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
       rules.max === (WORLD_SOULS[s.rooms[s.index].world] ?? defaultRules.max), `${name}: clean replay state`);
     return s;
   };
+  if (matches('The moth')) {
+    // Full-run QA (2026-11-04): Shift+R during the victory scene brought the moth back, and the second win froze it
+    // (the scene was already seen, so nothing dissolved it, opened the vines or granted the rune).
+    const thornSoulAndMount = async () => {
+      const d = stats.deaths;
+      key('keydown', 39); await until(() => stats.deaths > d, 3000, 'thorn soul'); key('keyup', 39); await alive();
+      const soul = s.corpses[0];
+      key('keydown', 39); key('keydown', 83); await until(() => s.player.x >= soul.x - 90, 3000, 'approach soul'); key('keyup', 83); key('keyup', 39);
+      await wait(120);
+      key('keydown', 32); key('keydown', 39); await until(() => s.player.x >= soul.x, 1500, 'jump onto soul');
+      key('keyup', 39); key('keyup', 32); key('keydown', 37); await until(() => s.player.body.velocity.x <= 0, 500, 'brake on soul'); key('keyup', 37);
+      await until(() => s.player.body.blocked.down || s.dead > 0, 2000, 'on the soul');
+      return soul;
+    };
+    const lastHit = async (soul) => { // the moth replay's controller: bait the dive beside the soul, stomp the stunned moth
+      const M = s.boss; let sideJump = false;
+      for (let t = 0; t < 60000 && M.hp > 0 && s.dead <= 0; t += 20) {
+        const g = s.player.body.blocked.down || s.player.body.touching.down;
+        let target = soul.x - 50;
+        if (['diveTell', 'dive'].includes(M.phase)) target = M.r.x - BOSS_W / 2 - 40;
+        if (M.phase === 'stunned') {
+          target = M.r.x - BOSS_W / 2 - 28;
+          if (g) key('keydown', 32);
+          if (!sideJump || s.player.y + 15 < bounds(M.r).top) target = M.r.x;
+          if (!sideJump && hit(bounds(s.player), bounds(M.r))) sideJump = true;
+          else if (!g && s.player.body.velocity.y >= 0) key('keyup', 32);
+        } else if (['curtainTell', 'curtain', 'curtainGap'].includes(M.phase)) target = O().x + 10.5 * T;
+        else if (['skimmerTell', 'skimmer'].includes(M.phase)) {
+          target = soul.x;
+          if (g && s.player.y > soul.y - 25) key('keydown', 32);
+          else if (s.player.body.velocity.y >= 0) key('keyup', 32);
+        } else if (s.player.body.velocity.y >= 0) key('keyup', 32);
+        if (M.phase === 'skimmerTell' && M.clock < 0.65) { target = O().x + 10 * T; key('keyup', 32); }
+        if (Math.abs(s.player.x - target) < 6) { key('keyup', 37); key('keyup', 39); }
+        else { key(s.player.x > target ? 'keydown' : 'keyup', 37); key(s.player.x < target ? 'keydown' : 'keyup', 39); }
+        await wait(20);
+      }
+      for (const c of [32, 37, 39]) key('keyup', c);
+      return M.hp <= 0;
+    };
+    s = await cleanSolveRoom('The moth');
+    s.boss.hp = 1; // setup shortcut: the first two stomps are covered above
+    check(await lastHit(await thornSoulAndMount()) && s.talk.queue.length > 0, 'moth retry: the last stomp starts the victory scene');
+    s = await shiftR(); await wait(200);
+    check(s.boss && !stats.mothFinished && rules.max === 1, 'moth retry: Shift+R mid-scene restarts the fight');
+    s.boss.hp = 1;
+    check(await lastHit(await thornSoulAndMount()) && s.talk.queue.length > 0, 'moth retry: the second win plays the victory scene again');
+    while (s.talk.line || s.talk.queue.length) { key('keydown', 13); await wait(40); key('keyup', 13); await wait(200); }
+    await wait(500);
+    check(!s.boss && stats.mothFinished && rules.max === 2 && !s.gates.some((g) => g.active && g.room === s.index),
+      'moth retry: the second win opens the vines and grants the rune');
+  }
   // Continue from the current checkpoint instead of resetting across a descent or hazard.
   const walkTo = async (tx) => {
     const s = room(), goal = O().x + tx * 32 + 16;
@@ -2211,6 +2274,49 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     check(h < 9, `The spring: the spring alone can't reach the ledge (${h.toFixed(2)} up)`);
   }
 
+  // Full-run QA (2026-11-04): Shift+R used to stack a second zoom hook, so the next zoomed view
+  // (Thornwood's section C, the stag arena) blew the backdrop, HUD and dialogue up to NaN for the rest of the run.
+  if (matches('The spectral stag')) {
+    s = await cleanSolveRoom('The spectral stag');
+    s = await shiftR(); await wait(1000);
+    const fixed = s.children.list.filter((o) => o.scrollFactorX === 0);
+    check(s.cameras.main.zoom < 1 && s.events.listenerCount('prerender') === 1 &&
+      fixed.every((o) => Number.isFinite(o.x) && Number.isFinite(o.y) && Math.abs(o.scaleX) < 2) && s.art.layers.every((l) => l.ts.scaleX === 1),
+      `Shift+R then a zoomed room keeps the backdrop, HUD and dialogue on screen (${s.events.listenerCount('prerender')} hooks, scale ${s.art.layers[0].ts.scaleX})`);
+  }
+  // Dying again and again at the start point used to lift the respawn a tile per death (onto the floating stack),
+  // until he was pushed out through the arena wall into the old tree's rock.
+  if (matches('The spectral stag')) {
+    s = await cleanSolveRoom('The spectral stag');
+    let highest = 0;
+    for (let i = 0; i < 14; i++) {
+      const d = stats.deaths;
+      key('keydown', 75); await until(() => stats.deaths > d, 2000, 'self-destruct at the start'); key('keyup', 75); await alive();
+      highest = Math.max(highest, (O().bottom - s.player.y) / T);
+    }
+    check(s.rooms[s.index].name === 'The spectral stag' && highest < 9,
+      `Repeated deaths at the start keep the respawn on the stack, not above it (${s.rooms[s.index].name}, ${highest.toFixed(1)} tiles up)`);
+  }
+  // Shift+R during the stag's last stand (after the beam cue started the ending music) brings the fight back: its music too.
+  if (matches('The spectral stag')) {
+    s = await cleanSolveRoom('The spectral stag');
+    GameAudio.cue('lastBeam');
+    s = await shiftR(); await wait(100);
+    check(!GameAudio.ending && GameAudio.musicKey === 'boss-spectral-stag', `Shift+R during the last stand restores the fight music (${GameAudio.musicKey})`);
+  }
+  // Play again from the ending card: World 1 must not keep the moth's self-destruct and recall.
+  if (matches('The clearing')) {
+    Object.assign(rules, { selfDestruct: true, recall: true }); // as after the moth
+    game.scene.stop('room'); game.scene.start('end');
+    await wait(12500);
+    key('keydown', 13); await wait(50); key('keyup', 13);
+    await until(() => game.scene.isActive('room') && room().player?.body, 5000, 'play again');
+    s = room(); Dialogue.skip(s); await wait(300);
+    const deaths = stats.deaths;
+    key('keydown', 75); await wait(1500); key('keyup', 75); await wait(100);
+    check(stats.deaths === deaths && !rules.selfDestruct && !rules.recall, 'Play again: World 1 starts without self-destruct or recall');
+    Object.keys(SCRIPT).forEach((k) => Dialogue.seen.add(k));
+  }
   for (let i = 0; i < ROOMS.length; i++) { if (!matches(ROOMS[i][0])) continue; room().scene.restart({ index: i }); await wait(300); }
   check(errors.length === 0, 'no errors: ' + errors.join('; '));
   document.body.insertAdjacentHTML('beforeend', `<pre>RESULT ${fails.length ? 'FAIL ' + fails.join(' | ') : 'OK'}</pre>`);
