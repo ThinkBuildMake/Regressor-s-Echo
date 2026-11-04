@@ -52,3 +52,6 @@ DECISION: the user asked for parallel agents. Three Codex workers, one per world
 01:32 cutscene fix verified by its agent (6 rooms + full suite OK), merged. Started W1 QA-and-fix.
 01:32 my queue commit used -a during a conflicted merge and committed conflict markers in check.html (3b2de1e); resolved in the next commit. Lesson: never commit -a while a merge is open.
 01:35 cutscene merge fixed (bf4f570); 5 story/ending rooms OK. World 1 QA-and-fix agent started (also covers cutscenes and audio events).
+02:47 W2 QA-and-fix merged (b94b8e7): Off the edge slide skip closed, The beam step block, spring drift stops when you let go (game-wide), Sawmill thrower plate + saw jam. Tree verified with 0.25-0.45s reactions. Full suite OK on its branch.
+NEEDS DECISION: Let go stage 1 can be done with one soul hung 2-3 high (a single hung soul always reaches as high as a 2-stack). Agent recommends accepting it as an alternative route.
+NEEDS DECISION: The ladder stage 1 one-soul skip via a wall kick off the ledge face onto a hung soul. No level shape blocks it without breaking the staircase; it needs a wall-jump rule decision (likely affects Three high too).
