@@ -1449,6 +1449,8 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   if (matches('The spectral stag') || matches('The pyramid entrance')) {
     s = await cleanSolveRoom('The spectral stag');
     let B = s.boss;
+    const view = s.cameras.main.worldView;
+    check(view.x <= O().x && view.right >= O().right, 'The spectral stag: the camera frames the whole arena');
     B.r.x = O().x + 6.5 * 32; B.phase = 'miss'; B.clock = -10;
     const plainDeaths = stats.deaths;
     key('keydown', 39);
@@ -1518,10 +1520,11 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     Dialogue.seen.delete('stagNote'); Dialogue.seen.delete('floorOne');
     const routeDeaths = stats.deaths;
     // Walk the whole return route and onward; no room restart or position reset.
-    const walkTo = async (name, column, direction, timeout) => {
+    const walkTo = async (name, column, direction, timeout, each) => {
       key('keydown', direction);
       let lastX = s.player.x;
       await until(() => {
+        each?.();
         // Hop only when something stops him (a soul on the floor), like a player would; hopping
         // everywhere can land him on a seal soul above the low exit, where he is stuck.
         const stuck = Math.abs(s.player.x - lastX) < 0.2; lastX = s.player.x;
@@ -1532,7 +1535,9 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
       }, timeout, `walk to ${name} column ${column}`);
       key('keyup', direction); key('keyup', 32); s.player.body.velocity.x = 0;
     };
-    await walkTo('The old tree', 20, 37, 10000);
+    let unseen = 0;
+    await walkTo('The old tree', 20, 37, 10000, () => { if (!s.transit && O().contains(s.player.x, s.player.y) && !s.cameras.main.worldView.contains(s.player.x, s.player.y)) unseen++; });
+    check(!unseen, `The spectral stag: after the win the camera follows you out of the arena (${unseen} frames off screen)`);
     await until(() => Dialogue.seen.has('stagNote'), 2000, 'note behind the old tree');
     check(s.stagWriting.visible && !s.guide.on, 'The spectral stag: return to the dirt note without the guide');
     Dialogue.skip(s);
@@ -1621,7 +1626,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     check(climbed, 'Reliquary: doorway route climbs the flyer chimney to the shrine');
     if (!climbed) throw new Error('Reliquary: chimney route did not reach the first shrine');
     // Each saw death jams its lane; hop the posts on subsequent runs.
-    for (let t = 0; t < 45000 && s.player.x < O().x + 29.5 * 32; t += 120) {
+    for (let t = 0; t < 45000 && s.player.x < O().x + 27.5 * 32; t += 120) {
       if (s.dead > 0) {
         direction(0); key('keyup', 32); await alive();
         const body = s.corpses.at(-1);
@@ -1633,8 +1638,10 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
       if (s.wallSide() > 0 && s.player.body.blocked.down) key('keydown', 32);
       await wait(60); key('keyup', 32); await wait(60);
     }
+    key('keydown', 39); await wait(800); key('keyup', 39); await wait(200);
+    check(s.player.x < O().x + 30 * 32, 'Reliquary: stepping off the plate closes its door before you reach it');
     for (let t = 0; t < 2500; t += 20) {
-      const dx = O().x + 29.5 * 32 - s.player.x, vx = s.player.body.velocity.x;
+      const dx = O().x + 27.5 * 32 - s.player.x, vx = s.player.body.velocity.x;
       const target = Phaser.Math.Clamp(dx * 6, -120, 120);
       key(vx < target - 8 ? 'keydown' : 'keyup', 39);
       key(vx > target + 8 ? 'keydown' : 'keyup', 37);
@@ -1844,39 +1851,50 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   }
   if (matches('Two places')) {
     s = await cleanSolveRoom('Two places');
-    const trySlideGap = async () => {
-      key('keydown', 39);
-      await until(() => s.player.x >= O().x + 3.2 * 32, 1200, 'slide approach');
-      key('keydown', 83); await wait(30); key('keydown', 32);
+    // Stage A: the shaft's spike plugs it with a soul; the thorn and wall stop you walking off it into the tunnel.
+    const fallIn = async (hold) => {
       const before = stats.deaths;
-      for (let t = 0; t < 2500 && stats.deaths === before && s.player.x < O().x + 12 * 32; t += 20) await wait(20);
-      key('keyup', 39); key('keyup', 83); key('keyup', 32); await alive();
-      return stats.deaths > before || s.player.x < O().x + 12 * 32;
-    };
-    check(await trySlideGap(), 'Two places: a slide-jump cannot cross without swap');
-    s = await cleanSolveRoom('Two places');
-    const leaveGapSoul = async () => {
+      key('keydown', 39); await until(() => s.player.x >= O().x + 6.2 * 32, 2000, 'run into shaft'); key('keyup', 39);
+      if (hold) key('keydown', hold);
+      await until(() => s.player.y + 15 >= O().y + (hold === 37 ? 12.9 : 12) * 32 || s.dead > 0, 2000, 'fall in shaft');
+      if (hold) key('keyup', hold);
       key('keydown', 39);
-      await until(() => s.player.x >= O().x + 4.1 * 32, 1200, 'run to gap lip');
-      key('keydown', 32); await wait(350); key('keydown', 75);
-      await until(() => s.dead > 0, 1600, 'mid-jump self-destruct');
-      key('keyup', 39); key('keyup', 32); key('keyup', 75); await alive();
+      await until(() => s.dead > 0 || s.player.x > O().x + 8.5 * 32, 2000, 'shaft exit'); key('keyup', 39);
+      const escaped = stats.deaths === before; await alive(); return escaped;
     };
-    await leaveGapSoul();
-    check(await trySlideGap(), 'Two places: the hanging soul cannot be crossed as a plain step');
+    check(!(await fallIn(39)), 'Two places: wall-sliding down the shaft cannot step into the tunnel');
     s = await cleanSolveRoom('Two places');
-    await leaveGapSoul();
-    const deaths = stats.deaths, soul = s.corpses.at(-1), gapPosition = [(s.corpses.at(-1).x-O().x)/32,(s.corpses.at(-1).y-O().y)/32];
-    key('keydown', 39);
-    await until(() => s.player.x >= O().x + 2.5 * 32, 1200, 'run before swap');
-    key('keydown', 69); await wait(30); key('keyup', 69);
-    check(stats.deaths === deaths && s.player.x > O().x + 8 * 32 && soul.x < O().x + 3 * 32,
-      'Two places: E exchanges positions without a death');
-    await until(() => s.player.x > O().x + 13.3 * 32 || stats.deaths > deaths, 2500, 'swap crossing');
-    key('keyup', 39); await wait(100);
-    check(stats.deaths === deaths && s.player.x > O().x + 11 * 32,
-      `Two places: swap crossing (x=${(s.player.x-O().x)/32}, deaths=${stats.deaths-deaths})`);
-    if (stats.deaths !== deaths || s.player.x < O().x + 12 * 32) throw new Error('Two places: swap crossing failed ' + JSON.stringify({soul:gapPosition,x:(s.player.x-O().x)/32,feet:(s.player.y+15-O().y)/32,deaths:stats.deaths-deaths}));
+    check(!(await fallIn(37)), 'Two places: sliding down the far wall cannot cross the spike to the tunnel');
+    const plugShaft = async () => {
+      s = await cleanSolveRoom('Two places');
+      key('keydown', 39); await until(() => s.player.x >= O().x + 6.2 * 32, 2000, 'run into shaft'); key('keyup', 39);
+      await until(() => s.dead > 0, 2000, 'spike plug'); await alive();
+      const plug = s.corpses.at(-1);
+      check(plug.x === O().x + 6.5 * 32 && plug.y === O().y + 13.5 * 32, 'Two places: the shaft spike leaves a plug soul');
+    };
+    await plugShaft();
+    const runSwap = async (slide) => {
+      const before = stats.deaths;
+      key('keydown', 39); await until(() => s.player.x >= O().x + 3.2 * 32, 2000, 'run before swap');
+      if (slide) { key('keydown', 83); await wait(30); key('keyup', 83); await wait(100); }
+      key('keydown', 69); await wait(30); key('keyup', 69);
+      await until(() => s.player.x > O().x + 12.6 * 32 || s.dead > 0, 2500, 'swap crossing'); key('keyup', 39);
+      const ok = stats.deaths === before && s.player.x > O().x + 12 * 32; await alive(); return ok;
+    };
+    check(!(await runSwap(false)), 'Two places: a swap at walking speed drops onto the spike');
+    await plugShaft();
+    const deaths = stats.deaths;
+    check(await runSwap(true) && stats.deaths === deaths, 'Two places: a swap mid-slide carries you over the spike into the tunnel');
+    if (s.player.x < O().x + 12 * 32) throw new Error('Two places: slide swap failed');
+    await wait(300); Dialogue.skip(s); await wait(100);
+    // Skip check: two step souls under a plate soul can't climb over the closed approach gate.
+    while (s.corpses.length) { key('keydown', 81); await wait(40); key('keyup', 81); await wait(400); }
+    for (const [x, b, floor] of [[15, 0, 12], [18, 0, 10]]) await place(x, b, floor);
+    check(s.doors.some(d => d.room === s.index && d.x < O().x + 17 * 32 && d.body.enable), 'Two places: a plate soul closes the approach gate');
+    const over = await hop(15, 4, 15, 18);
+    check(over.x < 16.5, `Two places: stepping souls cannot carry you over the closed approach gate (${over.x})`);
+    while (s.corpses.length) { key('keydown', 81); await wait(40); key('keyup', 81); await wait(400); }
+    s.player.body.reset(s.start.x, s.start.y); await wait(200);
     const mountStep = async () => {
       key('keydown', 39);
       await until(() => s.player.x >= O().x + 14 * 32, 1200, 'approach stair');
@@ -1992,7 +2010,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     await wait(1000);
     check(s.saws.some((sw) => sw.room === s.index && sw.jam), 'Everything: second soul jams the tunnel saw');
     const deaths = stats.deaths;
-    for (const [x, top, to, height] of [[17, 0, 21, 0], [21, 0, 22, 1], [24, 0, 25, 1], [25, 1, 31, 0]]) {
+    for (const [x, top, to, height] of [[17, 0, 21, 0], [21, 0, 22, 1], [24, 0, 25, 1], [25, 1, 28, 0], [28, 0, 31, 0]]) {
       const r = await hop(x, top, 20, to);
       check(r.x >= to - 0.4 && r.h >= height - 0.1,
         `Everything: plate and saw passage reaches ${to} (${r.x}, ${r.h})`);
@@ -2013,7 +2031,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     check(stats.deaths > before, 'Everything: jumping cannot skip the empty tunnel bridge');
   }
   await solve('Three high', [[7, 2], [8, 5], [9, 8]],
-    [[6, 0, 3, 7], [7, 3, 6, 8], [8, 6, 9, 9], [9, 9, 10, 12]]);
+    [[6, 0, 3, 7], [7, 3, 6, 8], [8, 6, 9, 9], [9, 9, 12, 12]]);
   if (matches('Three high')) {
     s = room();
     check(s.start.x > O().x + 10 * 32, 'Three high: safe staircase reaches the shrine');
@@ -2042,7 +2060,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   await solve('The ladder', [[9, 2]], []);
   if (matches('The ladder')) { const r = await hop(9, 3, 16, 10); check(r.h < 7, `The ladder: a stack 3 high can't reach the ledge (${r.h})`); }
   await solve('Three high', [[8, 2], [9, 5]], []);
-  if (matches('Three high')) { const r = await hop(9, 6, 16, 12); check(r.h < 10, `Three high: two souls can't reach the ledge (${r.h})`); }
+  if (matches('Three high')) { const r = await hop(9, 6, 16, 12); check(r.h < 12, `Three high: two souls can't reach the tower (${r.h})`); }
   if (matches('The spring')) { // the spring alone falls short of its ledge
     const s = await cleanSolveRoom('The spring');
     s.player.body.reset(s.springs[0].x, s.springs[0].y - 20); key('keydown', 39); await wait(1600); key('keyup', 39); await wait(300);

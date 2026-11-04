@@ -640,13 +640,13 @@ const ROOMS = [
     '##############################',
   ], [570, 75], { world: 2, boss: "tree", spots: [[7, "tree"]], deathTalk: {"2": "treeSlam", "25": "treeSlam2"} }],
   // ---------------- World 3: Sanctum (greybox) ----------------
-  ["Three high", [ // 10-high ledge: a 3-soul staircase (run off your top soul while holding K)
+  ["Three high", [ // 12-high tower: a 3-soul staircase (run off your top soul while holding K)
     '##############################',
     '#               #####        #',
     '#               #####        #',
-    '#               #####        #',
-    '#               #####        #',
     '#           C   #####        #',
+    '#         ##### #####        #',
+    '#         ##### #####        #',
     '#         ##### #####         ',
     '#         ##### #####         ',
     '#         ##### #####      ###',
@@ -659,24 +659,24 @@ const ROOMS = [
     ' P        #####            ###',
     '##############################',
   ], [600, 75], { world: 3, spots: [[4, "pyramid"]] }],
-  ["Two places", [ // swap under the low lintel across an eight-wide gap; exchange places under a falling spike to hold the exit plate
+  ["Two places", [ // plug the shaft with a soul, then swap into the low tunnel at a run; exchange places under a falling spike to hold the exit plate
     '##############################',
     '##############################',
-    '################      ########',
-    '#        ###          ########',
-    '#        ###          ########',
-    '#        ###      !   #      #',
-    '#        ###          #      #',
-    '#        ###          #      #',
-    '         ##     D     D       ',
-    ' P              D _   D       ',
-    '####            ##############',
-    '####            ##############',
-    '####           ###############',
-    '####           ###############',
-    '####         C ###############',
-    '####        ##################',
-    '####^^^^^^^^##################',
+    '#################     ########',
+    '#      #####    #     ########',
+    '#      #####    #     ########',
+    '#      #####    # !   #      #',
+    '#      #####    #     #      #',
+    '#      #####    #     #      #',
+    '       #####    D     D       ',
+    ' P     #####    D _   D       ',
+    '###### #####    ##############',
+    '###### #####    ##############',
+    '###### #####   ###############',
+    '######         ###############',
+    '######^ #### C ###############',
+    '##############################',
+    '##############################',
   ], [630, 73], { world: 3 }],
   ["Three jobs", [ // plate, pit and a laser blocker at once; recall mistakes instead of dying over them
     '##############################',
@@ -715,9 +715,9 @@ const ROOMS = [
     '###############################        ######',
     '##############        #########        ######',
     '##############        #########        ######',
-    '##############        #########        ######',
+    '##############        ######  #        ######',
     '   ###########  C             D        ######',
-    ' P             ##  _  #  o    D   s    ######',
+    ' P             ##  _  #  o   #D   s    ######',
     '#######^^^###################################',
     '#############################################',
   ], [690, 63], { world: 3, shrineTalk: "almostCompetent" }],
@@ -726,7 +726,7 @@ const ROOMS = [
     '########################################',
     '########################################',
     '#####                         D   ! !  #',
-    '#####    C #   o   #   o    #_D C      #',
+    '#####    C #   o   #   o  #_  D C      #',
     '#####   ####################### #     x#',
     '#####   #######################xx     x#',
     '#####  f#######################xx     x#',
@@ -943,6 +943,18 @@ class Room extends Phaser.Scene {
   }
 
   create() {
+    // Screen-fixed things (backdrop, HUD, dialogue) skip the camera's scroll but not its zoom. When a room zooms
+    // out (the stag frames its whole arena), scale them back to full screen for the draw, then restore them.
+    this.events.on('prerender', () => {
+      const cam = this.cameras.main, z = cam.zoom, cx = cam.width / 2, cy = cam.height / 2;
+      if (z === 1) return;
+      this.unzoomed = this.children.list.filter((o) => o.scrollFactorX === 0).map((o) => [o, o.x, o.y, o.scaleX, o.scaleY]);
+      for (const [o, x, y, sx, sy] of this.unzoomed) o.setPosition(cx + (x - cx) / z, cy + (y - cy) / z).setScale(sx / z, sy / z);
+    });
+    this.events.on('render', () => {
+      for (const [o, x, y, sx, sy] of this.unzoomed ?? []) o.setPosition(x, y).setScale(sx, sy);
+      this.unzoomed = null;
+    });
     this.statics = this.physics.add.staticGroup(); // walls, spike bases, doors, bodies
     this.corpses = [];
     this.doors = [];
@@ -1158,7 +1170,7 @@ class Room extends Phaser.Scene {
     // Arcade resolves vertical overlap first, so jumping while pressed into a wall snags on the
     // seam between stacked blocks and kills the jump. Side contacts get pushed out sideways instead.
     this.physics.add.collider(this.player, this.statics, null, (_pl, s) => {
-      if (this.boss?.stag && s.lying && this.corpses.includes(s)) return false;
+      if (s.lying && this.rooms[this.index].name === 'The spectral stag' && this.corpses.includes(s)) return false; // rammed souls stay flat, before and after the win
       const a = this.player.body, b = s.body;
       const ox = Math.min(a.right, b.right) - Math.max(a.x, b.x);
       const oy = Math.min(a.bottom, b.bottom) - Math.max(a.y, b.y);
@@ -2327,7 +2339,10 @@ class Room extends Phaser.Scene {
 
     this.updateHud();
     const room = this.rooms[this.index];
-    this.cameras.main.setZoom(room.name === 'Thornwood' && p.x > room.rect.x + 27 * T ? 0.68 : 1);
+    if (!this.boss?.stag) { // the stag frames its whole arena; after the win the camera follows again
+      this.cameras.main.setZoom(room.name === 'Thornwood' && p.x > room.rect.x + 27 * T ? 0.68 : 1);
+      if (!this.cameras.main._follow && !this.transit) this.cameras.main.startFollow(p, true, 0.12, 0.12);
+    }
     for (const layer of this.art.layers) if (layer.ts.depth === 10)
       layer.ts.setAlpha(room.name === 'The well' ? 0.15 : 1);
     // Look into drops in every tall room, including drops after a shrine.

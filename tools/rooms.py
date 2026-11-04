@@ -152,23 +152,24 @@ room('The tree guardian', [540, 75], 30, 17, 2, 'step and decoy: lure the blue s
 
 # ---------- World 3 ----------
 def three_high(o, p):
-    # Ten high needs three staggered steps, not two hung at jump height.
-    o(1, 1, 9, 15); o(10, 1, 14, 5); p(12, 5, 'C')
+    # Twelve high needs three staggered steps; two steps plus a kick off the tower face fall short.
+    o(1, 1, 9, 15); o(10, 1, 14, 3); p(12, 3, 'C')
     o(15, 1, 26, 15); o(27, 1, 28, 7)
     # Drop under the low lintel: the shield cannot double as an exit step.
     o(16, 1, 20, 11, '#'); p(18, 11, 'v')
     o(0, 13, 0, 15); o(29, 6, 29, 7); p(1, 15, 'P')
-room('Three high', [540, 75], 30, 17, 3, '10-high ledge: a 3-soul staircase (run off your top soul while holding K)', three_high)
+room('Three high', [540, 75], 30, 17, 3, '12-high tower: a 3-soul staircase (run off your top soul while holding K)', three_high)
 
 def own_way(o, p):
-    # A hanging soul carries a second run across a gap wider than a jump.
-    o(0, 8, 0, 9); o(1, 3, 10, 9); p(1, 9, 'P')
-    o(4, 10, 11, 15); o(4, 16, 11, 16, '^'); o(9, 3, 11, 8, '#')
-    o(11, 8, 11, 9); o(12, 3, 15, 14); p(13, 14, 'C'); o(15, 12, 15, 14, '#')
+    # Die on the spike at the bottom of the shaft: the soul plugs it, and the thorn stops you walking off it
+    # into the low tunnel. Run on the floor and swap: you keep your speed and come out in the tunnel.
+    o(0, 8, 0, 9); o(1, 3, 6, 9); p(1, 9, 'P')
+    o(6, 10, 6, 13); p(6, 14, '^'); o(7, 13, 11, 13); o(7, 14, 7, 14)
+    o(12, 3, 15, 14); p(13, 14, 'C'); o(15, 12, 15, 14, '#')
     # Swap out from under a falling spike, leaving the exit plate held.
-    o(16, 2, 21, 9); o(16, 8, 16, 9, 'D'); p(18, 9, '_'); p(18, 5, '!')
+    o(17, 2, 21, 9); o(16, 8, 16, 9, 'D'); p(18, 9, '_'); p(18, 5, '!')
     o(22, 8, 22, 9, 'D'); o(23, 5, 28, 9); o(29, 8, 29, 9)
-room('Two places', [570, 73], 30, 17, 3, 'swap under the low lintel across an eight-wide gap; exchange places under a falling spike to hold the exit plate', own_way)
+room('Two places', [570, 73], 30, 17, 3, 'plug the shaft with a soul, then swap into the low tunnel at a run; exchange places under a falling spike to hold the exit plate', own_way)
 
 def three_jobs(o, p):
     # Climb to the safe three-job setup, then drop to the shrine.
@@ -189,7 +190,7 @@ def everything(o, p):
     o(14, 15, 21, 19); o(15, 19, 16, 19, '#'); p(16, 18, 'C')
     # Keep the plate oldest, jam the low saw lane, then time a spring step.
     # Recall a bad step: another death would erase the plate and shut the door.
-    p(19, 19, '_'); o(22, 18, 29, 19); p(22, 19, '#'); p(25, 19, 'o')
+    p(19, 19, '_'); o(22, 18, 29, 19); p(22, 19, '#'); p(25, 19, 'o'); p(29, 19, '#'); o(28, 17, 29, 17)  # the post keeps the saw in its lane; headroom to hop it
     o(30, 18, 30, 19, 'D')
     o(31, 1, 38, 19); p(34, 19, 's')
     o(39, 1, 43, 10); o(44, 9, 44, 10)
@@ -204,8 +205,8 @@ def reliquary(o, p):
     # B: shrine. A 2-tall corridor split by posts into two saw lanes. Jam each saw with a soul (it sticks inside
     #    the soul, so you walk over it), then self-destruct on the plate at the end: all 3 souls. A wrong death
     #    erases your oldest jam: recall (Q) the mistake instead.
-    o(8, 3, 30, 4); p(9, 4, 'C'); p(11, 4, '#'); p(15, 4, 'o'); p(19, 4, '#'); p(23, 4, 'o'); p(28, 4, '#')
-    p(29, 4, '_'); o(30, 3, 30, 4, 'D')
+    o(8, 3, 30, 4); p(9, 4, 'C'); p(11, 4, '#'); p(15, 4, 'o'); p(19, 4, '#'); p(23, 4, 'o'); p(26, 4, '#')
+    p(27, 4, '_'); o(30, 3, 30, 4, 'D')   # two tiles from plate to door: you can't hold it and stand in the doorway
     # C: shrine, then crumbling steps down over spikes with falling spikes overhead.
     o(31, 3, 38, 21); p(32, 4, 'C'); o(32, 5, 32, 5, '#'); o(32, 22, 37, 22, '^')
     for x, y in ((33, 8), (35, 11), (37, 14), (35, 17)): o(x, y, x, y, '~')
