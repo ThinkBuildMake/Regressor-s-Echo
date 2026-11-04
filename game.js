@@ -1495,7 +1495,10 @@ class Room extends Phaser.Scene {
     // Snap: standing souls sit on a tile line, lying souls on a half-tile line (a spike death leaves
     // a lying soul flush with the floor, a standing one as a step one tile up).
     const feet = p.y + p.height / 2;
-    const bottom = !rules.snap ? feet : this.lying ? Math.ceil((feet - 1) / 16) * 16 : Math.round(feet / T) * T;
+    let bottom = !rules.snap ? feet : this.lying ? Math.ceil((feet - 1) / 16) * 16 : Math.round(feet / T) * T;
+    // World 1: a sideways saw that kills you mid-hop still gets your soul in its lane, so the soul jams it.
+    const saw = this.saws.find((sw) => sw.room === this.index && sw.dx && Math.abs(sw.x - p.x) < SAW_R + p.width / 2 && Math.abs(sw.y - p.y) < SAW_R + p.height / 2);
+    if (saw && rules.snap && this.rooms[this.index].world === 1) bottom = Math.max(bottom, Math.round((saw.y + SAW_R) / T) * T);
     const c = this.add.rectangle(x, bottom - h / 2, w, h, 0x7399d9);
     c.vy = 0;
     c.lying = this.lying;
@@ -1546,7 +1549,7 @@ class Room extends Phaser.Scene {
       this.boss.dir = 1;
       this.shots = this.shots.filter((sh) => { if (!sh.mothDust) return true; sh.destroy(); return false; });
     }
-    if (this.rooms[this.index].world) Dialogue.play(this, 'firstDeath'); // only the first time
+    if (this.rooms[this.index].name === 'First death') Dialogue.play(this, 'firstDeath'); // only the first time; its staging is that room's
     const hint = !treeSetup && this.rooms[this.index].deathTalk?.[++this.roomDeaths]; // hints after repeated deaths in a room
     if (hint) Dialogue.play(this, hint);
     if (chosen) Dialogue.play(this, 'chosenDeath');
@@ -2098,7 +2101,8 @@ class Room extends Phaser.Scene {
     } else if (B.phase === 'stunned') {
       for (let i = 0; i < 3; i++) {
         const a = B.clock * 5 + i * Math.PI * 2 / 3;
-        B.warn.strokeCircle(B.r.x + Math.cos(a) * 30, B.r.y - BOSS_H / 2 - 12 + Math.sin(a) * 6, 5);
+        const sx = B.r.x + Math.cos(a) * 34, sy = B.r.y - BOSS_H / 2 - 14 + Math.sin(a) * 8; // dizzy sparks: it's open
+        B.warn.fillStyle(0xffef72, 0.95).fillCircle(sx, sy, 6).fillStyle(0xffffff, 1).fillCircle(sx, sy, 2.5);
       }
       if (B.clock >= 2) { B.open = false; enter('diveGap'); }
     } else if (B.phase === 'diveGap' && B.clock >= gap) {

@@ -843,6 +843,149 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
       check(s.cameras.main.worldView.bottom >= O().y + 23 * T, 'Thornwood: shrine 2 reveals the section C floor');
     }
   }
+  // World 1 QA (2026-11-04): real-input replays for the night's World 1 fixes.
+  const frames = (n) => wait(n * frameMS);
+  const grounded = () => room().player.body.blocked.down || room().player.body.touching.down;
+  const tx = () => (room().player.x - O().x) / T, feet = () => (room().player.y + room().player.height / 2 - O().y) / T;
+  // Wall-climb a chimney like a player: jump toward `dir`, then kick off each wall as you touch it (jump held ~1/3s).
+  const climb = async (dir, stop, apex = false, max = 900) => {
+    const s = room(); let d = dir, k = d > 0 ? 39 : 37, sp = 0;
+    key('keydown', k); key('keydown', 32); await frames(20); key('keyup', 32);
+    for (let i = 0; i < max && !stop() && s.dead <= 0; i++) {
+      await frames(1);
+      if (s.wallSide() === d && !grounded() && (!apex || s.player.body.velocity.y > -120)) {
+        key('keyup', k); d = -d; k = d > 0 ? 39 : 37; key('keydown', k);
+        if (sp > 0) { key('keyup', 32); await frames(1); }
+        key('keydown', 32); sp = 20;
+      }
+      if (sp > 0 && --sp === 0) key('keyup', 32);
+    }
+    key('keyup', 32); key('keyup', 37); key('keyup', 39);
+  };
+  // Jump and steer above the nearest walker until it is crushed.
+  const stompNearest = async () => {
+    const s = room(), w = s.enemies.filter((e) => O().contains(e.x, e.y)).sort((a, b) => Math.abs(a.x - s.player.x) - Math.abs(b.x - s.player.x))[0];
+    key('keydown', w.x > s.player.x ? 39 : 37);
+    await until(() => Math.abs(w.x - s.player.x) < 3 * T, 6000, 'approach the walker');
+    key('keyup', 37); key('keyup', 39); key('keydown', 32);
+    for (let i = 0; i < 120 && s.enemies.includes(w) && s.dead <= 0; i++) {
+      const dx = w.x - s.player.x;
+      key(dx > 4 ? 'keydown' : 'keyup', 39); key(dx < -4 ? 'keydown' : 'keyup', 37);
+      if (i === 30) key('keyup', 32);
+      await frames(1);
+    }
+    key('keyup', 32); key('keyup', 37); key('keyup', 39);
+    return !s.enemies.includes(w);
+  };
+  const runTo = async (x) => { key('keydown', 39); await until(() => tx() >= x || room().dead > 0, 6000, 'run to ' + x); key('keyup', 39); };
+  if (matches('The thorn wall')) {
+    // The thorns stop below the ledge's lip, so a plain run-and-jump onto the step can't overshoot into them.
+    s = await cleanSolveRoom('The thorn wall');
+    await runTo(14.5); key('keydown', 39); key('keydown', 32);
+    await until(() => stats.deaths === 1, 2000, 'touch thorns while rising');
+    key('keyup', 39); key('keyup', 32); await alive();
+    key('keydown', 39); await until(() => tx() >= 11.4, 4000, 'run-up'); key('keydown', 32);
+    await until(() => grounded() && feet() < 14, 2000, 'land on the step holding right'); key('keyup', 32); key('keyup', 39);
+    await frames(10);
+    check(stats.deaths === 1 && feet() < 13.1, `The thorn wall: holding right onto the step is safe (feet ${feet().toFixed(2)})`);
+    key('keydown', 32); key('keydown', 39); await frames(50); key('keyup', 32); key('keyup', 39); await frames(20);
+    check(stats.deaths === 1 && feet() <= 10.05, 'The thorn wall: from the step, jump and hold right onto the ledge');
+  }
+  if (matches('The chain')) {
+    s = await cleanSolveRoom('The chain');
+    await runTo(5); key('keydown', 39); key('keydown', 32); await frames(8); key('keyup', 32);
+    await until(() => stats.deaths === 1, 3000, 'jump into the pit'); key('keyup', 39); await alive();
+    await runTo(5.2); key('keydown', 39); key('keydown', 32); await frames(10); key('keyup', 32);
+    await until(() => grounded() && tx() > 6, 2000, 'land on the pit soul');
+    key('keydown', 32); await frames(16); key('keyup', 32);
+    await until(() => s.start.x > O().x + 17 * T, 4000, 'reach the shrine'); key('keyup', 39); await frames(10);
+    await runTo(20); key('keydown', 39); key('keydown', 32);
+    await until(() => stats.deaths === 2, 2000, 'touch thorns while rising'); key('keyup', 39); key('keyup', 32); await alive();
+    await runTo(19); key('keydown', 39); key('keydown', 32); await frames(20); key('keyup', 32);
+    await until(() => grounded(), 2000, 'land on the step'); key('keyup', 39); await frames(10);
+    key('keydown', 32); key('keydown', 39); await frames(40); key('keyup', 32);
+    await until(() => s.rooms[s.index].name !== 'The chain' || stats.deaths > 2, 5000, 'leave The chain'); key('keyup', 39);
+    check(stats.deaths === 2 && s.rooms[s.index].name === 'The long pit', 'The chain: pit soul, shrine, thorn step and out with real inputs');
+  }
+  if (matches('The long pit')) {
+    // Jumping mid-slide in the one-tile tunnel used to bonk the ceiling and float the slide over the spikes.
+    let crossed = 0;
+    for (const delay of [2, 4, 6, 8, 10]) {
+      s = await cleanSolveRoom('The long pit');
+      await runTo(5); key('keydown', 39); key('keydown', 83); await frames(2); key('keyup', 83);
+      await frames(delay); key('keydown', 32); await frames(3); key('keyup', 32);
+      await until(() => stats.deaths > 0 || tx() > 10.5, 3000, 'slide-jump over the empty spike gap'); key('keyup', 39);
+      if (!stats.deaths) crossed++;
+    }
+    check(!crossed, `The long pit: a slide-jump can't float over the tunnel's spike gap (${crossed} crossed)`);
+  }
+  if (matches('The patrol')) {
+    Dialogue.seen.delete('patrol');
+    s = await go(ROOMS.findIndex(([n]) => n === 'The patrol'));
+    const w = s.enemies[0], x0 = w.x;
+    await wait(8000);
+    check(s.talk.active && Math.abs(w.x - x0) < 2, 'The patrol: the walker waits while the guide talks');
+    Dialogue.skip(s);
+  }
+  if (matches('First death')) {
+    Object.keys(SCRIPT).forEach((k) => Dialogue.seen.add(k)); Dialogue.seen.delete('firstDeath');
+    s = await go(ROOMS.findIndex(([n]) => n === 'First death'));
+    s.guide.setPosition(O().x + 10 * T, s.player.y - 34).setAlpha(0.7); s.guide.hoverY = s.guide.y; // left behind at the pit
+    await runTo(9); key('keydown', 39); key('keydown', 32); await frames(10); key('keyup', 32);
+    await until(() => stats.deaths > 0, 3000, 'die in the pit'); key('keyup', 39);
+    for (let i = 0; i < 40 && !(s.talk.line?.audioIndex >= 4); i++) { key('keydown', 13); await frames(2); key('keyup', 13); await frames(20); }
+    check(s.talk.line?.audioIndex >= 4, 'First death: Enter reaches the guide line');
+    await frames(60);
+    check(Math.abs(s.guide.x - s.player.x) < 3 * T, `First death: the guide drifts back beside him after the respawn (${((s.guide.x - s.player.x) / T).toFixed(1)} tiles)`);
+    Dialogue.skip(s);
+    Object.keys(SCRIPT).forEach((k) => Dialogue.seen.add(k));
+  }
+  if (matches('Thornwood')) {
+    s = await cleanSolveRoom('Thornwood');
+    // A: stomp the walker, climb into the thorns (the soul hangs where the arc meets them), then kick off it.
+    check(await stompNearest(), 'Thornwood: stomp the first walker');
+    await runTo(13.5); await frames(20);
+    await climb(1, () => stats.deaths > 0 || feet() < 6, true);
+    await alive();
+    const anchor = s.corpses[0];
+    check(stats.deaths === 1 && anchor && anchor.x > O().x + 14 * T, 'Thornwood: the chimney climb dies on the thorns and leaves an anchor soul');
+    check(await stompNearest(), 'Thornwood: stomp the walker again after the respawn');
+    await runTo(13.5); await frames(20);
+    await climb(1, () => stats.deaths > 1 || tx() > 15.3);
+    await runTo(17.6); await frames(20);
+    check(stats.deaths === 1 && s.start.x > O().x + 17 * T, 'Thornwood: kicking off the anchor soul climbs past the thorns to shrine 1');
+    // B: keep running over the crumbling bridge under the falling spikes.
+    await runTo(28.6); await frames(30);
+    check(stats.deaths === 1 && s.start.x > O().x + 28 * T, 'Thornwood: the crumbling bridge run reaches shrine 2');
+    // C: the saw never reaches the exit shaft, so following it can't skip the jam.
+    const saw = s.saws.find((w) => w.room === s.index);
+    let far = 0;
+    for (let i = 0; i < 360; i++) { await frames(1); far = Math.max(far, saw.x + SAW_R); }
+    check(far <= O().x + 43 * T, `Thornwood: the saw turns back before the exit shaft (reaches ${((far - O().x) / T).toFixed(2)})`);
+    const descend = async () => {
+      const d = stats.deaths;
+      key('keydown', 39); await until(() => feet() > 20 || stats.deaths > d, 4000, 'drop into section C'); key('keyup', 39);
+      await until(() => grounded(), 3000, 'land in section C');
+      if (s.enemies.some((e) => O().contains(e.x, e.y) && Math.abs(e.x - s.player.x) < 6 * T)) await stompNearest();
+      await until(() => grounded(), 3000, 'land after the stomp'); await frames(10);
+      if (tx() > 34.6) { key('keydown', 37); await until(() => tx() <= 34.3, 2000, 'back up from the post'); key('keyup', 37); await frames(10); }
+      key('keydown', 39); await until(() => tx() >= 35, 3000, 'run at the post'); key('keydown', 32); await frames(14); key('keyup', 32); key('keyup', 39);
+      await until(() => grounded() || stats.deaths > d, 3000, 'land on the post');
+      key('keydown', 39); await until(() => tx() >= 36.9 || stats.deaths > d, 3000, 'walk off the post into the corridor'); key('keyup', 39);
+    };
+    await descend();
+    const d1 = stats.deaths;
+    key('keydown', 39); await until(() => stats.deaths > d1, 8000, 'let the saw kill you'); key('keyup', 39); await alive();
+    await until(() => saw.jam, 10000, `the saw comes back to the soul (soul ${s.corpses.map((c) => [((c.x - O().x) / T).toFixed(2), ((c.y - O().y) / T).toFixed(2), c.lying])} saw ${((saw.x - O().x) / T).toFixed(2)})`);
+    check(saw.jam, 'Thornwood: the saw jams in the soul');
+    await descend();
+    const d2 = stats.deaths;
+    key('keydown', 39); await until(() => tx() >= s.corpses[0].x / T - O().x / T - 1.2 || stats.deaths > d2, 4000, 'walk to the soul');
+    key('keydown', 32); await frames(16); key('keyup', 32); await frames(40); key('keyup', 39);
+    await climb(1, () => stats.deaths > d2 || tx() > 45.3 || s.rooms[s.index].name !== 'Thornwood');
+    key('keydown', 39); await until(() => s.rooms[s.index].name !== 'Thornwood' || stats.deaths > d2, 3000, 'leave Thornwood'); key('keyup', 39);
+    check(stats.deaths === d2 && s.rooms[s.index].name === 'The moth', `Thornwood: over the jammed saw and up the exit shaft (${s.rooms[s.index].name})`);
+  }
   if (matches('The gatehouse')) {
     s = await cleanSolveRoom('The gatehouse');
     const move = async (tx, jump = false) => {
