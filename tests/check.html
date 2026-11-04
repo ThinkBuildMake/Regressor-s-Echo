@@ -1137,7 +1137,12 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     const laserDeaths = stats.deaths;
     key('keydown', 32); key('keydown', 39);
     await until(() => stats.deaths > laserDeaths, 2500, 'high laser shield');
-    key('keyup', 32); key('keyup', 39); await alive();
+    key('keyup', 32); key('keyup', 39);
+    const respawnY = s.player.y;
+    await wait(150);
+    check(s.dead > 0 && near(s.player.y, respawnY),
+      'Sawmill: the hero stays at the shrine while enemies pause during respawn');
+    await alive();
     const shield = s.corpses.at(-1);
     check(shield.y + shield.height / 2 < O().y + 19 * T,
       'Sawmill: jumping into ceiling laser hangs a shield above the walkway');

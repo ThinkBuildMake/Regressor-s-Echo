@@ -1451,6 +1451,7 @@ class Room extends Phaser.Scene {
       if (Math.abs(b.x - this.start.x) < b.width / 2 + 12 && b.y - b.height / 2 < y + 15) y = b.y - b.height / 2 - 15;
     p.body.reset(this.start.x, y);
     p.setVisible(false);
+    p.body.moves = false; // Gravity must pause with the enemies during respawn.
     this.dead = RESPAWN_DELAY;
     if (this.boss) { this.boss.hp = BOSS_HP; this.boss.hurt = 0;
       if (this.boss.stag) { this.boss.deaths++; this.boss.phase = 'setup'; this.boss.clock = 0; this.boss.bells = 0; this.boss.beam = null; this.boss.pulse = -1; this.boss.r.x = this.rooms[this.boss.room].rect.right - 5 * T; }
@@ -2254,6 +2255,7 @@ class Room extends Phaser.Scene {
     if (this.dead > 0) {
       this.dead -= dt;
       p.setVisible(this.dead <= 0);
+      p.body.moves = this.dead <= 0;
       p.body.velocity.x = 0;
       return;
     }
