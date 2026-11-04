@@ -840,7 +840,9 @@ const FONT = { fontFamily: 'Georgia, serif', align: 'center' };
 // First screen: the content warning. Any key or click continues (that click also lets the browser play audio).
 class Warning extends Phaser.Scene {
   constructor() { super('warning'); }
+  update(_t, ms) { GameAudio.mix(ms / 1000); }
   create() {
+    GameAudio.music('title');
     if (window.SKIP_WARNING) return this.scene.start('room'); // the test page
     const t = (y, text, size, color, wrap = 640) =>
       this.add.text(480, y, text, { ...FONT, fontSize: size, color, wordWrap: { width: wrap }, lineSpacing: 6 }).setOrigin(0.5);
@@ -850,7 +852,8 @@ class Warning extends Phaser.Scene {
     t(345, "If you're going through a hard time, please reach out to someone you trust or a local support line.", '16px', '#a8b8ad');
     const go = t(440, 'Click or press any key to continue', '15px', '#e8b44a');
     this.tweens.add({ targets: go, alpha: 0.35, duration: 900, yoyo: true, repeat: -1 });
-    const next = () => this.scene.start('room');
+    t(480, 'M mute · − / = volume', '13px', '#a8b8ad');
+    const next = () => { GameAudio.unlocked = true; GameAudio.play('ui-menu-select'); this.scene.start('room'); };
     this.input.keyboard.once('keydown', next);
     this.input.once('pointerdown', next);
   }
@@ -859,7 +862,9 @@ class Warning extends Phaser.Scene {
 // The last screen, after he walks into the pyramid: "Floor 1", the title, the run's deaths, thanks and credits.
 class End extends Phaser.Scene {
   constructor() { super('end'); }
+  update(_t, ms) { GameAudio.mix(ms / 1000); }
   create() {
+    GameAudio.music('ending');
     const t = (y, text, size, color, at) => {
       const o = this.add.text(480, y, text, { ...FONT, fontSize: size, color }).setOrigin(0.5).setAlpha(0);
       this.tweens.add({ targets: o, alpha: 1, duration: 1200, delay: at });
@@ -875,6 +880,8 @@ class End extends Phaser.Scene {
     t(422, 'Art, music and sound made with generative AI tools', '13px', '#7f9086', 10400);
     const again = t(490, 'Press any key to play again', '14px', '#e8b44a', 12000);
     this.time.delayedCall(12000, () => this.input.keyboard.once('keydown', () => {
+      GameAudio.ending = false;
+      GameAudio.play('ui-menu-select');
       stats.deaths = 0; stats.treePower = false; stats.mothFinished = false; stats.stagFinished = false;
       Dialogue.seen.clear();
       NAMES.guide = '???';
@@ -990,7 +997,7 @@ class Room extends Phaser.Scene {
               this.spikes.push(rect(x + 2, y + 6, T - 4, 10, 0xcd5c5c));
               hazard(this.spikes.at(-1), 'spikes', T, 16, -3);
               break;
-            case 'x': this.spikes.push(rect(x + 4, y + 2, T - 8, T - 4, 0x7a3550)); hazard(this.spikes.at(-1), 'thorns', T, T); break;
+            case 'x': this.spikes.push(rect(x + 4, y + 2, T - 8, T - 4, 0x7a3550)); this.spikes.at(-1).audioVine = true; hazard(this.spikes.at(-1), 'thorns', T, T); break;
             case '_': this.plates.push(Object.assign(rect(x + 1, y + T - 8, T - 2, 8, 0xffd700).setStrokeStyle(2, 0x8a6a00).setDepth(3), { room: ri })); hazard(this.plates.at(-1), 'plate', T, 8); break;
             case 'D': { const d = Object.assign(rect(x, y, T, T, 0x8c6640), { room: ri }); this.statics.add(d); this.doors.push(d); break; }
             case 'e': case 'f': case 't': this.walkerSpawns.push({ x, y, room: ri, kind: row[tx] }); break; // made on entry
@@ -1254,6 +1261,8 @@ class Room extends Phaser.Scene {
 
   // Staging cues fired by dialogue lines (see `cue` in dialogue.js).
   cue(name) {
+    GameAudio.cue(name);
+    if (['moth', 'tree', 'stagAppear'].includes(name) && this.boss) this.boss.audioArrived = true;
     const g = this.guide, p = this.player;
     if (name === 'stagAppear' && this.boss?.stag) {
       this.boss.hidden = false; this.boss.introUntil = this.time.now + 1000; this.boss.r.setVisible(true); this.cameras.main.flash(450, 170, 225, 255);
@@ -1362,6 +1371,7 @@ class Room extends Phaser.Scene {
   mothScream(done) {
     const B = this.boss;
     if (!B) return done?.();
+    GameAudio.play('moth-scream');
     B.pose = 0;
     this.time.delayedCall(150, () => { B.pose = 1; this.cameras.main.shake(500, 0.008); });
     for (let i = 0; i < 6; i++) this.time.delayedCall(150 + i * 160, () => {
@@ -1406,6 +1416,7 @@ class Room extends Phaser.Scene {
 
   die(chosen = false) {
     if (this.dead > 0) return;
+    GameAudio.play('hero-death-burst');
     const treeSetup = this.boss?.kind === 'tree' && (chosen || this.corpses.length < 2);
     stats.deaths++;
     const p = this.player;
@@ -1434,6 +1445,8 @@ class Room extends Phaser.Scene {
     }
     this.statics.add(c);
     this.corpses.push(c);
+    GameAudio.play('hero-soul-appears');
+    c.on('destroy', () => GameAudio.play('hero-soul-erased-replaced'));
     if (this.rooms[this.index].name === 'The long pit' && !c.lying &&
         c.x > this.rooms[this.index].rect.x + 3 * T && c.x < this.rooms[this.index].rect.x + 11 * T &&
         bottom > this.rooms[this.index].rect.y + 9 * T && bottom - h < this.rooms[this.index].rect.y + 10 * T)
@@ -1480,7 +1493,7 @@ class Room extends Phaser.Scene {
       const next = new Phaser.Geom.Rectangle(c.x - hw, c.y - hh + c.vy * dt, c.width, c.height);
       // A body coming down from above an enemy crushes it.
       for (const e of [...this.enemies]) {
-        if (bottom <= bounds(e).y + 2 && hit(next, bounds(e))) { e.destroy(); this.enemies.splice(this.enemies.indexOf(e), 1); }
+        if (bottom <= bounds(e).y + 2 && hit(next, bounds(e))) { GameAudio.play('walker-crushed'); e.destroy(); this.enemies.splice(this.enemies.indexOf(e), 1); }
       }
       let floor = Infinity;
       for (const s of solids) {
@@ -1531,7 +1544,17 @@ class Room extends Phaser.Scene {
       else this.figure(g, c, { lying: c.lying, dir: c.dir, t, soul: true });
     }
     const grounded = b.blocked.down || b.touching.down;
+    if (grounded && !this.audioGrounded && this.dead <= 0) GameAudio.play('hero-land', 3);
+    this.audioGrounded = grounded;
     this.walk = (this.walk || 0) + (grounded ? Math.abs(b.velocity.x) * dt : 0);
+    const step = Math.floor(this.walk / RUN_STEP) % RUN_FRAMES.length;
+    if ((step === 0 || step === 3) && step !== this.audioStep && grounded && !this.lying && p.visible && Math.abs(b.velocity.x) > 20) {
+      const surface = this.world >= 2 ? 'worlds-2-3' : 'world-1';
+      const take = (this.audioTake ?? 0) % 3 + 1;
+      this.audioTake = take;
+      GameAudio.play(`hero-footstep-${surface}-${take}`, 0, 0.4);
+    }
+    this.audioStep = step;
     const usePainting = this.painted && (!this.lying || this.hasSlide);
     if (this.painted) this.heroSprite.setVisible(p.visible && usePainting);
     if (!p.visible) return;
@@ -1950,6 +1973,7 @@ class Room extends Phaser.Scene {
     const pod = (x, y, vx, vy) => {
       const sh = this.textures.exists('mothDust') ? this.add.image(x, y, 'mothDust').setDisplaySize(16, 16)
         : this.add.circle(x, y, 8, 0xffef72);
+      GameAudio.play('moth-wing-dust-shot');
       this.shots.push(Object.assign(sh.setDepth(4), { vx, vy, mothDust: true }));
     };
     if (!B.phase) { enter('pause'); B.r.y = floor - 96; B.fired = 0; }
@@ -2070,6 +2094,7 @@ class Room extends Phaser.Scene {
   }
 
   treeImpact(x, y) {
+    GameAudio.play('tree-slam');
     const r = this.textures.exists('impact') ? this.add.image(x, y, 'impact').setDisplaySize(64, 32) : this.add.ellipse(x, y, 64, 16, 0xf1f578, 0.6);
     this.tweens.add({ targets: r, alpha: 0, duration: 300, onComplete: () => r.destroy() });
   }
@@ -2113,6 +2138,7 @@ class Room extends Phaser.Scene {
           const burst = this.textures.exists('mortar-burst') ? this.add.image(pod.r.x, B.floor - 12, 'mortar-burst').setDisplaySize(76, 32) : this.add.rectangle(pod.r.x, B.floor - 12, 76, 24, 0xf1f578, 0.6);
           this.tweens.add({ targets: burst, alpha: 0, duration: 300, onComplete: () => burst.destroy() });
         }
+        GameAudio.play('tree-seed-pod-burst');
         pod.r.destroy(); B.pods.splice(B.pods.indexOf(pod), 1);
       }
     }
@@ -2131,8 +2157,9 @@ class Room extends Phaser.Scene {
       return;
     }
     if (B.phase === 'slam') {
+      GameAudio.play('tree-slam');
       const c = B.target;
-      if (c?.active) { c.buried = TREE_BURIED; c.body.enable = false; c.setAlpha(0.15); c.sprites?.forEach((s) => s.setAlpha(0.1)); }
+      if (c?.active) { GameAudio.play('hero-soul-erased-replaced'); c.buried = TREE_BURIED; c.body.enable = false; c.setAlpha(0.15); c.sprites?.forEach((s) => s.setAlpha(0.1)); }
       this.cameras.main.shake(180, 0.005);
       if (feet > B.floor - 24 || Math.abs(p.x - B.aimX) < 28 && feet > (c?.y ?? B.floor) - 40) return this.die();
     } else if (B.phase === 'rake') {
@@ -2140,6 +2167,7 @@ class Room extends Phaser.Scene {
     } else if (B.phase === 'mortar') {
       for (const x of B.landings) {
         const r = this.textures.exists('seedPod') ? this.add.image(B.r.x, B.floor - 14 * T, 'seedPod').setDisplaySize(20, 20) : this.add.rectangle(B.r.x, B.floor - 14 * T, 20, 20, 0xf1f578);
+        GameAudio.play('tree-seed-pod-launch');
         B.pods.push({ r, vx: (x - B.r.x) / 0.9, vy: (B.landingY - r.y - 350 * 0.81) / 0.9 });
       }
     } else if (B.phase === 'canopy') {
@@ -2167,6 +2195,7 @@ class Room extends Phaser.Scene {
     if (B.hurt > 0 || (B.story === 'mothDown' && !B.open) || (B.stag && (B.phase !== 'dazed' || B.stomped)) || (B.kind === 'tree' && (B.stompReady === false || B.open <= 0))) return false;
     if (B.stag) B.stomped = true;
     if (B.kind === 'tree') { B.stompReady = false; B.open = 0; }
+    GameAudio.play(`${GameAudio.kind(B)}-${B.kind === 'tree' ? 'mask-hit' : 'hit'}`);
     B.hurt = 0.5;
     if (B.story === 'mothDown') {
       B.open = false; B.phase = 'diveGap'; B.clock = 0; B.warn?.clear();
@@ -2174,6 +2203,7 @@ class Room extends Phaser.Scene {
       this.shots = this.shots.filter((sh) => !sh.mothDust);
     }
     if (--B.hp <= 0 && B.story) { // a story boss stops still; its script dissolves it (cue 'absorb')
+      GameAudio.play(`${GameAudio.kind(B)}-defeat`);
       B.hidden = true;
       this.fallenBoss(B);
       if (B.stag) Dialogue.seen.delete(B.story);
@@ -2190,6 +2220,7 @@ class Room extends Phaser.Scene {
   update(_t, ms) {
     const dt = Math.min(ms / 1000, 0.05);
     const k = this.keys, JD = Phaser.Input.Keyboard.JustDown, p = this.player;
+    GameAudio.room(this, dt);
     this.bossPreviousFeet = this.bossFeet;
     this.bossFeet = p.y + p.height / 2;
 
@@ -2215,9 +2246,16 @@ class Room extends Phaser.Scene {
     Art.update(this, this.time.now / 1000);
 
     const weights = [p, ...this.corpses].map(bounds);
+    for (const pl of this.plates.filter(pl => pl.room === this.index)) {
+      const held = weights.some(w => hit(w, bounds(pl)));
+      if (held !== !!pl.audioHeld) GameAudio.play(held ? 'hazards-plate-down' : 'hazards-plate-up');
+      pl.audioHeld = held;
+    }
     for (const d of this.doors) {
       let held = d.plates.some((pl) => weights.some((w) => hit(w, bounds(pl))));
       if (this.rooms[d.room].name === 'Two places' && d.x < this.rooms[d.room].rect.x + 17 * T) held = !held;
+      if (d.room === this.index && d.audioHeld !== undefined && d.audioHeld !== held) GameAudio.play(held ? 'hazards-door-opens' : 'hazards-door-closes');
+      d.audioHeld = held;
       d.body.enable = !held;
       d.setAlpha(held ? 0.2 : 1);
     }
@@ -2256,6 +2294,7 @@ class Room extends Phaser.Scene {
       this.dead -= dt;
       p.setVisible(this.dead <= 0);
       p.body.moves = this.dead <= 0;
+      if (this.dead <= 0) GameAudio.play('hero-respawn-soul-gathers-back');
       p.body.velocity.x = 0;
       return;
     }
@@ -2272,14 +2311,19 @@ class Room extends Phaser.Scene {
     // Land on an enemy from above to stomp it (it comes back when you re-enter the room); any other touch kills.
     for (const list of [this.enemies, this.flyers]) for (const e of [...list]) {
       if (!hit(pb, bounds(e))) continue;
-      if (p.body.velocity.y > 0 && pb.bottom - bounds(e).y < 14) { list.splice(list.indexOf(e), 1); this.downed.push({ sp: e.spawn }); e.destroy(); p.body.velocity.y = -STOMP_BOUNCE; }
+      if (p.body.velocity.y > 0 && pb.bottom - bounds(e).y < 14) { list.splice(list.indexOf(e), 1); this.downed.push({ sp: e.spawn }); GameAudio.play('walker-crushed'); e.destroy(); p.body.velocity.y = -STOMP_BOUNCE; }
       else return this.die();
     }
     const sawBoxes = this.saws.filter((sw) => sw.room === this.index).map((sw) => new Phaser.Geom.Rectangle(sw.x - SAW_R + 3, sw.y - SAW_R + 3, SAW_R * 2 - 6, SAW_R * 2 - 6));
     const falling = this.droppers.filter((d) => d.room === this.index && d.state !== 'gone').map((d) => bounds(d.r));
     const hazards = [...this.spikes.map(bounds), ...this.shots.map(bounds), ...sawBoxes, ...falling];
-    if (hazards.some((h) => hit(pb, h)) || this.laserHit()) return this.die();
+    if (hazards.some((h) => hit(pb, h)) || this.laserHit()) {
+      const spike = this.spikes.find(h => hit(pb, bounds(h)));
+      if (spike) GameAudio.play(spike.audioVine ? 'hazards-vine-wall-touch' : 'hazards-spikes-impale');
+      return this.die();
+    }
     const world = this.rooms[this.index].world ?? 0;
+    GameAudio.loop(this, 'hero-release-wind-up', !this.sdLock && (rules.selfDestruct || world >= 2) && (k.K.isDown || k.X.isDown), 0.5);
     // Self-destruct: hold to charge, let go to cancel. After a death, let go before charging again.
     if (!(k.K.isDown || k.X.isDown)) this.sdLock = false, this.charge = 0;
     else if (!this.sdLock && (rules.selfDestruct || world >= 2) && (this.charge += ms / 1000) >= SD_HOLD) { this.sdLock = true; return this.die(true); }
@@ -2295,12 +2339,14 @@ class Room extends Phaser.Scene {
     if (this.touchBoss()) return;
     this.amulets = this.amulets.filter((a) => {
       if (!hit(bounds(p), bounds(a))) return true;
+      GameAudio.play('story-amulet-pickup');
       a.destroy(); // the gold flash comes later, once he puts it on
       Dialogue.play(this, 'amulet');
       return false;
     });
     for (const sh of this.shrines) if ((hit(bounds(p), bounds(sh)) ||
         (world === 3 && Math.abs(p.x - sh.x) < T / 2 && p.y + 15 <= sh.y + 14 && p.y + 15 > sh.y - 4 * T)) && this.start !== sh.spawn) {
+      GameAudio.play('story-shrine-activates');
       this.start = sh.spawn;
       this.shrines.forEach((o) => o.rune.setAlpha(o === sh ? 1 : 0.35));
       if (this.rooms[this.index].shrineTalk) Dialogue.play(this, this.rooms[this.index].shrineTalk);
@@ -2312,12 +2358,14 @@ class Room extends Phaser.Scene {
     const grounded = b.blocked.down || b.touching.down;
     if (grounded || b.velocity.y >= 0) this.sprung = false;
     if (b.velocity.y >= 0 && this.springs.some((sp) => hit(bounds(p), bounds(sp)))) {
+      GameAudio.play('hazards-spring');
       b.velocity.y = -SPRING; this.sprung = true;
       for (const sp of this.springs) if (hit(bounds(p), bounds(sp))) sp.launchArt = this.time.now;
     }
     const dir = (k.D.isDown || k.RIGHT.isDown) - (k.A.isDown || k.LEFT.isDown);
     if (dir && !(this.lying && this.slide > 0)) this.face = dir; // can't turn mid-slide
     if (slideKey && grounded && !this.lying && Math.abs(b.velocity.x) > 100) {
+      GameAudio.play('hero-slide');
       this.setLying(true);
       this.slide = SLIDE_TIME;
       this.slideDir = Math.sign(b.velocity.x);
@@ -2342,8 +2390,9 @@ class Room extends Phaser.Scene {
     }
     this.coyote = grounded ? COYOTE : this.coyote - dt;
     this.buffer = jumpDown ? BUFFER : this.buffer - dt;
-    if (this.buffer > 0 && this.coyote > 0) { b.velocity.y = -JUMP; this.buffer = this.coyote = 0; }
+    if (this.buffer > 0 && this.coyote > 0) { GameAudio.play(this.lying ? 'hero-dive' : 'hero-jump', this.lying ? 0 : 3); b.velocity.y = -JUMP; this.buffer = this.coyote = 0; }
     else if (this.buffer > 0 && this.wallCoyote > 0 && !grounded && this.lastWall !== this.kickSide) { // wall jump
+      GameAudio.play('hero-jump', 3);
       b.velocity.y = -WALL_JUMP; b.velocity.x = -this.lastWall * WALL_KICK; this.face = -this.lastWall;
       this.kick = KICK_LOCK; this.kickSide = this.lastWall; this.buffer = this.wallCoyote = 0;
     }
@@ -2379,8 +2428,10 @@ class Room extends Phaser.Scene {
     }
     if (firing && !beam.fired) {
       beam.fired = true;
+      GameAudio.play('stag-beam');
+      if (this.corpses.includes(target)) GameAudio.play('hazards-laser-blocked-by-soul');
       if (target === this.player) this.die();
-      else if (beam.stag && this.corpses.includes(target)) { target.buried = 2; target.body.enable = false; target.setAlpha(0.25); }
+      else if (beam.stag && this.corpses.includes(target)) { GameAudio.play('hero-soul-erased-replaced'); target.buried = 2; target.body.enable = false; target.setAlpha(0.25); }
       else if (this.corpses.includes(target)) { this.corpses.splice(this.corpses.indexOf(target), 1); target.destroy();
         if (this.rooms[this.index].name === 'The rehearsal') Dialogue.play(this, 'breakingBeam');
       }

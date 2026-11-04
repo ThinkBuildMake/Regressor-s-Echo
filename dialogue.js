@@ -402,7 +402,7 @@ const Dialogue = {
     if (!SCRIPT[key] || this.seen.has(key)) return false;
     this.seen.add(key);
     scene.talk.active = true;
-    scene.talk.queue.push(...SCRIPT[key].map((l) => ({ ...l })));
+    scene.talk.queue.push(...SCRIPT[key].map((l, i) => ({ ...l, audioScript: key, audioIndex: i })));
     return true;
   },
 
@@ -486,6 +486,7 @@ const Dialogue = {
       t.shown = 0;
       this.act(scene, t.line);
       scene.player.body.setVelocityX(0);
+      GameAudio.line(t.line.audioScript, t.line.audioIndex);
       if (t.line.reveal) NAMES.guide = 'Yourself';
       if (t.line.cue) scene.cue?.(t.line.cue);
       if (t.line.cue === 'lastBeam') scene.guide.hoverY = scene.guide.y;
@@ -525,7 +526,9 @@ const Dialogue = {
       if (t.shown < full) t.shown = full;
       else if (!walking) { t.line = null; return t.queue.length > 0 || this.update(scene, 0, false); }
     }
+    const before = Math.floor(t.shown / 3);
     t.shown = Math.min(full, t.shown + dt * 45);
+    if (!advance && Math.floor(t.shown / 3) > before) GameAudio.play(`dialogue-blip-${t.line.who === 'guide' ? 'ghost-guide' : 'hero'}`, 3, 0.25);
     t.text.setText(t.line.text.slice(0, Math.floor(t.shown)));
     t.hint.setAlpha(t.shown >= full ? 0.6 + Math.sin(scene.time.now / 250) * 0.3 : 0);
     return true;
