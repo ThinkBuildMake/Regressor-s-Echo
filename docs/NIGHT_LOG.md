@@ -51,3 +51,12 @@ DECISION: the user asked for parallel agents. Three Codex workers, one per world
 00:53 user went to bed: 'continue to run until I wake up'. Claude subagents allowed (weekly reset tonight). Cutscene-input fix, W2 and W3 QA-and-fix agents running.
 01:32 cutscene fix verified by its agent (6 rooms + full suite OK), merged. Started W1 QA-and-fix.
 01:32 my queue commit used -a during a conflicted merge and committed conflict markers in check.html (3b2de1e); resolved in the next commit. Lesson: never commit -a while a merge is open.
+01:35 cutscene merge fixed (bf4f570); 5 story/ending rooms OK. World 1 QA-and-fix agent started (also covers cutscenes and audio events).
+02:47 W2 QA-and-fix merged (b94b8e7): Off the edge slide skip closed, The beam step block, spring drift stops when you let go (game-wide), Sawmill thrower plate + saw jam. Tree verified with 0.25-0.45s reactions. Full suite OK on its branch.
+NEEDS DECISION: Let go stage 1 can be done with one soul hung 2-3 high (a single hung soul always reaches as high as a 2-stack). Agent recommends accepting it as an alternative route.
+NEEDS DECISION: The ladder stage 1 one-soul skip via a wall kick off the ledge face onto a hung soul. No level shape blocks it without breaking the staircase; it needs a wall-jump rule decision (likely affects Three high too).
+02:55 W3 QA-and-fix merged (9ae325b; check.html conflict resolved by hand: kept the stuck-hop walk + W3's each() hook). Fixed: Three high tower raised (2-soul kick skip), Two places rebuilt so swap is required (shaft plug + slide-swap), Everything saw post, Reliquary plate off its door, stag arena zoom actually applies, camera follows after the win. Stag verified: swap required, no passive win, 0-death win. 5 rooms re-run OK after merge.
+NEEDS DECISION: Two places now needs "slide, then swap" (a walking-speed swap drops you on the spike). Too hard for a teaching room?
+NEEDS DECISION: The rehearsal stage B can still be run by jumping at each beam lock (0 deaths); closing it needs a 1-tall corridor that makes the decoy timing tight.
+OPEN (mild): Reliquary: from the shrine you can drop onto the bottom crumble and skip the middle steps (2 of 3 tries).
+NOTE for the author: the stag's 10-death nudge "Lead it away" talks about the beam, not the swap trick (author's text; left as is). It only plays once you step off the platform.

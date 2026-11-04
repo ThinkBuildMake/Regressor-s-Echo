@@ -79,7 +79,7 @@ def off_edge(o, p):
     # Hang a step over the first pit, then bank the crossing at the shrine.
     o(4, 8, 10, 14); o(4, 15, 10, 15, '^'); p(13, 7, 'C')
     # Keep one soul on the plate and one in the air. An extra death shuts the exit.
-    p(16, 7, '_'); o(19, 8, 24, 14); o(19, 15, 24, 15, '^'); o(26, 1, 26, 7, 'D')
+    p(16, 7, '_'); o(19, 8, 25, 14); o(19, 15, 25, 15, '^'); o(26, 1, 26, 7, 'D')
 room('Off the edge', [346, 107], 30, 17, 2, 'jump off the edge holding K: the soul appears mid-pit', off_edge)
 
 def take_back(o, p):
@@ -104,6 +104,7 @@ room('The ladder', [376, 99], 30, 17, 2, '7-high ledge: stack to 3, then run off
 def beam(o, p):
     # A: the laser death is both the high step and the shield.
     o(1, 1, 10, 15); o(11, 1, 14, 7); p(11, 11, '<'); p(13, 7, 'C')
+    p(9, 15, '#')  # a low block beside the source: die standing on it for the step (as stage B's plate block)
     # B: the lower step must also hold the door; a third death removes it.
     o(15, 1, 24, 15); o(25, 1, 28, 7); p(25, 11, '<')
     o(16, 1, 16, 12, '#')  # sheltered drop beside the shrine
@@ -135,9 +136,10 @@ def sawmill(o, p):
     #    your soul hangs beside the spring 5-7 tiles up: one in the saw's row also jams it; one a row higher is a
     #    step too, but then you spring past a moving saw.
     o(0, 17, 0, 19); o(1, 1, 9, 19); p(1, 19, 'P'); p(6, 19, 's'); p(3, 14, 'o')
-    # B: shrine, plate (self-destruct on it: the soul opens the door AND shields you from the thrower's shots),
-    #    then crumbling floor over spikes under fire. Stomp the thrower.
-    o(10, 1, 14, 10); o(15, 6, 30, 9); p(12, 10, 'C'); p(16, 9, '_'); p(17, 9, '_'); o(19, 10, 25, 10, '~'); o(19, 11, 25, 13)
+    # B: shrine, then crumbling floor over spikes under fire to the plate in front of the thrower. Die on it (or let
+    #    it shoot you there): the soul opens the door AND blocks every later shot, so the second crossing is calm.
+    #    Stomp the thrower from the soul.
+    o(10, 1, 14, 10); o(15, 6, 30, 9); p(12, 10, 'C'); p(27, 9, '_'); o(19, 10, 25, 10, '~'); o(19, 11, 25, 13)
     o(19, 14, 25, 14, '^'); p(29, 9, 't'); o(31, 6, 31, 9, 'D')
     # C: shrine, drop down; a laser from the ceiling cuts the way out. Die in it mid-jump so the soul sits high
     #    and you can walk under it (a soul on the floor blocks the path with the beam still above it). Stomp the walker.
@@ -151,23 +153,24 @@ room('The tree guardian', [540, 75], 30, 17, 2, 'step and decoy: lure the blue s
 
 # ---------- World 3 ----------
 def three_high(o, p):
-    # Ten high needs three staggered steps, not two hung at jump height.
-    o(1, 1, 9, 15); o(10, 1, 14, 5); p(12, 5, 'C')
+    # Twelve high needs three staggered steps; two steps plus a kick off the tower face fall short.
+    o(1, 1, 9, 15); o(10, 1, 14, 3); p(12, 3, 'C')
     o(15, 1, 26, 15); o(27, 1, 28, 7)
     # Drop under the low lintel: the shield cannot double as an exit step.
     o(16, 1, 20, 11, '#'); p(18, 11, 'v')
     o(0, 13, 0, 15); o(29, 6, 29, 7); p(1, 15, 'P')
-room('Three high', [540, 75], 30, 17, 3, '10-high ledge: a 3-soul staircase (run off your top soul while holding K)', three_high)
+room('Three high', [540, 75], 30, 17, 3, '12-high tower: a 3-soul staircase (run off your top soul while holding K)', three_high)
 
 def own_way(o, p):
-    # A hanging soul carries a second run across a gap wider than a jump.
-    o(0, 8, 0, 9); o(1, 3, 10, 9); p(1, 9, 'P')
-    o(4, 10, 11, 15); o(4, 16, 11, 16, '^'); o(9, 3, 11, 8, '#')
-    o(11, 8, 11, 9); o(12, 3, 15, 14); p(13, 14, 'C'); o(15, 12, 15, 14, '#')
+    # Die on the spike at the bottom of the shaft: the soul plugs it, and the thorn stops you walking off it
+    # into the low tunnel. Run on the floor and swap: you keep your speed and come out in the tunnel.
+    o(0, 8, 0, 9); o(1, 3, 6, 9); p(1, 9, 'P')
+    o(6, 10, 6, 13); p(6, 14, '^'); o(7, 13, 11, 13); o(7, 14, 7, 14)
+    o(12, 3, 15, 14); p(13, 14, 'C'); o(15, 12, 15, 14, '#')
     # Swap out from under a falling spike, leaving the exit plate held.
-    o(16, 2, 21, 9); o(16, 8, 16, 9, 'D'); p(18, 9, '_'); p(18, 5, '!')
+    o(17, 2, 21, 9); o(16, 8, 16, 9, 'D'); p(18, 9, '_'); p(18, 5, '!')
     o(22, 8, 22, 9, 'D'); o(23, 5, 28, 9); o(29, 8, 29, 9)
-room('Two places', [570, 73], 30, 17, 3, 'swap under the low lintel across an eight-wide gap; exchange places under a falling spike to hold the exit plate', own_way)
+room('Two places', [570, 73], 30, 17, 3, 'plug the shaft with a soul, then swap into the low tunnel at a run; exchange places under a falling spike to hold the exit plate', own_way)
 
 def three_jobs(o, p):
     # Climb to the safe three-job setup, then drop to the shrine.
@@ -188,7 +191,7 @@ def everything(o, p):
     o(14, 15, 21, 19); o(15, 19, 16, 19, '#'); p(16, 18, 'C')
     # Keep the plate oldest, jam the low saw lane, then time a spring step.
     # Recall a bad step: another death would erase the plate and shut the door.
-    p(19, 19, '_'); o(22, 18, 29, 19); p(22, 19, '#'); p(25, 19, 'o')
+    p(19, 19, '_'); o(22, 18, 29, 19); p(22, 19, '#'); p(25, 19, 'o'); p(29, 19, '#'); o(28, 17, 29, 17)  # the post keeps the saw in its lane; headroom to hop it
     o(30, 18, 30, 19, 'D')
     o(31, 1, 38, 19); p(34, 19, 's')
     o(39, 1, 43, 10); o(44, 9, 44, 10)
@@ -203,8 +206,8 @@ def reliquary(o, p):
     # B: shrine. A 2-tall corridor split by posts into two saw lanes. Jam each saw with a soul (it sticks inside
     #    the soul, so you walk over it), then self-destruct on the plate at the end: all 3 souls. A wrong death
     #    erases your oldest jam: recall (Q) the mistake instead.
-    o(8, 3, 30, 4); p(9, 4, 'C'); p(11, 4, '#'); p(15, 4, 'o'); p(19, 4, '#'); p(23, 4, 'o'); p(28, 4, '#')
-    p(29, 4, '_'); o(30, 3, 30, 4, 'D')
+    o(8, 3, 30, 4); p(9, 4, 'C'); p(11, 4, '#'); p(15, 4, 'o'); p(19, 4, '#'); p(23, 4, 'o'); p(26, 4, '#')
+    p(27, 4, '_'); o(30, 3, 30, 4, 'D')   # two tiles from plate to door: you can't hold it and stand in the doorway
     # C: shrine, then crumbling steps down over spikes with falling spikes overhead.
     o(31, 3, 38, 21); p(32, 4, 'C'); o(32, 5, 32, 5, '#'); o(32, 22, 37, 22, '^')
     for x, y in ((33, 8), (35, 11), (37, 14), (35, 17)): o(x, y, x, y, '~')
