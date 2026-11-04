@@ -1,7 +1,7 @@
 // Match a keyed sprite sheet's colours to a reference sprite (per-channel mean/std over opaque pixels, alpha kept),
 // then remove the magenta spill a video background leaves (pink) without turning dark areas green.
 // Used on frames pulled from a Flow (Veo) video so they match the painted art.
-// over opaque pixels, alpha kept. node colormatch.mjs <src.png> <ref.png|webp> <out.png>
+//   node tools/colormatch.mjs <src.png> <ref.png|webp> <out.png>
 import { chromium } from 'playwright'; import { readFileSync, writeFileSync } from 'node:fs';
 const [src, ref, out] = process.argv.slice(2);
 const uri = (f) => `data:image/${f.endsWith('.webp') ? 'webp' : f.endsWith('.jpg') ? 'jpeg' : 'png'};base64,` + readFileSync(f).toString('base64');
