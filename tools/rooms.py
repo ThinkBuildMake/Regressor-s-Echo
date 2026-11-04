@@ -222,7 +222,7 @@ def rehearsal(o, p):
 room('The rehearsal', [715, 59], 30, 17, 3, 'aimed beams: protect a two-soul stair, shrine, sacrifice a corridor decoy', rehearsal)
 
 def old_tree(o, p):
-    o(1, 7, 28, 14); o(0, 13, 0, 14); o(29, 13, 29, 14)
+    o(1, 7, 28, 14); o(0, 13, 0, 14); o(29, 10, 29, 14)
     p(2, 14, 'P')
 room('The old tree', [745, 53], 30, 17, 3, 'calm promise; return behind the tree for the note', old_tree)
 
@@ -230,7 +230,8 @@ def end(o, p):
     o(1, 1, 38, 14); o(0, 13, 0, 14); o(39, 13, 39, 14)
     p(3, 11, 'P'); o(3, 12, 6, 12, '#')
     o(4, 13, 4, 14, 'V'); p(2, 14, 'V'); p(34, 14, 'B')
-    o(0, 13, 0, 14, 'V'); o(39, 13, 39, 14, 'V')
+    # The wall seal is above the floor doorway; leave a walk back from its soul.
+    o(0, 10, 0, 14, 'V'); o(39, 13, 39, 14, 'V')
 room('The spectral stag', [775, 53], 40, 17, 3, 'final boss: swap out of a soul ram, stomp, restore three elevated seals', end)
 
 def pyramid(o, p):

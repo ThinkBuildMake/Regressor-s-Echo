@@ -1325,12 +1325,14 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     Dialogue.skip(s);
     check(!s.boss && s.stagFinished && !s.guide.on, 'The spectral stag: last stand removes guide and opens entrance');
     Dialogue.seen.delete('stagNote'); Dialogue.seen.delete('floorOne');
+    const routeDeaths = stats.deaths;
     // Walk the whole return route and onward; no room restart or position reset.
     const walkTo = async (name, column, direction, timeout) => {
       key('keydown', direction);
       await until(() => {
-        // Hop over the platform and the surviving wall soul in either direction.
+        // Hop onto the wall soul, then walk left through the raised doorway.
         if (!s.transit && s.rooms[s.index].name === 'The spectral stag' && s.player.x < O().x + 10 * 32 &&
+          (direction === 39 || s.player.y + 15 > O().y + 11.1 * 32) &&
           s.player.body.blocked.down) key('keydown', 32);
         else if (s.player.body.velocity.y >= 0) key('keyup', 32);
         return s.rooms[s.index].name === name && !s.transit &&
@@ -1347,6 +1349,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     Dialogue.skip(s);
     await until(() => game.scene.isActive('end'), 4000, 'ending card after pyramid fade');
     check(game.scene.isActive('end'), 'The spectral stag: walk back to the note then on to the ending card');
+    check(stats.deaths === routeDeaths, 'The spectral stag: ending route needs no death to escape the wall soul');
     // Restart from the ending route: victory must survive rebuilding the scene.
     game.scene.stop('end'); game.scene.start('room', { index: ROOMS.findIndex(([n]) => n === 'The spectral stag') });
     await until(() => game.scene.isActive('room') && room().player?.active, 5000, 'restore room after ending');
