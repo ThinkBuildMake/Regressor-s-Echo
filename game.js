@@ -934,7 +934,7 @@ class Room extends Phaser.Scene {
     for (const [key, path] of [
       ['amulet', 'world1/amulet'], ['ghost', 'world1/ghost'], ['old-tree', 'world3/old-tree'],
       ...[1, 2, 3].flatMap((n) => [[`amulet-rune${n}`, `world1/amulet-rune${n}`], [`shrine${n}`, `world${n}/shrine`], [`shrineLit${n}`, `world${n}/shrine-lit`]]),
-      ['uiSoulFull', 'ui/soul-full'], ['uiSoulEmpty', 'ui/soul-empty'], ['carvings', 'world2/carvings'],
+      ['uiSoulFull', 'ui/soul-full'], ['uiSoulEmpty', 'ui/soul-empty'], ['carvings', 'world2/carvings'], ['laserEmitter', 'world2/laser'],
     ]) if (!this.textures.exists(key)) this.load.image(key, `assets/${path}.webp`);
     if (!this.textures.exists('heroSheet')) {
       this.load.image('heroSheet', 'assets/hero/sheet.webp'); // 8 frames: run 0-5, jump 6, fall 7
@@ -1124,6 +1124,11 @@ class Room extends Phaser.Scene {
               const e = rect(x + (name === 'Three high' ? T / 2 : 0), y, T, T, 0x5a4a6a);
               this.statics.add(e);
               this.lasers.push({ e, room: ri, dx: { '>': 1, '<': -1 }[row[tx]] ?? 0, dy: { v: 1, u: -1 }[row[tx]] ?? 0 });
+              if (this.textures.exists('laserEmitter')) { // carved stone emitter, painted facing right: turn it to fire its way
+                e.setFillStyle(0, 0);
+                this.add.image(e.x, e.y, 'laserEmitter').setDisplaySize(24, 35).setDepth(2)
+                  .setAngle({ '>': 0, v: 90, '<': 180, u: -90 }[row[tx]]).setFlipY(row[tx] === '<');
+              }
               break;
             }
             case 's': this.springs.push(rect(x + 3, y + T - 12, T - 6, 12, 0xffc93c).setStrokeStyle(2, 0x7a5200).setDepth(3)); hazard(this.springs.at(-1), 'spring', T - 6, 24, -6); break;
