@@ -538,6 +538,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     key('keyup', 39);
     key('keyup', 75); key('keyup', 32); await alive();
     const tree = s.boss, step = s.corpses[0], support = s.corpses[1];
+    Dialogue.seen.delete('treeDown'); Dialogue.seen.delete('guideCrack');
     check(Math.abs(support.x - tree.r.x) < support.width / 2 + 12 && support.y - support.height / 2 < tree.r.y - 32,
       `tree: timed self-destruct hangs the newest soul above the mask (${(support.x - tree.r.x) / 32}, top ${(support.y - support.height / 2 - O().y) / 32})`);
     await walkTo(18); await jumpTo(21);
@@ -545,15 +546,27 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     await until(() => tree.stone?.support === support, 15000, 'stone caught');
     check(tree.open === 0 && tree.hp === 3, 'tree: catching alone does not expose the mask');
     const deaths = stats.deaths;
-    key('keydown', 81); await wait(60); key('keyup', 81);
-    await until(() => tree.open > 0, 2000, 'recalled support drops stone');
-    check(s.corpses.includes(step) && stats.deaths === deaths, 'tree: recall keeps the step and never heals');
-    key('keydown', 32); await wait(180); await walkTo(23.5);
-    await until(() => tree.hp < 3 || s.dead > 0, 2000, 'exposed mask stomp');
-    key('keyup', 32);
-    check(tree.hp === 2 && stats.deaths === deaths, 'tree: stone opens a real stomp from the step');
-    s.die();
-    check(tree.hp === 3 && tree.open === 0 && !tree.stone && tree.attack === -1, 'tree: death heals and resets the fixed loop');
+    for (let hit = 0; hit < 3; hit++) {
+      if (hit) {
+        await walkTo(18); await jumpTo(21);
+        await until(() => tree.stone?.support === support, 15000, 'next stone caught');
+      }
+      await until(() => tree.phase === 'idle' && tree.attack === 2 && tree.timer < 0.6, 4000, 'jump before slam tell');
+      key('keydown', 32); await wait(180); await walkTo(23);
+      await until(() => tree.phase === 'slam', 2000, 'support slam tell');
+      key('keyup', 32);
+      check(tree.target === support, 'tree: blue tell locks the stone support');
+      await walkTo(21);
+      await until(() => tree.open > 0, 4000, 'burial drops stone onto bowed mask');
+      check(support.buried > 0 && s.corpses.includes(support) && s.corpses.includes(step), 'tree: buried support stays available for the next cycle');
+      key('keydown', 32); await wait(180); await walkTo(23);
+      await until(() => tree.hp < 3 - hit || s.dead > 0, 2000, 'exposed mask stomp');
+      key('keyup', 32);
+      check(tree.hp === 2 - hit && stats.deaths === deaths, 'tree: slam cycle ' + (hit + 1) + ' lands without a death');
+    }
+    check(tree.hp === 0 && tree.hidden && stats.deaths === deaths, 'tree: three slam openings win with the original two souls');
+    Dialogue.skip(s); await wait(200);
+    check(stats.treePower && !s.boss, 'tree: victory grants the third soul');
   }
 
   const solve = async (name, souls, hops, floor = 16) => {

@@ -1772,6 +1772,7 @@ class Room extends Phaser.Scene {
     if (B?.kind === 'tree' && !B.hidden) {
       if (B.phase === 'slam') {
         g.lineStyle(3, 0x69cfff, 1).strokeCircle(B.aimX, B.target?.y ?? B.floor - 16, 24);
+        if (B.target) g.strokeRect(B.target.x - B.target.width / 2 - 4, B.target.y - B.target.height / 2 - 4, B.target.width + 8, B.target.height + 8);
         g.lineBetween(B.r.x, B.r.y, B.aimX, B.target?.y ?? B.floor);
       } else if (B.phase === 'rake') {
         g.fillStyle(0xf1f578, 0.35).fillRect(B.r.x - 12 * T, B.floor - 24, 16 * T, 24);
@@ -1939,7 +1940,7 @@ class Room extends Phaser.Scene {
   }
 
   updateTree(B, dt) {
-    const pose = B.open > 0 ? 'idle' : B.phase === 'rake' ? 'swing' : B.phase === 'mortar' ? 'throw' : B.phase === 'slam' ? 'slam' : 'idle';
+    const pose = B.open > 0 ? 'slam' : B.phase === 'rake' ? 'swing' : B.phase === 'mortar' ? 'throw' : B.phase === 'slam' ? 'slam' : 'idle';
     this.bossPose(B, 'tree', pose, 224, B.phase === 'slam' ? TREE_GLOW : 0.8, pose === 'idle');
     B.img?.setVisible(B.r.visible).setTint(B.open > 0 ? 0xffffff : B.phase === 'slam' ? 0x69cfff : B.phase !== 'idle' ? 0xf1f578 : 0xffffff);
     if (B.hidden || this.dead > 0 || this.talk.line || this.talk.queue.length || this.transit) return;
@@ -1949,7 +1950,7 @@ class Room extends Phaser.Scene {
     const stone = B.stone;
     if (stone) {
       if (stone.support && (!this.corpses.includes(stone.support) || stone.support.buried)) {
-        stone.armed = !stone.support.buried;
+        stone.armed = true;
         stone.support = null;
       }
       if (!stone.support) {
