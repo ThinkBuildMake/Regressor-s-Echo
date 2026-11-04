@@ -1652,39 +1652,50 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   }
   if (matches('Two places')) {
     s = await cleanSolveRoom('Two places');
-    const trySlideGap = async () => {
-      key('keydown', 39);
-      await until(() => s.player.x >= O().x + 3.2 * 32, 1200, 'slide approach');
-      key('keydown', 83); await wait(30); key('keydown', 32);
+    // Stage A: the shaft's spike plugs it with a soul; the thorn and wall stop you walking off it into the tunnel.
+    const fallIn = async (hold) => {
       const before = stats.deaths;
-      for (let t = 0; t < 2500 && stats.deaths === before && s.player.x < O().x + 12 * 32; t += 20) await wait(20);
-      key('keyup', 39); key('keyup', 83); key('keyup', 32); await alive();
-      return stats.deaths > before || s.player.x < O().x + 12 * 32;
-    };
-    check(await trySlideGap(), 'Two places: a slide-jump cannot cross without swap');
-    s = await cleanSolveRoom('Two places');
-    const leaveGapSoul = async () => {
+      key('keydown', 39); await until(() => s.player.x >= O().x + 6.2 * 32, 2000, 'run into shaft'); key('keyup', 39);
+      if (hold) key('keydown', hold);
+      await until(() => s.player.y + 15 >= O().y + (hold === 37 ? 12.9 : 12) * 32 || s.dead > 0, 2000, 'fall in shaft');
+      if (hold) key('keyup', hold);
       key('keydown', 39);
-      await until(() => s.player.x >= O().x + 4.1 * 32, 1200, 'run to gap lip');
-      key('keydown', 32); await wait(350); key('keydown', 75);
-      await until(() => s.dead > 0, 1600, 'mid-jump self-destruct');
-      key('keyup', 39); key('keyup', 32); key('keyup', 75); await alive();
+      await until(() => s.dead > 0 || s.player.x > O().x + 8.5 * 32, 2000, 'shaft exit'); key('keyup', 39);
+      const escaped = stats.deaths === before; await alive(); return escaped;
     };
-    await leaveGapSoul();
-    check(await trySlideGap(), 'Two places: the hanging soul cannot be crossed as a plain step');
+    check(!(await fallIn(39)), 'Two places: wall-sliding down the shaft cannot step into the tunnel');
     s = await cleanSolveRoom('Two places');
-    await leaveGapSoul();
-    const deaths = stats.deaths, soul = s.corpses.at(-1), gapPosition = [(s.corpses.at(-1).x-O().x)/32,(s.corpses.at(-1).y-O().y)/32];
-    key('keydown', 39);
-    await until(() => s.player.x >= O().x + 2.5 * 32, 1200, 'run before swap');
-    key('keydown', 69); await wait(30); key('keyup', 69);
-    check(stats.deaths === deaths && s.player.x > O().x + 8 * 32 && soul.x < O().x + 3 * 32,
-      'Two places: E exchanges positions without a death');
-    await until(() => s.player.x > O().x + 13.3 * 32 || stats.deaths > deaths, 2500, 'swap crossing');
-    key('keyup', 39); await wait(100);
-    check(stats.deaths === deaths && s.player.x > O().x + 11 * 32,
-      `Two places: swap crossing (x=${(s.player.x-O().x)/32}, deaths=${stats.deaths-deaths})`);
-    if (stats.deaths !== deaths || s.player.x < O().x + 12 * 32) throw new Error('Two places: swap crossing failed ' + JSON.stringify({soul:gapPosition,x:(s.player.x-O().x)/32,feet:(s.player.y+15-O().y)/32,deaths:stats.deaths-deaths}));
+    check(!(await fallIn(37)), 'Two places: sliding down the far wall cannot cross the spike to the tunnel');
+    const plugShaft = async () => {
+      s = await cleanSolveRoom('Two places');
+      key('keydown', 39); await until(() => s.player.x >= O().x + 6.2 * 32, 2000, 'run into shaft'); key('keyup', 39);
+      await until(() => s.dead > 0, 2000, 'spike plug'); await alive();
+      const plug = s.corpses.at(-1);
+      check(plug.x === O().x + 6.5 * 32 && plug.y === O().y + 13.5 * 32, 'Two places: the shaft spike leaves a plug soul');
+    };
+    await plugShaft();
+    const runSwap = async (slide) => {
+      const before = stats.deaths;
+      key('keydown', 39); await until(() => s.player.x >= O().x + 3.2 * 32, 2000, 'run before swap');
+      if (slide) { key('keydown', 83); await wait(30); key('keyup', 83); await wait(100); }
+      key('keydown', 69); await wait(30); key('keyup', 69);
+      await until(() => s.player.x > O().x + 12.6 * 32 || s.dead > 0, 2500, 'swap crossing'); key('keyup', 39);
+      const ok = stats.deaths === before && s.player.x > O().x + 12 * 32; await alive(); return ok;
+    };
+    check(!(await runSwap(false)), 'Two places: a swap at walking speed drops onto the spike');
+    await plugShaft();
+    const deaths = stats.deaths;
+    check(await runSwap(true) && stats.deaths === deaths, 'Two places: a swap mid-slide carries you over the spike into the tunnel');
+    if (s.player.x < O().x + 12 * 32) throw new Error('Two places: slide swap failed');
+    await wait(300); Dialogue.skip(s); await wait(100);
+    // Skip check: two step souls under a plate soul can't climb over the closed approach gate.
+    while (s.corpses.length) { key('keydown', 81); await wait(40); key('keyup', 81); await wait(400); }
+    for (const [x, b, floor] of [[15, 0, 12], [18, 0, 10]]) await place(x, b, floor);
+    check(s.doors.some(d => d.room === s.index && d.x < O().x + 17 * 32 && d.body.enable), 'Two places: a plate soul closes the approach gate');
+    const over = await hop(15, 4, 15, 18);
+    check(over.x < 16.5, `Two places: stepping souls cannot carry you over the closed approach gate (${over.x})`);
+    while (s.corpses.length) { key('keydown', 81); await wait(40); key('keyup', 81); await wait(400); }
+    s.player.body.reset(s.start.x, s.start.y); await wait(200);
     const mountStep = async () => {
       key('keydown', 39);
       await until(() => s.player.x >= O().x + 14 * 32, 1200, 'approach stair');

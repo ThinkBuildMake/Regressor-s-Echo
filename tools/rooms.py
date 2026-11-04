@@ -159,14 +159,15 @@ def three_high(o, p):
 room('Three high', [540, 75], 30, 17, 3, '10-high ledge: a 3-soul staircase (run off your top soul while holding K)', three_high)
 
 def own_way(o, p):
-    # A hanging soul carries a second run across a gap wider than a jump.
-    o(0, 8, 0, 9); o(1, 3, 10, 9); p(1, 9, 'P')
-    o(4, 10, 11, 15); o(4, 16, 11, 16, '^'); o(9, 3, 11, 8, '#')
-    o(11, 8, 11, 9); o(12, 3, 15, 14); p(13, 14, 'C'); o(15, 12, 15, 14, '#')
+    # Die on the spike at the bottom of the shaft: the soul plugs it, and the thorn stops you walking off it
+    # into the low tunnel. Run on the floor and swap: you keep your speed and come out in the tunnel.
+    o(0, 8, 0, 9); o(1, 3, 6, 9); p(1, 9, 'P')
+    o(6, 10, 6, 13); p(6, 14, '^'); o(7, 13, 11, 13); o(7, 14, 7, 14)
+    o(12, 3, 15, 14); p(13, 14, 'C'); o(15, 12, 15, 14, '#')
     # Swap out from under a falling spike, leaving the exit plate held.
-    o(16, 2, 21, 9); o(16, 8, 16, 9, 'D'); p(18, 9, '_'); p(18, 5, '!')
+    o(17, 2, 21, 9); o(16, 8, 16, 9, 'D'); p(18, 9, '_'); p(18, 5, '!')
     o(22, 8, 22, 9, 'D'); o(23, 5, 28, 9); o(29, 8, 29, 9)
-room('Two places', [570, 73], 30, 17, 3, 'swap under the low lintel across an eight-wide gap; exchange places under a falling spike to hold the exit plate', own_way)
+room('Two places', [570, 73], 30, 17, 3, 'plug the shaft with a soul, then swap into the low tunnel at a run; exchange places under a falling spike to hold the exit plate', own_way)
 
 def three_jobs(o, p):
     # Climb to the safe three-job setup, then drop to the shrine.

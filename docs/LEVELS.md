@@ -97,7 +97,7 @@ New: **3 souls** and **soul swap** (E exchanges you with the newest soul). Recal
 | # | Room | Teaches | The trick | Status |
 |---|---|---|---|---|
 | 1 | Three high | 3 souls | Ten-high three-soul staircase; shrine, then hang a shield under a low laser lintel before building two exit steps. A fourth death erases the shield | Built |
-| 2 | Two places | Soul swap (E) | Take a running swap to a hanging soul under the far lip of an eight-wide gap. Leave an escape soul beyond the approach gate, then swap from the visible spike plate: its soul opens the exit but closes the approach behind you | Built |
+| 2 | Two places | Soul swap (E) | Fall into the one-wide shaft: its spike leaves a soul that plugs it, and the wall above the low tunnel stops you walking off the plug. Slide on the floor above and swap mid-slide: you keep the slide's speed and clear the spike into the tunnel (a walking-speed swap drops onto it). Leave an escape soul beyond the full-height approach gate, then swap from the visible spike plate: its soul opens the exit but closes the approach behind you | Built |
 | 3 | Three jobs | 3 souls at once | Plate, pit bridge, high laser blocker; shrine, then crumbling lips force you to jump into the beam before the landing falls. A fourth death erases the plate: recall the mistake | Built |
 | 4 | Everything | All powers | Slide a flat bridge to the shrine. Then keep a plate soul, a saw jam and a spring step at once: recall a bad step, because a fourth death shuts the door | Built |
 | 5 | Reliquary | Recall, three souls | Climb the flyer chimney, jam two saws and hold the plate. Shrine, then crumbling descent under falling spikes; thorns close both sides of the descent shaft | Built |
