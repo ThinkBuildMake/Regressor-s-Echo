@@ -68,6 +68,8 @@ Generate **one** image per run. Show the user the image and the critic's verdict
 - **Flow often paints sheet frames facing the wrong way** despite the facing rule: mirror those frames when cutting. It also ignores "same size as attached" on some sheets; a weak or duplicate frame can be dropped and an earlier frame reused (e.g. 1,2,3,2).
 - **When an attached reference has a shape the new creature must not copy**, say so outright ("NOT round like the attached beetle"), or Flow borrows the silhouette.
 - **Hanging or flying sprites:** `sheet.mjs` aligns on head and feet, which suits standing creatures only; for a hanging one, cut an equal box around each body's centre instead.
+- **Picker clicks can attach on their own:** clicking an item may attach it, and pressing "Add to prompt" too attaches it twice. Check the thumbnails before submitting.
+- **The amulet:** Flow's own amulet images have 5 rays; upload the repo's `assets/raw` amulet (3 rays) instead.
 - **Uploads from a git worktree are refused** by `file_upload` (only the main repo or the scratchpad count as shared): copy the file to the scratchpad first.
 - **Crop the sprite tight before shrinking a base**, or the shrunk base keeps a big empty margin.
 - **Check the download's filename** before moving it: the newest file in ~/Downloads can be an older, unrelated one. Flow names files after the prompt.
