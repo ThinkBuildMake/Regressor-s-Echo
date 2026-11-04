@@ -3,7 +3,7 @@
 //   node tools/video-fit.mjs <native.png> <nFrames> <target.webp> <out base> [--match=i:j] [--grow]   (target's .json gives its cell size)
 // --match=i:j sizes by one pose instead of the union: source frame i (0-based) to target frame j. Use it when the new
 // motion is bigger than the old (a wider wingbeat would otherwise shrink the creature), e.g. wings-up to wings-up.
-// --grow: if the motion doesn't fit the cell, widen/heighten the cell instead of shrinking the creature (a streaming
+// --grow: if the motion is wider than the cell, widen the cell (height stays) instead of shrinking the creature (a streaming
 // cape); the new cell size is written to the .json, so the game must use it.
 // Writes <out>.png, <out>.webp and <out>.json.
 import { chromium } from 'playwright'; import { readFileSync, writeFileSync } from 'node:fs'; import { execFileSync } from 'node:child_process';
@@ -23,7 +23,7 @@ const r = await p.evaluate(async ([s, t, n, TW, TH, match, grow]) => {
   let k = (tb - tt) / (sb - st), dx = tl - sl * k, dy = tt - st * k;
   // Keep every frame inside the cell: shrink if the whole motion is too big, then shift it in.
   const [ul, ut, ur, ub] = union(data(si), sw), pad = 4;
-  if (grow) { TW = Math.max(TW, Math.ceil((ur - ul) * k + 2 * pad)); TH = Math.max(TH, Math.ceil((ub - ut) * k + 2 * pad)); }
+  if (grow) TW = Math.max(TW, Math.ceil((ur - ul) * k + 2 * pad)); // widen only: the game scales heroes by cell height
   const fit = Math.min(1, (TW - 2 * pad) / ((ur - ul) * k), (TH - 2 * pad) / ((ub - ut) * k));
   if (fit < 1) { const cx = tl, cy = tb; k *= fit; dx = cx - sl * k; dy = cy - sb * k; }
   dx = Math.min(Math.max(dx, pad - ul * k), TW - pad - ur * k); dy = Math.min(Math.max(dy, pad - ut * k), TH - pad - ub * k);
