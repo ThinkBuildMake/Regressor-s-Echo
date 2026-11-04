@@ -74,6 +74,18 @@ bottom-left corner. The name card is text drawn in code, not an asset.
 | All bosses: hurt | code flash (user's call), no art | — | — | — | — | |
 | All bosses: death | 1 painted **fallen pose** each (moth on the ground wings drooped; tree slumped, mask dark; stag lying down), then code: white glow → dissolves into motes that stream into the hero → he flashes (STORY.md W1 §13) | ✅ | | — | | ✅ |
 
+## Boss attack effects (requested 2026-11-03, fun pass)
+From docs/brainstorm/2026-11-03-bosses.md. Paint physical objects; beams, lanes, warnings and rings are drawn in code. Attacks are **lemon yellow** (kept apart from the amulet's gold); the code adds the blue and violet glows. The game already loads each file below if it exists and draws a stand-in shape until then.
+
+| Asset → file | Sheet (animations) | Size in game | Prompt | Ref | Sheet | Sized | In game |
+|---|---|---|---|---|---|---|---|
+| Moth dust pod → `assets/bosses/moth-dust.webp` | a puff of glowing lemon-yellow moth scales, spinning, 4 frames | ½ tile | | | | | stand-in |
+| Falling stone → `assets/effects/falling-stone.webp` | a grey ruin stone with cracks and a faint yellow danger rim; 1 intact frame + 4 breaking apart | 1 tile | | | | | stand-in |
+| Impact burst / stun stars → `assets/effects/impact.webp` | yellow-white burst with little circling motes, for a boss getting hit or stunned, 4 frames | 1 tile | | | | | stand-in |
+| Seed mortar burst → `assets/effects/mortar-burst.webp` | a yellow seed husk cracking open into a ring of thorns, 5 frames | 2 tiles | | | | | stand-in |
+| Root rake segment → `assets/effects/root.webp` | a yellow-tipped root bursting up out of the ground, 4 frames (rising) | 1 tile | | | | | stand-in |
+| Seal socket → `assets/effects/seal.webp` | a carved stone socket in the floor, 2 frames: empty and glowing (a soul fills it) | 1 tile | | | | | stand-in |
+
 ## Hazards and room objects
 
 | Asset | Sheet (animations) | Prompt | Ref | Sheet | Sized | In game |
