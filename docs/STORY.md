@@ -225,15 +225,15 @@ A hint at the move through shared history; the room teaches what the flat soul d
 > *(The moth bursts in through the right wall.)*  
 > **Guide** [wry]: …that.
 
-### 14. The dust — *after his 2nd death in the fight*
-Blocking the dust with your soul should be taught in an earlier room, so the guide only nudges here. Dying heals the moth, but nobody says so; the player sees it.
-> **Hero** [shouting]: That's impossible! There's nowhere to hide from that!  
+### 14. Too high — *after his 2nd death in the fight*
+The moth flies higher than a jump; a soul is the step that reaches it (taught at the thorn wall), so the guide only nudges here. Dying heals the moth, but nobody says so; the player sees it.
+> **Hero** [annoyed]: Ugh. I can't get high enough to stomp on it.  
 > **Guide** [thinking]: I made it past here. There's a way.  
 > **Hero** [annoyed]: Then tell me!  
 > **Guide** [amused]: Where's the fun in that?
 
 *After about 25 deaths there (each try costs about two, since dying heals the moth), one more nudge:*
-> **Guide** [thinking]: Your soul caught you over the thorns. Think it'd catch a little dust?
+> **Guide** [thinking]: Remember the thorn wall? You needed a little extra height there, too.
 
 ### 15. The moth falls — *on the last stomp*
 > *(The moth drops still.)*  

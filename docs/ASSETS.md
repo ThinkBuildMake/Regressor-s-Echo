@@ -22,7 +22,7 @@ Key: ✅ done · 🟡 started · blank = to do · — = not needed (a single ima
 | Hero pained (changed by the user, 2026-11-04) | he bends forward a little, clutching his chest with both hands, shoulders hunched, head bowed, in quiet pain (user, 2026-11-04: arching backwards was too much). Replaces the "moment of death" frames. A pose, not a death animation: one held frame (a short 2–3 frame lead-in is a bonus). Facing right like the other hero sheets | | ✅ `raw/hero/sheet.jpg` (in-game look, green eyes) | | | |
 | Hero death | arcade-style burst: he flashes pure white, then breaks apart into square pixels that fly outward, ~4–5 frames (white flash → white silhouette → breaking into pixels). The scattering pixels after the last frame are code particles | | — | | | |
 | Hero respawn | soul light gathers to the respawn point: pixels fly inward (code particles) → white silhouette → the hero. Plays the **death sheet in reverse**, so no new sheet unless it looks wrong | | — | — | | |
-| White ghost (appears when he picks up the amulet) | — `raw/world1/ghost-white.jpg` approved by the user (standing pose fits the floating motif); glow, bob and alpha in code | | | — | | |
+| White ghost (appears when he picks up the amulet) | — `raw/world1/ghost-white.jpg` approved by the user (standing pose fits the floating motif); glow, bob and alpha in code | | | — | ✅ | ✅ |
 | Hero self-destruct (World 2 on, hold) | blue-white flames grow over the ~0.75 s hold while he keeps moving: code flames over his current frame, no sheet. Letting go cancels | — | — | — | — | |
 | Recall (World 3) | a soul fades back into the hero, newest first: code effect (the respawn gather, reused), no sheet | — | — | — | — | |
 
@@ -30,10 +30,10 @@ Key: ✅ done · 🟡 started · blank = to do · — = not needed (a single ima
 
 | Asset | Sheet (animations) | Prompt | Ref | Sheet | Sized | In game |
 |---|---|---|---|---|---|---|
-| Amulet: in the world (pickup) | — (glow and bob in code) | | | — | | |
-| Amulet: runes lit (1, 2, 3) | — one image per state, same framing: a rune lights after each boss (2nd after the moth, 3rd after the tree) | | | — | | |
-| Shrine: dormant | — | | | — | | |
-| Shrine: activated | — (same shrine, lit; glow pulse in code) | | | — | | |
+| Amulet: in the world (pickup) | — (glow and bob in code) | | | — | ✅ | ✅ |
+| Amulet: runes lit (1, 2, 3) | — one image per state, same framing: a rune lights after each boss (2nd after the moth, 3rd after the tree) | | | — | ✅ | ✅ |
+| Shrine: dormant | — | | | — | ✅ | ✅ |
+| Shrine: activated | — (same shrine, lit; glow pulse in code) | | | — | ✅ | ✅ |
 
 ## Enemies
 
@@ -137,7 +137,7 @@ Script: [STORY.md](STORY.md); § = the scene each asset serves. Done in priority
 |---|---|---|---|---|---|---|
 | Carved wall relief | W2 §6 | reads left to right: a crowd of figures, each with a gold circle on its chest; then fewer; then a handful; then one. Ruins stone, as a background layer behind room 7 | ✅ | | | |
 | Pyramid backdrop | W3 §1 | a huge stepped pyramid, its top lost in cloud; a far parallax layer for the Sanctum | ✅ | | | |
-| The old tree | W3 §5 | by the stag's arena, with a hiding spot behind it (where the note is) | ✅ | | | |
+| The old tree | W3 §5 | by the stag's arena, with a hiding spot behind it (where the note is) | ✅ | | ✅ | ✅ |
 | The guide's note | written in the DIRT behind the old tree, not on paper (user): a blank smoothed patch of earth, the words scratched in by code | a folded, worn paper, for a close-up the note's text sits on | ✅ | | | |
 | Sound: the guide cracking like glass as the beam hits him | W3 §8 | sad, not violent | | — | | |
 | Music: the last-stand cue | W3 §8 | later | | — | | |

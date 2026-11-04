@@ -17,7 +17,8 @@ const HERO_HEIGHT = 46;                                // painted hero's on-scre
 const HERO_SRC = 112;                                  // his typical height in the processed images (tools/sheet.mjs --height)
 // Run cycle: which frames of assets/hero/run.webp to loop, and how far he moves per frame.
 // Try orders and pacing in tools/preview.html, then copy the settings here.
-const RUN_FRAMES = [6, 7, 8, 9, 10], RUN_STEP = 15; // 11 dropped: it repeats 6
+const RUN_FRAMES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], RUN_STEP = 12; // Veo run: one full stride in 12 frames
+const RUN_SCALE = 1.12; // the Veo run draws him smaller in his cell than the idle does
 // Slide: loop the first row of assets/hero/slide.webp so the cape flutters.
 const SLIDE_FRAMES = [0, 1, 2, 3], SLIDE_FPS = 8;
 const BODY_STAND = [30, 32], BODY_LYING = [62, 16];    // body left behind
@@ -33,7 +34,7 @@ const BOSS_HP = 3, BOSS_SPEED = 100, BOSS_SPEEDUP = 50;
 // MOTH_SIZE grows painting and hitbox together. Its top stays 4 tiles up: out of jump reach from the
 // floor (~3.4 tiles), in reach from one soul, so stomping it always takes a death.
 const MOTH_SIZE = 1.3, BOSS_W = 96 * MOTH_SIZE, BOSS_H = 48 * MOTH_SIZE;
-const MOTH_FRAMES = [0, 1, 2, 1], MOTH_FPS = 8, MOTH_SCALE = 0.243 * MOTH_SIZE; // frames are full size (700 px tall); frame 2 reused for 4 so the loop can't shimmer
+const MOTH_FRAMES = [...Array(12).keys()], MOTH_FPS = 16, MOTH_SCALE = 0.243 * MOTH_SIZE; // frames are full size (700 px tall); frame 2 reused for 4 so the loop can't shimmer
 // Its intro: it bursts out of the right wall at these rows (top, bottom) of its room. The hole is only
 // painted; the wall keeps its colliders, so the arena stays closed.
 const MOTH_HOLE = [2, 9];
@@ -45,7 +46,7 @@ const RECALL_GAP = 0.35, RECALL_MIN = 0.08;
 // Wall jump: slide down a wall (or a soul) while pushing into it, jump to kick off. Hold jump for the full
 // kick; let go early and both the height and the push away are cut short. You can't kick off the same
 // side twice in a row (touch the ground or the other wall first), so one wall can't be climbed.
-const WALL_SLIDE = 110, WALL_KICK = 170, WALL_JUMP = 420, KICK_LOCK = 0.3;
+const WALL_SLIDE = 70, WALL_KICK = 170, WALL_JUMP = 420, KICK_LOCK = 0.3;
 // Hazards and enemies
 const SAW_SPEED = 90, SAW_R = 13;               // saws run along a row or column; a soul in the way jams them
 const CRUMBLE_TIME = 0.45, CRUMBLE_BACK = 2.5;  // crumbling blocks break this long after you land, return later
@@ -307,8 +308,8 @@ const ROOMS = [
     '#                             ',
     '#                             ',
     '#               ##############',
-    '#               x#############',
-    '#               x#############',
+    '#               ##############',
+    '#               ##############',
     '                x#############',
     '                x#############',
     '  P             x#############',
@@ -345,8 +346,8 @@ const ROOMS = [
     '#                             ',
     '#                             ',
     '#                     ########',
-    '#                     x#######',
-    '#                     x#######',
+    '#                     ########',
+    '#                     ########',
     '                      x#######',
     '                      x#######',
     '  P              C    x#######',
@@ -437,7 +438,7 @@ const ROOMS = [
     '############   #####       ####   ############',
     '############   #####       ####   ############',
     '############   #####       ####   ############',
-    '############   x####^^^^^^^####   ############',
+    '############   #####^^^^^^^####   ############',
     '############   x###############   ############',
     '############   x###############   ############',
     '############   x###############   ############',
@@ -449,7 +450,7 @@ const ROOMS = [
     '#          #   ################      ######  #',
     '#              ################      ######  #',
     '               ################              #',
-    ' P      e      ################   e #   o    #',
+    ' P      e      ################   e #   o  # #',
     '##############################################',
     '##############################################',
   ], [240, 101], { world: 1, spots: [[10, "wallJump"]] }],
@@ -501,14 +502,14 @@ const ROOMS = [
     '#                         D  #',
     '                          D   ',
     ' P           C  _         D   ',
-    '####       #######       #####',
-    '####       #######       #####',
-    '####       #######       #####',
-    '####       #######       #####',
-    '####       #######       #####',
-    '####       #######       #####',
-    '####       #######       #####',
-    '####^^^^^^^#######^^^^^^^#####',
+    '####       ########       ####',
+    '####       ########       ####',
+    '####       ########       ####',
+    '####       ########       ####',
+    '####       ########       ####',
+    '####       ########       ####',
+    '####       ########       ####',
+    '####^^^^^^^########^^^^^^^####',
     '##############################',
   ], [346, 107], { world: 2 }],
   ["Take it back", [ // recall a tunnel plug; preserve the plate while repairing a flat bridge
@@ -565,7 +566,7 @@ const ROOMS = [
     '#          #### #        #####',
     '#          ####          #####',
     '           ####        _ #####',
-    ' P         ####        # #####',
+    ' P       # ####        # #####',
     '##############################',
   ], [436, 92], { world: 2 }],
   ["The spring", [ // 9-high ledge: hold during the launch so a soul hangs beside the spring, then land on it
@@ -584,7 +585,7 @@ const ROOMS = [
     '#          ####          #####',
     '#          ####          #####',
     '           ####          #####',
-    ' P    s    ####     s    #####',
+    ' P    s    ####    s     #####',
     '##############################',
   ], [466, 84], { world: 2 }],
   ["Wrong order", [ // step, plate, pit: in another order a soul you still need vanishes
@@ -597,13 +598,13 @@ const ROOMS = [
     '#             D  _          D#',
     '#             D ###         D#',
     '#             D ###         D#',
-    '#             D ###         <#',
+    '#             D ###       < D#',
     '#             D ###         D#',
     '# _           D ###         D#',
-    '####          D             D#',
+    '####          D            #D#',
     '#             D             D ',
     '              D             D ',
-    ' P            DC    s       D ',
+    ' P            DC   s        D ',
     '#######^^^^^^^########^^^^^^##',
   ], [496, 75], { world: 2 }],
   ["Sawmill", [ // SHOWCASE W2: spring + timed self-destruct jams a saw, plate soul as a shield, thrower, laser
@@ -616,8 +617,8 @@ const ROOMS = [
     '#                              D   #########',
     '#                              D   #########',
     '#                              D   #########',
-    '#               __           t D C #########',
-    '#           C  ####~~~~~~~######   #########',
+    '#                          _ t D C #########',
+    '#           C  ####~~~~~~~######## #########',
     '#         #########       ######   #########',
     '#         #########       ######   #########',
     '#         #########       ######   #########',
@@ -650,13 +651,13 @@ const ROOMS = [
     '##############################',
   ], [570, 75], { world: 2, boss: "tree", spots: [[7, "tree"]], deathTalk: {"2": "treeSlam", "25": "treeSlam2"} }],
   // ---------------- World 3: Sanctum (greybox) ----------------
-  ["Three high", [ // 10-high ledge: a 3-soul staircase (run off your top soul while holding K)
+  ["Three high", [ // 12-high tower: a 3-soul staircase (run off your top soul while holding K)
     '##############################',
     '#               #####        #',
     '#               #####        #',
-    '#               #####        #',
-    '#               #####        #',
     '#           C   #####        #',
+    '#         ##### #####        #',
+    '#         ##### #####        #',
     '#         ##### #####         ',
     '#         ##### #####         ',
     '#         ##### #####      ###',
@@ -669,24 +670,24 @@ const ROOMS = [
     ' P        #####            ###',
     '##############################',
   ], [600, 75], { world: 3, spots: [[4, "pyramid"]] }],
-  ["Two places", [ // swap across a seven-wide gap; exchange places under a falling spike to hold the exit plate
+  ["Two places", [ // plug the shaft with a soul, then swap into the low tunnel at a run; exchange places under a falling spike to hold the exit plate
     '##############################',
     '##############################',
-    '################      ########',
-    '#                 !   ########',
-    '#                     ########',
-    '#                     #      #',
-    '#                     #      #',
-    '#                     #      #',
-    '                      D       ',
-    ' P                _   D       ',
-    '####            ##############',
-    '####         C  ##############',
-    '####       ###################',
-    '####       ###################',
-    '####       ###################',
-    '####       ###################',
-    '####^^^^^^^###################',
+    '#################     ########',
+    '#      #####    #     ########',
+    '#      #####    #     ########',
+    '#      #####    # !   #      #',
+    '#      #####    #     #      #',
+    '#      #####    #     #      #',
+    '       #####    D     D       ',
+    ' P     #####    D _   D       ',
+    '###### #####    ##############',
+    '###### #####    ##############',
+    '###### #####   ###############',
+    '######         ###############',
+    '######^ #### C ###############',
+    '##############################',
+    '##############################',
   ], [630, 73], { world: 3, keys: "swap" }],
   ["Three jobs", [ // plate, pit and a laser blocker at once; recall mistakes instead of dying over them
     '##############################',
@@ -725,9 +726,9 @@ const ROOMS = [
     '###############################        ######',
     '##############        #########        ######',
     '##############        #########        ######',
-    '##############        #########        ######',
+    '##############        ######  #        ######',
     '   ###########  C             D        ######',
-    ' P             ##  _  #  o    D   s    ######',
+    ' P             ##  _  #  o   #D   s    ######',
     '#######^^^###################################',
     '#############################################',
   ], [690, 63], { world: 3, shrineTalk: "almostCompetent" }],
@@ -736,24 +737,24 @@ const ROOMS = [
     '########################################',
     '########################################',
     '#####                         D   ! !  #',
-    '#####    C #   o   #   o    #_D C      #',
+    '#####    C #   o   #   o  #_  D C      #',
     '#####   ####################### #     x#',
-    '#####   #######################       x#',
-    '#####  f#######################       x#',
-    '#####   #######################  ~    x#',
-    '#####   #######################       x#',
-    '#####   #######################       x#',
-    '#####  ########################    ~  x#',
-    '#####   #######################       x#',
-    '#####f  #######################       x#',
-    '#####   #######################      ~x#',
-    '#####   #######################       x#',
-    '#####   #######################       x#',
-    '######  #######################    ~  x#',
-    '#####   #######################       x#',
-    '#       #######################       x#',
-    '        #######################     ~   ',
-    ' P      #######################      ~~ ',
+    '#####   #######################xx     x#',
+    '#####  f#######################xx     x#',
+    '#####   #######################xx~    x#',
+    '#####   #######################xx     x#',
+    '#####   #######################xx     x#',
+    '#####  ########################xx  ~  x#',
+    '#####   #######################xx     x#',
+    '#####f  #######################xx     x#',
+    '#####   #######################xx    ~x#',
+    '#####   #######################xx     x#',
+    '#####   #######################xx     x#',
+    '######  #######################xx  ~  x#',
+    '#####   #######################xx     x#',
+    '#       #######################xx     x#',
+    '        #######################xx   ~   ',
+    ' P      #######################xx    ~~ ',
     '################################^^^^^^^#',
     '########################################',
   ], [735, 52], { world: 3 }],
@@ -787,15 +788,15 @@ const ROOMS = [
     '#                            #',
     '#                            #',
     '#                            #',
-    '#                            #',
-    '#                            #',
-    '#                            #',
+    '#                             ',
+    '#                             ',
+    '#                             ',
     '                              ',
     '  P                           ',
     '##############################',
     '##############################',
   ], [805, 53], { world: 3, spots: [[18, "stagPromise"]] }],
-  ["The spectral stag", [ // final boss: three-soul wall, lead beams away, drop after charges
+  ["The spectral stag", [ // final boss: swap out of a soul ram, stomp, restore three elevated seals
     '########################################',
     '#                                      #',
     '#                                      #',
@@ -806,11 +807,11 @@ const ROOMS = [
     '#                                      #',
     '#                                      #',
     '#                                      #',
-    '#                                      #',
-    '# P                                    #',
-    '# #####                                #',
+    'V                                      #',
+    'V  P                                   #',
+    'V  ####                                #',
     'V   V                                  V',
-    'V   V                             B    V',
+    'V V V                             B    V',
     '########################################',
     '########################################',
   ], [835, 53], { world: 3 }],
@@ -844,13 +845,15 @@ const START_ROOM = ((q) => q == null ? ROOMS.findIndex((r) => r[0] === 'The clea
 const hit = (A, B) => A.x < B.right && A.right > B.x && A.y < B.bottom && A.bottom > B.y;
 const bounds = (o) => o.getBounds();
 
-const stats = { deaths: 0, mothFinished: false, treePower: false, stagFinished: false }; // run progress survives room restarts
+const stats = { deaths: 0, stagDeaths: 0, mothFinished: false, treePower: false, stagFinished: false }; // run progress survives room restarts
 const FONT = { fontFamily: 'Georgia, serif', align: 'center' };
 
 // First screen: the content warning. Any key or click continues (that click also lets the browser play audio).
 class Warning extends Phaser.Scene {
   constructor() { super('warning'); }
+  update(_t, ms) { GameAudio.mix(ms / 1000); }
   create() {
+    GameAudio.music('title');
     if (window.SKIP_WARNING) return this.scene.start('room'); // the test page
     const t = (y, text, size, color, wrap = 640) =>
       this.add.text(480, y, text, { ...FONT, fontSize: size, color, wordWrap: { width: wrap }, lineSpacing: 6 }).setOrigin(0.5);
@@ -860,7 +863,8 @@ class Warning extends Phaser.Scene {
     t(345, "If you're going through a hard time, please reach out to someone you trust or a local support line.", '16px', '#a8b8ad');
     const go = t(440, 'Click or press any key to continue', '15px', '#e8b44a');
     this.tweens.add({ targets: go, alpha: 0.35, duration: 900, yoyo: true, repeat: -1 });
-    const next = () => this.scene.start('room');
+    t(480, 'M mute · − / = volume', '13px', '#a8b8ad');
+    const next = () => { GameAudio.unlocked = true; GameAudio.play('ui-menu-select'); this.scene.start('room'); };
     this.input.keyboard.once('keydown', next);
     this.input.once('pointerdown', next);
   }
@@ -869,7 +873,9 @@ class Warning extends Phaser.Scene {
 // The last screen, after he walks into the pyramid: "Floor 1", the title, the run's deaths, thanks and credits.
 class End extends Phaser.Scene {
   constructor() { super('end'); }
+  update(_t, ms) { GameAudio.mix(ms / 1000); }
   create() {
+    GameAudio.music('ending');
     const t = (y, text, size, color, at) => {
       const o = this.add.text(480, y, text, { ...FONT, fontSize: size, color }).setOrigin(0.5).setAlpha(0);
       this.tweens.add({ targets: o, alpha: 1, duration: 1200, delay: at });
@@ -885,7 +891,10 @@ class End extends Phaser.Scene {
     t(422, 'Art, music and sound made with generative AI tools', '13px', '#7f9086', 10400);
     const again = t(490, 'Press any key to play again', '14px', '#e8b44a', 12000);
     this.time.delayedCall(12000, () => this.input.keyboard.once('keydown', () => {
-      stats.deaths = 0; stats.treePower = false; stats.mothFinished = false; stats.stagFinished = false;
+      GameAudio.ending = false;
+      GameAudio.play('ui-menu-select');
+      stats.deaths = stats.stagDeaths = 0; stats.treePower = false; stats.mothFinished = false; stats.stagFinished = false;
+      rules.selfDestruct = rules.recall = false; // the moth grants these again on the next run
       Dialogue.seen.clear();
       NAMES.guide = '???';
       this.scene.start('room', { index: START_ROOM });
@@ -897,21 +906,26 @@ class End extends Phaser.Scene {
 class Room extends Phaser.Scene {
   constructor() { super('room'); }
 
-  init(data) { this.index = Phaser.Math.Wrap(data.index ?? START_ROOM, 0, ROOMS.length); }
+  init(data) { this.index = Phaser.Math.Wrap(data.index ?? START_ROOM, 0, ROOMS.length); this.retry = !!data.retry; }
 
   preload() {
     Art.preload(this);
     Dialogue.preload(this);
+    for (const [key, path] of [
+      ['amulet', 'world1/amulet'], ['ghost', 'world1/ghost'], ['old-tree', 'world3/old-tree'],
+      ...[1, 2, 3].flatMap((n) => [[`amulet-rune${n}`, `world1/amulet-rune${n}`], [`shrine${n}`, `world${n}/shrine`]]),
+    ]) if (!this.textures.exists(key)) this.load.image(key, `assets/${path}.webp`);
     if (!this.textures.exists('heroSheet')) {
       this.load.image('heroSheet', 'assets/hero/sheet.webp'); // 8 frames: run 0-5, jump 6, fall 7
       this.load.image('heroIdle', 'assets/hero/idle.webp');
-      this.load.image('heroRun', 'assets/hero/run.webp'); // 12 run frames: top row 0-5, bottom row 6-11
+      this.load.image('heroRun', 'assets/hero/run-veo.webp'); // 12 run frames in one row
       this.load.image('heroSlide', 'assets/hero/slide.webp'); // 12 slide frames, 3 rows of 4
       this.load.json('heroSlideMeta', 'assets/hero/slide.json');  // each frame's head and feet x
     }
     for (const [key, path, width, height] of [
-      ['heroIdleAnim', 'hero/idle-anim', 98, 112],
-      ['heroWall', 'hero/wall-slide', 141, 141],
+      ['heroIdleAnim', 'hero/idle-veo', 106, 112],
+      ['heroWall', 'hero/wall-slide-veo', 141, 141],
+      ['heroKick', 'hero/wall-slide', 141, 141], // the old sheet's frame 3 is the wall kick-off
       ['flyer', 'enemies/flyer', 115, 112],
       ['thrower', 'enemies/thrower', 123, 112],
     ]) if (!this.textures.exists(key)) this.load.spritesheet(key, `assets/${path}.webp`, { frameWidth: width, frameHeight: height });
@@ -936,12 +950,28 @@ class Room extends Phaser.Scene {
     if (!this.textures.exists('seedPod')) this.load.image('seedPod', 'assets/bosses/seed-pod.webp');
     if (!this.textures.exists('mothImpact')) this.load.image('mothImpact', 'assets/effects/impact.webp');
     if (!this.textures.exists('mothDust')) this.load.image('mothDust', 'assets/bosses/moth-dust.webp');
-    if (!this.textures.exists('mothFly')) this.load.image('mothFly', 'assets/bosses/moth-fly.webp');
+    if (!this.textures.exists('mothFly')) this.load.image('mothFly', 'assets/bosses/moth-fly-12.webp'); // Veo: one full wingbeat in 12 frames
     if (!this.textures.exists('rocks')) this.load.image('rocks', 'assets/world1/rocks.webp'); // 6 earth chunks
     if (!this.textures.exists('wallBreak')) this.load.image('wallBreak', 'assets/world1/wall-break.webp');
   }
 
   create() {
+    // Screen-fixed things (backdrop, HUD, dialogue) skip the camera's scroll but not its zoom. When a room zooms
+    // out (the stag frames its whole arena), scale them back to full screen for the draw, then restore them.
+    // Scene events outlive a restart (Shift+R), so hook them once: a second pair would compound the scaling.
+    if (!this.zoomHooked) {
+      this.zoomHooked = true;
+      this.events.on('prerender', () => {
+        const cam = this.cameras.main, z = cam.zoom, cx = cam.width / 2, cy = cam.height / 2;
+        if (z === 1) return;
+        this.unzoomed = this.children.list.filter((o) => o.scrollFactorX === 0).map((o) => [o, o.x, o.y, o.scaleX, o.scaleY]);
+        for (const [o, x, y, sx, sy] of this.unzoomed) o.setPosition(cx + (x - cx) / z, cy + (y - cy) / z).setScale(sx / z, sy / z);
+      });
+      this.events.on('render', () => {
+        for (const [o, x, y, sx, sy] of this.unzoomed ?? []) o.setPosition(x, y).setScale(sx, sy);
+        this.unzoomed = null;
+      });
+    }
     this.statics = this.physics.add.staticGroup(); // walls, spike bases, doors, bodies
     this.corpses = [];
     this.doors = [];
@@ -950,6 +980,7 @@ class Room extends Phaser.Scene {
     this.enemies = []; // only the current room's walkers exist (Celeste-style)
     this.walkerSpawns = [];
     this.treePower = !!stats.treePower;
+    if (!stats.stagFinished) GameAudio.ending = false; // Shift+R during the last stand brings the stag back: fight music again
     this.bosses = []; // one per boss room; this.boss is the current room's
     this.stagFinished = !!stats.stagFinished;
     this.gates = [];
@@ -963,6 +994,7 @@ class Room extends Phaser.Scene {
     Art.ensure(this);
     Art.backdrop(this);
     const rect = (x, y, w, h, color) => this.add.rectangle(x + w / 2, y + h / 2, w, h, color);
+    this.wornAmulet = this.hudAmulet = this.pips = undefined;
     this.amulets = [];
     this.shrines = [];
     this.lasers = [];
@@ -990,17 +1022,17 @@ class Room extends Phaser.Scene {
               let w = 1;
               while (row[tx + w] === '#') w++;
               this.statics.add(rect(x, y, w * T, T, 0).setVisible(false)); // hitbox; painted below
-              Art.platform(this, x, y, w * T, T, Array.from({ length: w }, (_, i) => !'#^'.includes(rows[ty - 1]?.[tx + i] ?? '#')));
+              Art.platform(this, x, y, w * T, T, Array.from({ length: w }, (_, i) => !'#^'.includes(rows[ty - 1]?.[tx + i] ?? '#')), world);
               tx += w - 1;
               break;
             }
             case '^': // solid lower half, deadly upper half
               this.statics.add(rect(x, y + 16, T, 16, 0).setVisible(false));
-              Art.platform(this, x, y + 16, T, 16, [false]);
+              Art.platform(this, x, y + 16, T, 16, [false], world);
               this.spikes.push(rect(x + 2, y + 6, T - 4, 10, 0xcd5c5c));
               hazard(this.spikes.at(-1), 'spikes', T, 16, -3);
               break;
-            case 'x': this.spikes.push(rect(x + 4, y + 2, T - 8, T - 4, 0x7a3550)); hazard(this.spikes.at(-1), 'thorns', T, T); break;
+            case 'x': this.spikes.push(rect(x + 4, y + 2, T - 8, T - 4, 0x7a3550)); this.spikes.at(-1).audioVine = true; hazard(this.spikes.at(-1), 'thorns', T, T); break;
             case '_': this.plates.push(Object.assign(rect(x + 1, y + T - 8, T - 2, 8, 0xffd700).setStrokeStyle(2, 0x8a6a00).setDepth(3), { room: ri })); hazard(this.plates.at(-1), 'plate', T, 8); break;
             case 'D': { const d = Object.assign(rect(x, y, T, T, 0x8c6640), { room: ri }); this.statics.add(d); this.doors.push(d); break; }
             case 'e': case 'f': case 't': this.walkerSpawns.push({ x, y, room: ri, kind: row[tx] }); break; // made on entry
@@ -1021,7 +1053,7 @@ class Room extends Phaser.Scene {
               this.bosses.at(-1).r.setVisible(!this.bosses.at(-1).hidden);
               if (name === 'The spectral stag') {
                 const B = this.bosses.at(-1);
-                Object.assign(B, { stag: true, hidden: !Dialogue.seen.has('stagArrival'), story: 'stagDown', phase: 'setup', clock: 0, bells: 0, deaths: 0 });
+                Object.assign(B, { stag: true, hidden: !Dialogue.seen.has('stagArrival'), story: 'stagDown', phase: 'setup', clock: 0, bells: 0, deaths: stats.stagDeaths }); // the whole run's deaths here, across Shift+R
                 B.r.setVisible(!B.hidden).setSize(192, 64).setPosition(x, (oy + 14) * T).setFillStyle(0xbceaff);
                 B.antlers = this.add.graphics().setDepth(5);
                 B.r.on('destroy', () => B.antlers.destroy());
@@ -1037,13 +1069,13 @@ class Room extends Phaser.Scene {
                 B.floor = y + T;
                 B.r.on('destroy', () => { B.stone?.r.destroy(); B.pods.forEach((p) => p.r.destroy()); });
                 if (this.textures.exists('tree-idle')) {
-                  B.img = this.add.image(x + 3 * T, B.floor, 'tree-idle').setOrigin(0.5, 1).setDepth(4);
+                  B.img = this.add.image(x + 0.5 * T, B.floor, 'tree-idle').setOrigin(0.5, 1).setDepth(4);
                   B.r.setFillStyle(0, 0);
                 }
                 B.r.on('destroy', () => { B.img?.destroy(); B.pods.forEach((p) => p.r.destroy()); });
               } else if (this.textures.exists('mothFly')) {
-                const B = this.bosses.at(-1), tex = this.textures.get('mothFly'), fw = tex.getSourceImage().width / 4;
-                if (!tex.has(0)) for (let i = 0; i < 4; i++) tex.add(i, 0, i * fw, 0, fw, tex.getSourceImage().height);
+                const B = this.bosses.at(-1), tex = this.textures.get('mothFly'), fw = tex.getSourceImage().width / 12;
+                if (!tex.has(0)) for (let i = 0; i < 12; i++) tex.add(i, 0, i * fw, 0, fw, tex.getSourceImage().height);
                 B.r.setFillStyle(0, 0); // hitbox only
                 B.img = this.add.image(B.r.x, B.r.y, 'mothFly', 0).setScale(MOTH_SCALE).setDepth(4);
                 B.r.on('destroy', () => B.img.destroy());
@@ -1059,18 +1091,27 @@ class Room extends Phaser.Scene {
               break;
             }
             case '>': case '<': case 'v': case 'u': { // laser emitter: a solid block that fires a beam
-              const e = rect(x, y, T, T, 0x5a4a6a);
+              // On this lintel, either adjacent snapped soul can shield the seam.
+              const e = rect(x + (name === 'Three high' ? T / 2 : 0), y, T, T, 0x5a4a6a);
               this.statics.add(e);
               this.lasers.push({ e, room: ri, dx: { '>': 1, '<': -1 }[row[tx]] ?? 0, dy: { v: 1, u: -1 }[row[tx]] ?? 0 });
               break;
             }
             case 's': this.springs.push(rect(x + 3, y + T - 12, T - 6, 12, 0xffc93c).setStrokeStyle(2, 0x7a5200).setDepth(3)); hazard(this.springs.at(-1), 'spring', T - 6, 24, -6); break;
             case 'P': room.spawns.push({ x: x + T / 2, y: y + T - 15 }); break;
-            case 'A': this.amulets.push(this.add.circle(x + T / 2, y + T - 10, 6, 0xffd774).setStrokeStyle(2, 0xb07a22).setDepth(3)); break;
+            case 'A': {
+              const a = this.add.circle(x + T / 2, y + T - 10, 6, 0xffd774).setStrokeStyle(2, 0xb07a22).setDepth(3);
+              this.storyPainting(a, 'amulet', 24);
+              if (a.img) a.setStrokeStyle(0);
+              this.amulets.push(a);
+              break;
+            }
             case 'C': { // shrine: a mossy stone with a gold rune; touching it moves your respawn here
               const sh = this.add.rectangle(x + T / 2, y + T - 14, 16, 28, 0x56605a).setStrokeStyle(1, 0x2b322e).setDepth(3);
               sh.rune = this.add.circle(x + T / 2, y + T - 18, 3, 0xe8b44a).setAlpha(0.35).setDepth(3);
               sh.spawn = { x: x + T / 2, y: y + T - 15 };
+              this.storyPainting(sh, `shrine${world}`, 44, 14);
+              if (sh.img) { sh.setStrokeStyle(0); sh.rune.setVisible(false); sh.img.setTint(0x626868).setAlpha(0.65); }
               this.shrines.push(sh);
               break;
             }
@@ -1088,12 +1129,12 @@ class Room extends Phaser.Scene {
     }
     // Fill a screen's height of solid ground above and below every room (stopping at any other room),
     // so the camera's diagonal slide between rooms at different heights never shows empty space.
-    for (const { rect: R } of this.rooms) {
+    for (const { rect: R, world } of this.rooms) {
       const others = this.rooms.map((r) => r.rect).filter((O) => O !== R && O.x < R.right && O.right > R.x);
       const top = Math.max(R.y - 544, ...others.filter((O) => O.bottom <= R.y).map((O) => O.bottom));
       const bottom = Math.min(R.bottom + 544, ...others.filter((O) => O.y >= R.bottom).map((O) => O.y));
-      if (top < R.y) Art.platform(this, R.x, top, R.width, R.y - top, []);
-      if (bottom > R.bottom) Art.platform(this, R.x, R.bottom, R.width, bottom - R.bottom, []);
+      if (top < R.y) Art.platform(this, R.x, top, R.width, R.y - top, [], world);
+      if (bottom > R.bottom) Art.platform(this, R.x, R.bottom, R.width, bottom - R.bottom, [], world);
     }
     for (const B of [...this.bosses]) {
       if ((B.stag && stats.stagFinished) || (B.kind === 'tree' && stats.treePower) ||
@@ -1108,11 +1149,13 @@ class Room extends Phaser.Scene {
     rules.max = this.treePower ? 3 : Math.max(stats.mothFinished ? 2 : 1, WORLD_SOULS[this.rooms[this.index].world] ?? 3);
     Dialogue.create(this);
     this.wearing = Dialogue.seen.has('amulet');
+    this.litRune = this.wearing ? (stats.treePower ? 3 : stats.mothFinished ? 2 : 1) : undefined;
     this.roomDeaths = 0;
     this.drawStagGrounds();
-    this.showWorld(this.rooms[this.index].world);
+    Art.setWorld(this, this.rooms[this.index].world);
+    if (this.retry) this.world = this.rooms[this.index].world; // Shift+R keeps you in the same world: no title card
+    else this.showWorld(this.rooms[this.index].world);
     if (this.rooms[this.index].keys) this.showKeys(this.rooms[this.index].keys);
-    Dialogue.play(this, this.rooms[this.index].enter);
 
     this.spawnWalkers(this.index);
     this.physics.add.collider(this.enemies, this.statics);
@@ -1135,12 +1178,11 @@ class Room extends Phaser.Scene {
       this.heroSprite = this.add.image(0, 0, 'heroIdle').setOrigin(0.5, 1).setDepth(5.5);
       this.heroFrame = ['heroIdle', undefined];
     }
-    // The guide: the hero's own painting as a see-through, flameless blue-white ghost (a plain shape
-    // without the art). He appears in the amulet cutscene, then only for conversations he's in.
+    // The approved ghost replaces the tinted hero; conversation staging stays the same.
     if (!this.painted && !this.textures.exists('guideStandIn'))
       this.make.graphics({ add: false }).fillStyle(0xffffff).fillRoundedRect(0, 0, 22, 40, 10).generateTexture('guideStandIn', 22, 40).destroy();
-    this.guide = this.add.image(this.start.x + 60, this.start.y, this.painted ? 'heroIdle' : 'guideStandIn').setOrigin(0.5, 1)
-      .setScale(this.painted ? this.heroScale : 1).setTint(0xcfeaff).setBlendMode(Phaser.BlendModes.ADD).setDepth(4.4).setAlpha(0);
+    this.guide = this.add.image(this.start.x + 60, this.start.y, this.textures.exists('ghost') ? 'ghost' : this.painted ? 'heroIdle' : 'guideStandIn').setOrigin(0.5, 1)
+      .setScale(this.textures.exists('ghost') ? HERO_HEIGHT / 112 : this.painted ? this.heroScale : 1).setTint(0xcfeaff).setBlendMode(Phaser.BlendModes.ADD).setDepth(4.4).setAlpha(0);
     this.guide.on = Dialogue.seen.has('amulet') && !this.stagFinished;
     this.guide.hoverY = this.guide.y;
     this.guide.away = 0;
@@ -1149,6 +1191,7 @@ class Room extends Phaser.Scene {
     // Arcade resolves vertical overlap first, so jumping while pressed into a wall snags on the
     // seam between stacked blocks and kills the jump. Side contacts get pushed out sideways instead.
     this.physics.add.collider(this.player, this.statics, null, (_pl, s) => {
+      if (s.lying && this.rooms[this.index].name === 'The spectral stag' && this.corpses.includes(s)) return false; // rammed souls stay flat, before and after the win
       const a = this.player.body, b = s.body;
       const ox = Math.min(a.right, b.right) - Math.max(a.x, b.x);
       const oy = Math.min(a.bottom, b.bottom) - Math.max(a.y, b.y);
@@ -1162,12 +1205,15 @@ class Room extends Phaser.Scene {
     });
 
     this.keys = this.input.keyboard.addKeys('A,D,LEFT,RIGHT,SPACE,W,UP,K,X,Q,R,N,S,DOWN,SHIFT,ENTER,E,ESC,H,ONE,TWO,THREE,FOUR,FIVE');
+    this.bossBar = this.add.text(480, 14, '', { fontFamily: 'Georgia, serif', fontSize: '22px', color: '#ffef72' })
+      .setOrigin(0.5, 0).setScrollFactor(0).setDepth(30).setShadow(0, 2, '#000', 6);
     this.hud = this.add.text(8, 4, '', { fontFamily: 'monospace', fontSize: '13px', color: '#ddd', lineSpacing: 3, backgroundColor: '#000000aa', padding: { x: 6, y: 4 } }).setDepth(30).setScrollFactor(0).setVisible(showHud);
     const cam = this.cameras.main, R = this.rooms[this.index].rect;
     cam.setBounds(R.x, R.y, R.width, R.height);
     cam.startFollow(this.player, true, 0.12, 0.12);
     cam.centerOn(this.player.x, this.player.y);
     this.transit = false;
+    Dialogue.play(this, this.rooms[this.index].enter);
   }
 
   // Walked into a neighbouring room: souls stay behind (cleared), respawn moves to the nearest
@@ -1217,6 +1263,42 @@ class Room extends Phaser.Scene {
     }
   }
 
+  storyPainting(object, key, height, feet = 0) {
+    if (!this.textures.exists(key)) return;
+    object.setFillStyle(0, 0);
+    const image = this.textures.get(key).getSourceImage();
+    object.img = this.add.image(object.x, object.y + feet, key).setOrigin(0.5, feet ? 1 : 0.5)
+      .setScale(height / image.height).setDepth(3);
+    object.on('destroy', () => object.img.destroy());
+  }
+
+  drawStoryArt(t) {
+    const g = this.fx, p = this.player, b = p.body;
+    for (const a of this.amulets) {
+      const y = a.y + Math.sin(t * 2) * 3;
+      a.img?.setY(y);
+      g.fillStyle(0xffd774, 0.12 + Math.sin(t * 2) * 0.04).fillCircle(a.x, y, 16);
+    }
+    for (const sh of this.shrines) {
+      const active = this.start === sh.spawn;
+      sh.img?.setTint(active ? 0xffffff : 0x626868).setAlpha(active ? 1 : 0.65);
+      if (active) g.fillStyle(0xffd774, 0.12 + Math.sin(t * 3) * 0.04).fillCircle(sh.x, sh.y - 4, 24);
+    }
+    const rune = stats.treePower ? 3 : stats.mothFinished ? 2 : 1;
+    const key = this.textures.exists(`amulet-rune${rune}`) ? `amulet-rune${rune}` : 'amulet';
+    if (!this.textures.exists(key)) return;
+    if (!this.wornAmulet) this.wornAmulet = this.add.image(0, 0, key).setDepth(5.6);
+    this.wornAmulet.setTexture(key).setDisplaySize(10, 10).setVisible(this.wearing && p.visible && !this.lying)
+      .setPosition(b.center.x + this.face * 2, b.bottom - HERO_HEIGHT * 0.5 - 2);
+    if (!this.hudAmulet) this.hudAmulet = this.add.image(0, 516, key).setScrollFactor(0).setDepth(40);
+    this.hudAmulet.setTexture(key).setDisplaySize(32, 32).setX(32 + rules.max * 22).setVisible(this.wearing);
+    if (this.wearing && this.litRune !== rune) {
+      this.litRune = rune;
+      const flash = this.add.image(p.x, p.y - 62, key).setDisplaySize(64, 64).setDepth(6);
+      this.tweens.add({ targets: flash, y: flash.y - 18, alpha: 0, duration: 1800, onComplete: () => flash.destroy() });
+    }
+  }
+
   enemyPainting(object, key, height) {
     if (!this.textures.exists(key)) return;
     object.setFillStyle(0, 0);
@@ -1228,6 +1310,7 @@ class Room extends Phaser.Scene {
   // The world's name fades in when you arrive in a new world.
   showWorld(w) {
     this.world = w;
+    Art.setWorld(this, w);
     if (!WORLD_NAMES[w]) return;
     const t = this.add.text(480, 200, WORLD_NAMES[w], { fontFamily: 'Georgia, serif', fontSize: '42px', color: '#f1e3b8' })
       .setOrigin(0.5).setScrollFactor(0).setDepth(45).setAlpha(0).setShadow(0, 2, '#000', 8);
@@ -1254,6 +1337,14 @@ class Room extends Phaser.Scene {
     if (!talking) g.inTalk = false;
     if (g.inTalk) {
       if (g.alpha === 0) { g.setPosition(p.x + 40, p.y - 34); g.hoverY = g.y; }
+      // Left far behind (he respawned, or walked on while the ghost lingered): drift back to his upper right.
+      const home = { x: p.x + 40, y: p.y - 34 };
+      if (Math.hypot(home.x - g.x, home.y - g.hoverY) > 160 && !t.line?.guide && !t.line?.guideBy) g.drifting = true;
+      if (g.drifting) {
+        const d = Math.hypot(home.x - g.x, home.y - g.hoverY), s = Math.min(1, 260 * dt / (d || 1));
+        g.x += (home.x - g.x) * s; g.hoverY += (home.y - g.hoverY) * s;
+        if (d < 8) g.drifting = false;
+      }
       g.setAlpha(Math.min(0.7, g.alpha + dt * 1.2));
       g.away = 0;
       if (!g.looking) g.setFlipX(g.x > p.x);
@@ -1285,6 +1376,8 @@ class Room extends Phaser.Scene {
   }
 
   cue(name) {
+    GameAudio.cue(name);
+    if (['moth', 'tree', 'stagAppear'].includes(name) && this.boss) this.boss.audioArrived = true;
     const g = this.guide, p = this.player;
     if (name.startsWith('keys:')) return this.showKeys(name.slice(5));
     if (name === 'stagAppear' && this.boss?.stag) {
@@ -1301,7 +1394,7 @@ class Room extends Phaser.Scene {
       this.tweens.add({ targets: g, alpha: 0, duration: 1500, onComplete: () => { g.on = false; } });
     }
     if (name === 'stagGone' && this.boss?.stag) { this.bossDefeated(this.boss); this.stagFinished = true; }
-    if (name === 'tree' && this.boss?.kind === 'tree') { this.boss.hidden = false; this.boss.r.setVisible(true); this.boss.phase = 'intro'; this.boss.timer = 1; }
+    if (name === 'tree' && this.boss?.kind === 'tree') { this.boss.hidden = false; this.boss.r.setVisible(true); this.boss.phase = 'intro'; this.boss.timer = 3; }
     if (name === 'wear') this.wearing = true;
     if (name === 'flash') this.cameras.main.flash(600, 255, 215, 120);
     if (name === 'theEnd') { // he walks into the pyramid: fade out to the ending card
@@ -1311,8 +1404,7 @@ class Room extends Phaser.Scene {
     if (name === 'dim' || name === 'undim') { // night falls / morning comes (under the dialogue panel)
       this.dimmer ??= this.add.rectangle(480, 272, 960, 544, 0x020610).setScrollFactor(0).setDepth(39).setAlpha(0);
       this.tweens.killTweensOf(this.dimmer);
-      this.tweens.add({ targets: this.dimmer, alpha: name === 'dim' ? 0.88 : 0, duration: 1100 });
-      this.guide.setDepth(name === 'dim' ? 39.5 : 4.4); // the ghost still glows in the dark
+      this.tweens.add({ targets: this.dimmer, alpha: name === 'dim' ? 1 : 0, duration: 1100 }); // full dark, ghost included
     }
     if (name === 'pulse') this.cameras.main.flash(250, 255, 215, 120);
     if (name === 'ghost' && g && !g.on) { // fades in right beside him
@@ -1394,8 +1486,9 @@ class Room extends Phaser.Scene {
   mothScream(done) {
     const B = this.boss;
     if (!B) return done?.();
-    B.pose = 0;
-    this.time.delayedCall(150, () => { B.pose = 1; this.cameras.main.shake(500, 0.008); });
+    GameAudio.play('moth-scream');
+    B.pose = 6; // wings up (Veo sheet: 0 down, 3 flat, 6 up)
+    this.time.delayedCall(150, () => { B.pose = 3; this.cameras.main.shake(500, 0.008); });
     for (let i = 0; i < 6; i++) this.time.delayedCall(150 + i * 160, () => {
       for (const [w, col, a] of [[10, 0x2a2018, 0.35], [4, 0xffffff, 0.95]]) { // pale wave with a dark halo, readable on any backdrop
         const ring = this.add.circle(B.r.x, B.r.y, 50).setStrokeStyle(w, col, a).setDepth(5.9);
@@ -1409,6 +1502,7 @@ class Room extends Phaser.Scene {
   enterRoom(i) {
     const p = this.player, R = this.rooms[i].rect, cam = this.cameras.main;
     this.index = i;
+    cam.setZoom(1);
     rules.max = this.treePower ? 3 : Math.max(stats.mothFinished ? 2 : 1, WORLD_SOULS[this.rooms[i].world] ?? rules.max);
     Dialogue.play(this, this.rooms[i].enter);
     if (this.rooms[i].keys) this.showKeys(this.rooms[i].keys);
@@ -1438,6 +1532,8 @@ class Room extends Phaser.Scene {
 
   die(chosen = false) {
     if (this.dead > 0) return;
+    GameAudio.play('hero-death-burst');
+    const treeSetup = this.boss?.kind === 'tree' && (chosen || this.corpses.length < 2);
     stats.deaths++;
     const p = this.player;
     const [w, h] = this.lying ? BODY_LYING : BODY_STAND;
@@ -1446,7 +1542,14 @@ class Room extends Phaser.Scene {
     // Snap: standing souls sit on a tile line, lying souls on a half-tile line (a spike death leaves
     // a lying soul flush with the floor, a standing one as a step one tile up).
     const feet = p.y + p.height / 2;
-    const bottom = !rules.snap ? feet : this.lying ? Math.ceil((feet - 1) / 16) * 16 : Math.round(feet / T) * T;
+    let bottom = !rules.snap ? feet : this.lying ? Math.ceil((feet - 1) / 16) * 16 : Math.round(feet / T) * T;
+    // World 1: a sideways saw that kills you mid-hop still gets your soul in its lane, so the soul jams it.
+    const saw = this.saws.find((sw) => sw.room === this.index && sw.dx && Math.abs(sw.x - p.x) < SAW_R + p.width / 2 && Math.abs(sw.y - p.y) < SAW_R + p.height / 2);
+    if (saw && rules.snap && this.rooms[this.index].world === 1) bottom = Math.max(bottom, Math.round((saw.y + SAW_R) / T) * T);
+    // A soul made by a sideways beam fills that beam's row, so it always blocks it
+    // (rounding the feet left it a tile under the beam when you jumped up into it).
+    const lane = rules.snap && !this.lying && this.beams().find((r) => r.height === 6 && hit(bounds(p), r));
+    if (lane) bottom = Math.ceil(lane.bottom / T) * T;
     const c = this.add.rectangle(x, bottom - h / 2, w, h, 0x7399d9);
     c.vy = 0;
     c.lying = this.lying;
@@ -1456,15 +1559,17 @@ class Room extends Phaser.Scene {
       // A soul is the hero's painting, frozen in the pose he died in, glowing blue-white.
       const [key, frame] = this.lying ? ['heroSlide', SLIDE_FRAMES[0]] : this.heroFrame; // pose may not be drawn yet
       const feet = c.y + c.height / 2, flip = this.face < 0;
-      const body = this.add.image(c.x, feet, key, frame).setOrigin(0.5, 1).setScale(key === 'heroWall' ? HERO_HEIGHT / 141 : this.heroScale).setFlipX(flip)
+      const body = this.add.image(c.x, feet, key, frame).setOrigin(0.5, 1).setScale(key === 'heroWall' || key === 'heroKick' ? HERO_HEIGHT / 141 : this.heroScale).setFlipX(flip)
         .setTintFill(0x6fb6ee).setAlpha(0.45).setDepth(4.5);
-      const glow = this.add.image(c.x, feet, key, frame).setOrigin(0.5, 1).setScale(key === 'heroWall' ? HERO_HEIGHT / 141 : this.heroScale).setFlipX(flip)
+      const glow = this.add.image(c.x, feet, key, frame).setOrigin(0.5, 1).setScale(key === 'heroWall' || key === 'heroKick' ? HERO_HEIGHT / 141 : this.heroScale).setFlipX(flip)
         .setTint(0xbfe6ff).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.9).setDepth(4.6);
       c.sprites = [body, glow];
       c.on('destroy', () => c.sprites.forEach((sp) => sp.destroy()));
     }
     this.statics.add(c);
     this.corpses.push(c);
+    GameAudio.play('hero-soul-appears');
+    c.on('destroy', () => GameAudio.play('hero-soul-erased-replaced'));
     if (this.rooms[this.index].name === 'The long pit' && !c.lying &&
         c.x > this.rooms[this.index].rect.x + 3 * T && c.x < this.rooms[this.index].rect.x + 11 * T &&
         bottom > this.rooms[this.index].rect.y + 9 * T && bottom - h < this.rooms[this.index].rect.y + 10 * T)
@@ -1475,16 +1580,18 @@ class Room extends Phaser.Scene {
     this.droppers.forEach((d) => this.resetDropper(d));
     this.downed.forEach((d) => this.spawnEnemy(d.sp)); // dying brings stomped enemies back
     this.downed = [];
-    // Respawn on top of any bodies sitting on the start point.
+    // Respawn on top of any bodies sitting on the start point. Only bodies he would stand inside count: a soul
+    // floating above his head stays above it, or dying at the start would lift him a tile per death into the ceiling.
     this.setLying(false);
     let y = this.start.y;
     for (const b of [...this.corpses].sort((a, b) => b.y - a.y))
-      if (Math.abs(b.x - this.start.x) < b.width / 2 + 12 && b.y - b.height / 2 < y + 15) y = b.y - b.height / 2 - 15;
+      if (Math.abs(b.x - this.start.x) < b.width / 2 + 12 && b.y - b.height / 2 < y + 15 && b.y + b.height / 2 > y - 15) y = b.y - b.height / 2 - 15;
     p.body.reset(this.start.x, y);
     p.setVisible(false);
+    p.body.moves = false; // Gravity must pause with the enemies during respawn.
     this.dead = RESPAWN_DELAY;
     if (this.boss) { this.boss.hp = BOSS_HP; this.boss.hurt = 0;
-      if (this.boss.stag) { this.boss.deaths++; this.boss.phase = 'setup'; this.boss.clock = 0; this.boss.bells = 0; this.boss.beam = null; this.boss.pulse = -1; this.boss.r.x = this.rooms[this.boss.room].rect.right - 5 * T; }
+      if (this.boss.stag) { this.boss.deaths = ++stats.stagDeaths; this.boss.phase = 'setup'; this.boss.clock = 0; this.boss.bells = 0; this.boss.beam = null; this.boss.pulse = -1; this.boss.r.x = this.rooms[this.boss.room].rect.right - 5 * T; }
       if (this.boss.kind === 'tree') { this.boss.phase = 'idle'; this.boss.timer = 4; this.boss.attack = -1; this.boss.open = 0; this.boss.stone?.r.destroy(); this.boss.stone = null; this.boss.pods.forEach((p) => p.r.destroy()); this.boss.pods = []; }
     } // your death heals the boss
     if (this.boss?.story === 'mothDown' && !this.boss.hidden) {
@@ -1494,8 +1601,8 @@ class Room extends Phaser.Scene {
       this.boss.dir = 1;
       this.shots = this.shots.filter((sh) => { if (!sh.mothDust) return true; sh.destroy(); return false; });
     }
-    if (this.rooms[this.index].world) Dialogue.play(this, 'firstDeath'); // only the first time
-    const hint = this.rooms[this.index].deathTalk?.[++this.roomDeaths]; // hints after repeated deaths in a room
+    if (this.rooms[this.index].name === 'First death') Dialogue.play(this, 'firstDeath'); // only the first time; its staging is that room's
+    const hint = !treeSetup && this.rooms[this.index].deathTalk?.[++this.roomDeaths]; // hints after repeated deaths in a room
     if (hint) Dialogue.play(this, hint);
     if (chosen) Dialogue.play(this, 'chosenDeath');
   }
@@ -1510,7 +1617,7 @@ class Room extends Phaser.Scene {
       const next = new Phaser.Geom.Rectangle(c.x - hw, c.y - hh + c.vy * dt, c.width, c.height);
       // A body coming down from above an enemy crushes it.
       for (const e of [...this.enemies]) {
-        if (bottom <= bounds(e).y + 2 && hit(next, bounds(e))) { e.destroy(); this.enemies.splice(this.enemies.indexOf(e), 1); }
+        if (bottom <= bounds(e).y + 2 && hit(next, bounds(e))) { GameAudio.play('walker-crushed'); e.destroy(); this.enemies.splice(this.enemies.indexOf(e), 1); }
       }
       let floor = Infinity;
       for (const s of solids) {
@@ -1543,9 +1650,9 @@ class Room extends Phaser.Scene {
     return 0;
   }
 
-  canStand() {
+  canStand(height = STAND[1]) {
     const p = this.player, feet = p.y + p.height / 2;
-    const r = new Phaser.Geom.Rectangle(p.x - STAND[0] / 2, feet - STAND[1], STAND[0], STAND[1]);
+    const r = new Phaser.Geom.Rectangle(p.x - STAND[0] / 2, feet - height, STAND[0], height);
     return !this.statics.getChildren().some((s) => s.body.enable && hit(r, bounds(s)));
   }
 
@@ -1555,13 +1662,24 @@ class Room extends Phaser.Scene {
   drawFigures(t, dt) {
     const g = this.fx, b = this.player.body, p = this.player;
     g.clear();
+    this.drawStoryArt(t);
     for (const c of this.corpses) {
       if (c.buried > 0) { g.fillStyle(0x69cfff, 0.5).fillRect(c.x - 15, c.y + c.height / 2 - 4, 30, 4); continue; }
       if (c.sprites) this.soulFlames(g, c, t);
       else this.figure(g, c, { lying: c.lying, dir: c.dir, t, soul: true });
     }
     const grounded = b.blocked.down || b.touching.down;
+    if (grounded && !this.audioGrounded && this.dead <= 0) GameAudio.play('hero-land', 3);
+    this.audioGrounded = grounded;
     this.walk = (this.walk || 0) + (grounded ? Math.abs(b.velocity.x) * dt : 0);
+    const step = Math.floor(this.walk / RUN_STEP) % RUN_FRAMES.length;
+    if ((step === 0 || step === 3) && step !== this.audioStep && grounded && !this.lying && p.visible && Math.abs(b.velocity.x) > 20) {
+      const surface = this.world >= 2 ? 'worlds-2-3' : 'world-1';
+      const take = (this.audioTake ?? 0) % 3 + 1;
+      this.audioTake = take;
+      GameAudio.play(`hero-footstep-${surface}-${take}`, 0, 0.4);
+    }
+    this.audioStep = step;
     const usePainting = this.painted && (!this.lying || this.hasSlide);
     if (this.painted) this.heroSprite.setVisible(p.visible && usePainting);
     if (!p.visible) return;
@@ -1573,20 +1691,20 @@ class Room extends Phaser.Scene {
     // (one frame per RUN_STEP px, so steps match speed), or the standing painting when still.
     const wallPose = !grounded && b.velocity.y > 0 && this.wallSide() === this.face && this.textures.exists('heroWall');
     this.heroFrame = this.lying ? ['heroSlide', SLIDE_FRAMES[Math.floor(t * SLIDE_FPS) % SLIDE_FRAMES.length]]
-      : !grounded && this.kick > 0 && this.textures.exists('heroWall') ? ['heroWall', 3]
-      : wallPose ? ['heroWall', Math.floor(t * 8) % Math.min(3, this.textures.get('heroWall').frameTotal - 1)]
+      : !grounded && this.kick > 0 && this.textures.exists('heroKick') ? ['heroKick', 3]
+      : wallPose ? ['heroWall', Math.floor(t * 8) % 6]
       : !grounded ? ['heroSheet', b.velocity.y < 0 ? 6 : 7]
       : Math.abs(b.velocity.x) > 20
         ? (this.textures.exists('heroRun') ? ['heroRun', RUN_FRAMES[Math.floor(this.walk / RUN_STEP) % RUN_FRAMES.length]] : ['heroSheet', Math.floor(this.walk / RUN_STEP) % 6])
-      : this.textures.exists('heroIdleAnim') ? ['heroIdleAnim', Math.floor(t * 6) % 4] : ['heroIdle', undefined];
+      : this.textures.exists('heroIdleAnim') ? ['heroIdleAnim', Math.floor(t * 8) % 8] : ['heroIdle', undefined];
     const [key, frame] = this.heroFrame;
     // Standing frames center on him. The slide is anchored by its feet (the frame's leading edge),
     // a little ahead of center, so the body trails behind and getting up moves him forward.
     // Position from the physics body, which has already moved this frame (the rectangle only catches
     // up after drawing, so using it made the painting trail one frame behind the body).
-    const flip = (key === 'heroWall' && frame === 3 ? this.lastWall : this.face) < 0, slide = key === 'heroSlide', bx = b.center.x, feet = b.bottom;
-    this.heroSprite.setTexture(key, frame).setScale(key === 'heroWall' ? HERO_HEIGHT / 141 : this.heroScale).setFlipX(flip)
-      .setOrigin(slide ? this.slideOrigin(frame, flip) : key === 'heroIdleAnim' ? (flip ? 0.25 : 0.75) : 0.5, 1)
+    const flip = (key === 'heroKick' ? this.lastWall : this.face) < 0, slide = key === 'heroSlide', bx = b.center.x, feet = b.bottom;
+    this.heroSprite.setTexture(key, frame).setScale(key === 'heroWall' || key === 'heroKick' ? HERO_HEIGHT / 141 : this.heroScale * (key === 'heroRun' ? RUN_SCALE : 1)).setFlipX(flip)
+      .setOrigin(slide ? this.slideOrigin(frame, flip) : key === 'heroIdleAnim' ? (flip ? 0.27 : 0.73) : 0.5, 1) // idle feet sit 73% across the frame
       .setPosition(bx + (slide ? this.face * 12 : 0), feet + 1);
     // the amulet's glow, on his chest (only placed for upright poses)
     if (slide || !this.wearing) return;
@@ -1703,7 +1821,10 @@ class Room extends Phaser.Scene {
   }
 
   updateEnemies() {
-    if (this.talk?.line || this.talk?.queue?.length) { for (const e of this.enemies) e.body.velocity.x = 0; return; } // hold still while they talk
+    if (this.dead > 0 || this.talk.active) { // walkers wait while you are dead or in a conversation
+      for (const e of this.enemies) e.body.setVelocity(0, 0);
+      return;
+    }
     const solids = this.statics.getChildren().filter((s) => s.body.enable).map(bounds);
     for (const e of this.enemies) {
       const b = e.body;
@@ -1756,7 +1877,7 @@ class Room extends Phaser.Scene {
     const solid = (box, skip) => this.statics.getChildren().find((s) => s !== skip && s.body.enable && hit(box, bounds(s)));
     const walls = (box) => this.statics.getChildren().find((s) => s.body.enable && !this.corpses.includes(s) && hit(box, bounds(s)));
     const R = this.rooms[this.index].rect, p = this.player, t = this.time.now / 1000;
-    for (const f of this.flyers) {
+    for (const f of this.dead > 0 || this.talk.active ? [] : this.flyers) {
       const nx = f.x + f.dir * FLYER_SPEED * dt;
       if (walls(new Phaser.Geom.Rectangle(nx - 12, f.y - 8, 24, 16)) || nx < R.x + 16 || nx > R.right - 16) f.dir *= -1;
       else f.x = nx;
@@ -1818,7 +1939,7 @@ class Room extends Phaser.Scene {
         g.fillStyle(0xf1f578, 0.35).fillRect(B.r.x - 12 * T, B.floor - 24, 16 * T, 24);
         for (let x = B.r.x - 12 * T; x < B.r.x + 4 * T; x += T) g.fillTriangle(x, B.floor, x + 12, B.floor - 18, x + 24, B.floor);
       } else if (B.phase === 'mortar') {
-        for (const x of B.landings) g.lineStyle(2, 0xf1f578, 0.9).strokeEllipse(x, B.floor - 4, 76, 12);
+        for (const x of B.landings) g.lineStyle(2, 0xf1f578, 0.9).strokeEllipse(x, B.landingY + 4, 76, 12);
       } else if (B.phase === 'canopy') {
         g.fillStyle(0xf1f578, 0.2).fillRect(B.r.x - 16, B.floor - 14 * T, 32, 14 * T);
         for (let i = 0; i < 6; i++) g.fillStyle(0xf1f578, 0.7).fillEllipse(B.r.x - 50 + i * 20, B.floor - 12 * T + (t * 80 + i * 30) % 80, 6, 12);
@@ -1840,8 +1961,12 @@ class Room extends Phaser.Scene {
 
   drawStagGrounds() {
     const R = this.rooms.find((r) => r.name === 'The old tree').rect;
-    this.add.rectangle(R.x + 21 * T, R.y + 13 * T, 26, 128, 0x655d60).setDepth(1);
-    this.add.circle(R.x + 21 * T, R.y + 9 * T, 65, 0x526672).setDepth(1);
+    if (this.textures.exists('old-tree'))
+      this.add.image(R.x + 21 * T, R.y + 15 * T, 'old-tree').setOrigin(0.5, 1).setScale(0.5).setDepth(1);
+    else {
+      this.add.rectangle(R.x + 21 * T, R.y + 13 * T, 26, 128, 0x655d60).setDepth(1);
+      this.add.circle(R.x + 21 * T, R.y + 9 * T, 65, 0x526672).setDepth(1);
+    }
     this.add.ellipse(R.x + 19 * T, R.y + 14 * T, 200, 68, 0x705a43).setDepth(1);
     this.stagWriting = this.add.text(R.x + 16.5 * T, R.y + 13 * T, SCRIPT.stagNote.map((l) => l.text).join('\n'), {
       fontFamily: 'cursive', fontSize: '14px', color: '#382b23', fontStyle: 'italic', wordWrap: { width: 600 }
@@ -1853,17 +1978,23 @@ class Room extends Phaser.Scene {
 
   stagSeals(B) {
     const R = this.rooms[B.room].rect;
-    return [[6.5, 14.5], [12.5, 14.5], [5.5, 11.5]].map(([x, y]) => ({
+    return [[1.5, 11.5], [37.5, 11.5], [5.5, 11.5]].map(([x, y]) => ({
       x: R.x + x * T, y: R.y + y * T
     }));
   }
 
   updateStag(B, dt) {
     const R = this.rooms[B.room].rect, p = this.player;
+    const cam = this.cameras.main;
+    cam.setZoom(Math.min(1, cam.width / R.width)); cam.stopFollow(); cam.centerOn(R.centerX, R.centerY);
     B.antlers.setVisible(B.r.visible && !B.img).clear().lineStyle(B.phase === 'bell' ? 7 : 3, B.phase === 'bell' ? 0xdf89ff : 0xd9f3ff);
     for (const dx of [-28, 28]) {
       B.antlers.lineBetween(B.r.x + dx, B.r.y - 32, B.r.x + dx, B.r.y - 66);
       B.antlers.lineBetween(B.r.x + dx, B.r.y - 48, B.r.x + dx + Math.sign(dx) * 17, B.r.y - 62);
+    }
+    if (B.phase === 'beam' && B.beam) {
+      this.fx.lineStyle(2, 0x65baff, 0.6).lineBetween(B.r.x, B.r.y - 2 * T, B.beam.x, B.beam.y);
+      this.fx.fillStyle(0x65baff, 0.9).fillCircle(B.beam.x, B.beam.y, 8);
     }
     const pose = this.time.now < B.introUntil ? 'intro' : B.phase === 'beam' ? 'beam'
       : B.phase === 'bell' ? 'wave' : B.phase === 'charge' ? 'charge' : 'idle';
@@ -1886,6 +2017,8 @@ class Room extends Phaser.Scene {
     B.hurt -= dt; B.clock += dt;
     B.r.setFillStyle(B.phase === 'bell' ? 0xdf89ff : B.phase === 'beam' ? 0x65baff : B.phase === 'windup' ? 0xffda75 : 0xbceaff);
     if (B.phase === 'setup') {
+      B.r.x = R.x + 25 * T;
+      if (p.x < R.x + 7 * T && p.y + 15 > R.y + 12 * T) { B.clock = 0; return; }
       if (B.clock < 8 && p.x < R.x + 7 * T) return;
       B.phase = 'windup'; B.clock = 0;
     }
@@ -1897,7 +2030,7 @@ class Room extends Phaser.Scene {
       this.fx.fillStyle(0xf5f582, 0.22).fillRect(B.aimX - 16, R.y + 13 * T, 32, 2 * T);
       if (B.clock >= 0.9) { B.rammed = false; next('charge'); }
     } else if (B.phase === 'charge') {
-      B.r.x = Math.max(R.x + 6.5 * T, B.r.x - 650 * dt);
+      B.r.x -= Math.sign(B.r.x - B.aimX) * Math.min(Math.abs(B.r.x - B.aimX), 650 * dt);
       const c = this.corpses.find(c => c.body.enable && hit(bounds(c), bounds(B.r)));
       if (c) {
         const bottom = c.y + c.height / 2;
@@ -1907,12 +2040,12 @@ class Room extends Phaser.Scene {
         c.setFillStyle(0x7399d9, 0.6);
         B.rammed = true;
       }
-      if (B.r.x <= (B.rammed ? R.x + 6.5 * T : Math.max(R.x + 6.5 * T, B.aimX))) {
+      if (B.rammed || Math.abs(B.r.x - B.aimX) < 1) {
         B.stomped = false; next(B.rammed ? 'dazed' : 'miss');
       }
     } else if ((B.phase === 'dazed' && B.clock >= 2) || (B.phase === 'miss' && B.clock >= gap)) {
-      B.r.x = R.right - 5 * T; next('beam');
-      B.beam = { x: B.r.x, y: B.r.y - 2 * T, angle: Math.PI, clock: 0, stag: true };
+      B.r.x = R.x + 25 * T; next('beam');
+      B.beam = { x: B.r.x, y: R.y + 5 * T, angle: Math.PI, clock: 0, stag: true };
     } else if (B.phase === 'beam') {
       if (B.beam.clock < 1.98) this.updateAimedBeam(B.beam, dt);
       if (B.clock >= 1.98 + gap) next('procession');
@@ -1970,12 +2103,19 @@ class Room extends Phaser.Scene {
     const pod = (x, y, vx, vy) => {
       const sh = this.textures.exists('mothDust') ? this.add.image(x, y, 'mothDust').setDisplaySize(16, 16)
         : this.add.circle(x, y, 8, 0xffef72);
+      GameAudio.play('moth-wing-dust-shot');
       this.shots.push(Object.assign(sh.setDepth(4), { vx, vy, mothDust: true }));
     };
     if (!B.phase) { enter('pause'); B.r.y = floor - 96; B.fired = 0; }
     B.clock += dt;
-    B.pose = ['diveTell', 'dive'].includes(B.phase) ? 2 : undefined;
-    B.img?.setAngle(B.phase === 'loomTell' ? Math.sin(B.clock * 40) * 6 : 0);
+    B.pose = ['diveTell', 'dive'].includes(B.phase) ? 0 : undefined; // wings down
+    B.img?.setAngle(B.phase === 'stunned' ? 25 : B.phase === 'loomTell' ? Math.sin(B.clock * 40) * 6 : 0);
+    const flyTo = (x, y) => {
+      const distance = Math.hypot(x - B.r.x, y - B.r.y), step = Math.min(1, 900 * dt / (distance || 1));
+      B.dir = Math.sign(x - B.r.x) || B.dir;
+      B.r.x += (x - B.r.x) * step; B.r.y += (y - B.r.y) * step;
+      return distance <= 900 * dt;
+    };
     B.r.setAlpha(B.hurt > 0 ? 0.4 : 1);
     if (B.hp < BOSS_HP) {
       B.warn.lineStyle(4, 0x352e48).lineBetween(B.r.x - 45, B.r.y - 18, B.r.x - 25, B.r.y + 10);
@@ -1992,9 +2132,10 @@ class Room extends Phaser.Scene {
         if (++B.fired >= (B.hp === 1 ? 4 : 3)) enter('loomGap');
       }
     } else if (B.phase === 'loomGap' && B.clock >= gap) {
-      enter('diveTell');
+      enter('diveApproach');
       B.lane = Phaser.Math.Clamp(p.x, B.min, B.max);
-      B.r.x = B.lane; B.r.y = floor - 160;
+    } else if (B.phase === 'diveApproach') {
+      if (flyTo(B.lane, floor - 160)) enter('diveTell');
     } else if (B.phase === 'diveTell') {
       B.warn.strokeRect(B.lane - BOSS_W / 2, floor - 200, BOSS_W, 200);
       if (B.clock >= 0.8) enter('dive');
@@ -2004,22 +2145,29 @@ class Room extends Phaser.Scene {
       if (soul) {
         B.r.y = bounds(soul).top - BOSS_H / 2;
         enter('stunned'); B.open = true;
-        if (this.textures.exists('mothImpact')) {
-          const flash = this.add.image(B.r.x, bounds(soul).top, 'mothImpact').setDisplaySize(T, T).setDepth(5);
-          this.time.delayedCall(250, () => flash.destroy());
-        }
+        const flash = this.textures.exists('mothImpact')
+          ? this.add.image(B.r.x, bounds(soul).top, 'mothImpact').setDisplaySize(2 * T, 2 * T)
+          : this.add.star(B.r.x, bounds(soul).top, 8, 12, 32, 0xffef72);
+        flash.setDepth(5);
+        this.tweens.add({ targets: flash, alpha: 0, y: flash.y - 12, duration: 500, onComplete: () => flash.destroy() });
       } else if (B.clock >= 0.5) enter('diveGap');
     } else if (B.phase === 'stunned') {
-      B.warn.strokeCircle(B.r.x, B.r.y - BOSS_H / 2 - 8, 9);
+      for (let i = 0; i < 3; i++) {
+        const a = B.clock * 5 + i * Math.PI * 2 / 3;
+        const sx = B.r.x + Math.cos(a) * 34, sy = B.r.y - BOSS_H / 2 - 14 + Math.sin(a) * 8; // dizzy sparks: it's open
+        B.warn.fillStyle(0xffef72, 0.95).fillCircle(sx, sy, 6).fillStyle(0xffffff, 1).fillCircle(sx, sy, 2.5);
+      }
       if (B.clock >= 2) { B.open = false; enter('diveGap'); }
     } else if (B.phase === 'diveGap' && B.clock >= gap) {
-      B.r.x = B.max; B.r.y = floor - 96; enter('curtainTell');
+      enter('curtainApproach');
+    } else if (B.phase === 'curtainApproach') {
+      if (flyTo(B.max, floor - 96)) enter('curtainTell');
     } else if (B.phase === 'curtainTell') {
       for (let i = 0; i < 3; i++) B.warn.strokeRect(R.x + (3 + i * 8) * T, R.y + T, 6 * T, 10);
       if (B.clock >= 1) { enter('curtain'); B.fired = 0; }
     } else if (B.phase === 'curtain') {
       if (B.clock >= B.fired * 0.45) {
-        for (let j = 0; j < 12; j++) pod(R.x + (3 + B.fired * 8 + j / 2) * T, R.y + T, 0, 280);
+        for (let j = 0; j < 12; j++) pod(R.x + (3.25 + B.fired * 8 + j / 2) * T, R.y + T + 8, 0, 280); // just under the ceiling, or it dies inside it
         if (++B.fired === 3) enter('curtainGap');
       }
     } else if (B.phase === 'curtainGap' && B.clock >= gap) {
@@ -2032,7 +2180,9 @@ class Room extends Phaser.Scene {
       B.r.x = Math.max(B.min, B.max - B.clock * 360);
       if (B.r.x <= B.min) enter('pause');
     } else if (B.phase === 'pause' && B.clock >= 2 * 0.8 ** (BOSS_HP - B.hp)) {
-      B.r.setSize(BOSS_W, BOSS_H); B.r.x = B.max; B.r.y = floor - 96; enter('loomTell'); B.fired = 0;
+      B.r.setSize(BOSS_W, BOSS_H); enter('loomApproach');
+    } else if (B.phase === 'loomApproach') {
+      if (flyTo(B.max, floor - 96)) { enter('loomTell'); B.fired = 0; }
     }
   }
 
@@ -2049,7 +2199,7 @@ class Room extends Phaser.Scene {
     const frame = Math.floor((this.time.now - B.artStart) / (duration * 1000) * count);
     const sourceHeight = kind === 'stag' ? { idle: 486, intro: 584, charge: 500, beam: 555, wave: 617 }[pose] : fh;
     const scale = height / sourceHeight;
-    B.artFoot = kind === 'stag' ? (fh - { idle: 660, intro: 677, charge: 676, beam: 653, wave: 676 }[pose]) * scale : 0;
+    B.artFoot = (fh - (kind === 'stag' ? { idle: 660, intro: 677, charge: 676, beam: 653, wave: 676 } : { idle: 657, intro: 659, swing: 660, slam: 662, throw: 648 })[pose]) * scale; // empty rows under the feet
     B.img.setTexture(key, loop ? frame % count : Math.min(count - 1, frame)).setScale(scale);
     if (pose === 'idle') B.img.setFrame(0).setScale(scale, scale * (1 + Math.sin(this.time.now / 320) * 0.012));
   }
@@ -2061,7 +2211,7 @@ class Room extends Phaser.Scene {
       B.img = this.add.image(B.r.x, B.r.y, key).setDepth(4);
       B.r.on('destroy', () => B.img.destroy());
     }
-    const floor = this.rooms[B.room].rect.bottom - T;
+    const floor = B.floor ?? (B.stag ? B.r.y + 32 : this.rooms[B.room].rect.bottom - T); // the stag's room has two floor rows
     const tex = this.textures.get(key);
     // Fallen paintings have wide transparent margins.
     const [x, y, w, h] = { moth: [464, 310, 344, 104], tree: [512, 270, 250, 158], stag: [558, 306, 136, 86] }[kind];
@@ -2075,6 +2225,7 @@ class Room extends Phaser.Scene {
   }
 
   treeImpact(x, y) {
+    GameAudio.play('tree-slam');
     const r = this.textures.exists('impact') ? this.add.image(x, y, 'impact').setDisplaySize(64, 32) : this.add.ellipse(x, y, 64, 16, 0xf1f578, 0.6);
     this.tweens.add({ targets: r, alpha: 0, duration: 300, onComplete: () => r.destroy() });
   }
@@ -2082,7 +2233,7 @@ class Room extends Phaser.Scene {
   updateTree(B, dt) {
     const pose = B.open > 0 ? 'slam' : B.phase === 'rake' ? 'swing' : B.phase === 'mortar' ? 'throw' : B.phase === 'slam' ? 'slam' : 'idle';
     this.bossPose(B, 'tree', pose, 224, B.phase === 'slam' ? TREE_GLOW : 0.8, pose === 'idle');
-    B.img?.setVisible(B.r.visible).setTint(B.open > 0 ? 0xffffff : B.phase === 'slam' ? 0x69cfff : B.phase !== 'idle' ? 0xf1f578 : 0xffffff);
+    B.img?.setY(B.floor + B.artFoot).setVisible(B.r.visible).setTint(B.open > 0 ? 0xffffff : B.phase === 'slam' ? 0x69cfff : B.phase !== 'idle' ? 0xf1f578 : 0xffffff);
     if (B.hidden || this.dead > 0 || this.talk.line || this.talk.queue.length || this.transit) return;
     B.hurt -= dt;
     if (this.player.body.blocked.down || this.player.body.touching.down) B.stompReady = true;
@@ -2098,7 +2249,7 @@ class Room extends Phaser.Scene {
         stone.vy += 700 * dt; stone.r.y += stone.vy * dt;
         const support = this.corpses.filter((c) => !c.buried && Math.abs(c.x - stone.r.x) < c.width / 2 + 12 &&
           bounds(c).top >= bottom - 1 && bounds(c).top <= stone.r.y + 16).sort((a, b) => a.y - b.y)[0];
-        if (support) { stone.support = support; stone.r.y = bounds(support).top - 16; stone.vy = 0; }
+        if (support) { stone.support = support; stone.r.y = bounds(support).top - 16; stone.vy = 0; B.timer = 1; }
         else if (bottom <= bounds(B.r).top && stone.r.y + 16 >= bounds(B.r).top) {
           if (stone.armed) { B.open = 2; B.timer = Math.max(B.timer, 2); }
           this.treeImpact(stone.r.x, bounds(B.r).top);
@@ -2118,16 +2269,18 @@ class Room extends Phaser.Scene {
           const burst = this.textures.exists('mortar-burst') ? this.add.image(pod.r.x, B.floor - 12, 'mortar-burst').setDisplaySize(76, 32) : this.add.rectangle(pod.r.x, B.floor - 12, 76, 24, 0xf1f578, 0.6);
           this.tweens.add({ targets: burst, alpha: 0, duration: 300, onComplete: () => burst.destroy() });
         }
+        GameAudio.play('tree-seed-pod-burst');
         pod.r.destroy(); B.pods.splice(B.pods.indexOf(pod), 1);
       }
     }
     if (B.open > 0) { B.open = Math.max(0, B.open - dt); return; }
+    if (B.phase === 'idle' && B.attack === 2 && B.stone && !B.stone.support) return;
     if ((B.timer -= dt) > 0) return;
     if (B.phase === 'idle' || B.phase === 'intro') {
       B.attack = (B.attack + 1) % 4;
       B.phase = ['rake', 'mortar', 'canopy', 'slam'][B.attack];
       B.timer = [0.8, 0.7, 1, TREE_GLOW][B.attack];
-      if (B.phase === 'mortar') B.landings = [-64, 0, 64].map((dx) => Math.max(this.rooms[B.room].rect.x + T, Math.min(p.x + dx, this.rooms[B.room].rect.right - T)));
+      if (B.phase === 'mortar') { B.landingY = feet - 8; B.landings = [-64, 0, 64].map((dx) => Math.max(this.rooms[B.room].rect.x + T, Math.min(p.x + dx, this.rooms[B.room].rect.right - T))); }
       if (B.phase === 'slam') {
         B.target = this.corpses.filter((c) => !c.buried).sort((a, b) => Math.hypot(a.x - p.x, a.y - p.y) - Math.hypot(b.x - p.x, b.y - p.y))[0];
         B.aimX = B.target?.x ?? p.x;
@@ -2135,16 +2288,18 @@ class Room extends Phaser.Scene {
       return;
     }
     if (B.phase === 'slam') {
+      GameAudio.play('tree-slam');
       const c = B.target;
-      if (c?.active) { c.buried = TREE_BURIED; c.body.enable = false; c.setAlpha(0.15); c.sprites?.forEach((s) => s.setAlpha(0.1)); }
+      if (c?.active) { GameAudio.play('hero-soul-erased-replaced'); c.buried = TREE_BURIED; c.body.enable = false; c.setAlpha(0.15); c.sprites?.forEach((s) => s.setAlpha(0.1)); }
       this.cameras.main.shake(180, 0.005);
       if (feet > B.floor - 24 || Math.abs(p.x - B.aimX) < 28 && feet > (c?.y ?? B.floor) - 40) return this.die();
     } else if (B.phase === 'rake') {
       if (p.x > B.r.x - 12 * T && p.x < B.r.x + 4 * T && feet > B.floor - 24) return this.die();
     } else if (B.phase === 'mortar') {
       for (const x of B.landings) {
-        const r = this.textures.exists('seedPod') ? this.add.image(B.r.x, B.r.y, 'seedPod').setDisplaySize(20, 20) : this.add.rectangle(B.r.x, B.r.y, 20, 20, 0xf1f578);
-        B.pods.push({ r, vx: (x - B.r.x) / 0.9, vy: (B.floor - 8 - B.r.y - 350 * 0.81) / 0.9 });
+        const r = this.textures.exists('seedPod') ? this.add.image(B.r.x, B.floor - 14 * T, 'seedPod').setDisplaySize(20, 20) : this.add.rectangle(B.r.x, B.floor - 14 * T, 20, 20, 0xf1f578);
+        GameAudio.play('tree-seed-pod-launch');
+        B.pods.push({ r, vx: (x - B.r.x) / 0.9, vy: (B.landingY - r.y - 350 * 0.81) / 0.9 });
       }
     } else if (B.phase === 'canopy') {
       B.stone?.r.destroy();
@@ -2161,24 +2316,34 @@ class Room extends Phaser.Scene {
     const top = bounds(B.r).top;
     const falling = p.body.velocity.y >= 0;
     if (!falling && p.y + 15 <= top + 18) return false;
-    if (!falling || (this.bossPreviousFeet ?? p.body.prev.y + p.body.height) > top + 1) { this.die(); return true; }
+    if (!falling || (this.bossPreviousFeet ?? p.body.prev.y + p.body.height) > top + 1) {
+      if (B.kind === 'tree') return false;
+      if (B.story === 'mothDown' && (B.phase === 'stunned' || B.phase?.endsWith('Approach'))) return false;
+      this.die(); return true;
+    }
     p.body.reset(p.x, top - p.height / 2);
-    p.body.velocity.y = -JUMP * 0.8;
-    if (B.hurt > 0 || (B.story === 'mothDown' && !B.open) || (B.stag && (B.phase !== 'dazed' || B.stomped)) || (B.kind === 'tree' && (B.stompReady === false || B.open <= 0))) return false;
+    p.body.velocity.y = -JUMP * (B.stag ? 1 : 0.8);
+    if (B.hurt > 0 || (B.stag && (B.phase !== 'dazed' || B.stomped)) || (B.kind === 'tree' && (B.stompReady === false || B.open <= 0))) return false;
     if (B.stag) B.stomped = true;
     if (B.kind === 'tree') { B.stompReady = false; B.open = 0; }
+    GameAudio.play(`${GameAudio.kind(B)}-${B.kind === 'tree' ? 'mask-hit' : 'hit'}`);
     B.hurt = 0.5;
+    this.cameras.main.shake(180, 0.008);
+    B.img?.setTintFill(0xffffff);
+    this.time.delayedCall(120, () => B.img?.active && B.img.clearTint());
     if (B.story === 'mothDown') {
       B.open = false; B.phase = 'diveGap'; B.clock = 0; B.warn?.clear();
       for (const sh of this.shots.filter((sh) => sh.mothDust)) sh.destroy();
       this.shots = this.shots.filter((sh) => !sh.mothDust);
     }
     if (--B.hp <= 0 && B.story) { // a story boss stops still; its script dissolves it (cue 'absorb')
+      GameAudio.play(`${GameAudio.kind(B)}-defeat`);
       B.hidden = true;
       this.fallenBoss(B);
-      if (B.stag) Dialogue.seen.delete(B.story);
+      // Shift+R during the scene brings the boss back unbeaten, so its scene (which grants the win) must play again.
+      Dialogue.seen.delete(B.story);
       Dialogue.play(this, B.story);
-      if (B.story === 'treeDown') Dialogue.play(this, 'guideCrack');
+      if (B.story === 'treeDown') { Dialogue.seen.delete('guideCrack'); Dialogue.play(this, 'guideCrack'); }
       if (B.stag) this.talk.queue = this.talk.queue.map((l) => ({ ...l, text: l.text?.replace('{deaths}', B.deaths).replace('{next}', B.deaths + 1) }));
     } else if (B.hp <= 0) {
       this.bossDefeated(B);
@@ -2189,18 +2354,30 @@ class Room extends Phaser.Scene {
 
   update(_t, ms) {
     const dt = Math.min(ms / 1000, 0.05);
-    const k = this.keys, JD = Phaser.Input.Keyboard.JustDown, p = this.player;
+    const raw = this.keys, JD = Phaser.Input.Keyboard.JustDown, p = this.player;
+    this.blockedKeys ??= new Map();
+    // A held key stays blocked until released; a new press (new timeDown) counts even if
+    // the release and press both landed between two frames.
+    for (const [key, timeDown] of this.blockedKeys) {
+      if (!key.isDown) key._justDown = key._justUp = false;
+      if (!key.isDown || key.timeDown !== timeDown) this.blockedKeys.delete(key);
+    }
+    const k = Object.fromEntries(Object.entries(raw).map(([name, key]) => {
+      if (!this.blockedKeys.has(key)) return [name, key];
+      return [name, { isDown: false, _justDown: false, _justUp: false }];
+    }));
+    GameAudio.room(this, dt);
     this.bossPreviousFeet = this.bossFeet;
     this.bossFeet = p.y + p.height / 2;
 
-    if (JD(k.R) && k.SHIFT.isDown) return this.scene.restart({ index: this.index }); // Shift+R: retry the room (if you've trapped yourself)
+    if (JD(k.R) && k.SHIFT.isDown) return this.scene.restart({ index: this.index, retry: true }); // Shift+R: retry the room (if you've trapped yourself)
     if (DEV && JD(k.N)) return this.scene.restart({ index: this.index + 1 });
     if (DEV && JD(k.ONE)) rules.freeze = !rules.freeze;
     if (DEV && JD(k.TWO)) rules.snap = !rules.snap;
     if (DEV && JD(k.THREE)) rules.max = LIMITS[(LIMITS.indexOf(rules.max) + 1) % LIMITS.length];
     if (DEV && JD(k.FOUR)) rules.selfDestruct = !rules.selfDestruct;
     if (DEV && JD(k.FIVE)) rules.recall = !rules.recall;
-    if (JD(k.ESC)) Dialogue.skip(this);
+    if (JD(raw.ESC)) Dialogue.skip(this);
     if (DEV && JD(k.H)) { showHud = !showHud; this.hud.setVisible(showHud); }
 
     if (!rules.freeze) this.dropCorpses(dt);
@@ -2215,14 +2392,30 @@ class Room extends Phaser.Scene {
     Art.update(this, this.time.now / 1000);
 
     const weights = [p, ...this.corpses].map(bounds);
+    for (const pl of this.plates.filter(pl => pl.room === this.index)) {
+      const held = weights.some(w => hit(w, bounds(pl)));
+      if (held !== !!pl.audioHeld) GameAudio.play(held ? 'hazards-plate-down' : 'hazards-plate-up');
+      pl.audioHeld = held;
+    }
     for (const d of this.doors) {
-      const held = d.plates.some((pl) => weights.some((w) => hit(w, bounds(pl))));
+      let held = d.plates.some((pl) => weights.some((w) => hit(w, bounds(pl))));
+      if (this.rooms[d.room].name === 'Two places' && d.x < this.rooms[d.room].rect.x + 17 * T) held = !held;
+      if (d.room === this.index && d.audioHeld !== undefined && d.audioHeld !== held) GameAudio.play(held ? 'hazards-door-opens' : 'hazards-door-closes');
+      d.audioHeld = held;
       d.body.enable = !held;
       d.setAlpha(held ? 0.2 : 1);
     }
 
     this.updateHud();
     this.updateKeyPrompt();
+    const room = this.rooms[this.index];
+    if (!this.boss?.stag) { // the stag frames its whole arena; after the win the camera follows again
+      const zoom = room.name === 'Thornwood' && p.x > room.rect.x + 27 * T ? 0.68 : 1, cam = this.cameras.main;
+      cam.setZoom(cam.zoom + (zoom - cam.zoom) * Math.min(1, dt * 6)); // eases out to show Thornwood's section C
+      if (!this.cameras.main._follow && !this.transit) this.cameras.main.startFollow(p, true, 0.12, 0.12);
+    }
+    for (const layer of this.art.layers) if (layer.ts.depth === 10)
+      layer.ts.setAlpha(room.name === 'The well' ? 0.15 : 1);
     // Look into drops in every tall room, including drops after a shrine.
     this.cameras.main.setFollowOffset(0, this.rooms[this.index].rect.height > this.cameras.main.height ? -this.cameras.main.height * 0.4 : 0);
     if (this.transit) return;
@@ -2243,22 +2436,27 @@ class Room extends Phaser.Scene {
       if (next >= 0) return this.enterRoom(next);
       p.body.reset(this.start.x, this.start.y); // fell out of the world
     }
-    const space = JD(k.SPACE), jumpDown = space | JD(k.W) | JD(k.UP), swap = JD(k.E), talkKey = space | JD(k.ENTER) | swap;
+    const rawSpace = JD(raw.SPACE), rawSwap = JD(raw.E);
+    const talkKey = rawSpace | JD(raw.ENTER) | rawSwap;
+    const space = k.SPACE === raw.SPACE && rawSpace;
+    const jumpDown = space | JD(k.W) | JD(k.UP), swap = k.E === raw.E && rawSwap;
     const JU = Phaser.Input.Keyboard.JustUp, jumpUp = JU(k.SPACE) | JU(k.W) | JU(k.UP);
     const slideKey = JD(k.S) | JD(k.DOWN) | JD(k.SHIFT);
     this.showGuide(dt);
-    if (this.dead <= 0 && Dialogue.update(this, dt, talkKey)) { p.body.velocity.x = 0; return; } // talking: hold still
+    if (this.dead <= 0 && Dialogue.update(this, dt, talkKey)) return; // the scene owns movement
     if (this.dead > 0) {
       this.dead -= dt;
       p.setVisible(this.dead <= 0);
+      p.body.moves = this.dead <= 0;
+      if (this.dead <= 0) GameAudio.play('hero-respawn-soul-gathers-back');
       p.body.velocity.x = 0;
       return;
     }
     if (swap && ((this.rooms[this.index].world ?? 0) >= 3 || this.treePower)) {
       const c = this.corpses.at(-1);
       if (c) {
-        const x = p.x, y = p.y;
-        p.body.reset(c.x, c.y); p.body.setVelocity(0, 0);
+        const x = p.x, y = p.y, vx = p.body.velocity.x;
+        p.body.reset(c.x, c.y); p.body.setVelocity(vx, 0);
         c.setPosition(x, y); c.body.updateFromGameObject(); c.vy = 0;
         c.sprites?.forEach((sp) => sp.setPosition(c.x, c.y + c.height / 2));
         this.swapped = true;
@@ -2268,14 +2466,19 @@ class Room extends Phaser.Scene {
     // Land on an enemy from above to stomp it (it comes back when you re-enter the room); any other touch kills.
     for (const list of [this.enemies, this.flyers]) for (const e of [...list]) {
       if (!hit(pb, bounds(e))) continue;
-      if (p.body.velocity.y > 0 && pb.bottom - bounds(e).y < 14) { list.splice(list.indexOf(e), 1); this.downed.push({ sp: e.spawn }); e.destroy(); p.body.velocity.y = -STOMP_BOUNCE; }
+      if (p.body.velocity.y > 0 && pb.bottom - bounds(e).y < 14) { list.splice(list.indexOf(e), 1); this.downed.push({ sp: e.spawn }); GameAudio.play('walker-crushed'); e.destroy(); p.body.velocity.y = -STOMP_BOUNCE; }
       else return this.die();
     }
     const sawBoxes = this.saws.filter((sw) => sw.room === this.index).map((sw) => new Phaser.Geom.Rectangle(sw.x - SAW_R + 3, sw.y - SAW_R + 3, SAW_R * 2 - 6, SAW_R * 2 - 6));
     const falling = this.droppers.filter((d) => d.room === this.index && d.state !== 'gone').map((d) => bounds(d.r));
     const hazards = [...this.spikes.map(bounds), ...this.shots.map(bounds), ...sawBoxes, ...falling];
-    if (hazards.some((h) => hit(pb, h)) || this.laserHit()) return this.die();
+    if (hazards.some((h) => hit(pb, h)) || this.laserHit()) {
+      const spike = this.spikes.find(h => hit(pb, bounds(h)));
+      if (spike) GameAudio.play(spike.audioVine ? 'hazards-vine-wall-touch' : 'hazards-spikes-impale');
+      return this.die();
+    }
     const world = this.rooms[this.index].world ?? 0;
+    GameAudio.loop(this, 'hero-release-wind-up', !this.sdLock && (rules.selfDestruct || world >= 2) && (k.K.isDown || k.X.isDown), 0.5);
     // Self-destruct: hold to charge, let go to cancel. After a death, let go before charging again.
     if (!(k.K.isDown || k.X.isDown)) this.sdLock = false, this.charge = 0;
     else if (!this.sdLock && (rules.selfDestruct || world >= 2) && (this.charge += ms / 1000) >= SD_HOLD) { this.sdLock = true; return this.die(true); }
@@ -2292,29 +2495,35 @@ class Room extends Phaser.Scene {
     if (this.touchBoss()) return;
     this.amulets = this.amulets.filter((a) => {
       if (!hit(bounds(p), bounds(a))) return true;
+      GameAudio.play('story-amulet-pickup');
       a.destroy(); // the gold flash comes later, once he puts it on
       Dialogue.play(this, 'amulet');
       return false;
     });
     for (const sh of this.shrines) if ((hit(bounds(p), bounds(sh)) ||
         (world === 3 && Math.abs(p.x - sh.x) < T / 2 && p.y + 15 <= sh.y + 14 && p.y + 15 > sh.y - 4 * T)) && this.start !== sh.spawn) {
+      GameAudio.play('story-shrine-activates');
       this.start = sh.spawn;
       this.shrines.forEach((o) => o.rune.setAlpha(o === sh ? 1 : 0.35));
       if (this.rooms[this.index].shrineTalk) Dialogue.play(this, this.rooms[this.index].shrineTalk);
       if (this.rooms[this.index].world) Dialogue.play(this, 'shrineMark'); // the first touch only
     }
 
+    // A pickup, shrine or boss can open dialogue during this frame.
+    if (this.talk.active) { Dialogue.update(this, dt, false); return; }
     const b = p.body;
     if (b.velocity.y > MAX_FALL) b.velocity.y = MAX_FALL; // cap falling only (a cap both ways held springs to 7.4 tiles)
     const grounded = b.blocked.down || b.touching.down;
     if (grounded || b.velocity.y >= 0) this.sprung = false;
     if (b.velocity.y >= 0 && this.springs.some((sp) => hit(bounds(p), bounds(sp)))) {
+      GameAudio.play('hazards-spring');
       b.velocity.y = -SPRING; this.sprung = true;
       for (const sp of this.springs) if (hit(bounds(p), bounds(sp))) sp.launchArt = this.time.now;
     }
     const dir = (k.D.isDown || k.RIGHT.isDown) - (k.A.isDown || k.LEFT.isDown);
     if (dir && !(this.lying && this.slide > 0)) this.face = dir; // can't turn mid-slide
     if (slideKey && grounded && !this.lying && Math.abs(b.velocity.x) > 100) {
+      GameAudio.play('hero-slide');
       this.setLying(true);
       this.slide = SLIDE_TIME;
       this.slideDir = Math.sign(b.velocity.x);
@@ -2332,15 +2541,18 @@ class Room extends Phaser.Scene {
     else if (!grounded && (dir === 0 || (dir === Math.sign(b.velocity.x) && Math.abs(b.velocity.x) > SPEED))) {
       // Airborne and not steering (or steering with momentum already past running speed, e.g. a dive
       // out of a slide): keep the momentum, fading it only by light air drag.
-      b.velocity.x -= Math.sign(b.velocity.x) * Math.min(Math.abs(b.velocity.x), AIR_DRAG * dt);
+      // Letting go while a spring throws you up stops your drift (as on the ground), so a soul hung beside the spring isn't bumped from below.
+      b.velocity.x -= Math.sign(b.velocity.x) * Math.min(Math.abs(b.velocity.x), (this.sprung && !dir ? ACCEL : AIR_DRAG) * dt);
     } else {
       const diff = dir * SPEED - b.velocity.x, step = (grounded ? ACCEL : AIR_ACCEL) * dt;
       b.velocity.x += Math.sign(diff) * Math.min(Math.abs(diff), step);
     }
     this.coyote = grounded ? COYOTE : this.coyote - dt;
     this.buffer = jumpDown ? BUFFER : this.buffer - dt;
-    if (this.buffer > 0 && this.coyote > 0) { b.velocity.y = -JUMP; this.buffer = this.coyote = 0; }
+    // No dive in a one-tile tunnel: a bonk off its ceiling would float a slide over a spike gap.
+    if (this.buffer > 0 && this.coyote > 0 && (!this.lying || this.canStand(T + 8))) { GameAudio.play(this.lying ? 'hero-dive' : 'hero-jump', this.lying ? 0 : 3); b.velocity.y = -JUMP; this.buffer = this.coyote = 0; }
     else if (this.buffer > 0 && this.wallCoyote > 0 && !grounded && this.lastWall !== this.kickSide) { // wall jump
+      GameAudio.play('hero-jump', 3);
       b.velocity.y = -WALL_JUMP; b.velocity.x = -this.lastWall * WALL_KICK; this.face = -this.lastWall;
       this.kick = KICK_LOCK; this.kickSide = this.lastWall; this.buffer = this.wallCoyote = 0;
     }
@@ -2376,8 +2588,10 @@ class Room extends Phaser.Scene {
     }
     if (firing && !beam.fired) {
       beam.fired = true;
+      GameAudio.play('stag-beam');
+      if (this.corpses.includes(target)) GameAudio.play('hazards-laser-blocked-by-soul');
       if (target === this.player) this.die();
-      else if (beam.stag && this.corpses.includes(target)) { target.buried = 2; target.body.enable = false; target.setAlpha(0.25); }
+      else if (beam.stag && this.corpses.includes(target)) { GameAudio.play('hero-soul-erased-replaced'); target.buried = 2; target.body.enable = false; target.setAlpha(0.25); }
       else if (this.corpses.includes(target)) { this.corpses.splice(this.corpses.indexOf(target), 1); target.destroy();
         if (this.rooms[this.index].name === 'The rehearsal') Dialogue.play(this, 'breakingBeam');
       }
@@ -2412,6 +2626,8 @@ class Room extends Phaser.Scene {
     // Souls left: one flame per soul in this world, lit while it's still available (bottom left).
     const pips = this.pips ??= this.add.graphics().setScrollFactor(0).setDepth(40);
     pips.clear();
+    if (this.wearing && !this.hudAmulet)
+      pips.lineStyle(2, 0xffd774).strokeCircle(32 + rules.max * 22, 516, 9);
     for (let i = 0; i < rules.max; i++) {
       const free = i < rules.max - this.corpses.length, x = 22 + i * 22, y = 520;
       pips.fillStyle(0x7cc7ff, free ? 0.95 : 0.18).fillTriangle(x - 6, y + 6, x + 6, y + 6, x, y - 10);
@@ -2425,6 +2641,8 @@ class Room extends Phaser.Scene {
   }
 
   updateHud() {
+    const B = this.boss, show = B?.room === this.index && !B.hidden && B.hp > 0 && !this.transit;
+    this.bossBar.setVisible(show).setText(show ? '♥'.repeat(B.hp) + '♡'.repeat(BOSS_HP - B.hp) : '');
     const on = (v) => (v ? 'ON' : 'off');
     this.hud.setText([
       `Room ${this.index + 1}/${ROOMS.length} — ${this.rooms[this.index].name}`,

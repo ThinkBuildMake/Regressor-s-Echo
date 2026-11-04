@@ -46,3 +46,43 @@ DECISION: the user asked for parallel agents. Three Codex workers, one per world
 08:51 deterministic tests committed; full suite OK x3 (365s, 392s, 377s).
 09:32 main is NOT merged with night (user thought it was). Merged main (new sprites, audio tools) into night. 3 Codex sprite workers: bosses (w1), hero/enemies/portraits (w2), hazards per world (w3). Next: merge night into main once sprites land.
 09:43 sprites merged: hero/enemies/portraits (w2), bosses (w1). NEEDS REVIEW: the tree sprite is small (about 4 tiles tall) because it's scaled to the boss hitbox (mask 4 up).
+
+## Morning summary, night 2
+- **The whole game was played start to finish by a Claude agent with no dev keys: it reaches the ending card.** All 28 rooms, the three bosses, every story scene once and in order, powers/runes/music switching correctly. Full suite passes twice on the final build (db7a362).
+- **Branch:** `night/2026-11-02` in `../Game-Week-night`, not pushed. **Not merged into main:** main's working copy has uncommitted edits to `dialogue.js` and `docs/STORY.md` (your story chat) and a merge would overwrite them. Commit those, then run `git merge night/2026-11-02` in `../Game-Week` (expect a conflict in dialogue.js where both changed it).
+- **Done and verified by real play + full suite twice:**
+  - Cutscenes: each line acts out its stage direction as you press Enter; your own movement stops during a scene; a key held through a scene needs a fresh press; Esc skips. Walkers wait during conversations; the ghost drifts back to the hero.
+  - World 1: all rooms and the moth (7/7 bot wins with human reaction times); thorn steps no longer tight; long pit tunnel skip closed; Thornwood kick and saw fixed.
+  - World 2: all rooms and the tree; Off the edge skip closed; The beam step block; springs stop drifting when you let go; Sawmill plate shields you from the thrower and the saw jams.
+  - World 3: all rooms and the stag (swap required, no passive win, 0-death win); Three high, Two places, Everything, Reliquary skips closed; arena zoom works; the walk back to the note after the win works.
+  - The full run fixed: Shift+R making the backdrop/HUD/dialogue vanish for the rest of the run, play-again keeping later powers, Shift+R during a boss victory softlocking the re-win, respawn pushing you up floating souls (through a wall in the stag arena), ending music after a Shift+R.
+  - Cosmetic: the world title no longer reappears on every Shift+R; the stag's "You died N times" counts every death in its room this run.
+  - Earlier tonight: music and sound effects, story art (amulet + runes, ghost, shrines, old tree), ending route fix.
+- **Needs your decision:**
+  - Let go stage 1 can be done with one soul hung 2-3 high (accept as an alternative route?).
+  - The ladder stage 1: a wall kick off the ledge face onto one hung soul skips the staircase; needs a wall-jump rule decision (may affect Three high).
+  - Two places now needs "slide, then swap" (a walking-speed swap drops you on the spike): too hard for a teaching room?
+  - The rehearsal stage B can be run by jumping at each beam lock.
+  - Reliquary (mild): a drop from the shrine onto the bottom crumble skips the middle steps.
+  - The stag's 10-death nudge "Lead it away" is about the beam, not the swap trick (your text).
+- **Not done:** menus/title screen (you're making the art in another chat). Audio balance hasn't been heard by a person.
+
+## Night 2 (2026-11-04)
+00:53 user went to bed: 'continue to run until I wake up'. Claude subagents allowed (weekly reset tonight). Cutscene-input fix, W2 and W3 QA-and-fix agents running.
+01:32 cutscene fix verified by its agent (6 rooms + full suite OK), merged. Started W1 QA-and-fix.
+01:32 my queue commit used -a during a conflicted merge and committed conflict markers in check.html (3b2de1e); resolved in the next commit. Lesson: never commit -a while a merge is open.
+01:35 cutscene merge fixed (bf4f570); 5 story/ending rooms OK. World 1 QA-and-fix agent started (also covers cutscenes and audio events).
+02:47 W2 QA-and-fix merged (b94b8e7): Off the edge slide skip closed, The beam step block, spring drift stops when you let go (game-wide), Sawmill thrower plate + saw jam. Tree verified with 0.25-0.45s reactions. Full suite OK on its branch.
+NEEDS DECISION: Let go stage 1 can be done with one soul hung 2-3 high (a single hung soul always reaches as high as a 2-stack). Agent recommends accepting it as an alternative route.
+NEEDS DECISION: The ladder stage 1 one-soul skip via a wall kick off the ledge face onto a hung soul. No level shape blocks it without breaking the staircase; it needs a wall-jump rule decision (likely affects Three high too).
+02:55 W3 QA-and-fix merged (9ae325b; check.html conflict resolved by hand: kept the stuck-hop walk + W3's each() hook). Fixed: Three high tower raised (2-soul kick skip), Two places rebuilt so swap is required (shaft plug + slide-swap), Everything saw post, Reliquary plate off its door, stag arena zoom actually applies, camera follows after the win. Stag verified: swap required, no passive win, 0-death win. 5 rooms re-run OK after merge.
+NEEDS DECISION: Two places now needs "slide, then swap" (a walking-speed swap drops you on the spike). Too hard for a teaching room?
+NEEDS DECISION: The rehearsal stage B can still be run by jumping at each beam lock (0 deaths); closing it needs a 1-tall corridor that makes the decoy timing tight.
+OPEN (mild): Reliquary: from the shrine you can drop onto the bottom crumble and skip the middle steps (2 of 3 tries).
+NOTE for the author: the stag's 10-death nudge "Lead it away" talks about the beam, not the swap trick (author's text; left as is). It only plays once you step off the platform.
+03:29 full suite on W2+W3 merged: RESULT OK (648s). 5h usage at 71%.
+03:38 W1 QA-and-fix merged (nothing open): thorn steps backed by wall (thorn wall, chain), no jumping out of a slide under a 1-tile ceiling (long pit skip; game-wide), Thornwood kick + saw-follow skip closed + saw deaths jam in W1, walkers/flyers wait during conversations (game-wide), the ghost drifts back to the hero after scenes, firstDeath only in its room, brighter moth stun. Moth: 7/7 bot wins with 0.25-0.4s reactions, 0 deaths. All W1 cutscenes played fast/slow/Esc/while moving; audio cues fire.
+04:00 all three worlds merged: full suite OK twice (636s each). Merged main's new commits (title art, walk cycles, colormatch tool) into night.
+DECISION: did NOT merge night into main: main's working copy has uncommitted edits to dialogue.js and docs/STORY.md (another chat's story work), and a merge would overwrite them. The user merges in the morning after committing those.
+04:00 started the final start-to-finish playthrough agent (../Game-Week-w2, synced to night).
+06:02 final playthrough: reached the ending card with no dev keys (28 rooms, 3 bosses, every scene once in order, powers/runes/music right). Fixed: zoom handlers stacking after Shift+R (backdrop/HUD/dialogue vanished for the rest of the run), play-again keeping W2/W3 powers, Shift+R during a boss victory scene softlocking the re-win, respawn climbing floating souls (pushed through the stag arena wall), ending music after Shift+R in the last stand. Open (cosmetic): every Shift+R shows the world-name title again; the stag's "You died N times" counts only since the last Shift+R. Merged (b6f3d67).
