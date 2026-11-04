@@ -10,10 +10,10 @@ Goal: every room and boss in Worlds 1-3 verified possible, fair and skip-free by
 
 ## Doing
 - [ ] World 1 QA-and-fix — Claude agent in ../Game-Week-w1
-- [ ] World 2 QA-and-fix — Claude agent in ../Game-Week-w2
-- [ ] World 3 QA-and-fix — Claude agent in ../Game-Week-w3
 
 ## Done
+- [x] World 2 QA-and-fix merged (a770aaf)
+- [x] World 3 QA-and-fix merged (9ae325b)
 - [x] Cutscene work merged (line-by-line staging, input stops during scenes, held keys need a fresh press); the moth failure was a test bug; full suite OK — 882ebd9
 - [x] Ending route fix (walk back to the old tree after the stag) — 3b1187e
 - [x] Story art (amulet, runes, ghost, shrines, old tree), music and sound effects merged
