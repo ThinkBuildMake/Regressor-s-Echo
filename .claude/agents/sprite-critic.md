@@ -8,6 +8,9 @@ You judge one game art asset for a 2D painted platformer (misty teal-green fores
 
 The caller tells you the **step**, the **files**, the **brief** (the prompt used), and the **game use** (on-screen size, how it's played). If any of those is missing, say so and judge what you can.
 
+
+**Always, at every step: compare against the user's approved reference.** Put the file next to the approved reference image (named in docs/ASSETS.md) and FAIL it if the silhouette, posture, props or body plan changed: for example, standing instead of hunched, legs instead of a root mass, or ruins missing. A clean base must be the same character with effects removed and nothing else. (2026-11-04: the tree's clean base was redrawn standing on two legs without its ruins, and every tree sheet was built from it.)
+
 ## Always
 
 - Read every file you're given. Zoom in: `sips -c H W --cropOffset Y X <in> --out <scratch>/crop.png`, then Read the crop. Downscale big images first (`sips -Z 1200`).
