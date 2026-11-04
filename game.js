@@ -934,7 +934,7 @@ class Room extends Phaser.Scene {
     for (const [key, path] of [
       ['amulet', 'world1/amulet'], ['ghost', 'world1/ghost'], ['old-tree', 'world3/old-tree'],
       ...[1, 2, 3].flatMap((n) => [[`amulet-rune${n}`, `world1/amulet-rune${n}`], [`shrine${n}`, `world${n}/shrine`], [`shrineLit${n}`, `world${n}/shrine-lit`]]),
-      ['uiSoulFull', 'ui/soul-full'], ['uiSoulEmpty', 'ui/soul-empty'],
+      ['uiSoulFull', 'ui/soul-full'], ['uiSoulEmpty', 'ui/soul-empty'], ['carvings', 'world2/carvings'],
     ]) if (!this.textures.exists(key)) this.load.image(key, `assets/${path}.webp`);
     if (!this.textures.exists('heroSheet')) {
       this.load.image('heroSheet', 'assets/hero/sheet.webp'); // 8 frames: run 0-5, jump 6, fall 7
@@ -1040,6 +1040,9 @@ class Room extends Phaser.Scene {
       const room = { name, ...extra, rect: new Phaser.Geom.Rectangle(ox * T, oy * T, width * T, rows.length * T), spawns: [] };
       const world = extra.world ?? 1;
       const hazard = (body, name, w, h, dy) => Art.hazard(this, body, world, name, w, h, dy);
+      // The ladder's carved wall (STORY W2 §3): figures wearing the amulet, thinning to one, behind the shrine ledge.
+      if (name === 'The ladder' && this.textures.exists('carvings'))
+        this.add.image((ox + 8.5) * T, (oy + 9) * T, 'carvings').setOrigin(0.5, 1).setDisplaySize(14 * T, 14 * T * 1056 / 2508).setDepth(-2);
       rows.forEach((row, ty) => {
         for (let tx = 0; tx < row.length; tx++) {
           const x = (ox + tx) * T, y = (oy + ty) * T;
