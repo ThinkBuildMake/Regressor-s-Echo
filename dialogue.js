@@ -578,9 +578,8 @@ const Dialogue = {
     const camera = scene.cameras.main;
     camera.setFollowOffset(0, r.height > camera.height ? -camera.height * 0.4 : 0);
     scene.talk.ui.setVisible(false);
-    scene.blockedKeys ??= new Set();
-    scene.blockedKeys.clear();
-    for (const key of Object.values(scene.keys)) if (key.isDown) scene.blockedKeys.add(key);
+    scene.blockedKeys = new Map();
+    for (const key of Object.values(scene.keys)) if (key.isDown) scene.blockedKeys.set(key, key.timeDown);
     scene.talk.landing = 0;
     scene.talk.active = false;
   },

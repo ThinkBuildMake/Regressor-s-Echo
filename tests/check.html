@@ -318,6 +318,8 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     check(s.enemies.every((e) => s.rooms[wi].rect.contains(e.x, e.y)), 'walker stays inside its room');
   }
 
+  // The story-input and staging checks mark every scene seen; restore the real story state after them.
+  const stagingSeen = new Set(Dialogue.seen);
   if (matches('First death')) {
     for (const sliding of [false, true]) {
       Object.keys(SCRIPT).forEach((k) => Dialogue.seen.add(k));
@@ -346,7 +348,6 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     }
   }
 
-  const stagingSeen = new Set(Dialogue.seen);
   // Replay staging with real physics, then replay the same scene with Esc.
   for (const [name, script, mark] of [
     ['The clearing', 'amulet', 11.5], ['First death', 'firstPit', 9],
@@ -1416,10 +1417,12 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     // Walk the whole return route and onward; no room restart or position reset.
     const walkTo = async (name, column, direction, timeout) => {
       key('keydown', direction);
+      let lastX = s.player.x;
       await until(() => {
-        // Hop over the platform and the surviving wall soul in either direction.
-        if (!s.transit && s.rooms[s.index].name === 'The spectral stag' && s.player.x < O().x + 10 * 32 &&
-          s.player.body.blocked.down) key('keydown', 32);
+        // Hop only when something stops him (a soul on the floor), like a player would; hopping
+        // everywhere can land him on a seal soul above the low exit, where he is stuck.
+        const stuck = Math.abs(s.player.x - lastX) < 0.2; lastX = s.player.x;
+        if (!s.transit && s.rooms[s.index].name === 'The spectral stag' && stuck && s.player.body.blocked.down) key('keydown', 32);
         else if (s.player.body.velocity.y >= 0) key('keyup', 32);
         return s.rooms[s.index].name === name && !s.transit &&
           (direction === 37 ? s.player.x < O().x + column * 32 : s.player.x > O().x + column * 32);

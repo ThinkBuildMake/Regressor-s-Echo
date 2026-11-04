@@ -2220,12 +2220,12 @@ class Room extends Phaser.Scene {
   update(_t, ms) {
     const dt = Math.min(ms / 1000, 0.05);
     const raw = this.keys, JD = Phaser.Input.Keyboard.JustDown, p = this.player;
-    this.blockedKeys ??= new Set();
-    for (const key of Object.values(raw)) {
-      if (!key.isDown && this.blockedKeys.has(key)) {
-        key._justDown = key._justUp = false;
-        this.blockedKeys.delete(key);
-      }
+    this.blockedKeys ??= new Map();
+    // A held key stays blocked until released; a new press (new timeDown) counts even if
+    // the release and press both landed between two frames.
+    for (const [key, timeDown] of this.blockedKeys) {
+      if (!key.isDown) key._justDown = key._justUp = false;
+      if (!key.isDown || key.timeDown !== timeDown) this.blockedKeys.delete(key);
     }
     const k = Object.fromEntries(Object.entries(raw).map(([name, key]) => {
       if (!this.blockedKeys.has(key)) return [name, key];
