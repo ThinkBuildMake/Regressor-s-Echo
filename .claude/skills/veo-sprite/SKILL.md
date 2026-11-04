@@ -37,6 +37,10 @@ Read `.claude/skills/flow-asset/SKILL.md` "Driving Flow" first. It covers upload
   - **Attacks:** describe the wind-up, the strike and the recovery, in order.
 - Download the **1080p** version (free) to `assets/raw/<kind>/<name>.mp4`. That video is the raw file for the sheet.
 
+- **Poses (2026-11-04):** for a held pose, prompt the move *into* the pose plus "and holds that pose". The sheet is then 2–3 frames of the motion plus the steadiest held frame.
+  - Veo may zoom in during the clip (about 27% on the kneel and slumped poses). Size each frame against a standing frame so the character keeps the same pixel scale as the idle; never fit a kneeling figure to standing height.
+- **Flow's grid reshuffles while clips render.** Identify a tile by its hover title before you download it.
+
 ## 3. Video → sheet (all local)
 ```sh
 mkdir -p <scratch>/f && ffmpeg -i <name>.mp4 -vf fps=24 <scratch>/f/%03d.png
