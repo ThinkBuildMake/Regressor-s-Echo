@@ -161,12 +161,12 @@ room('Three high', [540, 75], 30, 17, 3, '10-high ledge: a 3-soul staircase (run
 def own_way(o, p):
     # A hanging soul carries a second run across a gap wider than a jump.
     o(0, 8, 0, 9); o(1, 3, 10, 9); p(1, 9, 'P')
-    o(4, 10, 10, 15); o(4, 16, 10, 16, '^')
-    o(11, 3, 15, 11); p(13, 11, 'C')
+    o(4, 10, 11, 15); o(4, 16, 11, 16, '^'); o(9, 3, 11, 8, '#')
+    o(11, 8, 11, 9); o(12, 3, 15, 14); p(13, 14, 'C'); o(15, 12, 15, 14, '#')
     # Swap out from under a falling spike, leaving the exit plate held.
-    o(16, 2, 21, 9); p(18, 9, '_'); p(18, 3, '!')
+    o(16, 2, 21, 9); o(16, 8, 16, 9, 'D'); p(18, 9, '_'); p(18, 5, '!')
     o(22, 8, 22, 9, 'D'); o(23, 5, 28, 9); o(29, 8, 29, 9)
-room('Two places', [570, 73], 30, 17, 3, 'swap across a seven-wide gap; exchange places under a falling spike to hold the exit plate', own_way)
+room('Two places', [570, 73], 30, 17, 3, 'swap under the low lintel across an eight-wide gap; exchange places under a falling spike to hold the exit plate', own_way)
 
 def three_jobs(o, p):
     # Climb to the safe three-job setup, then drop to the shrine.
@@ -208,7 +208,7 @@ def reliquary(o, p):
     o(31, 3, 38, 21); p(32, 4, 'C'); o(32, 5, 32, 5, '#'); o(32, 22, 37, 22, '^')
     for x, y in ((33, 8), (35, 11), (37, 14), (35, 17)): o(x, y, x, y, '~')
     for x in (34, 36): p(x, 3, '!')
-    o(38, 5, 38, 19, 'x'); p(38, 22, '^'); p(36, 20, '~'); o(37, 21, 38, 21, '~')
+    o(31, 6, 32, 21, 'x'); o(38, 5, 38, 19, 'x'); p(38, 22, '^'); p(36, 20, '~'); o(37, 21, 38, 21, '~')
     o(39, 20, 39, 21)
 room('Reliquary', [675, 52], 40, 24, 3, 'SHOWCASE W3: flyers in a chimney, two saws to jam, plate, recall, crumbling descent', reliquary)
 
@@ -228,10 +228,10 @@ room('The old tree', [745, 53], 30, 17, 3, 'calm promise; return behind the tree
 
 def end(o, p):
     o(1, 1, 38, 14); o(0, 13, 0, 14); o(39, 13, 39, 14)
-    p(2, 11, 'P'); o(2, 12, 6, 12, '#')
-    o(4, 13, 4, 14, 'V'); p(34, 14, 'B')
+    p(3, 11, 'P'); o(3, 12, 6, 12, '#')
+    o(4, 13, 4, 14, 'V'); p(2, 14, 'V'); p(34, 14, 'B')
     o(0, 13, 0, 14, 'V'); o(39, 13, 39, 14, 'V')
-room('The spectral stag', [775, 53], 40, 17, 3, 'final boss: three-soul wall, lead beams away, drop after charges', end)
+room('The spectral stag', [775, 53], 40, 17, 3, 'final boss: swap out of a soul ram, stomp, restore three elevated seals', end)
 
 def pyramid(o, p):
     o(1, 8, 28, 14); o(0, 13, 0, 14); p(2, 14, 'P')

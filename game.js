@@ -659,24 +659,24 @@ const ROOMS = [
     ' P        #####            ###',
     '##############################',
   ], [600, 75], { world: 3, spots: [[4, "pyramid"]] }],
-  ["Two places", [ // swap across a seven-wide gap; exchange places under a falling spike to hold the exit plate
+  ["Two places", [ // swap under the low lintel across an eight-wide gap; exchange places under a falling spike to hold the exit plate
     '##############################',
     '##############################',
     '################      ########',
-    '#                 !   ########',
-    '#                     ########',
-    '#                     #      #',
-    '#                     #      #',
-    '#                     #      #',
-    '                      D       ',
-    ' P                _   D       ',
+    '#        ###          ########',
+    '#        ###          ########',
+    '#        ###      !   #      #',
+    '#        ###          #      #',
+    '#        ###          #      #',
+    '         ##     D     D       ',
+    ' P              D _   D       ',
     '####            ##############',
-    '####         C  ##############',
-    '####       ###################',
-    '####       ###################',
-    '####       ###################',
-    '####       ###################',
-    '####^^^^^^^###################',
+    '####            ##############',
+    '####           ###############',
+    '####           ###############',
+    '####         C ###############',
+    '####        ##################',
+    '####^^^^^^^^##################',
   ], [630, 73], { world: 3 }],
   ["Three jobs", [ // plate, pit and a laser blocker at once; recall mistakes instead of dying over them
     '##############################',
@@ -728,22 +728,22 @@ const ROOMS = [
     '#####                         D   ! !  #',
     '#####    C #   o   #   o    #_D C      #',
     '#####   ####################### #     x#',
-    '#####   #######################       x#',
-    '#####  f#######################       x#',
-    '#####   #######################  ~    x#',
-    '#####   #######################       x#',
-    '#####   #######################       x#',
-    '#####  ########################    ~  x#',
-    '#####   #######################       x#',
-    '#####f  #######################       x#',
-    '#####   #######################      ~x#',
-    '#####   #######################       x#',
-    '#####   #######################       x#',
-    '######  #######################    ~  x#',
-    '#####   #######################       x#',
-    '#       #######################       x#',
-    '        #######################     ~   ',
-    ' P      #######################      ~~ ',
+    '#####   #######################xx     x#',
+    '#####  f#######################xx     x#',
+    '#####   #######################xx~    x#',
+    '#####   #######################xx     x#',
+    '#####   #######################xx     x#',
+    '#####  ########################xx  ~  x#',
+    '#####   #######################xx     x#',
+    '#####f  #######################xx     x#',
+    '#####   #######################xx    ~x#',
+    '#####   #######################xx     x#',
+    '#####   #######################xx     x#',
+    '######  #######################xx  ~  x#',
+    '#####   #######################xx     x#',
+    '#       #######################xx     x#',
+    '        #######################xx   ~   ',
+    ' P      #######################xx    ~~ ',
     '################################^^^^^^^#',
     '########################################',
   ], [735, 52], { world: 3 }],
@@ -785,7 +785,7 @@ const ROOMS = [
     '##############################',
     '##############################',
   ], [805, 53], { world: 3, spots: [[18, "stagPromise"]] }],
-  ["The spectral stag", [ // final boss: three-soul wall, lead beams away, drop after charges
+  ["The spectral stag", [ // final boss: swap out of a soul ram, stomp, restore three elevated seals
     '########################################',
     '#                                      #',
     '#                                      #',
@@ -797,10 +797,10 @@ const ROOMS = [
     '#                                      #',
     '#                                      #',
     '#                                      #',
-    '# P                                    #',
-    '# #####                                #',
+    '#  P                                   #',
+    '#  ####                                #',
     'V   V                                  V',
-    'V   V                             B    V',
+    'V V V                             B    V',
     '########################################',
     '########################################',
   ], [835, 53], { world: 3 }],
@@ -1049,7 +1049,8 @@ class Room extends Phaser.Scene {
               break;
             }
             case '>': case '<': case 'v': case 'u': { // laser emitter: a solid block that fires a beam
-              const e = rect(x, y, T, T, 0x5a4a6a);
+              // On this lintel, either adjacent snapped soul can shield the seam.
+              const e = rect(x + (name === 'Three high' ? T / 2 : 0), y, T, T, 0x5a4a6a);
               this.statics.add(e);
               this.lasers.push({ e, room: ri, dx: { '>': 1, '<': -1 }[row[tx]] ?? 0, dy: { v: 1, u: -1 }[row[tx]] ?? 0 });
               break;
@@ -1138,6 +1139,7 @@ class Room extends Phaser.Scene {
     // Arcade resolves vertical overlap first, so jumping while pressed into a wall snags on the
     // seam between stacked blocks and kills the jump. Side contacts get pushed out sideways instead.
     this.physics.add.collider(this.player, this.statics, null, (_pl, s) => {
+      if (this.boss?.stag && s.lying && this.corpses.includes(s)) return false;
       const a = this.player.body, b = s.body;
       const ox = Math.min(a.right, b.right) - Math.max(a.x, b.x);
       const oy = Math.min(a.bottom, b.bottom) - Math.max(a.y, b.y);
@@ -1375,6 +1377,7 @@ class Room extends Phaser.Scene {
   enterRoom(i) {
     const p = this.player, R = this.rooms[i].rect, cam = this.cameras.main;
     this.index = i;
+    cam.setZoom(1);
     rules.max = this.treePower ? 3 : Math.max(stats.mothFinished ? 2 : 1, WORLD_SOULS[this.rooms[i].world] ?? rules.max);
     Dialogue.play(this, this.rooms[i].enter);
     this.roomDeaths = 0;
@@ -1816,17 +1819,23 @@ class Room extends Phaser.Scene {
 
   stagSeals(B) {
     const R = this.rooms[B.room].rect;
-    return [[6.5, 14.5], [12.5, 14.5], [5.5, 11.5]].map(([x, y]) => ({
+    return [[1.5, 11.5], [37.5, 11.5], [5.5, 11.5]].map(([x, y]) => ({
       x: R.x + x * T, y: R.y + y * T
     }));
   }
 
   updateStag(B, dt) {
     const R = this.rooms[B.room].rect, p = this.player;
+    const cam = this.cameras.main;
+    cam.setZoom(Math.min(1, cam.width / R.width)); cam.stopFollow(); cam.centerOn(R.centerX, R.centerY);
     B.antlers.setVisible(B.r.visible && !B.img).clear().lineStyle(B.phase === 'bell' ? 7 : 3, B.phase === 'bell' ? 0xdf89ff : 0xd9f3ff);
     for (const dx of [-28, 28]) {
       B.antlers.lineBetween(B.r.x + dx, B.r.y - 32, B.r.x + dx, B.r.y - 66);
       B.antlers.lineBetween(B.r.x + dx, B.r.y - 48, B.r.x + dx + Math.sign(dx) * 17, B.r.y - 62);
+    }
+    if (B.phase === 'beam' && B.beam) {
+      this.fx.lineStyle(2, 0x65baff, 0.6).lineBetween(B.r.x, B.r.y - 2 * T, B.beam.x, B.beam.y);
+      this.fx.fillStyle(0x65baff, 0.9).fillCircle(B.beam.x, B.beam.y, 8);
     }
     const pose = this.time.now < B.introUntil ? 'intro' : B.phase === 'beam' ? 'beam'
       : B.phase === 'bell' ? 'wave' : B.phase === 'charge' ? 'charge' : 'idle';
@@ -1849,6 +1858,8 @@ class Room extends Phaser.Scene {
     B.hurt -= dt; B.clock += dt;
     B.r.setFillStyle(B.phase === 'bell' ? 0xdf89ff : B.phase === 'beam' ? 0x65baff : B.phase === 'windup' ? 0xffda75 : 0xbceaff);
     if (B.phase === 'setup') {
+      B.r.x = R.x + 25 * T;
+      if (p.x < R.x + 7 * T && p.y + 15 > R.y + 12 * T) { B.clock = 0; return; }
       if (B.clock < 8 && p.x < R.x + 7 * T) return;
       B.phase = 'windup'; B.clock = 0;
     }
@@ -1860,7 +1871,7 @@ class Room extends Phaser.Scene {
       this.fx.fillStyle(0xf5f582, 0.22).fillRect(B.aimX - 16, R.y + 13 * T, 32, 2 * T);
       if (B.clock >= 0.9) { B.rammed = false; next('charge'); }
     } else if (B.phase === 'charge') {
-      B.r.x = Math.max(R.x + 6.5 * T, B.r.x - 650 * dt);
+      B.r.x -= Math.sign(B.r.x - B.aimX) * Math.min(Math.abs(B.r.x - B.aimX), 650 * dt);
       const c = this.corpses.find(c => c.body.enable && hit(bounds(c), bounds(B.r)));
       if (c) {
         const bottom = c.y + c.height / 2;
@@ -1870,12 +1881,12 @@ class Room extends Phaser.Scene {
         c.setFillStyle(0x7399d9, 0.6);
         B.rammed = true;
       }
-      if (B.r.x <= (B.rammed ? R.x + 6.5 * T : Math.max(R.x + 6.5 * T, B.aimX))) {
+      if (B.rammed || Math.abs(B.r.x - B.aimX) < 1) {
         B.stomped = false; next(B.rammed ? 'dazed' : 'miss');
       }
     } else if ((B.phase === 'dazed' && B.clock >= 2) || (B.phase === 'miss' && B.clock >= gap)) {
-      B.r.x = R.right - 5 * T; next('beam');
-      B.beam = { x: B.r.x, y: B.r.y - 2 * T, angle: Math.PI, clock: 0, stag: true };
+      B.r.x = R.x + 25 * T; next('beam');
+      B.beam = { x: B.r.x, y: R.y + 5 * T, angle: Math.PI, clock: 0, stag: true };
     } else if (B.phase === 'beam') {
       if (B.beam.clock < 1.98) this.updateAimedBeam(B.beam, dt);
       if (B.clock >= 1.98 + gap) next('procession');
@@ -2126,7 +2137,7 @@ class Room extends Phaser.Scene {
     if (!falling && p.y + 15 <= top + 18) return false;
     if (!falling || (this.bossPreviousFeet ?? p.body.prev.y + p.body.height) > top + 1) { this.die(); return true; }
     p.body.reset(p.x, top - p.height / 2);
-    p.body.velocity.y = -JUMP * 0.8;
+    p.body.velocity.y = -JUMP * (B.stag ? 1 : 0.8);
     if (B.hurt > 0 || (B.story === 'mothDown' && !B.open) || (B.stag && (B.phase !== 'dazed' || B.stomped)) || (B.kind === 'tree' && (B.stompReady === false || B.open <= 0))) return false;
     if (B.stag) B.stomped = true;
     if (B.kind === 'tree') { B.stompReady = false; B.open = 0; }
@@ -2179,7 +2190,8 @@ class Room extends Phaser.Scene {
 
     const weights = [p, ...this.corpses].map(bounds);
     for (const d of this.doors) {
-      const held = d.plates.some((pl) => weights.some((w) => hit(w, bounds(pl))));
+      let held = d.plates.some((pl) => weights.some((w) => hit(w, bounds(pl))));
+      if (this.rooms[d.room].name === 'Two places' && d.x < this.rooms[d.room].rect.x + 17 * T) held = !held;
       d.body.enable = !held;
       d.setAlpha(held ? 0.2 : 1);
     }
@@ -2219,8 +2231,8 @@ class Room extends Phaser.Scene {
     if (swap && ((this.rooms[this.index].world ?? 0) >= 3 || this.treePower)) {
       const c = this.corpses.at(-1);
       if (c) {
-        const x = p.x, y = p.y;
-        p.body.reset(c.x, c.y); p.body.setVelocity(0, 0);
+        const x = p.x, y = p.y, vx = p.body.velocity.x;
+        p.body.reset(c.x, c.y); p.body.setVelocity(vx, 0);
         c.setPosition(x, y); c.body.updateFromGameObject(); c.vy = 0;
         c.sprites?.forEach((sp) => sp.setPosition(c.x, c.y + c.height / 2));
       }
