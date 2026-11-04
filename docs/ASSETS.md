@@ -4,7 +4,7 @@ Every painted asset the game needs, as a checklist. Each one goes through the `f
 (`.claude/skills/flow-asset/SKILL.md`): **prompt → reference → clean base → sheet → sized → in game**. The critic runs on
 reference, sheet and sized. Art prompts live in [PROMPTS.md](PROMPTS.md); audio prompts are in the Audio section below.
 
-**Status (2026-11-03):** every reference, sheet and sound on this list is made and approved by the user, including the stag walk: the user kept the current (prancing) walk for now, 2026-11-03. To replace it later, drop a new `assets/bosses/stag-walk.webp` + `.json` in place (no code change; keep 700 px tall cells facing left). Ideas if redone: a Veo video walk with frames extracted, or a cut-out leg rig in code; a drawn pose guide (`tools/gait-guide.mjs`) did not work in Flow (2 tries, near/far legs mixed up). The art checkboxes below lag behind; the review pages are the record: references https://claude.ai/artifact/D9g8CCAaV7W7MFSZEq2S61 · sprite animations https://claude.ai/artifact/LyqhxdFPrUPioRYo5R7ujU · batch 3 (fallen bosses, flyer, thrower, hazards in all worlds) https://claude.ai/artifact/1EDac6VRWQD4Cw2eqq5jyK · audio https://claude.ai/artifact/CLuj1KAWJxZPRxRSmERRfo. What's left is wiring into the game ("In game" column).
+**Status (2026-11-03):** every reference, sheet and sound on this list is made and approved by the user, including the stag walk: the user kept the current (prancing) walk for now, 2026-11-03. To replace it later, drop a new `assets/bosses/stag-walk.webp` + `.json` in place (no code change; keep 700 px tall cells facing left). Ideas if redone: a Veo video walk with frames extracted, or a cut-out leg rig in code; a drawn pose guide (`tools/gait-guide.mjs`) did not work in Flow (2 tries, near/far legs mixed up). The art checkboxes below lag behind; the review pages are the record: references https://claude.ai/artifact/D9g8CCAaV7W7MFSZEq2S61 · sprite animations https://claude.ai/artifact/LyqhxdFPrUPioRYo5R7ujU · batch 3 (fallen bosses, flyer, thrower, hazards in all worlds) https://claude.ai/artifact/1EDac6VRWQD4Cw2eqq5jyK · audio https://claude.ai/artifact/CLuj1KAWJxZPRxRSmERRfo. Music alternative if the ElevenLabs tracks don't hold up on review: Google Lyria 3 on OpenRouter (`google/lyria-3-pro-preview`, $0.08/track; served via Google AI Studio, not Vertex; takes an image prompt); not used yet. What's left is wiring into the game ("In game" column).
 
 Key: ✅ done · 🟡 started · blank = to do · — = not needed (a single image, or drawn in code).
 "Sheet" lists the animations to ask for. One facing per sheet; the game mirrors for the other.
@@ -145,6 +145,18 @@ Script: [STORY.md](STORY.md); § = the scene each asset serves. Done in priority
 | World 1 layers | ✅ | ✅ | ✅ | ✅ |
 | World 2 layers (sky, far, mid, near, lip, ground, cap) | ✅ | | | |
 | World 3 layers (sky, far, mid, near, lip, ground, cap) | ✅ | | | |
+
+## Menus and UI (added 2026-11-03)
+The game has no title screen, pause menu or on-screen soul count yet (the content warning and ending card are code text). Art for them; the screens themselves are code-chat work. Prompts: PROMPTS.md "## Menus and UI".
+
+| Asset | Used for | Prompt | Ref | Sized | In game |
+|---|---|---|---|---|---|
+| Title key art (16:9) | title screen background; dimmed behind the content warning | ✅ | | | |
+| Logo: "Regressor's Echo" | title screen and ending card (painted lettering + the amulet mark; fall back to code text if the lettering is off) | ✅ | | | |
+| Ending art (16:9) | behind the ending card: the hero small at the pyramid door at dawn | ✅ | | | |
+| Amulet mark icon | menu cursor, favicon | ✅ | | | |
+| Soul pips: full / empty | HUD soul count (1–3 by world) | ✅ | | | |
+| Menu panel | pause and settings menus (plain centre so it stretches) | ✅ | | | |
 
 ## Audio
 

@@ -273,6 +273,15 @@ One new enemy per world (see LEVELS.md "Enemies per world"). All red, the walker
   (First try without the "NOT domed" line came out a tall domed beetle, a copy of the walker.)
 - `reliquary-scarab-sheet.png` (attach the shrunk scarab): 4 frames: 1 walk A, near front leg far forward, near back leg far back; 2 walk B, all near legs gathered straight down; 3 walk C, near front leg lifted high and bent, middle back, back leg forward; body level in 1–3; 4 fall, body tipped back 30°, belly showing, all six legs flung out and UP like a starfish. Say "all four heads point to the left edge of the image": the first try mirrored frame 3 and let the fall legs dangle.
 
+## Menus and UI (Flow, Nano Banana 2.1)
+Stills, not sprites, so painted light and mist are fine in the two 16:9 paintings. Attach anchor.png for style; attach the hero reference for the hero; attach the amulet raw for the mark. Colour rules still hold: gold only on the amulet and its mark, bright blue-white only for souls.
+- **title** (16:9): [style block] The hero seen from behind and slightly to the side, standing small on a mossy rise at the edge of the dark forest at dusk, scarf and cape lifting in the wind, looking across a misty valley to a huge stepped pyramid far away, its top lost in cloud. Soft cold light, a faint warm glint at his chest. The left third is quiet sky and mist with nothing in it (room for the logo). No text.
+- **logo** (16:9, keyed): The words "Regressor's Echo" in elegant hand-painted serif lettering, pale cream with soft dark edges, slightly weathered like carved and painted wood, on one line, centred; the amulet mark (a ring with three short rays above it, nothing below the circle) small and gold above the words. Flat solid magenta #FF00FF background, nothing else. Spell it exactly: Regressor's Echo.
+- **ending** (16:9): [style block] At dawn, the hero tiny at the foot of the huge stepped pyramid, standing before its tall dark doorway, the forest behind him, warm first light on the stone steps and mist below. Calm and hopeful. No text.
+- **mark** (1:1, keyed): Only the amulet's mark, painted as a small gold emblem: a ring with three short rays above it, nothing below the circle, from the attached amulet. Centred, filling most of the frame, flat solid magenta #FF00FF background.
+- **soul-pip** (1:1, keyed): Two small round icons side by side with a wide magenta gap: left, a full soul (a soft bright blue-white flame inside a thin dark ring); right, an empty one (the same dark ring, empty and dim). Flat solid magenta #FF00FF background, no glow outside the rings.
+- **panel** (16:9, keyed): [style block] A plain dark weathered wooden panel with a thin carved border and slightly worn corners, seen straight on, filling most of the frame; the centre is plain and even with no carving (so it can stretch). Flat solid magenta #FF00FF background around it.
+
 ## Hero (AI Studio, Nano Banana Pro)
 
 Save to `assets/raw/hero/`. Attach the World 1 reference image for the brushwork, and from step 2 on, also attach the hero image from step 1.
