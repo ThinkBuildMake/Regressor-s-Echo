@@ -20,6 +20,8 @@ Key: ✅ done · 🟡 started · blank = to do · — = not needed (a single ima
 | Hero slumped / sitting, worn out (cutscene pose) | one held frame. Used after the first death, at the soul reveal, after the moth falls, after the stag falls | | ✅ `raw/hero/hero.jpg` | | | |
 | Hero holding something up (cutscene pose) | one frame: looking at the amulet held in front of him (today the amulet floats beside the standing sprite). Hands only, the amulet stays a separate sprite so it can glow | | ✅ `raw/hero/hero.jpg` | | | |
 | Hero pained (changed by the user, 2026-11-04) | he bends forward a little, clutching his chest with both hands, shoulders hunched, head bowed, in quiet pain (user, 2026-11-04: arching backwards was too much). Replaces the "moment of death" frames. A pose, not a death animation: one held frame (a short 2–3 frame lead-in is a bonus). Facing right like the other hero sheets | | ✅ `raw/hero/sheet.jpg` (in-game look, green eyes) | | | |
+| Hero slide (Veo, 2026-11-04, approved) | `assets/hero/slide-veo.webp` (8 frames, 324x96 like the old sheet, per-frame head/feet x in the .json): the same feet-first slide, cape and scarf trailing. Code: loop all 8 (`SLIDE_FRAMES`) instead of frames 0–3 of `slide.webp`. Raw: `raw/hero/slide.mp4` | ✅ | ✅ | ✅ | ✅ | |
+| Hero cutscene poses: done (2026-11-04, approved) | `assets/hero/pose-kneel`, `pose-slumped`, `pose-holding-up`, `pose-pained` (.webp + .json; 2–3 frames into the pose, then the held frame last; same pixel scale as `idle-veo`). Raw: the Veo clips `assets/raw/hero/pose-*.mp4`. Pained = bent forward, hands on chest, grimace | ✅ | ✅ | ✅ | ✅ | |
 | Hero death | arcade-style burst: he flashes pure white, then breaks apart into square pixels that fly outward, ~4–5 frames (white flash → white silhouette → breaking into pixels). The scattering pixels after the last frame are code particles | | — | | | |
 | Hero respawn | soul light gathers to the respawn point: pixels fly inward (code particles) → white silhouette → the hero. Plays the **death sheet in reverse**, so no new sheet unless it looks wrong | | — | — | | |
 | White ghost (appears when he picks up the amulet) | — `raw/world1/ghost-white.jpg` approved by the user (standing pose fits the floating motif); glow, bob and alpha in code | | | — | ✅ | ✅ |
@@ -144,6 +146,8 @@ Script: [STORY.md](STORY.md); § = the scene each asset serves. Done in priority
 
 ## Backgrounds (prompts already in PROMPTS.md)
 
+**World 2 and 3 layers are game files now (2026-11-04):** `assets/world2/` and `assets/world3/` have `sky`, `far`, `mid`, `nearTop`, `nearBottom`, `ground`, `lip` (same names and recipe as World 1; no `midAlt`). Not wired yet: `art.js` still loads World 1's layers for every world (code chat). Undecided: gate, cap, carvings, laser, pyramid, note.
+
 | Asset | Prompt | Ref | Sized | In game |
 |---|---|---|---|---|
 | World 1 layers | ✅ | ✅ | ✅ | ✅ |
@@ -162,6 +166,7 @@ The game has no title screen, pause menu or on-screen soul count yet (the conten
 | Soul pips: full / empty | HUD soul count (1–3 by world) | ✅ | | | |
 | Menu panel | grey stone box holding the menu buttons, centred on screen (title, pause, settings); plain centre so it stretches. Replaces the first wooden panel (user: "a grey stone box") | ✅ | | | |
 | Stone button: normal / highlighted | Start, Settings, Resume… as stone buttons inside the box; blank, the words are code text; highlighted = the selected one | ✅ | | | |
+| Stone keycaps: normal / pressed / wide | the keybinds screen: blank stone keys with the key's letter drawn on top in code (`assets/ui/key.webp`, `key-pressed.webp`, `key-wide.webp` for Space/Shift/Enter; raw `raw/ui/keycaps.jpg`) | ✅ | ✅ | ✅ | |
 
 ## Audio
 

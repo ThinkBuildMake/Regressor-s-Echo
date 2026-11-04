@@ -1,0 +1,38 @@
+{
+ "frameWidth": 324,
+ "frameHeight": 96,
+ "frames": [
+  {
+   "head": 167,
+   "feet": 268
+  },
+  {
+   "head": 163,
+   "feet": 268
+  },
+  {
+   "head": 168,
+   "feet": 268
+  },
+  {
+   "head": 164,
+   "feet": 268
+  },
+  {
+   "head": 164,
+   "feet": 268
+  },
+  {
+   "head": 167,
+   "feet": 268
+  },
+  {
+   "head": 167,
+   "feet": 268
+  },
+  {
+   "head": 164,
+   "feet": 268
+  }
+ ]
+}
