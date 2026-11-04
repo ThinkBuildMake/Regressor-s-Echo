@@ -1258,6 +1258,8 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   if (matches('The spectral stag') || matches('The pyramid entrance')) {
     s = await cleanSolveRoom('The spectral stag');
     let B = s.boss;
+    const view = s.cameras.main.worldView;
+    check(view.x <= O().x && view.right >= O().right, 'The spectral stag: the camera frames the whole arena');
     B.r.x = O().x + 6.5 * 32; B.phase = 'miss'; B.clock = -10;
     const plainDeaths = stats.deaths;
     key('keydown', 39);
@@ -1327,9 +1329,10 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     Dialogue.seen.delete('stagNote'); Dialogue.seen.delete('floorOne');
     const routeDeaths = stats.deaths;
     // Walk the whole return route and onward; no room restart or position reset.
-    const walkTo = async (name, column, direction, timeout) => {
+    const walkTo = async (name, column, direction, timeout, each) => {
       key('keydown', direction);
       await until(() => {
+        each?.();
         // Hop onto the wall soul, then walk left through the raised doorway.
         if (!s.transit && s.rooms[s.index].name === 'The spectral stag' && s.player.x < O().x + 10 * 32 &&
           (direction === 39 || s.player.y + 15 > O().y + 11.1 * 32) &&
@@ -1340,7 +1343,9 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
       }, timeout, `walk to ${name} column ${column}`);
       key('keyup', direction); key('keyup', 32); s.player.body.velocity.x = 0;
     };
-    await walkTo('The old tree', 20, 37, 10000);
+    let unseen = 0;
+    await walkTo('The old tree', 20, 37, 10000, () => { if (!s.transit && O().contains(s.player.x, s.player.y) && !s.cameras.main.worldView.contains(s.player.x, s.player.y)) unseen++; });
+    check(!unseen, `The spectral stag: after the win the camera follows you out of the arena (${unseen} frames off screen)`);
     await until(() => Dialogue.seen.has('stagNote'), 2000, 'note behind the old tree');
     check(s.stagWriting.visible && !s.guide.on, 'The spectral stag: return to the dirt note without the guide');
     Dialogue.skip(s);

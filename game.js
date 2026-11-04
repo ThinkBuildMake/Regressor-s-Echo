@@ -943,6 +943,18 @@ class Room extends Phaser.Scene {
   }
 
   create() {
+    // Screen-fixed things (backdrop, HUD, dialogue) skip the camera's scroll but not its zoom. When a room zooms
+    // out (the stag frames its whole arena), scale them back to full screen for the draw, then restore them.
+    this.events.on('prerender', () => {
+      const cam = this.cameras.main, z = cam.zoom, cx = cam.width / 2, cy = cam.height / 2;
+      if (z === 1) return;
+      this.unzoomed = this.children.list.filter((o) => o.scrollFactorX === 0).map((o) => [o, o.x, o.y, o.scaleX, o.scaleY]);
+      for (const [o, x, y, sx, sy] of this.unzoomed) o.setPosition(cx + (x - cx) / z, cy + (y - cy) / z).setScale(sx / z, sy / z);
+    });
+    this.events.on('render', () => {
+      for (const [o, x, y, sx, sy] of this.unzoomed ?? []) o.setPosition(x, y).setScale(sx, sy);
+      this.unzoomed = null;
+    });
     this.statics = this.physics.add.staticGroup(); // walls, spike bases, doors, bodies
     this.corpses = [];
     this.doors = [];
@@ -1159,7 +1171,7 @@ class Room extends Phaser.Scene {
     // Arcade resolves vertical overlap first, so jumping while pressed into a wall snags on the
     // seam between stacked blocks and kills the jump. Side contacts get pushed out sideways instead.
     this.physics.add.collider(this.player, this.statics, null, (_pl, s) => {
-      if (this.boss?.stag && s.lying && this.corpses.includes(s)) return false;
+      if (s.lying && this.rooms[this.index].name === 'The spectral stag' && this.corpses.includes(s)) return false; // rammed souls stay flat, before and after the win
       const a = this.player.body, b = s.body;
       const ox = Math.min(a.right, b.right) - Math.max(a.x, b.x);
       const oy = Math.min(a.bottom, b.bottom) - Math.max(a.y, b.y);
@@ -2316,7 +2328,10 @@ class Room extends Phaser.Scene {
 
     this.updateHud();
     const room = this.rooms[this.index];
-    this.cameras.main.setZoom(room.name === 'Thornwood' && p.x > room.rect.x + 27 * T ? 0.68 : 1);
+    if (!this.boss?.stag) { // the stag frames its whole arena; after the win the camera follows again
+      this.cameras.main.setZoom(room.name === 'Thornwood' && p.x > room.rect.x + 27 * T ? 0.68 : 1);
+      if (!this.cameras.main._follow && !this.transit) this.cameras.main.startFollow(p, true, 0.12, 0.12);
+    }
     for (const layer of this.art.layers) if (layer.ts.depth === 10)
       layer.ts.setAlpha(room.name === 'The well' ? 0.15 : 1);
     // Look into drops in every tall room, including drops after a shrine.

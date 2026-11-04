@@ -131,7 +131,7 @@ All three follow the moth's rules: 3 stomps from above, it speeds up after each 
 - The room: a ledge 7 high on the left needs a 2-soul staircase. The beam fires every ~4s, so you build the stair between shots and must stand away from it (out in the open, or next to a third "spare" soul) when the line locks, so it never crosses the stair. Recall cleans up a soul the beam made useless. Then a short second stage: a corridor where the line can only be led onto a decoy soul you place on purpose.
 
 ### The spectral stag (W3 boss, 3 souls + swap, final)
-- **Arena:** unchanged 40 × 17; platform columns 3–6 at row 12; the two-wide entrance shaft stays calm until you climb out.
+- **Arena:** unchanged 40 × 17; platform columns 3–6 at row 12; the two-wide entrance shaft stays calm until you climb out. During the fight the camera zooms out to frame the whole arena (backdrop, HUD and dialogue keep full size); after the win it follows the hero again, and rammed (flat) souls stay walk-through.
 - **Setup:** reach the platform or the floor to its right, then 8s or leave the platform. E exchanges hero and newest soul, keeps horizontal momentum and stops vertical motion, and never heals; available in World 3 or after the tree.
 - **Loop:** Buttress Charge → Searching Antlers → Procession → Three seals → recovery. Gaps 3s × 0.8 per hit; tells stay fixed.
 - **Charge:** yellow lane tracks for 0.5s, locks until 0.9s; 650 px/s. Only ramming a soul dazes it (2s); the soul is flattened, survives, and can be swapped again. Plain stomps bounce without damage. The stronger stomp bounce reaches the platform for restoring the seal.
