@@ -916,7 +916,7 @@ class Room extends Phaser.Scene {
     Dialogue.preload(this);
     for (const [key, path] of [
       ['amulet', 'world1/amulet'], ['ghost', 'world1/ghost'], ['old-tree', 'world3/old-tree'],
-      ...[1, 2, 3].flatMap((n) => [[`amulet-rune${n}`, `world1/amulet-rune${n}`], [`shrine${n}`, `world${n}/shrine`]]),
+      ...[1, 2, 3].flatMap((n) => [[`amulet-rune${n}`, `world1/amulet-rune${n}`], [`shrine${n}`, `world${n}/shrine`], [`shrineLit${n}`, `world${n}/shrine-lit`]]),
     ]) if (!this.textures.exists(key)) this.load.image(key, `assets/${path}.webp`);
     if (!this.textures.exists('heroSheet')) {
       this.load.image('heroSheet', 'assets/hero/sheet.webp'); // 8 frames: run 0-5, jump 6, fall 7
@@ -1118,7 +1118,7 @@ class Room extends Phaser.Scene {
               sh.rune = this.add.circle(x + T / 2, y + T - 18, 3, 0xe8b44a).setAlpha(0.35).setDepth(3);
               sh.spawn = { x: x + T / 2, y: y + T - 15 };
               this.storyPainting(sh, `shrine${world}`, 44, 14);
-              if (sh.img) { sh.setStrokeStyle(0); sh.rune.setVisible(false); sh.img.setTint(0x626868).setAlpha(0.65); }
+              if (sh.img) { sh.setStrokeStyle(0); sh.rune.setVisible(false); sh.world = world; }
               this.shrines.push(sh);
               break;
             }
@@ -1288,7 +1288,8 @@ class Room extends Phaser.Scene {
     }
     for (const sh of this.shrines) {
       const active = this.start === sh.spawn;
-      sh.img?.setTint(active ? 0xffffff : 0x626868).setAlpha(active ? 1 : 0.65);
+      const lit = `shrineLit${sh.world}`; // lit and unlit are two paintings of the same stone
+      if (sh.img) sh.img.setTexture(active && this.textures.exists(lit) ? lit : `shrine${sh.world}`);
       if (active) g.fillStyle(0xffd774, 0.12 + Math.sin(t * 3) * 0.04).fillCircle(sh.x, sh.y - 4, 24);
     }
     const rune = stats.treePower ? 3 : stats.mothFinished ? 2 : 1;
