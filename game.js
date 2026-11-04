@@ -936,6 +936,11 @@ class Room extends Phaser.Scene {
   init(data) { this.index = Phaser.Math.Wrap(data.index ?? START_ROOM, 0, ROOMS.length); this.retry = !!data.retry; }
 
   preload() {
+    // Keep the loading screen up until the world is built (removed on the first frame after create).
+    if (!window.SKIP_WARNING && !this.retry) {
+      const hide = UI.loadingScreen(this);
+      this.events.once('update', hide);
+    }
     Art.preload(this);
     Dialogue.preload(this);
     for (const [key, path] of [
@@ -1108,6 +1113,8 @@ class Room extends Phaser.Scene {
                 B.floor = y + T;
                 if (this.textures.exists('tree-idle')) {
                   B.img = this.add.image(x + 0.5 * T, B.floor, 'tree-idle').setOrigin(0.5, 1).setDepth(4);
+                  this.bossPose(B, 'tree', 'idle', 224, 0.8, true); // one frame at game size, not the whole sheet
+                  B.img.setY(B.floor + (B.artFoot ?? 0)).setVisible(!B.hidden);
                   B.r.setFillStyle(0, 0);
                 }
                 B.r.on('destroy', () => { B.img?.destroy(); B.pods.forEach((p) => p.r.destroy()); });

@@ -20,23 +20,28 @@ const UI = {
     if (dim) scene.add.rectangle(480, 272, 960, 544, 0x05080a, dim);
   },
 
-  // Black, a grey hero running in the lower right, and "Loading…" (the boot screen, and Start while the world is built).
+  // Black, a grey hero running in the lower right, and "Loading…" (the boot screen, and the game while it builds the world).
+  // Fixed to the screen; returns a function that removes it.
   loadingScreen(scene) {
-    scene.add.rectangle(480, 272, 960, 544, 0x000000).setDepth(100);
+    const parts = [scene.add.rectangle(480, 272, 960, 544, 0x000000).setDepth(1000)];
     let runner;
     if (scene.textures.exists('heroRun')) {
       const tex = scene.textures.get('heroRun'), img = tex.getSourceImage(), fw = img.width / 12;
       if (!tex.has(0)) for (let i = 0; i < 12; i++) tex.add(i, 0, i * fw, 0, fw, img.height);
-      runner = scene.add.image(880, 520, 'heroRun', 0).setOrigin(0.5, 1).setScale(0.62).setDepth(101);
+      runner = scene.add.image(880, 520, 'heroRun', 0).setOrigin(0.5, 1).setScale(0.62).setDepth(1001);
+      parts.push(runner);
       runner.preFX?.addColorMatrix().grayscale(1);
     }
-    const label = scene.add.text(820, 498, 'Loading', { ...FONT, fontSize: '22px', color: '#d8d8d8' }).setOrigin(1, 0.5).setDepth(101);
+    const label = scene.add.text(820, 498, 'Loading', { ...FONT, fontSize: '22px', color: '#d8d8d8' }).setOrigin(1, 0.5).setDepth(1001);
+    parts.push(label);
+    parts.forEach((o) => o.setScrollFactor(0));
     let step = 0;
-    scene.time.addEvent({ delay: 60, loop: true, callback: () => {
+    const timer = scene.time.addEvent({ delay: 60, loop: true, callback: () => {
       step++;
       runner?.setFrame(step % 12);
       label.setText('Loading' + '.'.repeat(Math.floor(step / 6) % 4));
     } });
+    return () => { timer.remove(); parts.forEach((o) => o.destroy()); };
   },
 
   panel(scene, y, w, h) {
@@ -96,13 +101,21 @@ class Title extends Phaser.Scene {
     else this.add.text(480, 128, "Regressor's Echo", { ...FONT, fontSize: '52px', color: '#f1e3b8' }).setOrigin(0.5);
     UI.panel(this, 372, 330, 236);
     UI.menu(this, [
-      { label: 'Start', act: () => { UI.loadingScreen(this); this.time.delayedCall(50, () => this.scene.start('room')); } }, // shown while the world is built
+      { label: 'Start', act: () => this.start() },
       { label: 'Settings', act: () => this.open('settings') },
       { label: 'Controls', act: () => this.open('controls') },
     ], 310);
     this.add.text(480, 528, 'Click or use ↑ ↓ and Enter', { ...FONT, fontSize: '13px', color: '#a8b8ad' }).setOrigin(0.5);
   }
   open(page) { this.scene.pause(); this.scene.launch('menu', { page, back: 'title' }); }
+  // The title (under its loading screen) stays up until the game has built the world, so there's no blank gap.
+  start() {
+    UI.loadingScreen(this);
+    this.time.delayedCall(50, () => {
+      this.scene.get('room').events.once('create', () => this.scene.stop());
+      this.scene.launch('room');
+    });
+  }
 }
 
 // The system menu, drawn over a paused scene: the pause list, Settings and Controls.
