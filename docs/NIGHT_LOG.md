@@ -47,14 +47,16 @@ DECISION: the user asked for parallel agents. Three Codex workers, one per world
 09:32 main is NOT merged with night (user thought it was). Merged main (new sprites, audio tools) into night. 3 Codex sprite workers: bosses (w1), hero/enemies/portraits (w2), hazards per world (w3). Next: merge night into main once sprites land.
 09:43 sprites merged: hero/enemies/portraits (w2), bosses (w1). NEEDS REVIEW: the tree sprite is small (about 4 tiles tall) because it's scaled to the boss hitbox (mask 4 up).
 
-## Morning summary, night 2 (draft, updated as work lands)
-- **Branch:** `night/2026-11-02` in `../Game-Week-night` (not merged into main, not pushed). **Main was not merged** because main's working copy has uncommitted edits to `dialogue.js` and `docs/STORY.md` (your story chat). Commit those, then `git merge night/2026-11-02` in `../Game-Week`.
-- **Done and verified by real play (Claude agents) + full suite twice:**
+## Morning summary, night 2
+- **The whole game was played start to finish by a Claude agent with no dev keys: it reaches the ending card.** All 28 rooms, the three bosses, every story scene once and in order, powers/runes/music switching correctly. Full suite passes twice on the final build (3cdaa96).
+- **Branch:** `night/2026-11-02` in `../Game-Week-night`, not pushed. **Not merged into main:** main's working copy has uncommitted edits to `dialogue.js` and `docs/STORY.md` (your story chat) and a merge would overwrite them. Commit those, then run `git merge night/2026-11-02` in `../Game-Week` (expect a conflict in dialogue.js where both changed it).
+- **Done and verified by real play + full suite twice:**
   - Cutscenes: each line acts out its stage direction as you press Enter; your own movement stops during a scene; a key held through a scene needs a fresh press; Esc skips. Walkers wait during conversations; the ghost drifts back to the hero.
-  - World 1: all rooms and the moth (7/7 wins with human reaction times); thorn steps no longer tight; long pit tunnel skip closed; Thornwood kick and saw fixed.
+  - World 1: all rooms and the moth (7/7 bot wins with human reaction times); thorn steps no longer tight; long pit tunnel skip closed; Thornwood kick and saw fixed.
   - World 2: all rooms and the tree; Off the edge skip closed; The beam step block; springs stop drifting when you let go; Sawmill plate shields you from the thrower and the saw jams.
   - World 3: all rooms and the stag (swap required, no passive win, 0-death win); Three high, Two places, Everything, Reliquary skips closed; arena zoom works; the walk back to the note after the win works.
-  - Earlier tonight: music and sound effects wired in, story art (amulet + runes, ghost, shrines, old tree), ending route fix.
+  - The full run fixed: Shift+R making the backdrop/HUD/dialogue vanish for the rest of the run, play-again keeping later powers, Shift+R during a boss victory softlocking the re-win, respawn pushing you up floating souls (through a wall in the stag arena), ending music after a Shift+R.
+  - Earlier tonight: music and sound effects, story art (amulet + runes, ghost, shrines, old tree), ending route fix.
 - **Needs your decision:**
   - Let go stage 1 can be done with one soul hung 2-3 high (accept as an alternative route?).
   - The ladder stage 1: a wall kick off the ledge face onto one hung soul skips the staircase; needs a wall-jump rule decision (may affect Three high).
@@ -62,7 +64,7 @@ DECISION: the user asked for parallel agents. Three Codex workers, one per world
   - The rehearsal stage B can be run by jumping at each beam lock.
   - Reliquary (mild): a drop from the shrine onto the bottom crumble skips the middle steps.
   - The stag's 10-death nudge "Lead it away" is about the beam, not the swap trick (your text).
-- **Not done:** menus/title screen (you're making the art in another chat). Audio balance hasn't been heard by a person.
+- **Not done:** menus/title screen (you're making the art in another chat). Audio balance hasn't been heard by a person. Being fixed at the time of writing: the world title reappearing on every Shift+R, and the stag's death count resetting on Shift+R.
 
 ## Night 2 (2026-11-04)
 00:53 user went to bed: 'continue to run until I wake up'. Claude subagents allowed (weekly reset tonight). Cutscene-input fix, W2 and W3 QA-and-fix agents running.
