@@ -70,6 +70,17 @@ const go = async (i) => { console.info('at go ' + ROOMS[i]?.[0]);
   await wait(100);
   return room();
 };
+// Shift+R with real keys; like go(), wait on the real clock because the rebuild may load art.
+const shiftR = async () => {
+  const old = room().player;
+  key('keydown', 16); key('keydown', 82); await wait(50); key('keyup', 82); key('keyup', 16);
+  const ready = () => room().player && room().player !== old && room().player.body;
+  for (const end = nativeNow() + 15000; !ready(); await new Promise((r) => setTimeout(r, 5))) {
+    await advance();
+    if (nativeNow() > end) throw new Error('Timed out waiting for Shift+R');
+  }
+  return room();
+};
 const key = (type, keyCode) => {                     // synthetic key event Phaser will accept
   const e = new KeyboardEvent(type, { bubbles: true });
   Object.defineProperty(e, 'keyCode', { get: () => keyCode });
@@ -722,10 +733,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     s = await cleanSolveRoom('The moth');
     s.boss.hp = 1; // setup shortcut: the first two stomps are covered above
     check(await lastHit(await thornSoulAndMount()) && s.talk.queue.length > 0, 'moth retry: the last stomp starts the victory scene');
-    const old = s.player;
-    key('keydown', 16); key('keydown', 82); await wait(50); key('keyup', 82); key('keyup', 16);
-    await until(() => room().player && room().player !== old && room().player.body, 5000, 'Shift+R mid-scene');
-    s = room(); await wait(200);
+    s = await shiftR(); await wait(200);
     check(s.boss && !stats.mothFinished && rules.max === 1, 'moth retry: Shift+R mid-scene restarts the fight');
     s.boss.hp = 1;
     check(await lastHit(await thornSoulAndMount()) && s.talk.queue.length > 0, 'moth retry: the second win plays the victory scene again');
@@ -2270,14 +2278,31 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   // (Thornwood's section C, the stag arena) blew the backdrop, HUD and dialogue up to NaN for the rest of the run.
   if (matches('The spectral stag')) {
     s = await cleanSolveRoom('The spectral stag');
-    const old = s.player;
-    key('keydown', 16); key('keydown', 82); await wait(50); key('keyup', 82); key('keyup', 16);
-    await until(() => room().player && room().player !== old && room().player.body, 5000, 'Shift+R rebuilds the arena');
-    s = room(); await wait(1000);
+    s = await shiftR(); await wait(1000);
     const fixed = s.children.list.filter((o) => o.scrollFactorX === 0);
     check(s.cameras.main.zoom < 1 && s.events.listenerCount('prerender') === 1 &&
       fixed.every((o) => Number.isFinite(o.x) && Number.isFinite(o.y) && Math.abs(o.scaleX) < 2) && s.art.layers.every((l) => l.ts.scaleX === 1),
       `Shift+R then a zoomed room keeps the backdrop, HUD and dialogue on screen (${s.events.listenerCount('prerender')} hooks, scale ${s.art.layers[0].ts.scaleX})`);
+  }
+  // Dying again and again at the start point used to lift the respawn a tile per death (onto the floating stack),
+  // until he was pushed out through the arena wall into the old tree's rock.
+  if (matches('The spectral stag')) {
+    s = await cleanSolveRoom('The spectral stag');
+    let highest = 0;
+    for (let i = 0; i < 14; i++) {
+      const d = stats.deaths;
+      key('keydown', 75); await until(() => stats.deaths > d, 2000, 'self-destruct at the start'); key('keyup', 75); await alive();
+      highest = Math.max(highest, (O().bottom - s.player.y) / T);
+    }
+    check(s.rooms[s.index].name === 'The spectral stag' && highest < 9,
+      `Repeated deaths at the start keep the respawn on the stack, not above it (${s.rooms[s.index].name}, ${highest.toFixed(1)} tiles up)`);
+  }
+  // Shift+R during the stag's last stand (after the beam cue started the ending music) brings the fight back: its music too.
+  if (matches('The spectral stag')) {
+    s = await cleanSolveRoom('The spectral stag');
+    GameAudio.cue('lastBeam');
+    s = await shiftR(); await wait(100);
+    check(!GameAudio.ending && GameAudio.musicKey === 'boss-spectral-stag', `Shift+R during the last stand restores the fight music (${GameAudio.musicKey})`);
   }
   // Play again from the ending card: World 1 must not keep the moth's self-destruct and recall.
   if (matches('The clearing')) {

@@ -968,6 +968,7 @@ class Room extends Phaser.Scene {
     this.enemies = []; // only the current room's walkers exist (Celeste-style)
     this.walkerSpawns = [];
     this.treePower = !!stats.treePower;
+    if (!stats.stagFinished) GameAudio.ending = false; // Shift+R during the last stand brings the stag back: fight music again
     this.bosses = []; // one per boss room; this.boss is the current room's
     this.stagFinished = !!stats.stagFinished;
     this.gates = [];
@@ -1534,11 +1535,12 @@ class Room extends Phaser.Scene {
     this.droppers.forEach((d) => this.resetDropper(d));
     this.downed.forEach((d) => this.spawnEnemy(d.sp)); // dying brings stomped enemies back
     this.downed = [];
-    // Respawn on top of any bodies sitting on the start point.
+    // Respawn on top of any bodies sitting on the start point. Only bodies he would stand inside count: a soul
+    // floating above his head stays above it, or dying at the start would lift him a tile per death into the ceiling.
     this.setLying(false);
     let y = this.start.y;
     for (const b of [...this.corpses].sort((a, b) => b.y - a.y))
-      if (Math.abs(b.x - this.start.x) < b.width / 2 + 12 && b.y - b.height / 2 < y + 15) y = b.y - b.height / 2 - 15;
+      if (Math.abs(b.x - this.start.x) < b.width / 2 + 12 && b.y - b.height / 2 < y + 15 && b.y + b.height / 2 > y - 15) y = b.y - b.height / 2 - 15;
     p.body.reset(this.start.x, y);
     p.setVisible(false);
     p.body.moves = false; // Gravity must pause with the enemies during respawn.
