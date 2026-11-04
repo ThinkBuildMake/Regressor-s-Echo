@@ -94,11 +94,11 @@ From docs/brainstorm/2026-11-03-bosses.md. Paint physical objects; beams, lanes,
 
 | Asset | Sheet (animations) | Prompt | Ref | Sheet | Sized | In game |
 |---|---|---|---|---|---|---|
-| Spikes (tileable strip) | — | | | — | | ✅ W2–3 |
-| Spiky vine wall (the `x` tile) | — (static, tileable) | | | — | | ✅ W2–3 |
-| Pressure plate: up / down | — up: `raw/world1/plate.jpg` approved. Down: no new art; when pressed the code sinks the plate so only a thin sliver of its top edge peeks above the ground | | | — | | ✅ W2–3 |
+| Spikes (tileable strip) | — | | | — | | ✅ W1–3 |
+| Spiky vine wall (the `x` tile) | — (static, tileable) | | | — | | ✅ W1–3 |
+| Pressure plate: up / down | — up: `raw/world1/plate.jpg` approved. Down: no new art; when pressed the code sinks the plate so only a thin sliver of its top edge peeks above the ground | | | — | | ✅ W1–3 |
 | Gate (held open by a pressure plate) | — one image per world: W1 root gate ✅, W2 stone slab, W3 carved shrine door; slides open in code | ✅ | 🟡 W1 | — | | |
-| Vine barrier (`V`, opens when the room's boss is beaten) | — `raw/world1/vine-barrier.jpg` approved; draw it **thinner** (about one tile wide) when sizing; it withers open in code | | | — | | ✅ W2–3 |
+| Vine barrier (`V`, opens when the room's boss is beaten) | — `raw/world1/vine-barrier.jpg` approved; draw it **thinner** (about one tile wide) when sizing; it withers open in code | | | — | | ✅ W1–3 |
 | Laser emitter (World 2) | — (beam in code) | | | — | | |
 | Spring (World 2) | idle / compressed / launch, 3 frames | | | | | ✅ |
 | Moving platform (World 2 room 7) | — | | | — | | |

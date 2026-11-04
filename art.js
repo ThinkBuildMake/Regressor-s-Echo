@@ -40,7 +40,7 @@ const Art = {
     scene.hazardsPreloaded = true;
     for (const world of [1, 2, 3]) {
       for (const name of ['crumble', 'crumble-cracked', 'crumble-breaking', 'falling-spike', 'saw',
-        ...(world > 1 ? ['spikes', 'thorns', 'plate', 'vine-barrier'] : [])]) {
+        'spikes', 'thorns', 'plate', 'vine-barrier']) {
         const key = `hazard-${world}-${name}`;
         if (!scene.textures.exists(key)) scene.load.image(key, `assets/world${world}/${name}.webp`);
       }
@@ -57,10 +57,13 @@ const Art = {
     if (!key) return;
     const tex = scene.textures.get(key);
     if (name === 'spikes' && !tex.has('points')) {
-      const top = key.includes('-2-') ? 71 : 69, source = tex.getSourceImage();
-      tex.add('points', 0, 0, top, source.width, source.height - top);
+      const top = key.includes('-2-') ? 71 : key.includes('-1-') ? 70 : 69, source = tex.getSourceImage(); // first rows of the points, per world
+      tex.add('points', 0, 0, top, source.width, 150 - top); // every world's strip ends at row 149; below is empty
     }
-    const img = scene.add.image(body.x, body.y + offsetY, key, name === 'spikes' ? 'points' : undefined).setDisplaySize(width, height).setDepth(3);
+    // Spikes repeat along the pit at their painted shape (stretching one strip across a wide pit squashed the stakes flat).
+    const img = name === 'spikes'
+      ? scene.add.tileSprite(body.x, body.y + offsetY, width, height, key, 'points').setTileScale(height / tex.get('points').height).setDepth(3)
+      : scene.add.image(body.x, body.y + offsetY, key).setDisplaySize(width, height).setDepth(3);
     body.setFillStyle(0, 0).setStrokeStyle(0);
     body.hazardArt = { img, world, name, offsetY };
     body.on('destroy', () => img.destroy());
