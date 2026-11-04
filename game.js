@@ -361,7 +361,7 @@ const ROOMS = [
     '##############################',
     '##############################',
     '##############################',
-  ], [150, 94], { world: 1 }],
+  ], [150, 94], { world: 1, enter: "slideHow" }],
   ["The well", [ // aim your fall: the soul must land near the exit side
     '##############################',
     '##############################',
@@ -519,7 +519,7 @@ const ROOMS = [
     '##############################',
     '##############################',
     '##############################',
-  ], [376, 107], { world: 2 }],
+  ], [376, 107], { world: 2, enter: "recallHow" }],
   ["The ladder", [ // 7-high ledge: stack to 3, then run off your top soul holding K for a step beside it
     '##############################',
     '#               #            #',
@@ -606,7 +606,7 @@ const ROOMS = [
     '#                              D   #########',
     '#                              D   #########',
     '#                              D   #########',
-    '#                          _ t D C #########',
+    '#                          _ t D   #########',
     '#           C  ####~~~~~~~######   #########',
     '#         #########       ######   #########',
     '#         #########       ######   #########',
@@ -616,7 +616,7 @@ const ROOMS = [
     '#         ######################           #',
     '          ######################            ',
     '          ######################            ',
-    ' P    s   ######################    #    e  ',
+    ' P    s   ###################### C  #    e  ',
     '############################################',
     '############################################',
   ], [526, 71], { world: 2 }],
@@ -677,7 +677,7 @@ const ROOMS = [
     '######^ #### C ###############',
     '##############################',
     '##############################',
-  ], [630, 73], { world: 3 }],
+  ], [630, 73], { world: 3, enter: "swapHow" }],
   ["Three jobs", [ // plate, pit and a laser blocker at once; recall mistakes instead of dying over them
     '##############################',
     '##############################',
@@ -1191,6 +1191,8 @@ class Room extends Phaser.Scene {
     });
 
     this.keys = this.input.keyboard.addKeys('A,D,LEFT,RIGHT,SPACE,W,UP,K,X,Q,R,N,S,DOWN,SHIFT,ENTER,E,ESC,H,ONE,TWO,THREE,FOUR,FIVE');
+    this.bossBar = this.add.text(480, 14, '', { fontFamily: 'Georgia, serif', fontSize: '22px', color: '#ffef72' })
+      .setOrigin(0.5, 0).setScrollFactor(0).setDepth(30).setShadow(0, 2, '#000', 6);
     this.hud = this.add.text(8, 4, '', { fontFamily: 'monospace', fontSize: '13px', color: '#ddd', lineSpacing: 3, backgroundColor: '#000000aa', padding: { x: 6, y: 4 } }).setDepth(30).setScrollFactor(0).setVisible(showHud);
     const cam = this.cameras.main, R = this.rooms[this.index].rect;
     cam.setBounds(R.x, R.y, R.width, R.height);
@@ -1364,8 +1366,7 @@ class Room extends Phaser.Scene {
     if (name === 'dim' || name === 'undim') { // night falls / morning comes (under the dialogue panel)
       this.dimmer ??= this.add.rectangle(480, 272, 960, 544, 0x020610).setScrollFactor(0).setDepth(39).setAlpha(0);
       this.tweens.killTweensOf(this.dimmer);
-      this.tweens.add({ targets: this.dimmer, alpha: name === 'dim' ? 0.88 : 0, duration: 1100 });
-      this.guide.setDepth(name === 'dim' ? 39.5 : 4.4); // the ghost still glows in the dark
+      this.tweens.add({ targets: this.dimmer, alpha: name === 'dim' ? 1 : 0, duration: 1100 }); // full dark, ghost included
     }
     if (name === 'pulse') this.cameras.main.flash(250, 255, 215, 120);
     if (name === 'ghost' && g && !g.on) { // fades in right beside him
@@ -1506,6 +1507,10 @@ class Room extends Phaser.Scene {
     // World 1: a sideways saw that kills you mid-hop still gets your soul in its lane, so the soul jams it.
     const saw = this.saws.find((sw) => sw.room === this.index && sw.dx && Math.abs(sw.x - p.x) < SAW_R + p.width / 2 && Math.abs(sw.y - p.y) < SAW_R + p.height / 2);
     if (saw && rules.snap && this.rooms[this.index].world === 1) bottom = Math.max(bottom, Math.round((saw.y + SAW_R) / T) * T);
+    // A soul made by a sideways beam fills that beam's row, so it always blocks it
+    // (rounding the feet left it a tile under the beam when you jumped up into it).
+    const lane = rules.snap && !this.lying && this.beams().find((r) => r.height === 6 && hit(bounds(p), r));
+    if (lane) bottom = Math.ceil(lane.bottom / T) * T;
     const c = this.add.rectangle(x, bottom - h / 2, w, h, 0x7399d9);
     c.vy = 0;
     c.lying = this.lying;
@@ -2122,7 +2127,7 @@ class Room extends Phaser.Scene {
       if (B.clock >= 1) { enter('curtain'); B.fired = 0; }
     } else if (B.phase === 'curtain') {
       if (B.clock >= B.fired * 0.45) {
-        for (let j = 0; j < 12; j++) pod(R.x + (3.25 + B.fired * 8 + j / 2) * T, R.y + T, 0, 280);
+        for (let j = 0; j < 12; j++) pod(R.x + (3.25 + B.fired * 8 + j / 2) * T, R.y + T + 8, 0, 280); // just under the ceiling, or it dies inside it
         if (++B.fired === 3) enter('curtainGap');
       }
     } else if (B.phase === 'curtainGap' && B.clock >= gap) {
@@ -2154,7 +2159,7 @@ class Room extends Phaser.Scene {
     const frame = Math.floor((this.time.now - B.artStart) / (duration * 1000) * count);
     const sourceHeight = kind === 'stag' ? { idle: 486, intro: 584, charge: 500, beam: 555, wave: 617 }[pose] : fh;
     const scale = height / sourceHeight;
-    B.artFoot = kind === 'stag' ? (fh - { idle: 660, intro: 677, charge: 676, beam: 653, wave: 676 }[pose]) * scale : 0;
+    B.artFoot = (fh - (kind === 'stag' ? { idle: 660, intro: 677, charge: 676, beam: 653, wave: 676 } : { idle: 657, intro: 659, swing: 660, slam: 662, throw: 648 })[pose]) * scale; // empty rows under the feet
     B.img.setTexture(key, loop ? frame % count : Math.min(count - 1, frame)).setScale(scale);
     if (pose === 'idle') B.img.setFrame(0).setScale(scale, scale * (1 + Math.sin(this.time.now / 320) * 0.012));
   }
@@ -2166,7 +2171,7 @@ class Room extends Phaser.Scene {
       B.img = this.add.image(B.r.x, B.r.y, key).setDepth(4);
       B.r.on('destroy', () => B.img.destroy());
     }
-    const floor = this.rooms[B.room].rect.bottom - T;
+    const floor = B.floor ?? (B.stag ? B.r.y + 32 : this.rooms[B.room].rect.bottom - T); // the stag's room has two floor rows
     const tex = this.textures.get(key);
     // Fallen paintings have wide transparent margins.
     const [x, y, w, h] = { moth: [464, 310, 344, 104], tree: [512, 270, 250, 158], stag: [558, 306, 136, 86] }[kind];
@@ -2188,7 +2193,7 @@ class Room extends Phaser.Scene {
   updateTree(B, dt) {
     const pose = B.open > 0 ? 'slam' : B.phase === 'rake' ? 'swing' : B.phase === 'mortar' ? 'throw' : B.phase === 'slam' ? 'slam' : 'idle';
     this.bossPose(B, 'tree', pose, 224, B.phase === 'slam' ? TREE_GLOW : 0.8, pose === 'idle');
-    B.img?.setVisible(B.r.visible).setTint(B.open > 0 ? 0xffffff : B.phase === 'slam' ? 0x69cfff : B.phase !== 'idle' ? 0xf1f578 : 0xffffff);
+    B.img?.setY(B.floor + B.artFoot).setVisible(B.r.visible).setTint(B.open > 0 ? 0xffffff : B.phase === 'slam' ? 0x69cfff : B.phase !== 'idle' ? 0xf1f578 : 0xffffff);
     if (B.hidden || this.dead > 0 || this.talk.line || this.talk.queue.length || this.transit) return;
     B.hurt -= dt;
     if (this.player.body.blocked.down || this.player.body.touching.down) B.stompReady = true;
@@ -2283,6 +2288,9 @@ class Room extends Phaser.Scene {
     if (B.kind === 'tree') { B.stompReady = false; B.open = 0; }
     GameAudio.play(`${GameAudio.kind(B)}-${B.kind === 'tree' ? 'mask-hit' : 'hit'}`);
     B.hurt = 0.5;
+    this.cameras.main.shake(180, 0.008);
+    B.img?.setTintFill(0xffffff);
+    this.time.delayedCall(120, () => B.img?.active && B.img.clearTint());
     if (B.story === 'mothDown') {
       B.open = false; B.phase = 'diveGap'; B.clock = 0; B.warn?.clear();
       for (const sh of this.shots.filter((sh) => sh.mothDust)) sh.destroy();
@@ -2590,6 +2598,8 @@ class Room extends Phaser.Scene {
   }
 
   updateHud() {
+    const B = this.boss, show = B?.room === this.index && !B.hidden && B.hp > 0 && !this.transit;
+    this.bossBar.setVisible(show).setText(show ? '♥'.repeat(B.hp) + '♡'.repeat(BOSS_HP - B.hp) : '');
     const on = (v) => (v ? 'ON' : 'off');
     this.hud.setText([
       `Room ${this.index + 1}/${ROOMS.length} — ${this.rooms[this.index].name}`,

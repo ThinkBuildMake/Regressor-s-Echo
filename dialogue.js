@@ -34,8 +34,35 @@ const SCRIPT = {
     G("amused", "Well. You've locked yourself out. With yourself. That's a new one."),
   ],
   letGo: [
+    // The nap, at the start of World 2: he writes the note here (revealed in World 3).
+    H('exhausted', 'I need… a minute. Or a hundred.'),
+    G('wry', "Go on. I'll keep watch. Not like I sleep."),
+    H('exhausted', 'Wake me if anything else comes through a wall.'),
+    W(1.6, 'dim'),
+    G('thinking', '…'),
+    G('sad', '…'),
+    W(1.4),
+    W(1.2, 'undim'),
+    H('curious', 'Did you just… sit there all night?'),
+    G('wry', "Floated. There's a difference."),
     H("thinking", "No spikes. No thorns. No bugs. …Why does that make it worse?"),
     G("thinking", "Because this time, nothing's going to do it for you."),
+    G("thinking", "Hold K. When the flames fill up, you go. Let go of K before then and you don't."),
+  ],
+  slideHow: [ // The long pit
+    H("thinking", "That pit's too long to jump."),
+    G("thinking", "Then don't jump it. Get running and press Shift. You'll slide flat."),
+    G("wry", "And if you die flat, you stay flat. A nice long bridge."),
+  ],
+  recallHow: [ // Take it back
+    G("thinking", "Press Q and your newest soul comes back to you. Hold it, and they keep coming, newest first."),
+    H("relieved", "No dying?"),
+    G("wry", "No dying. Mind what you're standing on, though."),
+  ],
+  swapHow: [ // Two places
+    G("thinking", "Press E. You and your newest soul trade places."),
+    H("curious", "Even while I'm running?"),
+    G("amused", "Especially while you're running."),
   ],
   chosenDeath: [
     W(0.8), // A beat.
@@ -304,17 +331,6 @@ const SCRIPT = {
     G('thinking', 'And one more thing. You can let go now, whenever you like.'),
     H('curious', 'Let go of what?'),
     G('wry', "Yourself. Trust me, it's worse when you choose it."),
-    // The nap: he writes the note here (revealed in World 3).
-    H('exhausted', 'I need… a minute. Or a hundred.'),
-    G('wry', "Go on. I'll keep watch. Not like I sleep."),
-    H('exhausted', 'Wake me if anything else comes through a wall.'),
-    W(1.6, 'dim'),
-    G('thinking', '…'),
-    G('sad', '…'),
-    W(1.4),
-    W(1.2, 'undim'),
-    H('curious', 'Did you just… sit there all night?'),
-    G('wry', "Floated. There's a difference."),
   ],
 };
 
@@ -351,14 +367,17 @@ stage('carvings', 4, { walk: 13.5, face: 'right' });
 stage('moth', 0, { walk: 9, face: 'right', speed: 22 });
 stage('moth', 1, { walk: 10, face: 'right', speed: 22 });
 stage('moth', 2, { walk: 11, face: 'right', speed: 22 });
-stage('mothDown', 25, { pose: 'slump' });
-stage('mothDown', 26, { pose: 'slump' });
-stage('mothDown', 31, { pose: 'idle', face: 'guide' });
 stage('stagPromise', 0, { walk: 20, guide: { x: 18, y: 13 }, face: 'guide' });
 stage('stagNote', 0, { walk: 19.5, face: 'left', pose: 'kneel' });
 stage('stagNote', 11, { pose: 'idle' });
 stage('floorOne', 0, { walk: 23, face: 'right' });
 stage('floorOne', 3, { walk: 26, face: 'right' });
+// The nap: the game walks him in, he lies down, full dark, and he gets up at dawn.
+stage('letGo', 0, { walk: 4, face: 'right' });
+stage('letGo', 2, { pose: 'sleep' });
+stage('letGo', 3, { pose: 'sleep' });
+stage('letGo', 4, { guideBy: 0.5 });
+stage('letGo', 8, { pose: 'idle', hop: true, face: 'guide' });
 
 // Small reactions also give the quieter exchanges a body beat on each panel.
 for (const lines of Object.values(SCRIPT)) for (const l of lines) {
@@ -391,7 +410,6 @@ stage('tree', 4, { walk: 7.5, hop: true, face: 'right' });
 stage('mothDown', 4, { hop: true });
 stage('mothDown', 12, { amulet: 'hold' });
 stage('mothDown', 13, { amulet: 'wear' });
-stage('mothDown', 27, { guideBy: 0.5 });
 stage('stagPromise', 3, { face: 'left' });
 stage('stagPromise', 4, { walk: 20.5, face: 'left' });
 stage('stagPromise', 5, { walk: 20, face: 'guide' });
@@ -528,7 +546,7 @@ const Dialogue = {
     if (l.cue === 'lookaround' || l.lookAround) { g.looking = false; g.setFlipX(g.x > scene.player.x); }
     if ((l.cue === 'dim' || l.cue === 'undim') && scene.dimmer) {
       scene.tweens.killTweensOf(scene.dimmer);
-      scene.dimmer.setAlpha(l.cue === 'dim' ? 0.88 : 0);
+      scene.dimmer.setAlpha(l.cue === 'dim' ? 1 : 0);
     }
   },
 

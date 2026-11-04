@@ -164,7 +164,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   }
   Object.assign(stats, storyState.stats); Object.assign(rules, storyState.rules);
   Dialogue.seen = storyState.seen;
-  for (const key of ['lowDoor', 'letGo', 'chosenDeath', 'carvings', 'guideCrack', 'pyramid', 'almostCompetent', 'breakingBeam']) Dialogue.seen.add(key);
+  for (const key of ['lowDoor', 'letGo', 'slideHow', 'recallHow', 'swapHow', 'chosenDeath', 'carvings', 'guideCrack', 'pyramid', 'almostCompetent', 'breakingBeam']) Dialogue.seen.add(key);
   // Walk the inserted chain in ROOMS order and compare every doorway row in world space.
   for (const [from, to] of [
     ['The gatehouse', 'Thornwood'], ['Thornwood', 'The moth'],
