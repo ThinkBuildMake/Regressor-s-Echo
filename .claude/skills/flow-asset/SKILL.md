@@ -69,6 +69,7 @@ Generate **one** image per run. Show the user the image and the critic's verdict
 - **When an attached reference has a shape the new creature must not copy**, say so outright ("NOT round like the attached beetle"), or Flow borrows the silhouette.
 - **Hanging or flying sprites:** `sheet.mjs` aligns on head and feet, which suits standing creatures only; for a hanging one, cut an equal box around each body's centre instead.
 - **Animations with real motion (walks, gallops, wingbeats): use the `veo-sprite` skill**, not an image sheet. Image models can't keep a four-beat gait (they mix up near and far legs, even with a pose guide).
+- **Waiting for downloads: always put a time limit on the wait.** For example: `for i in $(seq 1 150); do [ -n "$(find ~/Downloads -newer <marker> -name '*.jpg')" ] && break; sleep 2; done`. Never leave an open-ended `until …; do sleep; done` running in the background. One was left polling `~/Downloads` for almost two days waiting for files that never came (found and stopped 2026-11-04).
 - **Picker clicks can attach on their own:** clicking an item may attach it, and pressing "Add to prompt" too attaches it twice. Check the thumbnails before submitting.
 - **The amulet:** Flow's own amulet images have 5 rays; upload the repo's `assets/raw` amulet (3 rays) instead.
 - **Uploads from a git worktree are refused** by `file_upload` (only the main repo or the scratchpad count as shared): copy the file to the scratchpad first.
