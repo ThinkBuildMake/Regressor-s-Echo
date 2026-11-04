@@ -2238,7 +2238,7 @@ class Room extends Phaser.Scene {
     const JU = Phaser.Input.Keyboard.JustUp, jumpUp = JU(k.SPACE) | JU(k.W) | JU(k.UP);
     const slideKey = JD(k.S) | JD(k.DOWN) | JD(k.SHIFT);
     this.showGuide(dt);
-    if (this.dead <= 0 && Dialogue.update(this, dt, talkKey)) { p.body.velocity.x = 0; return; } // talking: hold still
+    if (this.dead <= 0 && Dialogue.update(this, dt, talkKey)) return; // the scene owns movement
     if (this.dead > 0) {
       this.dead -= dt;
       p.setVisible(this.dead <= 0);
