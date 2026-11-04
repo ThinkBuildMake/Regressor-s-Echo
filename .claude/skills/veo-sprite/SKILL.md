@@ -25,6 +25,10 @@ Read `.claude/skills/flow-asset/SKILL.md` "Driving Flow" first. It covers upload
 - Credits refill monthly at the start of the billing cycle (Google AI Pro: 1,000) and don't roll over.
 - The prompt is the creature's description plus the motion and the fixed rules:
   > Locked-off static camera, pure side view, flat solid magenta background that never changes. The <creature> <motion> in place, like on a treadmill, <gait detail>. Body level, stays in the centre of the frame and does not change size. Solid legs, no motion blur. No camera movement, no ground, no shadows, no particles, no glow, no other objects.
+- **Faces drift.** Veo redraws the face every frame, so a character's expression wanders: a deeper frown, an open mouth, blush marks (hero idle, 2026-11-04; the user caught it).
+  - Start from the **original full-resolution reference painting**, never from a small game sprite.
+  - Add to the prompt: "his face stays exactly as in the image the whole time: same expression, eyes, eyebrows and closed mouth; no blush, no sparkles".
+  - Check it before passing: crop the head from 4 frames across the loop, put them next to the reference, and fail the take if the face changes.
 - **Veo exaggerates wind and cloth.** "Soft breeze" came out as strong flapping, and the user wants it gentle. For idles, ask for near-still air: "the air is almost still; the scarf ends and cape hem drift very slightly and slowly, barely moving".
 - Gait details that worked or will help (the walker beetle's "tripod gait" came out as a readable scuttle, not a clean tripod):
   - **Walk:** "a calm natural four-beat walk: one hoof lifts at a time, left hind, left fore, right hind, right fore".
