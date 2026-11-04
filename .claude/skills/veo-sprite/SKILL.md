@@ -25,6 +25,7 @@ Read `.claude/skills/flow-asset/SKILL.md` "Driving Flow" first. It covers upload
 - Credits refill monthly at the start of the billing cycle (Google AI Pro: 1,000) and don't roll over.
 - The prompt is the creature's description plus the motion and the fixed rules:
   > Locked-off static camera, pure side view, flat solid magenta background that never changes. The <creature> <motion> in place, like on a treadmill, <gait detail>. Body level, stays in the centre of the frame and does not change size. Solid legs, no motion blur. No camera movement, no ground, no shadows, no particles, no glow, no other objects.
+- **Veo exaggerates wind and cloth.** "Soft breeze" came out as strong flapping, and the user wants it gentle. For idles, ask for near-still air: "the air is almost still; the scarf ends and cape hem drift very slightly and slowly, barely moving".
 - Gait details that worked or will help (the walker beetle's "tripod gait" came out as a readable scuttle, not a clean tripod):
   - **Walk:** "a calm natural four-beat walk: one hoof lifts at a time, left hind, left fore, right hind, right fore".
   - **Gallop:** "a real gallop, head lowered".
@@ -37,8 +38,8 @@ Read `.claude/skills/flow-asset/SKILL.md` "Driving Flow" first. It covers upload
 mkdir -p <scratch>/f && ffmpeg -i <name>.mp4 -vf fps=24 <scratch>/f/%03d.png
 node tools/video-loop.mjs <name>.mp4 [minLen] [maxLen]        # best loop windows: first=… next=…
 node tools/video-frames.mjs <scratch>/f <scratch>/native <first> <next> 12 [--anchor=feet|fixed] [--mirror] [--rot=k]
-node tools/colormatch.mjs <scratch>/native.png <painted keyed sheet of the same creature>.webp <scratch>/cm.png
-node tools/video-fit.mjs <scratch>/cm.png 12 assets/<kind>/<current sheet>.webp <scratch>/<name> [--match=i:j]
+node tools/colormatch.mjs <scratch>/native.png <painted keyed sheet of the same creature>.webp <scratch>/cm.png [--despill] [--blue-cap=6]
+node tools/video-fit.mjs <scratch>/cm.png 12 assets/<kind>/<current sheet>.webp <scratch>/<name> [--match=i:j] [--grow]
 tools/sheet-gif.sh <scratch>/<name>.png <frameWidth> 12 <scratch>/<name>.gif
 node tools/onion.mjs <scratch>/<name>.webp 12 <scratch>/onion.png
 ```
@@ -49,10 +50,10 @@ node tools/onion.mjs <scratch>/<name>.webp 12 <scratch>/onion.png
   - `--mirror` flips the result to face left. `--rot=k` starts the loop on frame k.
 - **colormatch:** video tints white and pale colours towards lavender. This shifts the colours to match the painting, then removes leftover pink without turning dark areas green.
   - The reference must be a **keyed** painted sheet (.webp with transparency), not a JPG on magenta.
-  - It only removes pink where red and blue both sit above green (magenta spill), so red creatures keep their red.
+  - Add `--despill` only for pale or white creatures, like the stag. It removes pink spill and any green cast, but it greys a green cape and darkens a crimson scarf, so leave it off for colourful characters like the hero.
   - For warm or neutral creatures, add `--blue-cap=6` if thin parts such as antennae turn vivid blue. Leave it off for cool-white creatures like the stag.
 - **video-fit:** it scales and places the creature so its height and position match the current sheet's cells. The result drops in with no code change.
-  - When the new motion is bigger than the old (a wider wingbeat), size by one matching pose with `--match=i:j` (source frame i to target frame j, e.g. wings up), or the creature comes out too small. The fit always keeps every frame inside the cell, shrinking or shifting if it has to.
+  - When the new motion is bigger than the old (a wider wingbeat), size by one matching pose with `--match=i:j` (source frame i to target frame j, e.g. wings up), or the creature comes out too small. The fit always keeps every frame inside the cell, shrinking or shifting if it has to. To keep the character's size when a cape or scarf swings wider than the old cell, add `--grow`. That widens the cell and writes the new size to the .json, so the code chat must use it.
 - **Start frame for a hard pose:** if take 1 drifts out of the pose you need (the stag's charge lifted its head), start take 2 from a frame of the current sheet in that pose instead of the base.
 - **Leave room for the motion:** a big wingbeat clipped the frame edge at 65% height; the moth needed about 36%, placed higher.
 - 12 frames is smooth; 8 is lighter but choppier.
