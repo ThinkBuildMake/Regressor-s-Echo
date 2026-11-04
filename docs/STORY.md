@@ -190,7 +190,7 @@ No hints: the player works out the plate. Just banter.
 > **Hero** [annoyed]: …  
 > **Guide** [warm]: It won't hurt. Promise.  
 > **Hero** [annoyed]: You promised I'd make it, too.  
-> **Guide** [weary]: …Fine. Touch it, and when you die, you come back there instead of all the way at the start.  
+> **Guide** [weary]: …Fine. Touch it. If you die, you'll come back there instead.  
 > **Hero** [thinking]: Huh. That's actually useful.
 
 *When he first touches the shrine:*

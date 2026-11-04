@@ -279,7 +279,7 @@ const SCRIPT = {
     H('annoyed', '…'),
     G('warm', "It won't hurt. Promise."),
     H('annoyed', "You promised I'd make it, too."),
-    G('weary', '…Fine. Touch it, and when you die, you come back there instead of all the way at the start.'),
+    G('weary', "…Fine. Touch it. If you die, you'll come back there instead."),
     H('thinking', "Huh. That's actually useful."),
   ],
   slide: [ // The long pit, at the tunnel mouth
