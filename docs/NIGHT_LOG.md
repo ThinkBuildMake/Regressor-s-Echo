@@ -46,3 +46,6 @@ DECISION: the user asked for parallel agents. Three Codex workers, one per world
 08:51 deterministic tests committed; full suite OK x3 (365s, 392s, 377s).
 09:32 main is NOT merged with night (user thought it was). Merged main (new sprites, audio tools) into night. 3 Codex sprite workers: bosses (w1), hero/enemies/portraits (w2), hazards per world (w3). Next: merge night into main once sprites land.
 09:43 sprites merged: hero/enemies/portraits (w2), bosses (w1). NEEDS REVIEW: the tree sprite is small (about 4 tiles tall) because it's scaled to the boss hitbox (mask 4 up).
+
+## Night 2 (2026-11-04)
+00:53 user went to bed: 'continue to run until I wake up'. Claude subagents allowed (weekly reset tonight). Cutscene-input fix, W2 and W3 QA-and-fix agents running.

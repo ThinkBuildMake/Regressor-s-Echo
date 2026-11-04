@@ -1,24 +1,23 @@
-# Night queue — started 2026-11-02 (branch night/2026-11-02, worktree ../Game-Week-night)
+# Night queue — 2026-11-04 (branch night/2026-11-02, worktree ../Game-Week-night)
 
-Goal: Worlds 1–3 playable end to end, every room in the showcase style (docs/LEVELS.md "Direction after the first playtest").
-
-**Every room task is done when:** its intended solution is a replay in tests/check.html and passes; `node tools/validate-rooms.mjs game.js` passes; the room is in the world's chain; LEVELS.md says Built; the full suite passes after merging.
+Goal: every room and boss in Worlds 1-3 verified possible, fair and skip-free by real play, with the new cutscenes, audio and story art working, merged into main by morning.
 
 ## Todo
-- [ ] Full run from the clearing to the ending card without dev keys
+- [ ] Merge the cutscene work (night-w1: line-by-line staging + cutscene input) once its agent verifies it
+- [ ] World 1 QA-and-fix agent (after the cutscene merge) in ../Game-Week-w1
+- [ ] Merge World 2 and World 3 QA-and-fix work; full suite twice
+- [ ] Final start-to-finish playthrough (one Claude agent, real inputs, clearing to ending card, no dev keys); fix what it finds
+- [ ] Merge night into main when the full suite passes twice
 - [ ] Morning summary at the top of NIGHT_LOG.md
 
 ## Doing
-- [ ] Playtests: one Claude playtester per world, playing from its first room through its boss with real key presses, reporting skips, softlocks and unfair deaths; fix what they find — 3 running
+- [ ] Cutscene input bug (moth exit after the win) — Claude agent in ../Game-Week-w1
+- [ ] World 2 QA-and-fix — Claude agent in ../Game-Week-w2
+- [ ] World 3 QA-and-fix — Claude agent in ../Game-Week-w3
 
 ## Done
-- [x] W2 tree guardian merged — ae47049 (+ f314874 restoring 4 replays my conflict script dropped)
-- [x] Stag second pass: old tree room, 40-wide arena, pyramid entrance, ending — 75399f9. Full suite OK (10m37s; it was 3m20s before the bosses, so it's slow, not hung)
-- [x] Baseline: `npm test` green on merged main (4m30s) — fd234ed
-- [x] Showcase rooms in the chain (+ narrow-landing physics fix, clean replays, ?only= filter) — 1434b9f^
-- [x] W1 The long pit — 1434b9f
-- [x] W1 The well, The gatehouse, the moth fight (dust, 3 stomps, 2nd rune → W2)
-- [x] W2 Let go, Off the edge, The ladder, The beam, The spring, Wrong order
-- [x] W3 Three high, In my own way, Three jobs, Everything, The rehearsal (aimed beam), the spectral stag (first pass) and the ending
+- [x] Ending route fix (walk back to the old tree after the stag) — 3b1187e
+- [x] Story art (amulet, runes, ghost, shrines, old tree), music and sound effects merged
 
 ## Blocked
+- Menus / title screen: the user is generating art in another chat; don't build until asked
