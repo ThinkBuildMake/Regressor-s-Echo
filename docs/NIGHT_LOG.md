@@ -60,3 +60,4 @@ NEEDS DECISION: Two places now needs "slide, then swap" (a walking-speed swap dr
 NEEDS DECISION: The rehearsal stage B can still be run by jumping at each beam lock (0 deaths); closing it needs a 1-tall corridor that makes the decoy timing tight.
 OPEN (mild): Reliquary: from the shrine you can drop onto the bottom crumble and skip the middle steps (2 of 3 tries).
 NOTE for the author: the stag's 10-death nudge "Lead it away" talks about the beam, not the swap trick (author's text; left as is). It only plays once you step off the platform.
+03:29 full suite on W2+W3 merged: RESULT OK (648s). 5h usage at 71%.
