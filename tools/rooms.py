@@ -150,13 +150,14 @@ def three_high(o, p):
 room('Three high', [540, 75], 30, 17, 3, '10-high ledge: a 3-soul staircase (run off your top soul while holding K)', three_high)
 
 def own_way(o, p):
-    # Recall a standing mistake without disturbing the flat bridge underneath it.
-    o(0, 8, 2, 9); o(3, 9, 9, 9); o(4, 10, 8, 10, '^'); p(1, 9, 'P')
-    o(10, 5, 18, 9); p(11, 9, '#'); p(11, 8, 'C')
-    # The plate and both bridge souls use all three slots: another death shuts the door.
-    p(16, 9, '_'); o(19, 9, 25, 9); o(20, 10, 24, 10, '^')
-    o(26, 8, 26, 9, 'D'); o(27, 5, 28, 9); o(29, 8, 29, 9)
-room('In my own way', [570, 73], 30, 17, 3, 'two lying souls bridge the tunnel pit; recall (Q) a standing one that blocks it', own_way)
+    # A hanging soul carries a second run across a gap wider than a jump.
+    o(0, 8, 0, 9); o(1, 3, 10, 9); p(1, 9, 'P')
+    o(4, 10, 10, 15); o(4, 16, 10, 16, '^')
+    o(11, 3, 15, 11); p(13, 11, 'C')
+    # Swap out from under a falling spike, leaving the exit plate held.
+    o(16, 2, 21, 9); p(18, 9, '_'); p(18, 3, '!')
+    o(22, 8, 22, 9, 'D'); o(23, 5, 28, 9); o(29, 8, 29, 9)
+room('Two places', [570, 73], 30, 17, 3, 'swap across a seven-wide gap; exchange places under a falling spike to hold the exit plate', own_way)
 
 def three_jobs(o, p):
     # Climb to the safe three-job setup, then drop to the shrine.
