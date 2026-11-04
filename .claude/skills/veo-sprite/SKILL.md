@@ -41,7 +41,7 @@ Read `.claude/skills/flow-asset/SKILL.md` "Driving Flow" first. It covers upload
 ```sh
 mkdir -p <scratch>/f && ffmpeg -i <name>.mp4 -vf fps=24 <scratch>/f/%03d.png
 node tools/video-loop.mjs <name>.mp4 [minLen] [maxLen]        # best loop windows: first=… next=…
-node tools/video-frames.mjs <scratch>/f <scratch>/native <first> <next> 12 [--anchor=feet|fixed] [--mirror] [--rot=k]
+node tools/video-frames.mjs <scratch>/f <scratch>/native <first> <next> 12 [--anchor=fixed|feet] [--mirror] [--rot=k]
 node tools/colormatch.mjs <scratch>/native.png <painted keyed sheet of the same creature>.webp <scratch>/cm.png [--despill] [--blue-cap=6]
 node tools/video-fit.mjs <scratch>/cm.png 12 assets/<kind>/<current sheet>.webp <scratch>/<name> [--match=i:j] [--grow]
 tools/sheet-gif.sh <scratch>/<name>.png <frameWidth> 12 <scratch>/<name>.gif
@@ -50,7 +50,11 @@ node tools/onion.mjs <scratch>/<name>.webp 12 <scratch>/onion.png
 - **video-loop:** it finds the window whose last frame best matches its first. For a walk, check that the window is one full stride, where the same foot lifts again. A half stride also scores well, but it swaps the sides.
   - Set the length range to the motion: a walk stride ran 35–37 frames at 24 fps; wingbeats are much shorter.
 - **video-frames:** it keys the background (video shifts the magenta, so it keys on the median border colour) and lays the frames into one sheet.
-  - Use `--anchor=feet` for anything standing: one shared ground line, so a lifted foot can't bob the body. Use `--anchor=fixed` for flying or hanging things: the locked camera already holds them still, and aligning on their outline makes the body jump as the wings move (moth, 2026-11-04).
+  - **Use `--anchor=fixed` by default.** Veo's locked camera already holds the creature in place, so the frames are aligned; re-aligning them only adds drift.
+    - Aligning on the outline made the moth's body jump as its wings moved.
+    - Aligning on the torso made the hero idle slide left and right with his swinging cape, while his boots never moved in the video (user caught it, 2026-11-04).
+  - Use `--anchor=feet` only if the creature drifts across the video. It keeps one shared ground line and aligns on the torso, which works for a walking stag but not for anything with a big cape.
+  - Check it: the boots or planted feet must sit at the same x in every frame. Measure the opaque centroid of the bottom 12% of each cell.
   - `--mirror` flips the result to face left. `--rot=k` starts the loop on frame k.
 - **colormatch:** video tints white and pale colours towards lavender. This shifts the colours to match the painting, then removes leftover pink without turning dark areas green.
   - The reference must be a **keyed** painted sheet (.webp with transparency), not a JPG on magenta.
