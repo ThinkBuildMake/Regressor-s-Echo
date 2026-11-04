@@ -91,16 +91,16 @@ Cut for now: *The race* (walkers are slow enough to outrun, so it had no tension
 
 After the tree: the 3rd rune lights up, giving a **3rd soul** and **soul swap**.
 
-## World 3: Sanctum (3 souls + recall, about 6 minutes)
-New: **3 souls** and **recall** (Q: tap for the newest soul, hold for more). Mostly a convenience: rooms can be longer and harder without a mistake costing several deaths.
+## World 3: Sanctum (3 souls + swap, about 6 minutes)
+New: **3 souls** and **soul swap** (E exchanges you with the newest soul). Recall remains available from World 2.
 
 | # | Room | Teaches | The trick | Status |
 |---|---|---|---|---|
 | 1 | Three high | 3 souls | Ten-high three-soul staircase; shrine, then hang a shield under a low laser lintel before building two exit steps. A fourth death erases the shield | Built |
-| 2 | Two places | Soul swap (E) | Swap to a mid-jump soul across a seven-wide gap; then cross a soul-held door, recall its plate soul and die beyond it; swap out from under a falling spike to leave the exit plate held | Built |
+| 2 | Two places | Soul swap (E) | Take a running swap to a hanging soul under the far lip of an eight-wide gap. Leave an escape soul beyond the approach gate, then swap from the visible spike plate: its soul opens the exit but closes the approach behind you | Built |
 | 3 | Three jobs | 3 souls at once | Plate, pit bridge, high laser blocker; shrine, then crumbling lips force you to jump into the beam before the landing falls. A fourth death erases the plate: recall the mistake | Built |
 | 4 | Everything | All powers | Slide a flat bridge to the shrine. Then keep a plate soul, a saw jam and a spring step at once: recall a bad step, because a fourth death shuts the door | Built |
-| 5 | Reliquary | Recall, three souls | Climb the flyer chimney, jam two saws and hold the plate. Shrine, then crumbling descent under falling spikes; thorns prevent sliding down the exit wall | Built |
+| 5 | Reliquary | Recall, three souls | Climb the flyer chimney, jam two saws and hold the plate. Shrine, then crumbling descent under falling spikes; thorns close both sides of the descent shaft | Built |
 | 6 | The rehearsal | Leading a beam | First lock after 2.6s: lead the beam below a two-soul stair; shrine, then sacrifice a decoy in a low corridor firing every 1.6s, too fast to run its full length | Built |
 | 7 | The old tree | Story | Calm promise before the fight; return for the note after victory | Built |
 | 8 | The spectral stag | Final boss | Charge a soul flat, swap onto the platform and stomp during the 2s daze. Antlers → three floor pulses → Three seals: all three sockets must hold souls at the end of a 3s countdown. Souls survive every attack; death heals it | Built (40×17 arena; separate old-tree and pyramid rooms) |
@@ -131,13 +131,13 @@ All three follow the moth's rules: 3 stomps from above, it speeds up after each 
 - The room: a ledge 7 high on the left needs a 2-soul staircase. The beam fires every ~4s, so you build the stair between shots and must stand away from it (out in the open, or next to a third "spare" soul) when the line locks, so it never crosses the stair. Recall cleans up a soul the beam made useless. Then a short second stage: a corridor where the line can only be led onto a decoy soul you place on purpose.
 
 ### The spectral stag (W3 boss, 3 souls + swap, final)
-- **Arena:** unchanged 40 × 17; platform columns 2–6 at row 12.
-- **Setup:** 8s or leave the platform. E exchanges hero and newest soul, zeroes velocity, and never heals; available in World 3 or after the tree.
-- **Loop:** Buttress Charge → Searching Antlers → Procession → Last Bell → recovery. Gaps 3s × 0.8 per hit; tells stay fixed.
-- **Charge:** yellow lane tracks for 0.5s, locks until 0.9s; 650 px/s. Only ramming a soul dazes it (2s); the soul is flattened, survives, and can be swapped again. Plain stomps bounce without damage.
-- **Antlers:** blue aim 1.4s, lock 0.4s, fire 0.18s. A hit soul phases out for 2s, then returns, allowing recovery without a death.
+- **Arena:** unchanged 40 × 17; platform columns 3–6 at row 12; the two-wide entrance shaft stays calm until you climb out.
+- **Setup:** reach the platform or the floor to its right, then 8s or leave the platform. E exchanges hero and newest soul, keeps horizontal momentum and stops vertical motion, and never heals; available in World 3 or after the tree.
+- **Loop:** Buttress Charge → Searching Antlers → Procession → Three seals → recovery. Gaps 3s × 0.8 per hit; tells stay fixed.
+- **Charge:** yellow lane tracks for 0.5s, locks until 0.9s; 650 px/s. Only ramming a soul dazes it (2s); the soul is flattened, survives, and can be swapped again. Plain stomps bounce without damage. The stronger stomp bounce reaches the platform for restoring the seal.
+- **Antlers:** the origin is high above the floor, giving the platform a steep, jumpable shot; blue aim 1.4s, lock 0.4s, fire 0.18s. A hit soul phases out for 2s, then returns, allowing recovery without a death.
 - **Procession:** three yellow floor pulses, each 0.6s warning and 0.6s active, two tiles wide; climb above floor row 14.7.
-- **Three seals:** sockets at (6.5,14.5), (12.5,14.5), (5.5,11.5). Three violet rings shrink for 3s; all sockets must contain souls within 25px on both axes. The blast preserves every soul. Floor souls intercept charges, while the platform soul doubles as a swap destination.
+- **Three seals:** sockets at (1.5,11.5), (37.5,11.5), (5.5,11.5). Three violet rings shrink for 3s; all sockets must contain souls within 25px on both axes. The blast preserves every soul. All sockets sit above the charge lane. Swap from the locked lane to the platform soul, stomp the rammed stag, then return to the platform socket and swap its soul back before the bell.
 - **Route:** The rehearsal → The old tree (30 × 17, promise beside the tree at column 21) → arena → The pyramid entrance (30 × 17). Both arena gates and the vine buttress under the platform open after the last stand, clearing the way back. Return behind the tree to the dirt note at columns 18–20, then walk through the arena to the pyramid door at column 22; entering fades to the ending card.
 - **Story:** STORY.md W3 scenes 5 (arrives), 6 (nudge after about 10 deaths), 7 (the guide's last stand), 8 (the note behind the old tree), 9 (floor one, ending card).
 
