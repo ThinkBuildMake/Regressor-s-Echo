@@ -67,7 +67,7 @@ The game's text lives in [dialogue.js](../dialogue.js); this is the source it's 
 
 ### 2. The find and the meeting — *touching the amulet; he picks it up*
 > **Hero** [curious]: Hm? What's this?  
-> **Hero** [excited]: An amulet… if that's pure gold, it'd fetch a pretty penny.  
+> **Hero** [excited]: An amulet… I'm sure I can sell this for a good price.  
 > *(Tools clink in his satchel.)*  
 > **Hero** [thinking]: It'd get scratched to bits in there, though. Welp. I'll wear it for now.  
 > *(It appears on his chest and flashes gold. A beat later, a blue-white ghost fades in at his upper right.)*  
@@ -79,56 +79,70 @@ The game's text lives in [dialogue.js](../dialogue.js); this is the source it's 
 > *(His eyes settle on the hero. A beat.)*  
 > **Guide** [solemn]: …Oh.  
 > *(A long beat. He realizes what he's become; the player only learns why in World 2.)*  
+> **Guide** [sad]: …Guess it's my turn now.  
+> *(A beat. He shakes it off.)*  
 > **Guide** [wry]: Anyways. Which death are you on right now?  
 > **Hero** [thinking]: Which… death?  
-> **Guide** [amused]: A first-timer! Introductions, then.  
-> **Hero** [curious]: Hang on. You look like me.  
-> **Guide** [solemn]: I am you. From another timeline. A few thousand deaths ahead.  
+> **Guide** [amused]: Oh, a first-timer! This is my favorite part.  
+> **Guide** [wry]: Introductions, then. I'll cut to the chase.  
+> **Guide** [wry]: I'm you. From another timeline. Give or take a few thousand deaths.  
+> *(A beat.)*  
+> **Hero** [startled]: You're… me?  
+> **Guide** [teasing]: Same face. Same hair. Same bad decisions.  
 > *(A long beat.)*  
 > **Hero** [exhausted]: Ooook then. I must be dreaming.
 
 He can move again.
 
 ### 3. The curse and the lead — *halfway to the clearing's exit*
-> **Hero** [annoyed]: It's this blasted amulet. I'm leaving it right here.  
+> **Hero** [annoyed]: …This all started when I put this thing on. Nope. I'm leaving it right here.  
 > *(A gold pulse: it won't come off.)*  
 > **Hero** [startled]: …Why won't it come off?  
-> **Guide** [solemn]: It won't let go. And it won't let you stay dead.  
-> **Hero** [determined]: Then someone out there knows how to get it off.  
-> **Guide** [weary]: …Fine. Start with the tribe that made it. See the mark on it?  
-> **Hero** [thinking]: This squiggle?  
+> **Guide** [wry]: If I could've gotten it off that easily, believe me, I would've done it a looong time ago.  
+> **Guide** [weary]: If you want to try where I failed, be my guest. But be warned: I tried everything. And when I say everything, I mean *everything*.  
+> **Hero** [determined]: Then I'll find whoever made it. Somebody out there has to know how to get it off.  
+> **Guide** [weary]: …That's what I said, too.  
+> *(He turns the amulet over. A gold pulse.)*  
+> **Hero** [curious]: Hm. There's a mark on the back. Some kind of squiggle.  
+> **Hero** [thinking]: Whoever made this must have left it.  
 > **Guide** [thinking]: There's another one like it farther in.  
-> **Hero** [neutral]: All right. But if this is a waste of time, I'm going home.
+> **Guide** [weary]: Not that it'll get you anywhere.  
+> **Hero** [determined]: Pointless or not, that's where I'm headed. The sooner this thing's off, the sooner I'm back to taking it easy.
 
 From here the guide appears only for conversations he's part of: he fades in at the hero's upper right and fades away once they're done.
 
 ### 4. The pit — *First death, at the pit's edge*
 > **Hero** [thinking]: I'm not going to make it.  
 > **Guide** [amused]: …heh.  
-> **Guide** [wry]: No, you'll be able to make it.  
+> **Guide** [wry]: Sure you will.  
 > **Hero** [startled]: Look at it! There's no way I can make it. This gap is like twice the length I can jump.  
-> **Guide** [wry]: Trust me. I'm you from the future. I already know what's gonna happen.  
+> **Guide** [wry]: I'm you from the future. And I managed to get past this point.  
 > **Guide** [amused]: You'll make it. Trust me.  
 > **Hero** [determined]: All right… here goes nothing.
 
 ### 5. First death — *he comes back at the room's start*
-> *(A beat.)*  
+> *(A beat. He gasps awake back at the room's start.)*  
 > **Hero** [pained]: AAGH!  
-> **Hero** [pained]: Am… I alive?  
-> **Hero** [pained]: Why does it feel like someone scooped out half my insides?  
+> **Hero** [startled]: …I'm… alive?  
+> **Hero** [pained]: Ugh. Then why does it feel like someone scooped out half my insides?  
 > **Guide** [wry]: Mm. That fades. Mostly.  
 > **Hero** [annoyed]: You. You said I'd make it.  
-> **Guide** [thinking]: And you will.  
-> **Hero** [shouting]: I landed on SPIKES. I trusted you!  
-> **Guide** [wry]: Hey, it's not like you actually died. …Well, sorta.  
-> **Hero** [startled]: That's NOT better!  
-> **Guide** [thinking]: That empty feeling's real, though. You left a piece of yourself out there.  
+> **Guide** [wry]: And you will.  
+> **Hero** [shouting]: I landed on SPIKES! I trusted you!  
+> **Guide** [amused]: Technically, you trusted yourself.  
+> **Hero** [annoyed]: …That's not the point.  
+> **Hero** [thinking]: Wait. I landed on spikes. So how am I standing here?  
+> **Guide** [thinking]: The amulet. It keeps bringing you back.  
+> **Hero** [startled]: Bringing me— so I DID die?!  
+> **Guide** [wry]: Sorta. Depends who's counting.  
+> **Hero** [shouting]: That's NOT better!  
+> **Guide** [thinking]: And that empty feeling? You left a piece of yourself out there.  
 > **Hero** [shouting]: A PIECE OF ME?!  
-> **Guide** [amused]: Seeing's believing. Come take a look.
+> **Guide** [amused]: Seeing's believing. Go on. Take a look.
 
 ### 6. His soul — *back at the pit's edge, his soul hanging over the spikes*
 > **Hero** [startled]: Is that… me?  
-> **Guide** [amused]: Yep. And more specifically, it's your soul.  
+> **Guide** [amused]: Yep. Well, your soul, technically.  
 > **Hero** [startled]: My SOUL? Isn't that supposed to be, I dunno, inside me?  
 > **Guide** [wry]: Most of it still is.  
 > **Hero** [thinking]: …It's just floating there.  
@@ -138,19 +152,25 @@ From here the guide appears only for conversations he's part of: he fades in at 
 > **Hero** [exhausted]: …Fine. Sorry, me.
 
 ### 7. The thorn wall — *on entry*
+No hints on entry: the player works out the thorns. Just banter.
 > **Hero** [thinking]: That's way too high to climb.  
-> **Hero** [annoyed]: …And let me guess. The thorns.  
-> **Guide** [amused]: Now you're getting the hang of it. Touch them on the way up, about two tiles off the ground. Leave a step you can reach.
+> **Guide** [wry]: You used to climb trees all the time.  
+> **Hero** [annoyed]: I was eight. And I fell out of most of them.  
+> **Guide** [amused]: I remember.
+
+*After his first death in this room (on the thorns):*
+> **Guide** [amused]: Now you're getting the hang of it.  
+> **Guide** [wry]: Mind how high you touch them, though.
 
 ### 8. The patrol — *on entry*
-> **Guide** [thinking]: See that plate? It holds the door open, as long as something's on it.  
+No hints: the player works out the plate. Just banter.
 > **Hero** [exhausted]: Lemme guess. I gotta die again.  
 > **Guide** [amused]: No longer a greenhorn, are ya?
 
 ### 9. The first shrine — *The chain, on entry*
 > **Guide** [thinking]: Oh, by the way. Take a look over there.  
 > **Hero** [curious]: …Over where.  
-> **Guide** [thinking]: The stone with the glowing mark. That's an artifact. Try touching it.  
+> **Guide** [thinking]: The stone with the glowing mark. Try touching it.  
 > **Hero** [annoyed]: Last time you told me to try something, I ended up on spikes.  
 > **Guide** [amused]: And look how well that turned out.  
 > **Hero** [annoyed]: …  
@@ -166,9 +186,9 @@ From here the guide appears only for conversations he's part of: he fades in at 
 ### 10. The low door — *The long pit, after his standing soul first blocks the tunnel*
 > **Guide** [amused]: Well. You've locked yourself out. With yourself. That's a new one.
 
-*The well and the turnaround are silent puzzle rooms.*
+*The well and the gatehouse are silent puzzle rooms.*
 
-### 11. The moth arrives — *The moth, partway along the ledge, while walking*
+### 11. The moth arrives — *The moth, a few steps in along the arena floor, while walking*
 > *(The ground shakes.)*  
 > **Hero** [startled]: What's with this shaking… is this an earthquake?  
 > **Guide** [surprised]: Oh shoot, it's been so long that I forgot. Be careful! Watch out for…  
@@ -199,10 +219,11 @@ Blocking the dust with your soul should be taught in an earlier room, so the gui
 > **Hero** [scared]: It ABSORBED it? A whole moth?  
 > **Guide** [wry]: It's not picky.  
 > **Hero** [curious]: …Another mark lit up.  
-> **Guide** [thinking]: Means you can leave two of yourself behind now.  
+> **Guide** [thinking]: Second one.  
+> **Hero** [thinking]: So… two of me now?  
+> **Guide** [thinking]: Two. And you can take the newest back. No dying required.  
 > **Hero** [exhausted]: Wonderful. Twice the dying.  
 > **Guide** [wry]: Twice the options.  
-> **Guide** [thinking]: And you can take the newest one back. No dying required. (draft 2026-11-03)
 > **Hero** [thinking]: …Will it hurt any less?  
 > **Guide** [amused]: Nope!  
 > *(A beat. Let it land: no explanation, no comfort.)*  
@@ -212,6 +233,8 @@ Blocking the dust with your soul should be taught in an earlier room, so the gui
 
 ### 14. The nap — *straight on from 13*
 He writes the note while the hero sleeps: he's incorporeal, so he drifts ahead to the old tree in World 3 and scratches it into the dirt there. Nothing gives it away until World 3 (a flashback could show it, but isn't needed).
+> *(A beat.)*  
+> **Hero** [exhausted]: …Great. Something to look forward to.  
 > **Hero** [exhausted]: I need… a minute. Or a hundred.  
 > **Guide** [wry]: Go on. I'll keep watch. Not like I sleep.  
 > **Hero** [exhausted]: Wake me if anything else comes through a wall.  
@@ -321,6 +344,7 @@ The pyramid needs to be visible in the background, its top lost in cloud.
 
 ### 4. The promise — *by an old tree before the stag's arena*
 > *(The guide stops. The hero walks a few steps before noticing.)*  
+> **Guide** [thinking]: …Hold on.  
 > **Hero** [curious]: What? You never stop.  
 > **Guide** [thinking]: Can you promise me something?  
 > **Hero** [annoyed]: …That depends.  

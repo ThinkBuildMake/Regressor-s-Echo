@@ -122,6 +122,8 @@ const SCRIPT = {
   ],
 
   stagPromise: [
+    W(0.8), // the guide stops; the hero walks a few steps before noticing
+    G("thinking", "…Hold on."),
     H("curious", "What? You never stop."),
     G("thinking", "Can you promise me something?"),
     H("annoyed", "\u2026That depends."),
@@ -187,7 +189,7 @@ const SCRIPT = {
   ],
   amulet: [ // the find and the meeting
     H('curious', "Hm? What's this?"),
-    H('excited', "An amulet… if that's pure gold, it'd fetch a pretty penny."),
+    H('excited', "An amulet… I'm sure I can sell this for a good price."),
     W(0.8), // tools clink in his satchel
     { ...H('thinking', "It'd get scratched to bits in there, though. Welp. I'll wear it for now."), cue: 'wear' },
     W(0.7, 'flash'),
@@ -200,51 +202,65 @@ const SCRIPT = {
     W(0.9), // his eyes settle on the hero
     G('solemn', '…Oh.'), // he realizes what he's become; the player learns why in World 2
     W(1.2),
+    G('sad', "…Guess it's my turn now."),
+    W(0.8), // he shakes it off
     G('wry', 'Anyways. Which death are you on right now?'),
     H('thinking', 'Which… death?'),
-    G('amused', 'A first-timer! Introductions, then.'),
-    H('curious', 'Hang on. You look like me.'),
-    { ...G('solemn', 'I am you. From another timeline. A few thousand deaths ahead.'), reveal: true }, // named from here on
+    G('amused', 'Oh, a first-timer! This is my favorite part.'),
+    G('wry', "Introductions, then. I'll cut to the chase."),
+    { ...G('wry', "I'm you. From another timeline. Give or take a few thousand deaths."), reveal: true }, // named from here on
+    W(0.8),
+    H('startled', "You're… me?"),
+    G('teasing', 'Same face. Same hair. Same bad decisions.'),
     W(1.2),
     H('exhausted', 'Ooook then. I must be dreaming.'),
   ],
   curse: [ // halfway to the clearing's exit
-    H('annoyed', "It's this blasted amulet. I'm leaving it right here."),
+    H('annoyed', "…This all started when I put this thing on. Nope. I'm leaving it right here."),
     { ...H('startled', "…Why won't it come off?"), cue: 'pulse' },
-    G('solemn', "It won't let go. And it won't let you stay dead."),
-    H('determined', 'Then someone out there knows how to get it off.'),
-    { ...G('weary', '…Fine. Start with the tribe that made it. See the mark on it?'), cue: 'pulse' },
-    H('thinking', 'This squiggle?'),
+    G('wry', "If I could've gotten it off that easily, believe me, I would've done it a looong time ago."),
+    G('weary', 'If you want to try where I failed, be my guest. But be warned: I tried everything. And when I say everything, I mean everything.'),
+    H('determined', "Then I'll find whoever made it. Somebody out there has to know how to get it off."),
+    G('weary', "…That's what I said, too."),
+    W(0.6), // he turns the amulet over
+    { ...H('curious', "Hm. There's a mark on the back. Some kind of squiggle."), cue: 'pulse' },
+    H('thinking', 'Whoever made this must have left it.'),
     G('thinking', "There's another one like it farther in."),
-    H('neutral', "All right. But if this is a waste of time, I'm going home."),
+    G('weary', "Not that it'll get you anywhere."),
+    H('determined', "Pointless or not, that's where I'm headed. The sooner this thing's off, the sooner I'm back to taking it easy."),
   ],
   firstPit: [ // Scene 3, at the edge of the pit
     H('thinking', "I'm not going to make it."),
     G('amused', '…heh.'),
-    G('wry', "No, you'll be able to make it."),
+    G('wry', 'Sure you will.'),
     H('startled', "Look at it! There's no way I can make it. This gap is like twice the length I can jump."),
-    G('wry', "Trust me. I'm you from the future. I already know what's gonna happen."),
+    G('wry', "I'm you from the future. And I managed to get past this point."), // true: he got past it by dying
     G('amused', "You'll make it. Trust me."),
     H('determined', 'All right… here goes nothing.'),
   ],
   firstDeath: [ // he comes back at the room's start
-    W(0.6),
+    W(0.6), // he gasps awake back at the room's start
     H('pained', 'AAGH!'),
-    H('pained', 'Am… I alive?'),
-    H('pained', 'Why does it feel like someone scooped out half my insides?'),
+    H('startled', "…I'm… alive?"),
+    H('pained', 'Ugh. Then why does it feel like someone scooped out half my insides?'),
     G('wry', 'Mm. That fades. Mostly.'),
     H('annoyed', "You. You said I'd make it."),
-    G('thinking', 'And you will.'),
-    H('shouting', 'I landed on SPIKES. I trusted you!'),
-    G('wry', "Hey, it's not like you actually died. …Well, sorta."),
-    H('startled', "That's NOT better!"),
-    G('thinking', "That empty feeling's real, though. You left a piece of yourself out there."),
+    G('wry', 'And you will.'),
+    H('shouting', 'I landed on SPIKES! I trusted you!'),
+    G('amused', 'Technically, you trusted yourself.'),
+    H('annoyed', "…That's not the point."),
+    H('thinking', 'Wait. I landed on spikes. So how am I standing here?'),
+    G('thinking', 'The amulet. It keeps bringing you back.'),
+    H('startled', 'Bringing me— so I DID die?!'),
+    G('wry', "Sorta. Depends who's counting."),
+    H('shouting', "That's NOT better!"),
+    G('thinking', 'And that empty feeling? You left a piece of yourself out there.'),
     H('shouting', 'A PIECE OF ME?!'),
-    G('amused', "Seeing's believing. Come take a look."),
+    G('amused', "Seeing's believing. Go on. Take a look."),
   ],
   soul: [ // back at the pit's edge
     H('startled', 'Is that… me?'),
-    G('amused', "Yep. And more specifically, it's your soul."),
+    G('amused', "Yep. Well, your soul, technically."),
     H('startled', "My SOUL? Isn't that supposed to be, I dunno, inside me?"),
     G('wry', 'Most of it still is.'),
     H('thinking', "…It's just floating there."),
@@ -255,18 +271,22 @@ const SCRIPT = {
   ],
   thorns: [
     H('thinking', "That's way too high to climb."),
-    H('annoyed', '…And let me guess. The thorns.'),
-    G('amused', "Now you're getting the hang of it. Touch them on the way up, about two tiles off the ground. Leave a step you can reach."),
+    G('wry', 'You used to climb trees all the time.'),
+    H('annoyed', 'I was eight. And I fell out of most of them.'),
+    G('amused', 'I remember.'),
+  ],
+  thornsHint: [ // his first death in the thorn wall room
+    G('amused', "Now you're getting the hang of it."),
+    G('wry', 'Mind how high you touch them, though.'),
   ],
   patrol: [
-    G('thinking', "See that plate? It holds the door open, as long as something's on it."),
     H('exhausted', 'Lemme guess. I gotta die again.'),
     G('amused', 'No longer a greenhorn, are ya?'),
   ],
   chain: [ // the first shrine; its mark matches the amulet's
     G('thinking', 'Oh, by the way. Take a look over there.'),
     H('curious', '…Over where.'),
-    G('thinking', "The stone with the glowing mark. That's an artifact. Try touching it."),
+    G('thinking', "The stone with the glowing mark. Try touching it."),
     H('annoyed', 'Last time you told me to try something, I ended up on spikes.'),
     G('amused', 'And look how well that turned out.'),
     H('annoyed', '…'),
@@ -321,16 +341,19 @@ const SCRIPT = {
     H('scared', 'It ABSORBED it? A whole moth?'),
     G('wry', "It's not picky."),
     H('curious', '…Another mark lit up.'),
-    G('thinking', 'Means you can leave two of yourself behind now.'),
+    G('thinking', 'Second one.'),
+    H('thinking', 'So… two of me now?'),
+    G('thinking', 'Two. And you can take the newest back. No dying required.'),
     H('exhausted', 'Wonderful. Twice the dying.'),
     G('wry', 'Twice the options.'),
-    G('thinking', 'And you can take the newest one back. No dying required.'),
     H('thinking', '…Will it hurt any less?'),
     G('amused', 'Nope!'),
     W(0.8),
     G('thinking', 'And one more thing. You can let go now, whenever you like.'),
     H('curious', 'Let go of what?'),
     G('wry', "Yourself. Trust me, it's worse when you choose it."),
+    W(0.8),
+    H('exhausted', '…Great. Something to look forward to.'),
   ],
 };
 
@@ -350,8 +373,8 @@ stage('amulet', 6, { walk: 11, face: 'guide', hop: true });
 stage('amulet', 7, { face: 'guide' });
 stage('amulet', 9, { lookAround: true });
 stage('amulet', 11, { guideBy: -0.5 });
-stage('amulet', 17, { walk: 11.5, face: 'guide' });
-stage('amulet', 20, { face: 'left' });
+stage('amulet', 22, { walk: 11.5, face: 'guide' });
+stage('amulet', 25, { face: 'left' });
 stage('curse', 0, { walk: 16.5, face: 'right' });
 stage('firstPit', 0, { walk: 9, face: 'right' });
 stage('firstPit', 6, { face: 'right' });
@@ -389,14 +412,14 @@ for (const lines of Object.values(SCRIPT)) for (const l of lines) {
 }
 stage('curse', 0, { amulet: 'pull', pose: 'kneel' });
 stage('curse', 1, { amulet: 'wear', pose: 'idle', hop: true });
-stage('curse', 3, { walk: 17, face: 'right' });
-stage('curse', 5, { amulet: 'hold' });
-stage('curse', 7, { amulet: 'wear', walk: 17.5, face: 'right' });
+stage('curse', 4, { walk: 17, face: 'right' });
+stage('curse', 7, { amulet: 'hold' });
+stage('curse', 11, { amulet: 'wear', walk: 17.5, face: 'right' });
 stage('firstPit', 3, { pose: 'kneel', face: 'right', camera: { x: -32, y: -20 } });
 stage('firstPit', 6, { pose: 'idle', face: 'right' });
 stage('firstDeath', 1, { pose: 'slump' });
 stage('firstDeath', 5, { pose: 'idle', face: 'guide' });
-stage('firstDeath', 12, { guideBy: 1 });
+stage('firstDeath', 17, { guideBy: 1 });
 stage('soul', 4, { pose: 'slump', face: 'right' });
 stage('soul', 8, { pose: 'idle', face: 'right' });
 stage('chain', 1, { face: 'right' });
@@ -410,9 +433,9 @@ stage('tree', 4, { walk: 7.5, hop: true, face: 'right' });
 stage('mothDown', 4, { hop: true });
 stage('mothDown', 12, { amulet: 'hold' });
 stage('mothDown', 13, { amulet: 'wear' });
-stage('stagPromise', 3, { face: 'left' });
-stage('stagPromise', 4, { walk: 20.5, face: 'left' });
-stage('stagPromise', 5, { walk: 20, face: 'guide' });
+stage('stagPromise', 5, { face: 'left' });
+stage('stagPromise', 6, { walk: 20.5, face: 'left' });
+stage('stagPromise', 7, { walk: 20, face: 'guide' });
 stage('stagDown', 5, { hop: true, face: 'guide' });
 stage('stagDown', 6, { pose: 'slump' });
 stage('stagDown', 13, { pose: 'idle', face: 'guide' });
