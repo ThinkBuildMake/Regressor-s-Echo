@@ -659,24 +659,24 @@ const ROOMS = [
     ' P        #####            ###',
     '##############################',
   ], [600, 75], { world: 3, spots: [[4, "pyramid"]] }],
-  ["In my own way", [ // two lying souls bridge the tunnel pit; recall (Q) a standing one that blocks it
+  ["Two places", [ // swap across a seven-wide gap; exchange places under a falling spike to hold the exit plate
     '##############################',
     '##############################',
-    '##############################',
-    '##############################',
-    '##############################',
-    '##########         ########  #',
-    '##########         ########  #',
-    '##########         ########  #',
-    '   ####### C       #######D   ',
-    ' P         #    _         D   ',
-    '####^^^^^###########^^^^^#####',
-    '##############################',
-    '##############################',
-    '##############################',
-    '##############################',
-    '##############################',
-    '##############################',
+    '################      ########',
+    '#                 !   ########',
+    '#                     ########',
+    '#                     #      #',
+    '#                     #      #',
+    '#                     #      #',
+    '                      D       ',
+    ' P                _   D       ',
+    '####            ##############',
+    '####         C  ##############',
+    '####       ###################',
+    '####       ###################',
+    '####       ###################',
+    '####       ###################',
+    '####^^^^^^^###################',
   ], [630, 73], { world: 3 }],
   ["Three jobs", [ // plate, pit and a laser blocker at once; recall mistakes instead of dying over them
     '##############################',
@@ -911,6 +911,7 @@ class Room extends Phaser.Scene {
       if (!this.textures.exists(effect)) this.load.image(effect, `assets/effects/${effect}.webp`);
     if (this.bossArtRequested) return;
     this.bossArtRequested = true;
+    if (!this.textures.exists('seal')) this.load.image('seal', 'assets/effects/seal.webp');
     for (const pose of ['intro', 'idle', 'charge', 'beam', 'wave']) {
       if (!this.textures.exists(`stag-${pose}`)) this.load.image(`stag-${pose}`, `assets/bosses/stag-${pose}.webp`);
       if (!this.cache.json.exists(`stag-${pose}-frames`)) this.load.json(`stag-${pose}-frames`, `assets/bosses/stag-${pose}.json`);
@@ -1010,7 +1011,7 @@ class Room extends Phaser.Scene {
               this.bosses.at(-1).r.setVisible(!this.bosses.at(-1).hidden);
               if (name === 'The spectral stag') {
                 const B = this.bosses.at(-1);
-                Object.assign(B, { stag: true, hidden: !Dialogue.seen.has('stagArrival'), story: 'stagDown', phase: 'setup', clock: 0, waveClock: 0, waves: 0, deaths: 0 });
+                Object.assign(B, { stag: true, hidden: !Dialogue.seen.has('stagArrival'), story: 'stagDown', phase: 'setup', clock: 0, bells: 0, deaths: 0 });
                 B.r.setVisible(!B.hidden).setSize(192, 64).setPosition(x, (oy + 14) * T).setFillStyle(0xbceaff);
                 B.antlers = this.add.graphics().setDepth(5);
                 B.r.on('destroy', () => B.antlers.destroy());
@@ -1448,7 +1449,7 @@ class Room extends Phaser.Scene {
     p.setVisible(false);
     this.dead = RESPAWN_DELAY;
     if (this.boss) { this.boss.hp = BOSS_HP; this.boss.hurt = 0;
-      if (this.boss.stag) { this.boss.deaths++; this.boss.phase = 'setup'; this.boss.clock = 0; this.boss.waveClock = 0; this.boss.waves = 0; this.boss.wave = null; this.boss.beam = null; }
+      if (this.boss.stag) { this.boss.deaths++; this.boss.phase = 'setup'; this.boss.clock = 0; this.boss.bells = 0; this.boss.beam = null; this.boss.pulse = -1; this.boss.r.x = this.rooms[this.boss.room].rect.right - 5 * T; }
       if (this.boss.kind === 'tree') { this.boss.phase = 'idle'; this.boss.timer = 4; this.boss.attack = -1; this.boss.open = 0; this.boss.stone?.r.destroy(); this.boss.stone = null; this.boss.pods.forEach((p) => p.r.destroy()); this.boss.pods = []; }
     } // your death heals the boss
     if (this.boss?.story === 'mothDown' && !this.boss.hidden) {
@@ -1813,59 +1814,88 @@ class Room extends Phaser.Scene {
     this.add.rectangle(P.x + 22 * T, P.y + 14 * T, 40, 64, 0x101923).setDepth(2);
   }
 
-  stagWave(B, dt) {
-    const R = this.rooms[B.room].rect, w = B.wave;
-    const prev = w.x;
-    w.x -= 420 * dt;
-    this.fx.fillStyle(0xdf89ff, 0.7).fillRect(w.x, R.y + T, 12, 14 * T);
-    const souls = this.corpses.filter((c) => c.x <= prev && c.x >= w.x && c.y < R.y + 12 * T)
-      .sort((a, b) => b.x - a.x);
-    for (const c of souls) {
-      if (w.broken === 2) { B.wave = null; return; }
-      this.corpses.splice(this.corpses.indexOf(c), 1); c.destroy(); w.broken++;
-    }
-    if (this.player.x <= prev && this.player.x >= w.x) { this.die(); return; }
-    if (w.x < R.x) B.wave = null;
+  stagSeals(B) {
+    const R = this.rooms[B.room].rect;
+    return [[6.5, 14.5], [12.5, 14.5], [5.5, 11.5]].map(([x, y]) => ({
+      x: R.x + x * T, y: R.y + y * T
+    }));
   }
 
   updateStag(B, dt) {
     const R = this.rooms[B.room].rect, p = this.player;
-    B.antlers.setVisible(B.r.visible && !B.img).clear().lineStyle(B.waveClock > 13 ? 7 : 3, B.waveClock > 13 ? 0xdf89ff : 0xd9f3ff);
+    B.antlers.setVisible(B.r.visible && !B.img).clear().lineStyle(B.phase === 'bell' ? 7 : 3, B.phase === 'bell' ? 0xdf89ff : 0xd9f3ff);
     for (const dx of [-28, 28]) {
       B.antlers.lineBetween(B.r.x + dx, B.r.y - 32, B.r.x + dx, B.r.y - 66);
       B.antlers.lineBetween(B.r.x + dx, B.r.y - 48, B.r.x + dx + Math.sign(dx) * 17, B.r.y - 62);
     }
     const pose = this.time.now < B.introUntil ? 'intro' : B.phase === 'beam' ? 'beam'
-      : B.waveClock >= 14 ? 'wave' : B.phase === 'charge' ? 'charge' : 'idle';
+      : B.phase === 'bell' ? 'wave' : B.phase === 'charge' ? 'charge' : 'idle';
     this.bossPose(B, 'stag', pose, 180, pose === 'wave' || pose === 'intro' ? 1 : 0.7, pose === 'charge' || pose === 'idle');
-    B.img?.setPosition(B.r.x, B.r.y + 32 + (B.artFoot ?? 0)).setVisible(B.r.visible).setTint(B.waveClock > 13 ? 0xdf89ff : B.phase === 'beam' ? 0x65baff : 0xffffff);
+    B.img?.setPosition(B.r.x, B.r.y + 32 + (B.artFoot ?? 0)).setVisible(B.r.visible).setTint(B.phase === 'bell' ? 0xdf89ff : B.phase === 'beam' ? 0x65baff : 0xffffff);
+    const seals = this.stagSeals(B);
+    if (!B.sealArt && this.textures.exists('seal')) B.sealArt = seals.map(socket => {
+      const art = this.add.image(socket.x, socket.y, 'seal').setDisplaySize(T, T).setDepth(2);
+      B.r.on('destroy', () => art.destroy()); return art;
+    });
+    for (const [i, socket] of seals.entries()) {
+      const filled = this.corpses.some(c => Math.abs(c.x - socket.x) < 25 && Math.abs(c.y - socket.y) < 25);
+      B.sealArt?.[i].setTint(filled ? 0xbbeeff : 0xdf89ff);
+      this.fx.lineStyle(3, filled ? 0xbbeeff : 0xdf89ff, 0.9).strokeCircle(socket.x, socket.y, 14);
+    }
     if (this.dead > 0 || this.transit || this.talk.line || this.talk.queue.length) return;
     if (p.x > R.x + 1.5 * T) this.gates.filter((g) => g.active && g.room === B.room).forEach((g) => { g.body.enable = true; });
     if (!Dialogue.seen.has('stagArrival')) { Dialogue.play(this, 'stagArrival'); return; }
     if (B.hidden) return;
     B.hurt -= dt; B.clock += dt;
-    B.r.setFillStyle(B.waveClock > 13 ? 0xdf89ff : B.phase === 'beam' ? 0x65baff : B.phase === 'windup' ? 0xffda75 : 0xbceaff);
+    B.r.setFillStyle(B.phase === 'bell' ? 0xdf89ff : B.phase === 'beam' ? 0x65baff : B.phase === 'windup' ? 0xffda75 : 0xbceaff);
     if (B.phase === 'setup') {
       if (B.clock < 8 && p.x < R.x + 7 * T) return;
       B.phase = 'windup'; B.clock = 0;
     }
-    B.waveClock += dt;
-    if (B.waveClock >= 15 && !B.wave) { B.waveClock = -10; B.waves++; B.wave = { x: R.right - T, broken: 0 }; }
-    if (B.wave) this.stagWave(B, dt);
-    if (this.dead > 0) return;
-    const gap = 8 * Math.pow(0.8, 3 - B.hp);
-    if (B.phase === 'windup' && B.clock > 0.7) { B.phase = 'charge'; B.clock = 0; }
-    if (B.phase === 'charge') {
+    const gap = 3 * Math.pow(0.8, 3 - B.hp);
+    const next = (phase) => { B.phase = phase; B.clock = 0; };
+    if (B.phase === 'windup') {
+      if (B.clock < 0.5) B.aimX = p.x;
+      this.fx.lineStyle(3, 0xf5f582, 0.6).lineBetween(B.r.x, R.y + 14.5 * T, B.aimX, R.y + 14.5 * T);
+      this.fx.fillStyle(0xf5f582, 0.22).fillRect(B.aimX - 16, R.y + 13 * T, 32, 2 * T);
+      if (B.clock >= 0.9) { B.rammed = false; next('charge'); }
+    } else if (B.phase === 'charge') {
       B.r.x = Math.max(R.x + 6.5 * T, B.r.x - 650 * dt);
-      for (const c of [...this.corpses]) if (hit(bounds(c), bounds(B.r))) { this.corpses.splice(this.corpses.indexOf(c), 1); c.destroy(); }
-      if (B.r.x <= R.x + 6.5 * T) { B.phase = 'dazed'; B.clock = 0; B.stomped = false; }
-    } else if (B.phase === 'dazed' && B.clock >= 2) {
-      B.r.x = R.right - 5 * T; B.phase = 'beam'; B.clock = 0;
-      B.beam = { x: B.r.x, y: B.r.y - 2 * T, angle: Math.PI, clock: 0 };
+      const c = this.corpses.find(c => c.body.enable && hit(bounds(c), bounds(B.r)));
+      if (c) {
+        const bottom = c.y + c.height / 2;
+        c.lying = true; c.setSize(...BODY_LYING); c.y = bottom - BODY_LYING[1] / 2;
+        c.body.setSize(...BODY_LYING); c.body.updateFromGameObject();
+        c.sprites?.forEach(sp => sp.destroy()); c.sprites = [];
+        c.setFillStyle(0x7399d9, 0.6);
+        B.rammed = true;
+      }
+      if (B.r.x <= (B.rammed ? R.x + 6.5 * T : Math.max(R.x + 6.5 * T, B.aimX))) {
+        B.stomped = false; next(B.rammed ? 'dazed' : 'miss');
+      }
+    } else if ((B.phase === 'dazed' && B.clock >= 2) || (B.phase === 'miss' && B.clock >= gap)) {
+      B.r.x = R.right - 5 * T; next('beam');
+      B.beam = { x: B.r.x, y: B.r.y - 2 * T, angle: Math.PI, clock: 0, stag: true };
     } else if (B.phase === 'beam') {
-      if (B.beam.clock < 1.18) this.updateAimedBeam(B.beam, dt);
-      if (B.clock > gap) { B.phase = 'windup'; B.clock = 0; }
-    }
+      if (B.beam.clock < 1.98) this.updateAimedBeam(B.beam, dt);
+      if (B.clock >= 1.98 + gap) next('procession');
+    } else if (B.phase === 'procession') {
+      const pulse = Math.floor(B.clock / 1.2), t = B.clock % 1.2;
+      if (pulse < 3) {
+        if (B.pulse !== pulse) { B.pulse = pulse; B.pulseX = p.x; }
+        this.fx.fillStyle(0xf5f582, t < 0.6 ? 0.25 : 0.9).fillRect(B.pulseX - T, R.y + 14.7 * T, 2 * T, 0.3 * T);
+        if (t >= 0.6 && Math.abs(p.x - B.pulseX) < T + 10 && p.y + 15 > R.y + 14.7 * T) return this.die();
+      }
+      if (B.clock >= 3.6 + gap) { B.pulse = -1; next('bell'); }
+    } else if (B.phase === 'bell') {
+      for (let i = 0; i < 3; i++) this.fx.lineStyle(3, 0xdf89ff, 0.9).strokeCircle(p.x, p.y, Math.max(2, (3 - B.clock) * 24 + i * 14));
+      if (B.clock >= 3) {
+        B.bells++;
+        this.cameras.main.flash(150, 180, 100, 230);
+        if (!seals.every(socket => this.corpses.some(c => c.body.enable && Math.abs(c.x - socket.x) < 25 && Math.abs(c.y - socket.y) < 25))) return this.die();
+        next('recovery');
+      }
+    } else if (B.phase === 'recovery' && B.clock >= gap) next('windup');
     if (B.deaths >= 10) Dialogue.play(this, 'stagNudge');
   }
 
@@ -2091,15 +2121,14 @@ class Room extends Phaser.Scene {
   touchBoss() {
     const B = this.boss, p = this.player;
     if (!B || B.hidden || !hit(bounds(p), bounds(B.r))) return false;
-    if (B.stag && B.phase !== 'dazed') { this.die(); return true; }
     const top = bounds(B.r).top;
     const falling = p.body.velocity.y >= 0;
     if (!falling && p.y + 15 <= top + 18) return false;
     if (!falling || (this.bossPreviousFeet ?? p.body.prev.y + p.body.height) > top + 1) { this.die(); return true; }
     p.body.reset(p.x, top - p.height / 2);
     p.body.velocity.y = -JUMP * 0.8;
-    if (B.hurt > 0 || (B.story === 'mothDown' && !B.open) || (B.stag && B.stomped) || (B.kind === 'tree' && (B.stompReady === false || B.open <= 0))) return false;
-    if (B.stag) { B.stomped = true; if (B.waves) B.waveClock = -10; B.clock = Math.min(B.clock, 0.5); }
+    if (B.hurt > 0 || (B.story === 'mothDown' && !B.open) || (B.stag && (B.phase !== 'dazed' || B.stomped)) || (B.kind === 'tree' && (B.stompReady === false || B.open <= 0))) return false;
+    if (B.stag) B.stomped = true;
     if (B.kind === 'tree') { B.stompReady = false; B.open = 0; }
     B.hurt = 0.5;
     if (B.story === 'mothDown') {
@@ -2176,7 +2205,7 @@ class Room extends Phaser.Scene {
       if (next >= 0) return this.enterRoom(next);
       p.body.reset(this.start.x, this.start.y); // fell out of the world
     }
-    const space = JD(k.SPACE), jumpDown = space | JD(k.W) | JD(k.UP), talkKey = space | JD(k.ENTER) | JD(k.E);
+    const space = JD(k.SPACE), jumpDown = space | JD(k.W) | JD(k.UP), swap = JD(k.E), talkKey = space | JD(k.ENTER) | swap;
     const JU = Phaser.Input.Keyboard.JustUp, jumpUp = JU(k.SPACE) | JU(k.W) | JU(k.UP);
     const slideKey = JD(k.S) | JD(k.DOWN) | JD(k.SHIFT);
     this.showGuide(dt);
@@ -2186,6 +2215,15 @@ class Room extends Phaser.Scene {
       p.setVisible(this.dead <= 0);
       p.body.velocity.x = 0;
       return;
+    }
+    if (swap && ((this.rooms[this.index].world ?? 0) >= 3 || this.treePower)) {
+      const c = this.corpses.at(-1);
+      if (c) {
+        const x = p.x, y = p.y;
+        p.body.reset(c.x, c.y); p.body.setVelocity(0, 0);
+        c.setPosition(x, y); c.body.updateFromGameObject(); c.vy = 0;
+        c.sprites?.forEach((sp) => sp.setPosition(c.x, c.y + c.height / 2));
+      }
     }
     const pb = bounds(p);
     // Land on an enemy from above to stomp it (it comes back when you re-enter the room); any other touch kills.
@@ -2274,7 +2312,8 @@ class Room extends Phaser.Scene {
   // Shared by relics and bosses. One shot stops at its first wall, soul or player.
   updateAimedBeam(beam, dt) {
     beam.clock += dt;
-    if (beam.clock < 0.6) beam.angle = Math.atan2(this.player.y - beam.y, this.player.x - beam.x);
+    const aim = beam.stag ? 1.4 : 0.6, fire = aim + 0.4, end = fire + 0.18;
+    if (beam.clock < aim) beam.angle = Math.atan2(this.player.y - beam.y, this.player.x - beam.x);
     const dx = Math.cos(beam.angle), dy = Math.sin(beam.angle);
     const distance = (r) => {
       let lo = 0, hi = 2000;
@@ -2289,15 +2328,16 @@ class Room extends Phaser.Scene {
       const d = distance(bounds(solid));
       if (d < length) { length = d; target = solid; }
     }
-    const firing = beam.clock >= 1 && beam.clock < 1.18;
-    if (beam.clock < 1.18) {
+    const firing = beam.clock >= fire && beam.clock < end;
+    if (beam.clock < end) {
       this.fx.fillStyle(0x65baff, 0.35).fillCircle(beam.x, beam.y, 22);
-      this.fx.lineStyle(firing ? 7 : 1, 0x8edbff, firing ? 1 : beam.clock < 0.6 ? 0.4 : 0.9);
+      this.fx.lineStyle(firing ? 7 : 1, 0x8edbff, firing ? 1 : beam.clock < aim ? 0.4 : 0.9);
       this.fx.lineBetween(beam.x, beam.y, beam.x + dx * length, beam.y + dy * length);
     }
     if (firing && !beam.fired) {
       beam.fired = true;
       if (target === this.player) this.die();
+      else if (beam.stag && this.corpses.includes(target)) { target.buried = 2; target.body.enable = false; target.setAlpha(0.25); }
       else if (this.corpses.includes(target)) { this.corpses.splice(this.corpses.indexOf(target), 1); target.destroy();
         if (this.rooms[this.index].name === 'The rehearsal') Dialogue.play(this, 'breakingBeam');
       }
@@ -2348,7 +2388,7 @@ class Room extends Phaser.Scene {
     const on = (v) => (v ? 'ON' : 'off');
     this.hud.setText([
       `Room ${this.index + 1}/${ROOMS.length} — ${this.rooms[this.index].name}`,
-      'Move A/D or ←/→ · Jump Space · Slide Shift/S/↓ while running · Self-destruct hold K · Recall Q · Retry room Shift+R · Next room N (dev) · Hide H',
+      'Move A/D or ←/→ · Jump Space · Slide Shift/S/↓ while running · Self-destruct hold K · Recall Q · Swap E · Retry room Shift+R · Next room N (dev) · Hide H',
       `[1] bodies float: ${on(rules.freeze)}   [2] grid snap: ${on(rules.snap)}   ` +
       `[3] max bodies: ${rules.max || '∞'}   [4] self-destruct: ${on(rules.selfDestruct)}   [5] recall: ${on(rules.recall)}   · bodies: ${this.corpses.length}`,
       this.boss?.room === this.index ? `Boss ${'■'.repeat(this.boss.hp)}${'□'.repeat(BOSS_HP - this.boss.hp)}` : '',
