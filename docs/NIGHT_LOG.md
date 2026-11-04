@@ -62,3 +62,6 @@ OPEN (mild): Reliquary: from the shrine you can drop onto the bottom crumble and
 NOTE for the author: the stag's 10-death nudge "Lead it away" talks about the beam, not the swap trick (author's text; left as is). It only plays once you step off the platform.
 03:29 full suite on W2+W3 merged: RESULT OK (648s). 5h usage at 71%.
 03:38 W1 QA-and-fix merged (nothing open): thorn steps backed by wall (thorn wall, chain), no jumping out of a slide under a 1-tile ceiling (long pit skip; game-wide), Thornwood kick + saw-follow skip closed + saw deaths jam in W1, walkers/flyers wait during conversations (game-wide), the ghost drifts back to the hero after scenes, firstDeath only in its room, brighter moth stun. Moth: 7/7 bot wins with 0.25-0.4s reactions, 0 deaths. All W1 cutscenes played fast/slow/Esc/while moving; audio cues fire.
+04:00 all three worlds merged: full suite OK twice (636s each). Merged main's new commits (title art, walk cycles, colormatch tool) into night.
+DECISION: did NOT merge night into main: main's working copy has uncommitted edits to dialogue.js and docs/STORY.md (another chat's story work), and a merge would overwrite them. The user merges in the morning after committing those.
+04:00 started the final start-to-finish playthrough agent (../Game-Week-w2, synced to night).
