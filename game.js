@@ -2249,10 +2249,6 @@ class Room extends Phaser.Scene {
       return distance <= 900 * dt;
     };
     B.r.setAlpha(B.hurt > 0 ? 0.4 : 1);
-    if (B.hp < BOSS_HP) {
-      B.warn.lineStyle(4, 0x352e48).lineBetween(B.r.x - 45, B.r.y - 18, B.r.x - 25, B.r.y + 10);
-      if (B.hp === 1) B.warn.lineBetween(B.r.x + 25, B.r.y + 10, B.r.x + 45, B.r.y - 18);
-    }
     B.warn.lineStyle(2, 0xffef72, 0.8);
     if (B.phase === 'loomTell') {
       B.warn.strokeCircle(B.r.x, B.r.y, 40 + Math.sin(B.clock * 40) * 5);
