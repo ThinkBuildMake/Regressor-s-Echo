@@ -2441,9 +2441,11 @@ class Room extends Phaser.Scene {
     const rawSpace = JD(raw.SPACE), rawSwap = JD(raw.E);
     const talkKey = rawSpace | JD(raw.ENTER) | rawSwap;
     const space = k.SPACE === raw.SPACE && rawSpace;
-    const jumpDown = space | JD(k.W) | JD(k.UP), swap = k.E === raw.E && rawSwap;
+    // A press that advances (or ends) a conversation is only for the conversation: no jump, swap or slide.
+    const talking = this.talk.active;
+    const jumpDown = !talking && (space | JD(k.W) | JD(k.UP)), swap = !talking && k.E === raw.E && rawSwap;
     const JU = Phaser.Input.Keyboard.JustUp, jumpUp = JU(k.SPACE) | JU(k.W) | JU(k.UP);
-    const slideKey = JD(k.S) | JD(k.DOWN) | JD(k.SHIFT);
+    const slideKey = !talking && (JD(k.S) | JD(k.DOWN) | JD(k.SHIFT));
     this.showGuide(dt);
     if (this.dead <= 0 && Dialogue.update(this, dt, talkKey)) return; // the scene owns movement
     if (this.dead > 0) {
