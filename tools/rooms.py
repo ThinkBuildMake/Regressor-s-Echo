@@ -78,7 +78,7 @@ def off_edge(o, p):
     # Hang a step over the first pit, then bank the crossing at the shrine.
     o(4, 8, 10, 14); o(4, 15, 10, 15, '^'); p(13, 7, 'C')
     # Keep one soul on the plate and one in the air. An extra death shuts the exit.
-    p(16, 7, '_'); o(19, 8, 24, 14); o(19, 15, 24, 15, '^'); o(26, 1, 26, 7, 'D')
+    p(16, 7, '_'); o(19, 8, 25, 14); o(19, 15, 25, 15, '^'); o(26, 1, 26, 7, 'D')
 room('Off the edge', [346, 107], 30, 17, 2, 'jump off the edge holding K: the soul appears mid-pit', off_edge)
 
 def take_back(o, p):
@@ -103,6 +103,7 @@ room('The ladder', [376, 99], 30, 17, 2, '7-high ledge: stack to 3, then run off
 def beam(o, p):
     # A: the laser death is both the high step and the shield.
     o(1, 1, 10, 15); o(11, 1, 14, 7); p(11, 11, '<'); p(13, 7, 'C')
+    p(9, 15, '#')  # a low block beside the source: die standing on it for the step (as stage B's plate block)
     # B: the lower step must also hold the door; a third death removes it.
     o(15, 1, 24, 15); o(25, 1, 28, 7); p(25, 11, '<')
     o(16, 1, 16, 12, '#')  # sheltered drop beside the shrine
@@ -134,9 +135,10 @@ def sawmill(o, p):
     #    your soul hangs beside the spring 5-7 tiles up: one in the saw's row also jams it; one a row higher is a
     #    step too, but then you spring past a moving saw.
     o(0, 17, 0, 19); o(1, 1, 9, 19); p(1, 19, 'P'); p(6, 19, 's'); p(3, 14, 'o')
-    # B: shrine, plate (self-destruct on it: the soul opens the door AND shields you from the thrower's shots),
-    #    then crumbling floor over spikes under fire. Stomp the thrower.
-    o(10, 1, 14, 10); o(15, 6, 30, 9); p(12, 10, 'C'); p(16, 9, '_'); p(17, 9, '_'); o(19, 10, 25, 10, '~'); o(19, 11, 25, 13)
+    # B: shrine, then crumbling floor over spikes under fire to the plate in front of the thrower. Die on it (or let
+    #    it shoot you there): the soul opens the door AND blocks every later shot, so the second crossing is calm.
+    #    Stomp the thrower from the soul.
+    o(10, 1, 14, 10); o(15, 6, 30, 9); p(12, 10, 'C'); p(27, 9, '_'); o(19, 10, 25, 10, '~'); o(19, 11, 25, 13)
     o(19, 14, 25, 14, '^'); p(29, 9, 't'); o(31, 6, 31, 9, 'D')
     # C: shrine, drop down; a laser from the ceiling cuts the way out. Die in it mid-jump so the soul sits high
     #    and you can walk under it (a soul on the floor blocks the path with the beam still above it). Stomp the walker.

@@ -491,14 +491,14 @@ const ROOMS = [
     '#                         D  #',
     '                          D   ',
     ' P           C  _         D   ',
-    '####       ########      #####',
-    '####       ########      #####',
-    '####       ########      #####',
-    '####       ########      #####',
-    '####       ########      #####',
-    '####       ########      #####',
-    '####       ########      #####',
-    '####^^^^^^^########^^^^^^#####',
+    '####       ########       ####',
+    '####       ########       ####',
+    '####       ########       ####',
+    '####       ########       ####',
+    '####       ########       ####',
+    '####       ########       ####',
+    '####       ########       ####',
+    '####^^^^^^^########^^^^^^^####',
     '##############################',
   ], [346, 107], { world: 2 }],
   ["Take it back", [ // recall a tunnel plug; preserve the plate while repairing a flat bridge
@@ -555,7 +555,7 @@ const ROOMS = [
     '#          #### #        #####',
     '#          ####          #####',
     '           ####        _ #####',
-    ' P         ####        # #####',
+    ' P       # ####        # #####',
     '##############################',
   ], [436, 92], { world: 2 }],
   ["The spring", [ // 9-high ledge: hold during the launch so a soul hangs beside the spring, then land on it
@@ -606,7 +606,7 @@ const ROOMS = [
     '#                              D   #########',
     '#                              D   #########',
     '#                              D   #########',
-    '#               __           t D C #########',
+    '#                          _ t D C #########',
     '#           C  ####~~~~~~~######   #########',
     '#         #########       ######   #########',
     '#         #########       ######   #########',
@@ -2453,7 +2453,8 @@ class Room extends Phaser.Scene {
     else if (!grounded && (dir === 0 || (dir === Math.sign(b.velocity.x) && Math.abs(b.velocity.x) > SPEED))) {
       // Airborne and not steering (or steering with momentum already past running speed, e.g. a dive
       // out of a slide): keep the momentum, fading it only by light air drag.
-      b.velocity.x -= Math.sign(b.velocity.x) * Math.min(Math.abs(b.velocity.x), AIR_DRAG * dt);
+      // Letting go while a spring throws you up stops your drift (as on the ground), so a soul hung beside the spring isn't bumped from below.
+      b.velocity.x -= Math.sign(b.velocity.x) * Math.min(Math.abs(b.velocity.x), (this.sprung && !dir ? ACCEL : AIR_DRAG) * dt);
     } else {
       const diff = dir * SPEED - b.velocity.x, step = (grounded ? ACCEL : AIR_ACCEL) * dt;
       b.velocity.x += Math.sign(diff) * Math.min(Math.abs(diff), step);

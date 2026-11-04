@@ -1082,9 +1082,9 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     const doors = s.doors.filter((d) => d.room === s.index);
     check(doors.every((d) => !d.body.enable), 'Off the edge: plate and airborne soul keep the exit open');
     const a = await hop(17, 0, 8, 21);
-    const b = await hop(21, 1, 8, 25);
-    const c = await hop(25, 0, 8, 27);
-    check(a.h >= 0.95 && b.h >= -0.05 && b.x >= 24.6 && c.x >= 26.6,
+    const b = await hop(21, 1, 8, 26);
+    const c = await hop(26, 0, 8, 27);
+    check(a.h >= 0.95 && b.h >= -0.05 && b.x >= 25.6 && c.x >= 26.6,
       'Off the edge: second airborne step crosses the pit and held door');
     await place(14, 0, 8);
     check(doors.every((d) => d.body.enable) && s.start.x > O().x + 12 * 32,
@@ -1122,10 +1122,47 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
       const bridge = s.corpses.at(-1), col = (bridge.x - O().x) / T - 0.5;
       const height = 8 - (bridge.y - bridge.height / 2 - O().y) / T;
       const onto = await hop(18.4, 0, 8, col);
-      const across = await hop(col, height, 8, 25);
-      check(onto.h >= height - 0.05 && across.x >= 24.6 && across.h >= -0.05,
+      const across = await hop(col, height, 8, 26);
+      check(onto.h >= height - 0.05 && across.x >= 25.6 && across.h >= -0.05,
         `Off the edge: pit two tolerates K ${delay}ms after jumping (soul ${col}, ${height}; ${JSON.stringify({onto,across})})`);
     }
+    // From the shrine with real inputs: the plate soul alone can't be slid across the seven-wide pit; a held jump can.
+    s = await cleanSolveRoom('Off the edge');
+    s.player.body.reset(O().x + 13.5 * T, O().y + 8 * T - 16); await wait(200); // the shrine (stage one is covered above)
+    await walkTo(16); await sacrifice(); // the plate soul
+    const runOff = async (slide, k) => {
+      await walkTo(13); await jumpTo(17); await walkTo(16.6);
+      const deaths = stats.deaths;
+      key('keydown', 39);
+      await until(() => s.player.x >= O().x + (slide ? 18.2 : 18.9) * T, 2000, 'run to pit two');
+      if (slide) { key('keydown', 83); await until(() => s.player.x >= O().x + 18.8 * T, 1000, 'slide to the edge'); }
+      key('keydown', 32); if (k) key('keydown', 75);
+      if (k) { // steer: let go over column 23 so the soul hangs within reach
+        await until(() => s.player.x >= O().x + 23 * T || stats.deaths > deaths, 1500, 'over pit two');
+        key('keyup', 39); key('keydown', 37);
+        await until(() => s.player.body.velocity.x <= 0 || stats.deaths > deaths, 500, 'stop over pit two'); key('keyup', 37);
+      }
+      await until(() => stats.deaths > deaths || (s.player.body.blocked.down && s.player.x > O().x + 25.5 * T), 2500, 'pit two jump');
+      for (const c of [39, 83, 32, 75]) key('keyup', c);
+      await alive();
+      return stats.deaths > deaths;
+    };
+    check(await runOff(true, false), 'Off the edge: a slide jump with only the plate soul falls into pit two');
+    key('keydown', 81); await wait(60); key('keyup', 81); await wait(100); // recall the pit soul to keep the plate soul
+    await runOff(false, true);
+    const bridge = s.corpses.at(-1), bridgeCol = (bridge.x - O().x) / T - 0.5;
+    await walkTo(13); await jumpTo(17); await walkTo(16.6);
+    const crossDeaths = stats.deaths;
+    key('keydown', 39);
+    await until(() => s.player.x >= O().x + 18.9 * T, 2000, 'run to pit two again');
+    key('keydown', 32); key('keyup', 39); await walkTo(bridgeCol); key('keyup', 32);
+    await until(() => s.player.body.blocked.down || s.dead > 0, 2000, 'land on the bridge');
+    await jumpTo(27);
+    key('keydown', 39);
+    await until(() => s.rooms[s.index].name === 'Take it back' || stats.deaths > crossDeaths, 4000, 'leave Off the edge');
+    key('keyup', 39);
+    check(s.rooms[s.index].name === 'Take it back' && stats.deaths === crossDeaths,
+      `Off the edge: a held jump off the edge bridges pit two to the doorway (bridge ${bridgeCol})`);
 
   }
   await solve('The ladder', [[8, 2], [9, 3]],
@@ -1217,6 +1254,29 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     const short = await hop(8, 2, 16, 11);
     check(short.h < 7.9 && short.x < 11,
       'The beam: without the laser soul the first ledge is out of reach');
+    // Real inputs: die standing on the low block for the step, then jump from it into the beam.
+    s = await cleanSolveRoom('The beam');
+    const beamJump = async () => {
+      await walkTo(7.5); await jumpTo(9); await walkTo(9.4);
+      const deaths = stats.deaths;
+      key('keydown', 39); await wait(60); key('keydown', 32);
+      await until(() => stats.deaths > deaths, 1500, 'jump into the beam'); key('keyup', 39); key('keyup', 32); await alive();
+    };
+    await beamJump();
+    const lone = s.corpses[0];
+    await walkTo(7.5); await jumpTo(9); await walkTo(9.3);
+    let loneBest = 0;
+    key('keydown', 32); key('keydown', 39);
+    for (let t = 0; t < 1500; t += 20) { await wait(20); if (s.player.body.blocked.down) loneBest = Math.max(loneBest, 16 - (s.player.y + 15 - O().y) / T); }
+    key('keyup', 32); key('keyup', 39);
+    check(loneBest < 4.9, `The beam: the beam soul alone is out of reach from the block (top ${16 - (lone.y - lone.height / 2 - O().y) / T}, stood at ${loneBest.toFixed(2)})`);
+    s = await cleanSolveRoom('The beam');
+    await walkTo(7.5); await jumpTo(9); await walkTo(9.5); await sacrifice();
+    await beamJump();
+    await walkTo(7.5);
+    const stepA = await jumpTo(9), stepB = await jumpTo(10), ledgeA = await jumpTo(12); await walkTo(13);
+    check(stepA.h >= 1.95 && stepB.h >= 4.95 && ledgeA.h >= 7.95 && s.corpses.length === 2 && s.start.x > O().x + 10.5 * T,
+      `The beam: a step soul on the low block and a beam soul reach the shrine with real inputs (${JSON.stringify([stepA, stepB, ledgeA])}, deaths ${stats.deaths}, start ${(s.start.x - O().x) / T})`);
   }
   await solve('The spring', [[9, 6]], [[6, 0, 7, 9], [9, 7, 9, 11], [11, 9, 9, 13]]);
   if (matches('The spring')) {
@@ -1264,6 +1324,33 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     check(stats.deaths > deaths,
       'The spring: extra deaths erase the high shield and the next launch hits the laser');
   }
+  if (matches('The spring')) {
+    // Stage two with real inputs from the shrine: hold → onto the spring and die in the beam; then walk on again,
+    // let go as it throws you (the drift stops, so you don't bump the soul from below) and steer onto it near the top.
+    s = await cleanSolveRoom('The spring');
+    s.player.body.reset(O().x + 13.5 * T, O().y + 7 * T - 16); await wait(300);
+    await descend(16.6);
+    const deaths = stats.deaths;
+    key('keydown', 39);
+    await until(() => stats.deaths > deaths, 3000, 'spring into the beam'); key('keyup', 39); await alive();
+    const shield = s.corpses.at(-1), shieldCol = (shield.x - O().x) / T - 0.5;
+    check(s.beams().every((b) => b.x >= shield.x), `The spring: the beam death shields the spring (soul column ${shieldCol})`);
+    await descend(17);
+    key('keydown', 39);
+    await until(() => s.player.body.velocity.y < -300, 2000, 'second launch'); key('keyup', 39);
+    await until(() => s.player.body.velocity.y > -200, 2000, 'near the top');
+    check(s.player.x < shield.x - shield.width / 2 - 8, 'The spring: letting go during the launch stops the drift under the soul');
+    await walkTo(shieldCol);
+    await until(() => s.player.body.blocked.down || s.dead > 0, 2000, 'land on the shield');
+    const onShield = 16 - (s.player.y + 15 - O().y) / T, landX = (s.player.x - O().x) / T;
+    if (onShield >= 6.95) {
+      await walkTo(shieldCol + 0.9); await jumpTo(26); await jumpTo(28); // jump from the soul's far edge
+      key('keydown', 39);
+      await until(() => s.rooms[s.index].name === 'Wrong order' || stats.deaths > deaths + 1, 4000, 'leave The spring'); key('keyup', 39);
+    }
+    check(onShield >= 6.95 && stats.deaths === deaths + 1 && s.rooms[s.index].name === 'Wrong order',
+      `The spring: the beam soul is the landing to the exit with real inputs (stood at ${landX.toFixed(2)}, ${onShield.toFixed(2)}; soul ${shieldCol})`);
+  }
   if (matches('Sawmill')) {
     s = await cleanSolveRoom('Sawmill');
     await walkTo(5);
@@ -1279,9 +1366,24 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     await walkTo(column + 0.65);
     await jumpTo(12);
     check(s.start.x > O().x + 11 * T, 'Sawmill: real spring death reaches stage B shrine');
-    await jumpTo(16); await sacrifice();
+    // Stage B: cross the crumbles under fire to the plate in front of the thrower and die there.
+    const fireDeaths = stats.deaths;
+    await walkTo(13); await jumpTo(18); await jumpTo(21); await jumpTo(25); await jumpTo(27);
+    check(stats.deaths === fireDeaths, 'Sawmill: first crossing under fire reaches the thrower plate');
+    await sacrifice();
+    const plateSoul = s.corpses.at(-1);
+    check(Math.abs(plateSoul.x - (O().x + 27.5 * T)) < 1 && s.doors.filter((d) => d.room === s.index).every((d) => !d.body.enable),
+      'Sawmill: the plate soul holds the door');
+    // Second crossing: the plate soul stops every shot before the crumbles.
     const crossingDeaths = stats.deaths;
-    await walkTo(13); await jumpTo(18); await jumpTo(21); await jumpTo(25); await jumpTo(29); await walkTo(33);
+    let leaked = false;
+    const watch = () => { leaked ||= s.shots.some((sh) => sh.x < plateSoul.x - 20); };
+    room().events.on('update', watch);
+    await walkTo(13); await jumpTo(18);
+    await wait(2 * THROW_EVERY * 1000); // stand at the crumbles' edge: no shot gets past the soul
+    room().events.off('update', watch);
+    check(!leaked && stats.deaths === crossingDeaths, 'Sawmill: the plate soul shields the second crossing from the thrower');
+    await jumpTo(21); await jumpTo(25); await jumpTo(27); await jumpTo(29); await walkTo(33);
     check(stats.deaths === crossingDeaths && s.start.x > O().x + 32 * T,
       'Sawmill: plate shield, crumble jumps and thrower stomp reach stage C shrine');
     await walkTo(35);
