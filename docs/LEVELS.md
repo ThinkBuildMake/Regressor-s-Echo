@@ -96,11 +96,11 @@ New: **3 souls** and **soul swap** (E exchanges you with the newest soul). Recal
 
 | # | Room | Teaches | The trick | Status |
 |---|---|---|---|---|
-| 1 | Three high | 3 souls | Ten-high three-soul staircase; shrine, then hang a shield under a low laser lintel before building two exit steps. A fourth death erases the shield | Built |
+| 1 | Three high | 3 souls | Twelve-high three-soul staircase (two souls plus a kick off the tower face fall short); shrine, then hang a shield under a low laser lintel before building two exit steps. A fourth death erases the shield | Built |
 | 2 | Two places | Soul swap (E) | Fall into the one-wide shaft: its spike leaves a soul that plugs it, and the wall above the low tunnel stops you walking off the plug. Slide on the floor above and swap mid-slide: you keep the slide's speed and clear the spike into the tunnel (a walking-speed swap drops onto it). Leave an escape soul beyond the full-height approach gate, then swap from the visible spike plate: its soul opens the exit but closes the approach behind you | Built |
 | 3 | Three jobs | 3 souls at once | Plate, pit bridge, high laser blocker; shrine, then crumbling lips force you to jump into the beam before the landing falls. A fourth death erases the plate: recall the mistake | Built |
-| 4 | Everything | All powers | Slide a flat bridge to the shrine. Then keep a plate soul, a saw jam and a spring step at once: recall a bad step, because a fourth death shuts the door | Built |
-| 5 | Reliquary | Recall, three souls | Climb the flyer chimney, jam two saws and hold the plate. Shrine, then crumbling descent under falling spikes; thorns close both sides of the descent shaft | Built |
+| 4 | Everything | All powers | Slide a flat bridge to the shrine. Then keep a plate soul, a saw jam and a spring step at once (a post keeps the saw in its lane when the door opens, so it must be jammed; hop the post where the ceiling rises): recall a bad step, because a fourth death shuts the door | Built |
+| 5 | Reliquary | Recall, three souls | Climb the flyer chimney, jam two saws and hold the plate (two tiles from its door, so you can't stand on it and in the doorway at once). Shrine, then crumbling descent under falling spikes; thorns close both sides of the descent shaft | Built |
 | 6 | The rehearsal | Leading a beam | First lock after 2.6s: lead the beam below a two-soul stair; shrine, then sacrifice a decoy in a low corridor firing every 1.6s, too fast to run its full length | Built |
 | 7 | The old tree | Story | Calm promise before the fight; return for the note after victory | Built |
 | 8 | The spectral stag | Final boss | Charge a soul flat, swap onto the platform and stomp during the 2s daze. Antlers → three floor pulses → Three seals: all three sockets must hold souls at the end of a 3s countdown. Souls survive every attack; death heals it | Built (40×17 arena; separate old-tree and pyramid rooms) |

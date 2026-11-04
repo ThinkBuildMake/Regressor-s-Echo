@@ -1434,7 +1434,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     check(climbed, 'Reliquary: doorway route climbs the flyer chimney to the shrine');
     if (!climbed) throw new Error('Reliquary: chimney route did not reach the first shrine');
     // Each saw death jams its lane; hop the posts on subsequent runs.
-    for (let t = 0; t < 45000 && s.player.x < O().x + 29.5 * 32; t += 120) {
+    for (let t = 0; t < 45000 && s.player.x < O().x + 27.5 * 32; t += 120) {
       if (s.dead > 0) {
         direction(0); key('keyup', 32); await alive();
         const body = s.corpses.at(-1);
@@ -1446,8 +1446,10 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
       if (s.wallSide() > 0 && s.player.body.blocked.down) key('keydown', 32);
       await wait(60); key('keyup', 32); await wait(60);
     }
+    key('keydown', 39); await wait(800); key('keyup', 39); await wait(200);
+    check(s.player.x < O().x + 30 * 32, 'Reliquary: stepping off the plate closes its door before you reach it');
     for (let t = 0; t < 2500; t += 20) {
-      const dx = O().x + 29.5 * 32 - s.player.x, vx = s.player.body.velocity.x;
+      const dx = O().x + 27.5 * 32 - s.player.x, vx = s.player.body.velocity.x;
       const target = Phaser.Math.Clamp(dx * 6, -120, 120);
       key(vx < target - 8 ? 'keydown' : 'keyup', 39);
       key(vx > target + 8 ? 'keydown' : 'keyup', 37);
@@ -1816,7 +1818,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     await wait(1000);
     check(s.saws.some((sw) => sw.room === s.index && sw.jam), 'Everything: second soul jams the tunnel saw');
     const deaths = stats.deaths;
-    for (const [x, top, to, height] of [[17, 0, 21, 0], [21, 0, 22, 1], [24, 0, 25, 1], [25, 1, 31, 0]]) {
+    for (const [x, top, to, height] of [[17, 0, 21, 0], [21, 0, 22, 1], [24, 0, 25, 1], [25, 1, 28, 0], [28, 0, 31, 0]]) {
       const r = await hop(x, top, 20, to);
       check(r.x >= to - 0.4 && r.h >= height - 0.1,
         `Everything: plate and saw passage reaches ${to} (${r.x}, ${r.h})`);
@@ -1837,7 +1839,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     check(stats.deaths > before, 'Everything: jumping cannot skip the empty tunnel bridge');
   }
   await solve('Three high', [[7, 2], [8, 5], [9, 8]],
-    [[6, 0, 3, 7], [7, 3, 6, 8], [8, 6, 9, 9], [9, 9, 10, 12]]);
+    [[6, 0, 3, 7], [7, 3, 6, 8], [8, 6, 9, 9], [9, 9, 12, 12]]);
   if (matches('Three high')) {
     s = room();
     check(s.start.x > O().x + 10 * 32, 'Three high: safe staircase reaches the shrine');
@@ -1866,7 +1868,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   await solve('The ladder', [[9, 2]], []);
   if (matches('The ladder')) { const r = await hop(9, 3, 16, 10); check(r.h < 7, `The ladder: a stack 3 high can't reach the ledge (${r.h})`); }
   await solve('Three high', [[8, 2], [9, 5]], []);
-  if (matches('Three high')) { const r = await hop(9, 6, 16, 12); check(r.h < 10, `Three high: two souls can't reach the ledge (${r.h})`); }
+  if (matches('Three high')) { const r = await hop(9, 6, 16, 12); check(r.h < 12, `Three high: two souls can't reach the tower (${r.h})`); }
   if (matches('The spring')) { // the spring alone falls short of its ledge
     const s = await cleanSolveRoom('The spring');
     s.player.body.reset(s.springs[0].x, s.springs[0].y - 20); key('keydown', 39); await wait(1600); key('keyup', 39); await wait(300);
