@@ -6,9 +6,10 @@ Goal: every room and boss in Worlds 1-3 verified possible, fair and skip-free by
 - [ ] Merge night into main — BLOCKED by uncommitted story edits in main's working copy (dialogue.js, STORY.md); leave for the user
 
 ## Doing
-- [ ] Cosmetic: world title on every Shift+R, stag death count across Shift+R — Claude agent in ../Game-Week-w3
 
 ## Done
+- [x] Cosmetic fixes (world title, stag death count); full suite OK twice (db7a362)
+- [x] Morning summary written
 - [x] Final start-to-finish playthrough reached the ending card; its fixes merged; full suite OK twice (3cdaa96)
 - [x] All three worlds merged; full suite OK twice (37f5509)
 - [x] World 1 QA-and-fix merged
