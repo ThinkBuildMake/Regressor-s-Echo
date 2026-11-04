@@ -81,6 +81,15 @@ def off_edge(o, p):
     p(16, 7, '_'); o(18, 8, 24, 14); o(18, 15, 24, 15, '^'); o(26, 1, 26, 7, 'D')
 room('Off the edge', [346, 107], 30, 17, 2, 'jump off the edge holding K: the soul appears mid-pit', off_edge)
 
+def take_back(o, p):
+    # A standing mistake plugs the tunnel; recall it, then slide a flat bridge.
+    o(0, 6, 2, 7); o(3, 7, 9, 7); o(5, 8, 7, 8, '^'); p(1, 7, 'P')
+    o(10, 3, 18, 7); p(11, 7, '#'); p(11, 6, 'C')
+    # Keep the plate oldest. Recall the bad bridge before spending the last slot.
+    p(16, 7, '_'); o(19, 7, 25, 7); o(21, 8, 23, 8, '^')
+    o(26, 6, 26, 7, 'D'); o(27, 3, 28, 7); o(29, 6, 29, 7)
+room('Take it back', [376, 107], 30, 17, 2, 'recall a tunnel plug; preserve the plate while repairing a flat bridge', take_back)
+
 def ladder(o, p):
     # Safe staircase, then bank the climb before dropping to the spike approach.
     o(1, 1, 9, 15); o(10, 1, 14, 8); p(12, 8, 'C')
@@ -237,6 +246,7 @@ for name, pos, world, note, rows, extra in rooms:
     if name == 'The old tree': opts.update(spots=[[18, 'stagPromise']])
     if name == 'The tree guardian': opts.update(boss='tree', spots=[[7, 'tree']], deathTalk={2: 'treeSlam', 25: 'treeSlam2'})
     if world == 3 or name == 'End of the greybox': pos = [pos[0] + 30, pos[1]]
+    if name != 'Take it back' and (world == 3 or world == 2 and pos[0] >= 376): pos = [pos[0] + 30, pos[1]]
     o = ', '.join(f"{k}: {json.dumps(v)}" for k, v in opts.items())
     out.append(f"  [{json.dumps(name)}, [ // {note}\n" + ''.join(f"    '{r}',\n" for r in rows) + f"  ], {json.dumps(pos)}{', { ' + o + ' }' if o else ''}],")
 open(sys.argv[1], 'w').write('\n'.join(out) + '\n')

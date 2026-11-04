@@ -25,7 +25,7 @@ Three **showcase rooms**, one per world, are in the greybox to judge this style 
 | World | Souls | New power | The world's trick |
 |---|---|---|---|
 | 1. Forest Edge | 1 | **Slide** (a speed boost, and it leaves a flat soul 2 wide). Every death comes from the forest | **Where you get hit is where your soul hangs.** You aim your deaths with jumps and positioning |
-| 2. Overgrown Ruins | 2 | **Self-destruct** (hold the button), then **recall** a few rooms in (taught by In my own way, moved here from World 3) | **Timing.** You keep moving while you hold, so you press early to die where you'll be, and let go to cancel. A 3rd death erases the 1st, so order matters too. Recall takes your newest soul back without dying |
+| 2. Overgrown Ruins | 2 | **Self-destruct** (hold the button), then **recall** a few rooms in (taught by Take it back) | **Timing.** You keep moving while you hold, so you press early to die where you'll be, and let go to cancel. A 3rd death erases the 1st, so order matters too. Recall takes your newest soul back without dying |
 | 3. Sanctum | 3 | **Soul swap** (a key swaps places with your newest soul: you appear where it was, it appears where you stood) | **Three at once, in the right order.** Puzzles need all 3 souls doing different jobs at the same time. Swap turns every soul into an escape hatch |
 
 **Self-destruct (World 2 on):** hold the button for about 0.75s while the blue-white flames grow. You keep running, jumping and falling while you hold. Let go early to cancel. A hazard that hits you mid-hold kills you on the spot, so the soul lands there instead.
@@ -54,7 +54,7 @@ Three **showcase rooms**, one per world, are in the greybox to judge this style 
 | 9 | The gatehouse | Which side the walker ends up on | Let the walker kill you on the plate from the door side, then hop your soul and its pen. After the shrine, a low post keeps the patrol away from your respawn; the plate soul is also the step to a four-high ledge. Careless guard contact steals the step | | Built |
 | 10 | The moth | Boss 1 | One soul, two jobs. You place it by dying on the arena's thorns, and it must shield you from the wing dust *and* be the step you stomp from. Dying again heals the moth and moves the soul, so you get one placement for all 3 stomps. The dust can't break souls. The moth stays away from both walls, seals the entrance until victory, and pauses briefly after a death so you can approach the step | "Careful. It remembers too." | Built |
 
-After the moth: the amulet's 2nd rune lights up and you earn a **2nd soul** and **self-destruct**, leading into World 2.
+After the moth: the amulet's 2nd rune lights up and you earn a **2nd soul**, **self-destruct** and **recall**, leading into World 2.
 
 ## Opening conversation (room 2)
 
@@ -81,15 +81,16 @@ New: **2 souls**, **self-destruct** (hold K), **lasers** (a soul blocks the beam
 |---|---|---|---|---|
 | 1 | Let go | Self-destruct | Stack two souls for a safe 5-high ledge, then shrine. Stomp the guard and stack on a plate: the bottom soul opens the exit. Each death revives the guard; a careless third death erases the plate soul | Built |
 | 2 | Off the edge | Hold while jumping | Jump off holding K: hang a step over the pit, cross to the shrine. Then leave a soul on the plate and hang another over the next pit; a careless third death closes the exit | Built |
-| 3 | The ladder | Staircase | Offset your two souls to climb a 7-high ledge; a straight stack falls short. Shrine, descend beneath the hanging wall, then hang the staircase over spikes: the lower step is also your bridge. A third death erases it | Built |
-| 4 | The beam | Lasers | Die beside the laser source: the high step also blocks the beam. Shrine, drop through the sheltered shaft, then the lower step must hold a plate while the laser soul finishes the stair. A third death erases the plate soul and shuts the exit | Built |
-| 5 | The spring | Springs | Hang a soul beside the spring to reach a 9-high ledge, then shrine. Descend through the sheltered shaft; the hanging wall prevents bridging from the shrine. The second landing soul also blocks a laser: die too low and the beam stays live; extra deaths can erase the shield | Built |
-| 6 | Wrong order | Death order | Step, plate, pit: replace the step, not the bridge. Shrine, then spring to a high plate via a temporary landing; replace it with a laser shield over spikes. Only the high plate opens the exit; one death too many shuts it | Built |
-| 7 | The tree guardian | Boss 2 | It glows blue, then slams the soul nearest you. Lure each slam onto the decoy while standing on the step; only then can one stomp hurt it. Jumping alone cannot dodge the shockwave. Respawning gives four seconds before the next blue warning. Dying to rebuild heals it | Built |
+| 3 | Take it back | Recall | Recall a standing tunnel plug, then slide a flat bridge. Shrine; preserve a plate soul by recalling a bad bridge before replacing it | Built |
+| 4 | The ladder | Staircase | Offset your two souls to climb a 7-high ledge; a straight stack falls short. Shrine, descend beneath the hanging wall, then hang the staircase over spikes: the lower step is also your bridge. A third death erases it | Built |
+| 5 | The beam | Lasers | Die beside the laser source: the high step also blocks the beam. Shrine, drop through the sheltered shaft, then the lower step must hold a plate while the laser soul finishes the stair. A third death erases the plate soul and shuts the exit | Built |
+| 6 | The spring | Springs | Hang a soul beside the spring to reach a 9-high ledge, then shrine. Descend through the sheltered shaft; the hanging wall prevents bridging from the shrine. The second landing soul also blocks a laser: die too low and the beam stays live; extra deaths can erase the shield | Built |
+| 7 | Wrong order | Death order | Step, plate, pit: replace the step, not the bridge. Shrine, then spring to a high plate via a temporary landing; replace it with a laser shield over spikes. Only the high plate opens the exit; one death too many shuts it | Built |
+| 8 | The tree guardian | Boss 2 | Catch the canopy stone on a hanging soul; recall it to expose the mask, then stomp from the step. Rake, mortar and the blue decoy burial share a fixed loop; jumping clears the shockwave. Three-hit support recovery awaiting decision | Built |
 
 Cut for now: *The race* (walkers are slow enough to outrun, so it had no tension) and *The moving ledge* (its timing window was too small to be fair).
 
-After the tree: the 3rd rune lights up, giving a **3rd soul** and **recall**.
+After the tree: the 3rd rune lights up, giving a **3rd soul** and **soul swap**.
 
 ## World 3: Sanctum (3 souls + recall, about 6 minutes)
 New: **3 souls** and **recall** (Q: tap for the newest soul, hold for more). Mostly a convenience: rooms can be longer and harder without a mistake costing several deaths.
@@ -111,14 +112,14 @@ Cut: *Spring tower* (a spring-placed soul has to land within a few frames, too t
 ## Boss and rehearsal designs (2026-11-02, written for the overnight build; tune the numbers in playtests)
 All three follow the moth's rules: 3 stomps from above, it speeds up after each one (attack gaps × 0.8), any death heals it to full, yellow attacks never break souls, and an attack that breaks souls is warned by a blue glow.
 
-### The tree guardian (W2 boss, 2 souls + self-destruct)
-- **Arena:** one screen (30 × 17), flat floor. The tree is rooted at the right (about 7 tiles wide) and never moves. Its stone mask is the stomp target: top **4 tiles up**, sticking out over the floor at its left edge. Out of reach from the floor, in reach from one standing soul 1–2 tiles in front of it, so every stomp needs a soul.
-- **Branch swing (yellow):** a 0.6s wind-up, then a branch sweeps the floor band (the bottom tile) from the trunk out to about 12 tiles. Jump it, or be standing on a soul. It passes through souls.
-- **Seed pod (yellow):** lobbed at where you are, bursts on landing in a small area. A soul between you and the pod blocks it, as with the moth's dust.
-- **The slam (blue, smashes souls):** every third attack. The mask glows blue for 2.05s and **looks at the soul nearest you; the target locks when the glow starts**. The arm slams that soul into the ground: it sinks flat (useless as a step) and **pushes back up 5s later**. The slam also sends a shockwave along the floor that kills you unless you are standing on an unburied soul when it lands. Each buried decoy opens one stomp, lasting until it rises. With no souls out, it slams where you stand.
-- **The trick:** you need 2 souls: the step in front of the mask and a decoy farther out (self-destruct lets you put the decoy anywhere, mid-air too). When the glow starts, be near the decoy. Then get onto the step before the slam lands: the slam buries the decoy, the shockwave passes under you, and you stomp. Stand on the step when the glow starts and the slam buries your step and the shockwave kills you, which heals the tree. As it speeds up (slam intervals 8s → 6.4s → 5.12s), the decoy is barely back up in time, so the last cycle is tight.
-- **Replay numbers:** 30 × 17 arena; floor row 16, mask at column 23 with its top 4 tiles up. Step at column 21, decoy at 13 (8 tiles apart). Blue warning 2.05s; run, jump onto the step, then jump mostly straight up before steering onto the mask. Replay spare time: 0.3–0.6s. Jump over the return swing earlier as it speeds up, then lead the pod left before returning to the decoy. Yellow wind-ups 0.6s; burial 5s; attack gaps × 0.8 per stomp.
-- **Story:** STORY.md W2 scenes 4 (arrives partway in), 5 (the slam nudges after the 2nd and about the 25th death) and 6 (the tree falls, 3rd rune: 3 souls + recall).
+### The tree guardian (W2 boss, 2 souls + self-destruct + recall)
+- **Arena:** unchanged 30 × 17, floor row 16, mask at column 23.5, top 4 tiles up. Put a step at column 21, then charge K on it before jumping toward the mask to hang the newest soul above it.
+- **Fixed loop:** Root Rake → Seed Mortar → Canopy shake → Borrowed Fist. Initial setup grace 4s; recovery gaps 1.6s → 1.28s → 1.024s. Tells stay fixed: rake 0.8s, mortar 0.7s, canopy 1s, fist 2.05s.
+- **Rake (lemon):** marked 16-tile floor band, bottom 24px; jump or stand on a soul. **Mortar (lemon):** three 76px landing markers, at the player's position and ±64px, then 0.9s lobbed seeds. Souls block them; a floor burst reaches 38px each side and 28px up.
+- **Canopy (lemon):** leaves and a marked 32px column above the mask. One 32px stone falls from 14 tiles up, resting on the first soul. An uncaught stone breaks harmlessly on the mask; recalling/removing a caught support drops it and opens the mask for 2s. A stomp then spends the opening; plain stomps bounce without damage.
+- **Borrowed Fist (blue):** locks the nearest unburied soul when the tell starts. Buries it for 5s, then restores it. Burying the stone support drops the stone early without opening the mask. The shockwave covers the bottom 24px; jumping clears it, so no death is required to recover.
+- **Unresolved:** recall consumes the support, but rebuilding it by death heals the boss. Three separate stone openings need a decision about returning the support or permitting a three-stomp combo.
+- **Story:** tree fall grants three souls and soul swap via persistent `stats.treePower`; recall belongs to the moth's rune.
 
 ### The rehearsal (W3 room 6, 3 souls + recall)
 - Teaches the stag's beam without the stag. An emitter (an antler relic in the right wall) glows blue, shows an **aiming line that follows you**, locks 0.4s before it fires, then fires a beam along that line that breaks the first soul it hits and kills you if it reaches you. Then a 3s gap in the stair chamber; the corridor cycles every 1.6s. Both give 2s extra before the first shot.
@@ -157,7 +158,7 @@ Measured in the game; the greybox tests (`tests/check.html`) replay each tight r
 - Lasers stop at the first soul, wall or door in their path, so a soul blocks only the part of the beam beyond it.
 
 ## Playing the greybox
-The rooms are on the `greybox-levels` branch, in its own folder (`../Game-Week-greybox`). Serve that folder (`python3 -m http.server 8001`) and open `http://localhost:8001/?dev&room=The%20long%20pit` (any room name works; `?dev` turns on the dev keys and the room shortcut). Keys: hold K to self-destruct (World 2 on), Q to recall your newest soul (World 3), Shift+R to retry the room (the way out if you trap yourself), N for the next room and H for the help panel (both dev only). The flames in the bottom left show how many souls you have left.
+The rooms are on the `greybox-levels` branch, in its own folder (`../Game-Week-greybox`). Serve that folder (`python3 -m http.server 8001`) and open `http://localhost:8001/?dev&room=The%20long%20pit` (any room name works; `?dev` turns on the dev keys and the room shortcut). Keys: hold K to self-destruct (World 2 on), Q to recall your newest soul (World 2 on), Shift+R to retry the room (the way out if you trap yourself), N for the next room and H for the help panel (both dev only). The flames in the bottom left show how many souls you have left.
 
 ## Open design questions
 - **Slide speed:** raise it so the slide's speed boost can carry puzzles, or keep it as the flat-soul tool only?
