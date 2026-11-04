@@ -371,7 +371,7 @@ const Dialogue = {
   play(scene, key) {
     if (!SCRIPT[key] || this.seen.has(key)) return false;
     this.seen.add(key);
-    scene.talk.queue.push(...SCRIPT[key].map((l) => ({ ...l })));
+    scene.talk.queue.push(...SCRIPT[key].map((l, i) => ({ ...l, audioScript: key, audioIndex: i })));
     return true;
   },
 
@@ -394,6 +394,7 @@ const Dialogue = {
       if (!t.queue.length) { t.ui.setVisible(false); return false; }
       t.line = t.queue.shift();
       t.shown = 0;
+      GameAudio.line(t.line.audioScript, t.line.audioIndex);
       if (t.line.reveal) NAMES.guide = 'Yourself';
       if (t.line.cue) scene.cue?.(t.line.cue);
       t.ui.setVisible(!t.line.wait);
@@ -421,7 +422,9 @@ const Dialogue = {
       if (t.shown < full) t.shown = full;
       else { t.line = null; return t.queue.length > 0 || this.update(scene, 0, false); }
     }
+    const before = Math.floor(t.shown / 3);
     t.shown = Math.min(full, t.shown + dt * 45);
+    if (!advance && Math.floor(t.shown / 3) > before) GameAudio.play(`dialogue-blip-${t.line.who === 'guide' ? 'ghost-guide' : 'hero'}`, 3, 0.25);
     t.text.setText(t.line.text.slice(0, Math.floor(t.shown)));
     t.hint.setAlpha(t.shown >= full ? 0.6 + Math.sin(scene.time.now / 250) * 0.3 : 0);
     return true;

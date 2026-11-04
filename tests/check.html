@@ -6,6 +6,7 @@
 <script>window.SKIP_WARNING = true;</script>
 <script src="../art.js"></script>
 <script src="../dialogue.js"></script>
+<script src="../audio.js"></script>
 <script src="../game.js"></script>
 <script>
 const errors = [];
@@ -82,6 +83,31 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   if (only.length) Dialogue.seen.add('firstDeath');
   let s;
   const storyState = { stats: { ...stats }, rules: { ...rules }, seen: new Set(Dialogue.seen) };
+  if (matches('The clearing audio')) {
+    const play = GameAudio.play, calls = [], savedStats = { ...stats };
+    GameAudio.play = (...args) => calls.push(args);
+    try {
+      s = await go(ROOMS.findIndex(r => r[0] === 'The clearing'));
+      check(GameAudio.musicKey === 'world-1-forest-edge', 'world 1 music selected');
+      const track = GameAudio.tracks.get(GameAudio.musicKey);
+      GameAudio.room(s, 0);
+      check(GameAudio.tracks.get(GameAudio.musicKey) === track, 'same world keeps its music instance');
+      s.die();
+      check(calls.some(([key]) => key === 'hero-death-burst'), 'death calls death sound');
+      s = await go(ROOMS.findIndex(r => r[0] === 'The moth'));
+      s.cue('moth'); GameAudio.room(s, 0);
+      check(GameAudio.musicKey === 'boss-great-moth', 'boss arrival selects boss music');
+      s.boss.hp = 0; GameAudio.room(s, 0);
+      check(GameAudio.musicKey === 'world-1-forest-edge', 'fallen boss returns world music');
+      s = await go(ROOMS.findIndex(r => r[0] === 'Let go'));
+      check(GameAudio.musicKey === 'world-2-overgrown-ruins', 'world 2 music selected');
+    } finally {
+      GameAudio.play = play;
+      Object.assign(stats, savedStats);
+      Dialogue.seen = new Set(storyState.seen);
+    }
+  }
+
   // Story wiring: exercise room metadata and the event handlers, then suppress it for replays.
   for (const [name, sceneKey, trigger] of [
     ['Let go', 'letGo', (s) => Dialogue.play(s, s.rooms[s.index].enter)],
