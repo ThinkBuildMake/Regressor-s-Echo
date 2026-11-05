@@ -484,7 +484,7 @@ Shown as a cutscene after the fade (he stands on the ground the whole time, no f
 > This game shows a character dying many times, sometimes by his own choice, and deals with grief and self-sacrifice. Death is a puzzle mechanic here and is shown without gore.  
 > If you're going through a hard time, please reach out to someone you trust or a local support line.
 
-**Ending card** (after Floor one; the dialogue cue `theEnd` fades to it): "Floor 1" alone, then the title, "Deaths: N" (the whole run), "Keep getting back up.", "Thank you for playing.", credits, and any key to play again.
+**Ending card** (after Floor one; the dialogue cue `theEnd` fades to it): "Floor 1" alone, then the title, "Deaths: N" (the whole run), "Thank you for playing.", credits, and any key to play again.
 
 ## Later story direction
 
