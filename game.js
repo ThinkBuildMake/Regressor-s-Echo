@@ -1170,6 +1170,7 @@ class Room extends Phaser.Scene {
             case '>': case '<': case 'v': case 'u': { // laser emitter: a solid block that fires a beam
               // On this lintel, either adjacent snapped soul can shield the seam.
               const e = rect(x + (name === 'Three high' ? T / 2 : 0), y, T, T, 0x5a4a6a);
+              if (name === 'Three high') this.plat(ri, x, y, T, T, [false], world); // the shifted emitter sits in the lintel: paint its own tile as stone, not a notch
               this.statics.add(e);
               this.lasers.push({ e, room: ri, dx: { '>': 1, '<': -1 }[row[tx]] ?? 0, dy: { v: 1, u: -1 }[row[tx]] ?? 0 });
               if (this.textures.exists('laserEmitter')) { // carved stone emitter, painted facing right: turn it to fire its way
