@@ -61,7 +61,7 @@ The characters hint at a move; a prompt at the bottom of the screen gives the ke
 | Wall jump | In the air against a wall: press Space again | after the wall-jump scene (Thornwood) |
 | Retry | Shift + R: retry the room | after the patrol scene (the first bug-and-plate room); else after "You've locked yourself out" |
 | Self-destruct | Hold K: let go | after the Let go scene (World 2) |
-| Recall | Q: take back your newest soul | after the Take it back scene (World 2) |
+| Recall | Q: take back your newest soul | at the end of the moth's fall, when the moth grants it (not again in Take it back) |
 | Swap | E: swap places with your newest soul | after the Two places scene (World 3) |
 
 ## Story spine

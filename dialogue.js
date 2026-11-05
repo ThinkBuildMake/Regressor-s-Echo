@@ -55,7 +55,6 @@ const SCRIPT = {
     H('annoyed', "Great. Now I'm in my own way."),
     G('wry', "Then take yourself back. You're allowed to change your mind."),
     H('thinking', '…First thing all week that lets me.'),
-    W(0.1, 'keys:recall'),
   ],
   twoPlaces: [ // Two places, on entry: the first room with swap
     H('curious', 'So I just… trade places? With me?'),
@@ -412,6 +411,7 @@ const SCRIPT = {
     G('wry', "Yourself. Trust me, it's worse when you choose it."),
     W(0.8),
     H('exhausted', '…Great. Something to look forward to.'),
+    W(0.1, 'keys:recall'), // Q is taught here, as the moth grants it
   ],
 };
 
