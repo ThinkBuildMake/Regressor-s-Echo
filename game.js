@@ -967,7 +967,7 @@ class Room extends Phaser.Scene {
     for (const [key, path] of [
       ['amulet', 'world1/amulet'], ['ghost', 'world1/ghost'], ['old-tree', 'world3/old-tree'],
       ...[1, 2, 3].flatMap((n) => [[`amulet-rune${n}`, `world1/amulet-rune${n}`], [`shrine${n}`, `world${n}/shrine`], [`shrineLit${n}`, `world${n}/shrine-lit`], [`gate${n}`, `world${n}/gate`]]),
-      ['uiSoulFull', 'ui/soul-full'], ['uiSoulEmpty', 'ui/soul-empty'], ['carvings', 'world2/carvings'], ['pyramid', 'world3/pyramid'], ['laserEmitter', 'world2/laser'],
+      ['uiSoulFull', 'ui/soul-full'], ['uiSoulEmpty', 'ui/soul-empty'], ['carvings', 'world2/carvings'], ['pyramid', 'world3/pyramid'], ['laserEmitter', 'world2/laser'], ['relicBody', 'world3/relic-body'], ['relicBarrel', 'world3/relic-barrel'],
     ]) if (!this.textures.exists(key)) this.load.image(key, `assets/${path}.webp`);
     if (!this.textures.exists('heroSheet')) {
       this.load.image('heroSheet', 'assets/hero/sheet.webp'); // 8 frames: run 0-5, jump 6, fall 7
@@ -1156,8 +1156,13 @@ class Room extends Phaser.Scene {
               if (tx === 0) this.gates.at(-1).setAlpha(0).body.enable = false; // a boss room's entrance vines grow shut once you're in
               break;
             case 'a': {
-              rect(x, y, T, T, 0x539bd6);
-              this.aimedBeams.push({ x: x + T / 2, y: y + T / 2, room: ri, clock: -2, period: ty === 8 ? 1.6 : 4, angle: Math.PI });
+              const beam = { x: x + T / 2, y: y + T / 2, room: ri, clock: -2, period: ty === 8 ? 1.6 : 4, angle: Math.PI };
+              if (this.textures.exists('relicBody')) { // round stone body; the barrel turns around its centre to aim (docs/PROMPTS.md)
+                if (this.textures.exists('relicBarrel'))
+                  beam.barrel = this.add.image(beam.x, beam.y, 'relicBarrel').setScale(0.25).setOrigin(-1.039, 0.479).setRotation(beam.angle).setDepth(5.4);
+                this.add.image(beam.x, beam.y, 'relicBody').setDisplaySize(T, T).setDepth(5.5);
+              } else rect(x, y, T, T, 0x539bd6);
+              this.aimedBeams.push(beam);
               break;
             }
             case '>': case '<': case 'v': case 'u': { // laser emitter: a solid block that fires a beam
@@ -2987,6 +2992,7 @@ class Room extends Phaser.Scene {
     beam.clock += dt;
     const aim = beam.stag ? 1.4 : 0.6, fire = aim + 0.4, end = fire + 0.18;
     if (beam.clock < aim) beam.angle = Math.atan2(this.player.y - beam.y, this.player.x - beam.x);
+    beam.barrel?.setRotation(beam.angle);
     const dx = Math.cos(beam.angle), dy = Math.sin(beam.angle);
     const distance = (r) => {
       let lo = 0, hi = 2000;
