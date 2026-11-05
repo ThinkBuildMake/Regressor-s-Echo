@@ -170,8 +170,8 @@ const SCRIPT = {
     H("sad", "Don't\u2014 you can't just\u2014"),
     W(0.8),
     { ...G("wry", "\u2026Hey."), fade: 0.24, cue: 'crackle' },
-    { ...G("warm", "I was never\u2026 alive in the first place\u2026 right?"), fade: 0.16, cue: 'guideBreak' },
-    W(2),
+    { ...G("warm", "I was never\u2026 alive in the first place\u2026 right?"), fade: 0.16 },
+    W(2, 'guideBreak'), // after his last word, he shatters
     W(1.6, 'toNote'), // fade to black: next, he finds the note behind the old tree
   ],
   stagNote: [ // read in his voice (the ghost's portrait), in quotes

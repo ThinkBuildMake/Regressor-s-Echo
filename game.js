@@ -1531,10 +1531,19 @@ class Room extends Phaser.Scene {
         });
       });
     }
-    if (name === 'guideBreak') {
-      g.on = false;
-      this.cameras.main.flash(400, 120, 210, 255);
-      this.tweens.add({ targets: g, alpha: 0, duration: 1500, onComplete: () => { g.on = false; } });
+    if (name === 'guideBreak') { // he shatters: a burst of sparkles flying outward, and breaking glass
+      GameAudio.play('story-guide-shatters');
+      if (!this.textures.exists('spark'))
+        this.make.graphics({ add: false }).fillStyle(0xffffff).fillCircle(3, 3, 3).generateTexture('spark', 6, 6).destroy();
+      const burst = this.add.particles(g.x, g.y - 22, 'spark', {
+        speed: { min: 70, max: 280 }, angle: { min: 0, max: 360 }, lifespan: { min: 700, max: 1400 }, gravityY: 70,
+        scale: { start: 2.2, end: 0 }, alpha: { start: 1, end: 0 }, tint: [0xffffff, 0xdff2ff, 0xa8d4ff], emitting: false,
+      }).setDepth(6);
+      burst.explode(130);
+      this.time.delayedCall(1600, () => burst.destroy());
+      this.cameras.main.flash(260, 200, 230, 255);
+      this.tweens.killTweensOf(g);
+      g.setAlpha(0); g.on = false;
     }
     if (name === 'stagGone' && this.boss?.stag) { this.bossDefeated(this.boss); this.stagFinished = true; }
     if (name === 'tree' && this.boss?.kind === 'tree') { this.boss.hidden = false; this.boss.r.setVisible(true); this.boss.phase = 'intro'; this.boss.timer = TREE_INTRO; this.boss.screamed = false; }
