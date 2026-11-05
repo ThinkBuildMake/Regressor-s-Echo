@@ -2029,9 +2029,10 @@ class Room extends Phaser.Scene {
       sh.y += (sh.vy ?? 0) * dt;
       sh.img?.setPosition(sh.x, sh.y);
       if (sh.hw && sh.texture?.key === 'pollen-cloud') sh.setFrame(Math.floor(t * 6 + sh.hw) % 4); // slow swirl
-      if (sh.mothDust && sh.y + (sh.hw ?? 0) >= R.bottom - T - 4) { sh.destroy(); return false; }
+      const gone = () => sh.hw ? this.tweens.add({ targets: sh, alpha: 0, duration: 200, onComplete: () => sh.destroy() }) : sh.destroy(); // a cloud puffs out
+      if (sh.mothDust && sh.y + (sh.hw ?? 0) >= R.bottom - T - 4) { gone(); return false; }
       if (!solid(shotBox(sh)) && R.contains(sh.x, sh.y)) return true;
-      sh.destroy();
+      gone();
       return false;
     });
     for (const sw of this.saws) {
@@ -2434,7 +2435,7 @@ class Room extends Phaser.Scene {
     B.r.setPosition(B.x + B.face * TREE_MASK[0], B.floor - TREE_MASK[1]);
     const rising = B.phase === 'spikesUp' && !B.hidden; // roots burst up across the floor, behind the souls
     if (rising && !B.roots && this.textures.exists('root'))
-      B.roots = Array.from({ length: Math.floor((R.width - 2 * T) / 14) }, (_, i) => this.add.image(R.x + T + 7 + i * 14, B.floor, 'root', 0).setOrigin(0.5, 1).setDisplaySize(17, 30).setDepth(1).setFlipX(i % 2 > 0));
+      B.roots = Array.from({ length: Math.floor((R.width - 2 * T) / 14) }, (_, i) => this.add.image(R.x + T + 7 + i * 14, B.floor, 'root', 0).setOrigin(0.5, 1).setDisplaySize(17, 26 + (i * 7 % 3) * 4).setDepth(1).setFlipX(i % 2 > 0)); // under a soul's top
     B.roots?.forEach((r, i) => r.setVisible(rising).setFrame(Math.min(3, Math.floor((TREE_SPIKES_UP - B.timer) / 0.03 + (i % 3) / 2))));
     B.img?.setPosition(B.x, B.floor + B.artFoot).setFlipX(B.face > 0)
       .setTint({ slam: 0x69cfff, spikes: 0xff8a6b, spikesUp: 0xff8a6b, swing: 0xf1f578, throw: 0xf1f578 }[B.phase] ?? 0xffffff);
@@ -2514,7 +2515,7 @@ class Room extends Phaser.Scene {
     if (B.stag) B.stomped = true;
     if (B.kind === 'tree') { B.stompReady = false; B.open = 0; }
     GameAudio.play(`${GameAudio.kind(B)}-${B.kind === 'tree' ? 'mask-hit' : 'hit'}`);
-    B.hurt = 0.5;
+    B.hurt = B.story === 'mothDown' ? 0.9 : 0.5; // the moth's longer: a bounce can't land a second stomp at once
     this.cameras.main.shake(180, 0.008);
     B.img?.setTintFill(0xffffff);
     this.time.delayedCall(120, () => B.img?.active && B.img.clearTint());
