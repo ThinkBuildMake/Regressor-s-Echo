@@ -322,7 +322,8 @@ The wall behind the room is carved; it needs its own background art.
 
 ### 5. The slam — *after his 2nd and about his 25th deaths in the fight*
 > **Hero** [shouting]: It smashed me! The other me! It keeps smashing me!  
-> **Guide** [thinking]: Watch where it looks before it swings.
+> **Guide** [warning]: Hey.  
+> **Guide** [thinking]: Try to guide the tree to attack your soul.
 
 *After about 25:*
 > **Guide** [thinking]: It always goes for the one closest to you. Use that.

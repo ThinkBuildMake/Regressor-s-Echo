@@ -351,7 +351,8 @@ const SCRIPT = {
     H('scared', "…It's not just a tree."),
   ],
   treeSlam: [H('shouting', 'It keeps flattening me!'),
-    G('thinking', 'Watch where it looks before it swings.')],
+    G('warning', 'Hey.'), // its own line: a tap of Space meant for jumping spends this one, not the hint
+    G('thinking', 'Try to guide the tree to attack your soul.')],
   treeSlam2: [G('thinking', 'Put your other self where its fists come down.')],
   treeDown: [
     W(0.8), H('exhausted', 'Is it…'), H('annoyed', "Don't you dare get back up."),
