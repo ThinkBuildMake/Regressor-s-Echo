@@ -1737,9 +1737,10 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     await until(() => s.player.body.blocked.down, 1000, 'stand before the last stomp');
     await stomp(1);
     check(stats.deaths === deaths && B.hp === 0, 'The spectral stag: gate, antlers and beam win without dying');
-    Dialogue.skip(s);
-    check(!s.boss && s.stagFinished && !s.guide.on, 'The spectral stag: last stand removes guide and opens entrance');
     Dialogue.seen.delete('stagNote'); Dialogue.seen.delete('floorOne');
+    Dialogue.skip(s); // the last-stand cutscene: the shot under the white light, the farewell, then a fade to the note
+    await until(() => !s.boss && s.stagFinished && !s.guide.on, 3000, 'stag spent and guide gone');
+    check(!s.boss && s.stagFinished && !s.guide.on, 'The spectral stag: last stand removes guide and opens entrance');
     const routeDeaths = stats.deaths;
     // Walk the whole return route and onward; no room restart or position reset.
     const walkTo = async (name, column, direction, timeout, each) => {
@@ -1757,13 +1758,12 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
       }, timeout, `walk to ${name} column ${column}`);
       key('keyup', direction); key('keyup', 32); s.player.body.velocity.x = 0;
     };
+    await until(() => s.rooms[s.index].name === 'The old tree' && Dialogue.seen.has('stagNote') && !s.transit, 5000, 'fade to the note behind the old tree');
+    check(s.stagWriting.visible && !s.guide.on, 'The spectral stag: the cutscene brings you to the note, without the guide');
+    Dialogue.skip(s); await wait(300);
     let unseen = 0;
-    await walkTo('The old tree', 20, 37, 10000, () => { if (!s.transit && O().contains(s.player.x, s.player.y) && !s.cameras.main.worldView.contains(s.player.x, s.player.y)) unseen++; });
-    check(!unseen, `The spectral stag: after the win the camera follows you out of the arena (${unseen} frames off screen)`);
-    await until(() => Dialogue.seen.has('stagNote'), 2000, 'note behind the old tree');
-    check(s.stagWriting.visible && !s.guide.on, 'The spectral stag: return to the dirt note without the guide');
-    Dialogue.skip(s);
-    await walkTo('The pyramid entrance', 2, 39, 20000); // the floor-one scene starts as you arrive, and he walks on into the pyramid himself
+    await walkTo('The pyramid entrance', 2, 39, 25000, () => { if (!s.transit && s.rooms[s.index].name === 'The spectral stag' && !s.cameras.main.worldView.contains(s.player.x, s.player.y)) unseen++; });
+    check(unseen <= 2, `The spectral stag: after the win the camera follows you back through the arena (${unseen} frames off screen)`); // a frame as he crosses in, before the camera's room tween // the floor-one scene starts as you arrive
     await until(() => Dialogue.seen.has('floorOne'), 2000, 'pyramid entrance scene');
     Dialogue.skip(s);
     await until(() => game.scene.isActive('end'), 4000, 'ending card after pyramid fade');

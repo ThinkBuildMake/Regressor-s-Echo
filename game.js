@@ -937,6 +937,7 @@ class End extends Phaser.Scene {
       rules.selfDestruct = rules.recall = false; // the moth grants these again on the next run
       Dialogue.seen.clear();
       NAMES.guide = '???';
+      UI.resumeIndex = undefined; // a fresh run starts from the first room
       this.scene.start('title');
     };
     this.leaving = false;
@@ -989,6 +990,8 @@ class Room extends Phaser.Scene {
     if (!this.textures.exists('walker')) this.load.image('walker', 'assets/enemies/walker.webp');
     for (const [effect, width, height] of [['impact', 114, 128], ['mortar-burst', 117, 128], ['root', 70, 128], ['shockwave', 211, 96], ['pollen-cloud', 213, 256]])
       if (!this.textures.exists(effect)) this.load.spritesheet(effect, `assets/effects/${effect}.webp`, { frameWidth: width, frameHeight: height });
+    for (const [effect, width, height] of [['dizzy', 128, 64], ['stag-beam', 256, 64], ['stag-sweep', 384, 128], ['stag-gate', 192, 288]]) // keyed fx-: stag-beam is also a stag pose
+      if (!this.textures.exists('fx-' + effect)) this.load.spritesheet('fx-' + effect, `assets/effects/${effect}.webp`, { frameWidth: width, frameHeight: height });
     if (this.bossArtRequested) return;
     this.bossArtRequested = true;
     for (const pose of ['intro', 'idle', 'charge', 'beam', 'wave', 'walk']) {
@@ -1862,7 +1865,7 @@ class Room extends Phaser.Scene {
   // same figure in blue flame; a lying soul is him mid-dive, with a flame trail filling its hitbox.
   drawFigures(t, dt) {
     const g = this.fx, b = this.player.body, p = this.player;
-    g.clear();
+    g.clear(); this.dizzyArt?.scene && this.dizzyArt.setVisible(false); this.stagBeamArt?.scene && this.stagBeamArt.setVisible(false);
     this.drawStoryArt(t);
     for (const c of this.corpses) {
       if (c.buried > 0) { g.fillStyle(0x69cfff, 0.5).fillRect(c.x - 15, c.y + c.height / 2 - 4, 30, 4); continue; }
@@ -2223,6 +2226,11 @@ class Room extends Phaser.Scene {
 
   // Every boss shows this while it can be stomped: sparks circling over its head.
   dizzy(x, y, w) {
+    if (this.textures.exists('fx-dizzy')) { // a 6-frame loop of stars circling in a ring; hidden again at the start of every frame (drawFigures)
+      if (!this.dizzyArt?.scene) this.dizzyArt = this.add.image(0, 0, 'fx-dizzy', 0).setDepth(6);
+      this.dizzyArt.setPosition(x, y).setFrame(Math.floor(this.time.now / 90) % 6).setDisplaySize(3.2 * w, 1.6 * w).setVisible(true);
+      return;
+    }
     for (let i = 0; i < 4; i++) {
       const a = this.time.now / 200 + i * Math.PI / 2, sx = x + Math.cos(a) * w, sy = y + Math.sin(a) * w * 0.24;
       this.fx.fillStyle(0xffef72, 0.95).fillCircle(sx, sy, 8).fillStyle(0xffffff, 1).fillCircle(sx, sy, 3.5);
@@ -2254,6 +2262,16 @@ class Room extends Phaser.Scene {
     const held = !!B.plate && [p, ...this.corpses].some((w) => w.body?.enable !== false && hit(bounds(w), bounds(B.plate)));
     B.gateUp = held && !B.gateBroken;
     B.gate.setVisible(B.gateUp); B.gate.body.enable = B.gateUp;
+    if (this.textures.exists('fx-stag-gate')) { // painted gate: rises on frames 0-2, stands on 3, shatters on 4-7 (stone block at x 50-141 of the cell)
+      B.gateArt ??= this.add.image(B.gate.x, floor, 'fx-stag-gate', 0).setOrigin(0.5, 1).setScale(T / 91).setDepth(4);
+      if (!B.gateArt.hooked) { B.gateArt.hooked = true; B.r.on('destroy', () => B.gateArt.destroy()); }
+      B.gate.setAlpha(0);
+      if (B.gateUp) { B.gateRise = (B.gateRise ?? 0) + dt; B.gateArt.setFrame(Math.min(3, Math.floor(B.gateRise / 0.1))).setVisible(true); }
+      else if (B.gateShatter != null) {
+        const f = 4 + Math.floor((B.gateShatter += dt) / 0.1);
+        if (f > 7) { B.gateShatter = null; B.gateArt.setVisible(false); } else B.gateArt.setFrame(f).setVisible(true);
+      } else { B.gateRise = 0; B.gateArt.setVisible(false); }
+    }
     const pose = this.time.now < B.introUntil ? 'intro' : ['sweepTell', 'sweep', 'tug'].includes(B.phase) ? 'wave' : B.phase === 'beam' ? 'beam'
       : B.phase === 'charge' ? 'charge' : moved ? 'walk' : 'idle';
     // Loop times match the hooves to the ground: walk 23 and gallop 55 px of cell per frame, at STAG_WALK and STAG_GALLOP.
@@ -2261,7 +2279,7 @@ class Room extends Phaser.Scene {
     // The sheets face left and place the body off-center by a different amount each (pixel mass center, cell px); line the bodies up on B.r.x.
     const shift = ({ idle: 55, intro: 55, charge: -79, beam: 25, wave: 30, walk: -28 }[pose] ?? 0) * (B.img?.scaleX ?? 0);
     B.img?.setFlipX(B.face > 0).setPosition(B.r.x + B.face * shift, B.r.y + 32 + (B.artFoot ?? 0)).setVisible(B.r.visible)
-      .setTint(B.phase === 'beam' ? 0x65baff : B.phase === 'dazed' ? 0xb8b8d0 : 0xffffff)
+      .setTint(B.phase === 'dazed' ? 0xb8b8d0 : 0xffffff)
       .setAngle(B.phase === 'dazed' ? Math.sin(B.clock * 5) * 7 : B.phase === 'tug' ? -B.face * (4 + Math.sin(B.clock * 30) * 1.5) : 0); // dazed: it reels; tug: it leans back, straining
     if (B.phase === 'beam' && B.beam && B.img) { // the beam comes from its open mouth (beam sheet: 585x700 cells, mouth at 43,395)
       const scale = B.img.scaleX, side = B.img.flipX ? -1 : 1;
@@ -2277,6 +2295,13 @@ class Room extends Phaser.Scene {
         .arc(B.r.x + B.face * T, floor - 2 * T, 5.5 * T, B.face > 0 ? -1.4 : Math.PI + 1.4, B.face > 0 ? -0.2 : Math.PI + 0.2, B.face < 0).strokePath();
     }
     if (B.phase === 'dazed') this.dizzy(B.r.x + B.face * 40, B.r.y + 32 - 215, 50);
+    if (this.textures.exists('fx-stag-sweep')) { // the antlers' arc of light through the band, additive, while it sweeps
+      B.sweepArt ??= this.add.image(0, 0, 'fx-stag-sweep', 0).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.6).setDepth(6);
+      if (!B.sweepArt.hooked) { B.sweepArt.hooked = true; B.r.on('destroy', () => B.sweepArt.destroy()); }
+      B.sweepArt.setVisible(B.phase === 'sweep');
+      if (B.phase === 'sweep') B.sweepArt.setPosition(band.centerX, band.centerY).setDisplaySize(band.width * 1.2, band.width * 0.4).setFlipX(B.face > 0)
+        .setFrame(Math.min(3, Math.floor(B.clock / 0.3 * 4)));
+    }
     B.tugText ??= this.add.text(0, 0, 'Press  SPACE', { fontFamily: 'Georgia, serif', fontSize: '22px', color: '#f1e3b8', backgroundColor: '#000000aa', padding: { x: 14, y: 8 } }).setOrigin(0.5).setDepth(46);
     if (!B.tugText.hooked) { B.tugText.hooked = true; B.r.on('destroy', () => B.tugText.destroy()); }
     const tugging = B.phase === 'tug' && this.corpses.includes(B.snag);
@@ -2330,6 +2355,7 @@ class Room extends Phaser.Scene {
       if (B.gateUp && hit(bounds(B.gate), bounds(B.r))) { // slams into the risen gate, which shatters
         B.r.x = B.gate.x - B.face * (T / 2 + B.r.width / 2);
         B.gateBroken = true; B.again = false; B.gate.setVisible(false); B.gate.body.enable = false;
+        B.gateShatter = 0; B.gateRise = 0;
         this.playFx('impact', B.gate.x, floor - T, 3 * T, 3.4 * T, 500);
         daze();
       } else if (B.r.x === B.aimX) next('miss');
@@ -2943,6 +2969,11 @@ class Room extends Phaser.Scene {
       if (d < length) { length = d; target = solid; }
     }
     const firing = beam.clock >= fire && beam.clock < end;
+    if (beam.stag && firing && this.textures.exists('fx-stag-beam')) { // the painted beam, additive over black, one tile tall
+      if (!this.stagBeamArt?.scene) this.stagBeamArt = this.add.tileSprite(0, 0, 256, 64, 'fx-stag-beam', 0).setOrigin(0, 0.5).setBlendMode(Phaser.BlendModes.ADD).setDepth(6);
+      this.stagBeamArt.setPosition(beam.x, beam.y).setRotation(beam.angle).setSize(length * 2, 64).setScale(0.5).setAlpha(0.6)
+        .setFrame(Math.floor(this.time.now / 60) % 8).setVisible(true);
+    }
     if (beam.clock < end) {
       this.fx.fillStyle(0x65baff, 0.35).fillCircle(beam.x, beam.y, 22);
       this.fx.lineStyle(firing ? 7 : 1, 0x8edbff, firing ? 1 : beam.clock < aim ? 0.4 : 0.9);

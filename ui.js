@@ -113,7 +113,8 @@ class Title extends Phaser.Scene {
     UI.loadingScreen(this);
     this.time.delayedCall(50, () => {
       this.scene.get('room').events.once('create', () => this.scene.stop());
-      this.scene.launch('room');
+      // Always say which room: without data, Phaser would reuse the last room's (e.g. the final room after the ending).
+      this.scene.launch('room', { index: UI.resumeIndex ?? START_ROOM });
     });
   }
 }
@@ -153,7 +154,7 @@ class Menu extends Phaser.Scene {
       { label: 'Resume', act: () => this.close() },
       { label: 'Settings', act: () => this.show('settings') },
       { label: 'Controls', act: () => this.show('controls') },
-      { label: 'Quit to title', act: () => { this.scene.stop(this.back); this.scene.start('title'); } },
+      { label: 'Quit to title', act: () => { UI.resumeIndex = this.scene.get(this.back).index; this.scene.stop(this.back); this.scene.start('title'); } }, // Start resumes here
     ], 215);
   }
 
