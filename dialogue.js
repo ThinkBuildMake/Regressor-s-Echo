@@ -207,6 +207,7 @@ const SCRIPT = {
     G("warm", "\"Trust me.\""),
     G("warm", "\"\u2014 You\""),
     G("wry", "\"P.S. The amulet's still not worth anything. I checked.\""),
+    H("sad", "\u2026"), // he stands up, quiet
   ],
   floorOne: [
     H("sad", "\u2026Idiot."),

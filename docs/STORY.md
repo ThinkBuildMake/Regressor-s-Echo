@@ -469,7 +469,8 @@ Shown as a cutscene after the fade (he stands on the ground the whole time, no f
 > "You'll get further than I ever could."  
 > "Trust me."  
 > "— You"  
-> "P.S. The amulet's still not worth anything. I checked."
+> "P.S. The amulet's still not worth anything. I checked."  
+> **Hero** [sad]: … *(He stands.)*
 
 ### 9. Floor one — *the pyramid's entrance; the game ends*
 > **Hero** [sad]: …Idiot.  
