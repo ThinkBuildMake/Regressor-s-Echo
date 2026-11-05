@@ -96,7 +96,7 @@ From docs/brainstorm/2026-11-03-bosses.md. The user wants these placeholders rep
 | Root rake segment → `assets/effects/root.webp` | a yellow-tipped root bursting up out of the ground, 4 frames (rising) | 1 tile | | | | | stand-in |
 | Seal socket → `assets/effects/seal.webp` | a carved stone socket in the floor, 2 frames: empty and glowing (a soul fills it) | 1 tile | | | | | stand-in |
 
-**Made 2026-11-04:** every file above now exists in `assets/effects/` (pollen-cloud 4 frames 213x256, impact 4 x 114x128, shockwave 4 x 211x96, mortar-burst 5 x 117x128, root 4 x 70x128, falling-stone 5 x 64x64, seal 2 x 168x64; frame size in each .json). The game still draws the stand-in shapes until the code loads them as sprite sheets.
+**Made 2026-11-04:** every file above now exists in `assets/effects/` (pollen-cloud 4 frames 213x256, impact 4 x 114x128, shockwave 4 x 211x96, mortar-burst 5 x 117x128, root 4 x 70x128, falling-stone 5 x 64x64, seal 2 x 168x64; frame size in each .json). In the game since 2026-11-04 (sprite sheets): pollen-cloud (the moth's Loom and Curtain clouds), impact (moth dive, tree slam), shockwave (tree slam, visual), mortar-burst (seed pods landing), root (the tree's floor spikes). seal and falling-stone are not wired as sheets.
 
 ## Hazards and room objects
 
