@@ -142,44 +142,56 @@ const SCRIPT = {
   stagNudge: [
     G("thinking", "You did this an hour ago. Lead it away.")
   ],
-  stagDown: [
+  stagDown: [ // the last stomp: the game takes over
+    W(0.8),
     H("excited", "We did it! Did you see that? Three stomps, and I barely\u2014"),
     G("amused", "You died {deaths} times."),
     H("cocky", "{next}. But who's counting?"),
     G("warm", "Me. It was always me."),
-    { ...G("warning", "LOOK OUT!"), cue: 'lastBeam' },
+    W(1.1, 'stagRise'), // behind his back, the stag calls out and gets up
+    W(0.9, 'stagCharge'), // and lowers its antlers to charge
+    G("warning", "LOOK OUT!"),
+    W(2.6, 'lastBeam'), // the ghost throws himself into the shot: everything goes white
+    W(0.9),
+    G("pained", "Ugh\u2026"),
+    { ...G("pained", "*crack*"), cue: 'crack' },
     H("shouting", "NO\u2014!"),
-    G("pained", "Ugh\u2026 I knew it would come to this."),
+    W(1),
+    G("pained", "I knew it would come to this."),
     G("weary", "Same thing happened last time. My guide did exactly this."),
     H("shouting", "You KNEW? Then why would you\u2014"),
+    W(0.6),
     G("warm", "Because I knew."),
+    W(1.2),
     H("sad", "\u2026"),
     G("warm", "I've watched over you. You're already doing better than I did. You'll get further."),
     G("solemn", "Just remember\u2026 the deaths aren't free. Count every one."),
     H("sad", "Don't\u2014 you can't just\u2014"),
+    W(0.8),
     G("wry", "Hey."),
     { ...G("warm", "I was never alive in the first place, right?"), cue: 'guideBreak' },
-    W(1.6, 'stagGone')
+    W(2),
+    W(1.6, 'toNote'), // fade to black: next, he finds the note behind the old tree
   ],
-  stagNote: [
-    H("sad", "If you're reading this\u2026 then it must mean I've kicked the bucket."),
-    H("sad", "Don't make that face. I can see it from here. Well. Could."),
-    H("sad", "Well, I guess it's time to come clean."),
-    H("sad", "You know how I said there was a limit? That was a lie. Figured you'd be more careful if you thought you were running out."),
-    H("sad", "The limit is when your spirit breaks. On floor ninety, mine did, and I just\u2026 stopped getting back up."),
-    H("sad", "So keep getting back up. No matter how hard it gets. No matter what."),
-    H("sad", "Thanks for putting up with me. I know I'm not great company. I'd know."),
-    H("sad", "And don't take my ending as yours. You're me, sure, but you were different from the start."),
-    H("sad", "You'll get further than I ever could."),
-    H("sad", "Trust me."),
-    H("sad", "\u2014 You"),
-    H("sad", "P.S. The amulet's still not worth anything. I checked.")
+  stagNote: [ // read in his voice (the ghost's portrait), in quotes
+    G("warm", "\"If you're reading this\u2026 then it must mean I've kicked the bucket.\""),
+    G("warm", "\"Don't make that face. I can see it from here. Well. Could.\""),
+    G("warm", "\"Well, I guess it's time to come clean.\""),
+    G("warm", "\"You know how I said there was a limit? That was a lie. Figured you'd be more careful if you thought you were running out.\""),
+    G("warm", "\"The limit is when your spirit breaks. On floor ninety, mine did, and I just\u2026 stopped getting back up.\""),
+    G("warm", "\"So keep getting back up. No matter how hard it gets. No matter what.\""),
+    G("warm", "\"Thanks for putting up with me. I know I'm not great company. I'd know.\""),
+    G("warm", "\"And don't take my ending as yours. You're me, sure, but you were different from the start.\""),
+    G("warm", "\"You'll get further than I ever could.\""),
+    G("warm", "\"Trust me.\""),
+    G("warm", "\"\u2014 You\""),
+    G("wry", "\"P.S. The amulet's still not worth anything. I checked.\"")
   ],
   floorOne: [
     H("sad", "\u2026Idiot."),
     H("determined", "Ninety floors, huh."),
     H("determined", "Then I'm not stopping at ninety."),
-    W(2.2), // he walks into the doorway on his own
+    W(2.2, 'doorOpen'), // the doors open and he walks into the light on his own
     W(1, 'theEnd')
   ],
   clearing: [
@@ -413,6 +425,15 @@ stage('moth', 2, { walk: 11, face: 'right', speed: 22 });
 stage('stagPromise', 0, { walk: 20, guide: { x: 18, y: 13 }, face: 'guide' });
 stage('stagNote', 0, { walk: 19.5, face: 'left', pose: 'kneel' });
 stage('stagNote', 11, { pose: 'idle' });
+// The stag's fall: walk away from where it lies into the open clearing, back turned to it.
+const stagTile = (scene) => { const B = scene.bosses.find((b) => b.stag), r = scene.rooms[scene.index].rect; return ((B?.img ?? B?.r)?.x - r.x) / 32 || 25; };
+const awayFromStag = (scene) => (stagTile(scene) > (scene.player.x - scene.rooms[scene.index].rect.x) / 32 ? 'left' : 'right');
+stage('stagDown', 1, { walk: (scene) => { const t = stagTile(scene); return t > 20 ? Math.max(4, t - 11) : Math.min(35, t + 11); }, face: awayFromStag });
+for (const i of [2, 3, 4]) stage('stagDown', i, { face: awayFromStag });
+stage('stagDown', 7, { face: awayFromStag });
+stage('stagDown', 12, { hop: true, face: 'guide' }); // NO—!
+stage('stagDown', 13, { pose: 'slump' });
+stage('stagDown', 21, { pose: 'idle', face: 'guide' });
 stage('floorOne', 0, { walk: 5, face: 'right' });
 stage('floorOne', 3, { walk: 15, face: 'right' }); // into the doorway (game.js draws it at 15)
 // The nap: the game walks him in, he lies down, full dark, and he gets up at dawn.
@@ -457,9 +478,6 @@ stage('mothDown', 13, { pose: 'idle', amulet: 'wear' });
 stage('stagPromise', 5, { face: 'left' });
 stage('stagPromise', 6, { walk: 20.5, face: 'left' });
 stage('stagPromise', 7, { walk: 20, face: 'guide' });
-stage('stagDown', 5, { hop: true, face: 'guide' });
-stage('stagDown', 6, { pose: 'slump' });
-stage('stagDown', 13, { pose: 'idle', face: 'guide' });
 stage('floorOne', 1, { walk: 8, face: 'right' });
 stage('floorOne', 2, { walk: 11, face: 'right' });
 
@@ -552,6 +570,9 @@ const Dialogue = {
 
   act(scene, l, skip = false) {
     const p = scene.player, g = scene.guide, r = scene.rooms[scene.index].rect;
+    // A walk mark or facing can be worked out when the line starts (e.g. away from where the stag fell).
+    if (typeof l.walk === 'function') l.walk = l.walk(scene);
+    if (typeof l.facing === 'function') l.facing = l.facing(scene);
     if (!skip) {
       scene.talk.motion = { elapsed: 0, feet: p.y + p.height / 2, height: p.height,
         mark: l.walk === undefined ? null : this.mark(scene, l.walk),

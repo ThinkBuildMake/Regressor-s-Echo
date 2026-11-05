@@ -973,6 +973,7 @@ class Room extends Phaser.Scene {
       ['heroIdleAnim', 'hero/idle-veo', 106, 112],
       ['heroWall', 'hero/wall-slide-veo', 141, 141],
       ['heroKick', 'hero/wall-slide', 141, 141], // the old sheet's frame 3 is the wall kick-off
+      ['pyramidDoor', 'world3/pyramid-door', 640, 1024], // closed, half open, open (light inside)
       ['heroKneel', 'hero/pose-kneel', 112, 112],
       ['heroSlump', 'hero/pose-slumped', 127, 112],
       ['heroHold', 'hero/pose-holding-up', 111, 112],
@@ -1474,10 +1475,59 @@ class Room extends Phaser.Scene {
     if (name === 'stagAppear' && this.boss?.stag) {
       this.boss.hidden = false; this.boss.introUntil = this.time.now + 1000; this.boss.r.setVisible(true); this.cameras.main.flash(450, 170, 225, 255);
     }
-    if (name === 'lastBeam' && this.boss?.stag) {
-      const B = this.boss; g.setPosition(p.x + 40, p.y).setAlpha(0.9);
-      const beam = this.add.line(0, 0, B.r.x, B.r.y, g.x, g.y, 0x9bdfff).setOrigin(0).setLineWidth(7).setDepth(6);
-      this.time.delayedCall(700, () => beam.destroy());
+    // The stag's fall (stagDown): behind his back it calls out and gets up, starts its charge, and the ghost
+    // throws himself into the last shot.
+    const stagAt = (B, pose, duration, loop) => {
+      this.bossPose(B, 'stag', pose, 180, duration, loop);
+      B.img?.setAlpha(1).clearTint().setPosition(B.r.x, B.r.y + 32 + (B.artFoot ?? 0)).setFlipX(B.r.x < p.x); // sheets face left
+    };
+    if (name === 'stagRise' && this.boss?.stag) {
+      const B = this.boss;
+      GameAudio.play('stag-wave');
+      this.cameras.main.shake(500, 0.004);
+      stagAt(B, 'intro', 1);
+      this.tweens.addCounter({ from: 0, to: 1, duration: 1000, onUpdate: () => B.img?.active && stagAt(B, 'intro', 1) });
+    }
+    if (name === 'stagCharge' && this.boss?.stag) { // gallops in and holds, still a few tiles off, while the ghost shouts
+      const B = this.boss, stop = p.x + Math.sign(B.r.x - p.x) * 7 * T;
+      GameAudio.play('stag-charge');
+      this.tweens.add({ targets: B.r, x: stop, duration: 900, ease: 'Quad.easeIn', onUpdate: () => B.img?.active && stagAt(B, 'charge', 0.37, true) });
+    }
+    if (name === 'lastBeam' && this.boss?.stag) { // he steps into the shot; everything goes white; the stag is spent
+      const B = this.boss, between = (p.x + B.r.x) / 2;
+      g.on = true; g.inTalk = true;
+      this.tweens.add({ targets: g, x: between, duration: 220, onComplete: () => { g.hoverY = p.y - 20; } });
+      g.setAlpha(0.9);
+      stagAt(B, 'beam', 0.7);
+      this.time.delayedCall(250, () => {
+        GameAudio.play('stag-beam');
+        const beam = this.add.line(0, 0, B.r.x - Math.sign(B.r.x - p.x) * 40, B.r.y - 30, between, p.y - 20, 0x9bdfff).setOrigin(0).setLineWidth(9).setDepth(6);
+        this.time.delayedCall(500, () => beam.destroy());
+      });
+      const white = this.add.rectangle(480, 272, 960, 544, 0xffffff).setScrollFactor(0).setDepth(38).setAlpha(0);
+      this.tweens.add({ targets: white, alpha: 1, duration: 300, delay: 300 });
+      this.time.delayedCall(800, () => { if (this.boss?.stag) this.bossDefeated(this.boss); this.stagFinished = true; }); // gone under the light
+      this.tweens.add({ targets: white, alpha: 0, duration: 800, delay: 1900, onComplete: () => white.destroy() });
+    }
+    if (name === 'crack') { // the ghost cracks like glass
+      GameAudio.play('story-guide-cracking-like-glass');
+      this.cameras.main.shake(250, 0.004);
+      this.cameras.main.flash(180, 170, 220, 255);
+    }
+    if (name === 'toNote') { // fade to black, then he finds the note behind the old tree
+      const cam = this.cameras.main;
+      p.body.moves = false;
+      cam.fadeOut(900, 0, 0, 0);
+      cam.once('camerafadeoutcomplete', () => {
+        const i = this.rooms.findIndex((r) => r.name === 'The old tree'), R = this.rooms[i].rect;
+        p.body.reset(R.x + 15 * T, R.y + 15 * T - p.height / 2);
+        this.enterRoom(i);
+        this.time.delayedCall(600, () => {
+          p.body.moves = true;
+          cam.fadeIn(900, 0, 0, 0);
+          Dialogue.play(this, 'stagNote');
+        });
+      });
     }
     if (name === 'guideBreak') {
       g.on = false;
@@ -1488,6 +1538,10 @@ class Room extends Phaser.Scene {
     if (name === 'tree' && this.boss?.kind === 'tree') { this.boss.hidden = false; this.boss.r.setVisible(true); this.boss.phase = 'intro'; this.boss.timer = TREE_INTRO; this.boss.screamed = false; }
     if (name === 'wear') this.wearing = true;
     if (name === 'flash') this.cameras.main.flash(600, 255, 215, 120);
+    if (name === 'doorOpen' && this.pyramidDoor?.setFrame) { // the doors swing open onto warm light
+      this.time.delayedCall(150, () => this.pyramidDoor.setFrame(1));
+      this.time.delayedCall(500, () => this.pyramidDoor.setFrame(2));
+    }
     if (name === 'theEnd') { // he walks into the pyramid: fade out to the ending card
       this.tweens.add({ targets: this.heroSprite, alpha: 0, duration: 700 }); // swallowed by the dark doorway
       this.cameras.main.fadeOut(1500, 0, 0, 0);
@@ -2151,7 +2205,9 @@ class Room extends Phaser.Scene {
     if (this.textures.exists('pyramid')) // the pyramid rising over the jungle, its base on the floor at the room's far end
       this.add.image(P.x + 15 * T, P.y + 15 * T + 6, 'pyramid').setOrigin(0.5, 1).setDisplaySize(880, 491).setDepth(0.5);
     else this.add.triangle(P.x + 22 * T, P.y + 10 * T, 0, 160, 120, 0, 240, 160, 0x708292).setDepth(1);
-    this.add.rectangle(P.x + 15 * T, P.y + 14 * T, 40, 64, 0x101923).setDepth(2); // the doorway at the pyramid's base: he walks into it
+    this.pyramidDoor = this.textures.exists('pyramidDoor') // a carved double door at the pyramid's base; it opens as he walks up
+      ? this.add.image(P.x + 15 * T, P.y + 15 * T, 'pyramidDoor', 0).setOrigin(0.5, 1).setDisplaySize(96, 154).setDepth(2)
+      : this.add.rectangle(P.x + 15 * T, P.y + 14 * T, 40, 64, 0x101923).setDepth(2);
   }
 
   stagSeals(B) {
