@@ -841,8 +841,10 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     s.die(); await alive();
     check(!Dialogue.seen.has('treeSlam') && s.roomDeaths === 0,
       'tree: chosen and accidental setup deaths do not consume combat hints');
-    s.die(); await alive(); s.die(); await alive();
-    check(Dialogue.seen.has('treeSlam'), 'tree: combat deaths after setup play the slam hint');
+    for (let i = 0; i < 19; i++) { s.die(); await alive(); }
+    check(!Dialogue.seen.has('treeSlam'), 'tree: no slam hint before the 20th combat death');
+    s.die(); await alive();
+    check(Dialogue.seen.has('treeSlam'), 'tree: the 20th combat death plays the slam hint');
     Dialogue.skip(s);
 
 

@@ -670,7 +670,7 @@ const ROOMS = [
     'V                           V ',
     'VP                     B    V ',
     '##############################',
-  ], [582, 75], { world: 2, boss: "tree", spots: [[7, "tree"]], deathTalk: {"2": "treeSlam", "25": "treeSlam2"} }],
+  ], [582, 75], { world: 2, boss: "tree", spots: [[7, "tree"]], deathTalk: {"20": "treeSlam", "40": "treeSlam2"} }],
   // ---------------- World 3: Sanctum (greybox) ----------------
   ["Three high", [ // 12-high tower: a 3-soul staircase (run off your top soul while holding K)
     '##############################',

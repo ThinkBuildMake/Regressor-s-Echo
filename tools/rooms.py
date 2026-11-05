@@ -264,7 +264,7 @@ for name, pos, world, note, rows, extra in rooms:
     if name == 'Three high': opts.update(spots=[[4, 'pyramid']])
     if name == 'Everything': opts.update(shrineTalk='almostCompetent')
     if name == 'The old tree': opts.update(spots=[[18, 'stagPromise']])
-    if name == 'The tree guardian': opts.update(boss='tree', spots=[[7, 'tree']], deathTalk={2: 'treeSlam', 25: 'treeSlam2'})
+    if name == 'The tree guardian': opts.update(boss='tree', spots=[[7, 'tree']], deathTalk={20: 'treeSlam', 40: 'treeSlam2'})
     if world == 3 or name == 'End of the greybox': pos = [pos[0] + 30, pos[1]]
     if name != 'Take it back' and (world == 3 or world == 2 and pos[0] >= 376): pos = [pos[0] + 30, pos[1]]
     if name != 'The ladder' and pos[0] >= 436: pos = [pos[0] + 12, pos[1]]  # The ladder is 12 wider (the mural's platform)

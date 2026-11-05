@@ -320,12 +320,12 @@ The wall behind the room is carved; it needs its own background art.
 > *(Its eyes open.)*  
 > **Hero** [scared]: …It's not just a tree.
 
-### 5. The slam — *after his 2nd and about his 25th deaths in the fight*
+### 5. The slam — *after his 20th and 40th deaths in the fight*
 > **Hero** [shouting]: It smashed me! The other me! It keeps smashing me!  
 > **Guide** [warning]: Hey.  
 > **Guide** [thinking]: Try to guide the tree to attack your soul.
 
-*After about 25:*
+*After 40:*
 > **Guide** [thinking]: It always goes for the one closest to you. Use that.
 
 ### 6. The tree falls — *on the last stomp; same staging as the moth*
