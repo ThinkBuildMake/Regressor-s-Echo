@@ -41,6 +41,11 @@ Read `.claude/skills/flow-asset/SKILL.md` "Driving Flow" first. It covers upload
   - Veo may zoom in during the clip (about 27% on the kneel and slumped poses). Size each frame against a standing frame so the character keeps the same pixel scale as the idle; never fit a kneeling figure to standing height.
 - **Flow's grid reshuffles while clips render.** Identify a tile by its hover title before you download it.
 
+- **Rising or waking up: film the reverse.** When the start and end poses are the same height, Veo fills the gap by making the creature bob up and back down, which reads as a jump (tree guardian, 2026-11-04). Ask for the easy downward motion instead ("slowly sinks down and curls up to sleep"), reverse the clip with `ffmpeg -vf reverse`, and use its lowest frame as the sleeping pose. Check that the height increases on every frame.
+- **Frames mode takes a first and a last frame.** Pinning both ends stops drift, but the end pose must be reachable by a smooth motion.
+- **Props get left behind.** Veo treats ruins or stones around a creature as scenery and walks away from them. If they belong to the creature, first edit the start frame so they're clearly part of its body (the tree's roots gripping stone blocks as feet).
+- **Walks must alternate.** Prompt "left foot, then right foot, left, right", and check frame by frame which limb moves. One take reached with the same arm every cycle.
+
 ## 3. Video → sheet (all local)
 ```sh
 mkdir -p <scratch>/f && ffmpeg -i <name>.mp4 -vf fps=24 <scratch>/f/%03d.png
