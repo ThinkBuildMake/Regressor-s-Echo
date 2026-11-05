@@ -293,9 +293,9 @@ const ROOMS = [
     '#                            #',
     '#                            #',
     '#                            #',
-    '#                             ',
-    '#                  ##         ',
-    '#  P       A      ###         ',
+    '#                            V',
+    '#                  ##        V',
+    '#  P       A      ###        V',
     '##############################',
   ], [0, 100], { world: 1, enter: 'clearing', spots: [[16, 'curse', 'amulet']] }],
   ['First death', [
@@ -1145,7 +1145,8 @@ class Room extends Phaser.Scene {
                 B.r.on('destroy', () => B.img.destroy());
               }
               break;
-            case 'V': this.gates.push(Object.assign(rect(x, y, T, T, 0x4a6b3a), { room: ri })); this.statics.add(this.gates.at(-1));
+            case 'V': if (name.startsWith('Climb: stack') && Dialogue.seen.has('amulet')) break; // the first room's vines part once he has the amulet
+              this.gates.push(Object.assign(rect(x, y, T, T, 0x4a6b3a), { room: ri })); this.statics.add(this.gates.at(-1));
               hazard(this.gates.at(-1), 'vine-barrier', T, T);
               if ((name === 'The spectral stag' || name === 'The moth') && tx === 0) this.gates.at(-1).body.enable = false;
               break;
@@ -1172,6 +1173,7 @@ class Room extends Phaser.Scene {
               const a = this.add.circle(x + T / 2, y + T - 10, 6, 0xffd774).setStrokeStyle(2, 0xb07a22).setDepth(3);
               this.storyPainting(a, 'amulet', 24);
               if (a.img) a.setStrokeStyle(0);
+              a.room = ri;
               this.amulets.push(a);
               break;
             }
@@ -2885,6 +2887,7 @@ class Room extends Phaser.Scene {
       if (!hit(bounds(p), bounds(a))) return true;
       GameAudio.play('story-amulet-pickup');
       a.destroy(); // the gold flash comes later, once he puts it on
+      this.gates.filter((g) => g.room === a.room).forEach((g) => g.destroy()); // the vines on the way out part
       Dialogue.play(this, 'amulet');
       return false;
     });
