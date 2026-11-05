@@ -282,6 +282,7 @@ const SCRIPT = {
   patrol: [
     H('exhausted', 'Lemme guess. I gotta die again.'),
     G('amused', 'No longer a greenhorn, are ya?'),
+    W(0.1, 'keys:retry'), // the first plate puzzle with a bug: easy to get stuck, so show Shift+R here
   ],
   chain: [ // the first shrine; its mark matches the amulet's
     G('thinking', 'Oh, by the way. Take a look over there.'),

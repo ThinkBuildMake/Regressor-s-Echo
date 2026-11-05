@@ -56,10 +56,10 @@ The characters hint at a move; a prompt at the bottom of the screen gives the ke
 
 | Move | Prompt | When |
 |---|---|---|
-| Move and jump | ← → move · Space jump | after the opening lines in the clearing |
+| Move and jump | A D move · Space jump | after the opening lines in the clearing |
 | Slide | Shift or ↓ while running: slide | after the slide scene (The long pit) |
 | Wall jump | In the air against a wall: press Space again | after the wall-jump scene (Thornwood) |
-| Retry | Shift + R: retry the room | after "You've locked yourself out" |
+| Retry | Shift + R: retry the room | after the patrol scene (the first bug-and-plate room); else after "You've locked yourself out" |
 | Self-destruct | Hold K: let go | after the Let go scene (World 2) |
 | Recall | Q: take back your newest soul | after the Take it back scene (World 2) |
 | Swap | E: swap places with your newest soul | after the Two places scene (World 3) |
