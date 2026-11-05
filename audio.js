@@ -26,7 +26,7 @@ const GameAudio = {
   },
   media(key, music = false) {
     try {
-      const a = new Audio(new URL(`assets/audio/${music ? 'music' : 'sfx'}/${key}.ogg`, document.querySelector('script[src$="audio.js"]').src));
+      const a = new Audio(new URL(`assets/audio/${music ? 'music' : 'sfx'}/${key}.ogg`, document.querySelector('script[src*="audio.js"]').src));
       a.preload = 'auto';
       a.addEventListener('error', () => { a.failed = true; });
       return a;

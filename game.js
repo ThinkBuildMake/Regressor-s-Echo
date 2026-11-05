@@ -68,7 +68,7 @@ const SPIDER_SHAKE = 0.5, SPIDER_REST = 1, SPIDER_CLIMB = 150, IDOL_SPEED = 70, 
 const heavy = (e) => e.kind === 'i' || e.kind === 'b';
 // Key prompts: shown once each, on screen (the characters never name keys). Each hides once you've done it.
 const KEY_PROMPTS = {
-  move: ['← →  move     ·     Space  jump', (s) => s.player.body.velocity.y < -100],
+  move: ['A  D  move     ·     Space  jump', (s) => s.player.body.velocity.y < -100],
   slide: ['Shift  or  ↓  while running:  slide', (s) => s.lying && s.slide > 0],
   wallJump: ['In the air against a wall:  press Space again', (s) => s.kick > 0],
   retry: ['Shift + R:  retry the room', () => false],
@@ -2414,8 +2414,8 @@ class Room extends Phaser.Scene {
     const x = B.x + B.face * TREE_REACH;
     this.playFx('impact', x, y - 24, 72, 80, 350);
     for (const dir of [-1, 1]) {
-      const wave = this.playFx('shockwave', x + dir * 30, B.floor - 15, 70, 32, 500);
-      if (wave) this.tweens.add({ targets: wave.setFlipX(dir < 0).setDepth(3), x: x + dir * 130, duration: 500 });
+      const wave = this.playFx('shockwave', x + dir * 40, B.floor - 22, 106, 48, 600);
+      if (wave) this.tweens.add({ targets: wave.setFlipX(dir < 0).setDepth(4.4), x: x + dir * 150, duration: 600 });
     }
   }
 
