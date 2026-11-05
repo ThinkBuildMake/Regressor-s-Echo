@@ -1452,6 +1452,12 @@ class Room extends Phaser.Scene {
 
   // Staging cues fired by dialogue lines (see `cue` in dialogue.js).
   // A key prompt at the bottom of the screen, once per run. It stays until you do the move (or 25s pass).
+  // On the floor, or standing on an idol (the collider only reports touching.down on the frames it pushes him out).
+  onGround(b) {
+    return b.blocked.down || b.touching.down || (b.velocity.y >= 0 && this.enemies.some((o) => o.kind === 'i' && o.body
+      && Math.abs(b.bottom - o.body.top) < 3 && b.right > o.body.left && b.left < o.body.right));
+  }
+
   showKeys(id) {
     if (!KEY_PROMPTS[id] || Dialogue.seen.has('keys:' + id)) return;
     Dialogue.seen.add('keys:' + id);
@@ -1875,8 +1881,8 @@ class Room extends Phaser.Scene {
       if (c.sprites) this.soulFlames(g, c, t);
       else this.figure(g, c, { lying: c.lying, dir: c.dir, t, soul: true });
     }
-    const grounded = b.blocked.down || b.touching.down;
-    // Land sound only after a real moment in the air (standing on an idol flickers 'grounded' every frame).
+    const grounded = this.onGround(b);
+    // Land sound only after a real moment in the air.
     this.airTime = grounded ? 0 : (this.airTime ?? 0) + dt;
     if (grounded && !this.audioGrounded && this.landAir > 0.12 && this.dead <= 0) GameAudio.play('hero-land', 3);
     this.landAir = grounded ? 0 : this.airTime;
@@ -2060,7 +2066,7 @@ class Room extends Phaser.Scene {
       }
       if (e.kind === 'i') { // moves toward you only while you're in the air or holding K; walls and souls stop it
         const p = this.player, pb = p.body, dx = p.x - e.x;
-        const air = !(pb.blocked.down || pb.touching.down) && !this.enemies.some((o) => o.kind === 'i' && Math.abs(pb.bottom - o.body.top) < 2 && pb.right > o.body.left && pb.left < o.body.right); // standing on an idol is the ground
+        const air = !this.onGround(pb);
         const go = p.visible && (air || this.charge > 0) && Math.abs(dx) > 4 && (dx < 0 ? e.x > e.room.x + 16 : e.x < e.room.right - 16);
         if (go) e.dir = Math.sign(dx);
         b.velocity.x = go ? e.dir * IDOL_SPEED : 0;
@@ -2905,7 +2911,7 @@ class Room extends Phaser.Scene {
     if (this.talk.active) { Dialogue.update(this, dt, false); return; }
     const b = p.body;
     if (b.velocity.y > MAX_FALL) b.velocity.y = MAX_FALL; // cap falling only (a cap both ways held springs to 7.4 tiles)
-    const grounded = b.blocked.down || b.touching.down;
+    const grounded = this.onGround(b);
     if (grounded || b.velocity.y >= 0) this.sprung = false;
     if (b.velocity.y >= 0 && this.springs.some((sp) => hit(bounds(p), bounds(sp)))) {
       GameAudio.play('hazards-spring');
