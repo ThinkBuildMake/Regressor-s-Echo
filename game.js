@@ -869,6 +869,12 @@ const bounds = (o) => o.getBounds();
 const shotBox = (sh, h = sh.hw ?? 4) => new Phaser.Geom.Rectangle(sh.x - h, sh.y - h, 2 * h, 2 * h);
 
 const stats = { deaths: 0, stagDeaths: 0, mothFinished: false, treePower: false, stagFinished: false }; // run progress survives room restarts
+// ?dev&room=… starts mid-game as if you'd played up to there: the amulet worn (so the ghost is with you) and earlier bosses beaten.
+if (DEV && START_ROOM > ROOMS.findIndex((r) => r[0] === 'The clearing')) {
+  Dialogue.seen.add('amulet');
+  const at = (name) => START_ROOM > ROOMS.findIndex((r) => r[0] === name);
+  stats.mothFinished = at('The moth'); stats.treePower = at('The tree guardian');
+}
 const FONT = { fontFamily: 'Georgia, serif', align: 'center' };
 
 // First screen: the content warning. Any key or click continues (that click also lets the browser play audio).
