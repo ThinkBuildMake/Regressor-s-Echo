@@ -51,7 +51,7 @@ const TREE_ART = 217, TREE_MASK = [25, 80], TREE_REACH = 75, TREE_WAKE = 2;
 // Intro after waking: it stands up tall and roars (14 frames; mouth opens on frame 7), then settles back (10 frames).
 const TREE_STAND = 1.75, TREE_SETTLE = 1.25, TREE_INTRO = TREE_WAKE + TREE_STAND + TREE_SETTLE;
 const TREE_WAVE_SPEED = 250, TREE_WAVE_RANGE = 150; // the slam's shockwave along the floor (px/s, px each way)
-const STAG_WALK = 130, STAG_GALLOP = 650, STAG_DAZE = 3, STAG_SWEEP = 1, STAG_TUG_PULL = 0.15, STAG_TUG_PRESS = 0.12; // tug of war: the stag pulls the bar down per second; each Space press pushes it up
+const STAG_WALK = 130, STAG_GALLOP = 650, STAG_DAZE = 3, STAG_SWEEP = 1, STAG_TUG_PULL = 0.45, STAG_TUG_PRESS = 0.07; // tug of war: the stag pulls the bar down per second; each Space press pushes it up
 const TREE_GLOW = 2.05, TREE_SPIKES = 1.5, TREE_SPIKES_UP = 1.2, TREE_STUCK = 2.5, TREE_WALK = 40, TREE_LUNGE = 240, TREE_FIST = 40;
 // Self-destruct (World 2 on): hold K/X this long. You keep moving while it charges; letting go cancels.
 const SD_HOLD = 0.75;
@@ -817,7 +817,7 @@ const ROOMS = [
     '##############################',
     '##############################',
   ], [817, 53], { world: 3, spots: [[18, "stagPromise"]] }],
-  ["The spectral stag", [ // final boss: gate plate (slide tunnel), antler sweep snags a floating soul, then a tug of war (mash Space)
+  ["The spectral stag", [ // final boss: gate plate, antler sweep snags a floating soul, then a tug of war (mash Space)
     '########################################',
     '#                                      #',
     '#                                      #',
@@ -828,11 +828,11 @@ const ROOMS = [
     '#                                      #',
     '#                                      #',
     '#                                      #',
-    '#                                 ######',
-    '#                                     _V',
-    '#                                #######',
-    'V                                #######',
-    'V P                         B    #######',
+    '#                                      #',
+    '#                                      #',
+    '#                                      #',
+    'V                                      V',
+    'V P                         B     _    V',
     '########################################',
     '########################################',
   ], [847, 53], { world: 3, spots: [[7, "stagArrival"]] }],
@@ -848,10 +848,10 @@ const ROOMS = [
     '#                            #',
     '#                            #',
     '#                            #',
+    '#                            #',
+    '#                            #',
     '                             #',
-    '#                            #',
-    '#                            #',
-    '# P                          #',
+    '  P                          #',
     '##############################',
     '##############################',
   ], [887, 53], { world: 3 }],
@@ -1537,7 +1537,13 @@ class Room extends Phaser.Scene {
         orb?.destroy(); B.chargeOrb = null;
         GameAudio.play('hazards-laser-blocked-by-soul');
         this.cameras.main.shake(300, 0.01);
-        const beam = this.add.line(0, 0, ...from, between, p.y - 20, 0x9bdfff).setOrigin(0).setLineWidth(14).setDepth(6);
+        const [fx, fy] = from, tx = between, ty = p.y - 20, length = Math.hypot(tx - fx, ty - fy);
+        const beam = this.textures.exists('fx-stag-beam') // the painted beam, as in the fight
+          ? this.add.tileSprite(fx, fy, length * 2, 64, 'fx-stag-beam', 0).setOrigin(0, 0.5).setScale(0.5).setRotation(Math.atan2(ty - fy, tx - fx))
+            .setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.8).setDepth(6)
+          : this.add.line(0, 0, fx, fy, tx, ty, 0x9bdfff).setOrigin(0).setLineWidth(14).setDepth(6);
+        const flicker = this.time.addEvent({ delay: 60, loop: true, callback: () => beam.setFrame?.((beam.frame.name + 1) % 8) });
+        beam.once('destroy', () => flicker.remove());
         this.time.delayedCall(500, () => beam.destroy());
       });
       const white = this.add.rectangle(480, 272, 960, 544, 0xffffff).setScrollFactor(0).setDepth(38).setAlpha(0);
@@ -2359,13 +2365,13 @@ class Room extends Phaser.Scene {
     const gap = 3 * Math.pow(0.8, 3 - B.hp);
     const next = (phase) => { B.phase = phase; B.clock = 0; };
     const daze = () => { B.stomped = false; next('dazed'); this.cameras.main.shake(200, 0.01); };
-    // The gallop runs wall to wall: from the entrance wall to the right shelf.
+    // The gallop runs wall to wall.
     const lane = (to) => new Phaser.Geom.Rectangle(Math.min(B.r.x, to) - B.r.width / 2, B.r.y - B.r.height / 2, Math.abs(to - B.r.x) + B.r.width, B.r.height);
     const tell = B.again ? 0.6 : 0.9, lock = tell - 0.4;
     if (B.phase === 'windup') {
       if (B.clock < lock) {
         B.face = p.x > B.r.x ? 1 : -1;
-        B.aimX = B.face > 0 ? R.x + 33 * T - B.r.width / 2 : R.x + T + B.r.width / 2;
+        B.aimX = B.face > 0 ? R.x + 39 * T - B.r.width / 2 : R.x + T + B.r.width / 2;
       }
       const L = lane(B.aimX);
       this.fx.fillStyle(0xf5f582, B.clock >= lock ? 0.3 : 0.12).fillRect(L.x, L.y, L.width, L.height);

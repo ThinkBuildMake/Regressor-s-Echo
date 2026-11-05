@@ -445,9 +445,11 @@ A cutscene: the game takes over. The two walk away from the fallen stag into the
 > *(He breaks apart and is gone. Fade to black; the next scene is the note.)*
 
 ### 8. The note — *behind the tree*
-Shown as a cutscene after the fade (he stands on the ground the whole time, no falling pose). Nothing is drawn on the ground: the hero looking down is enough. He walks to the spot, wonders aloud, then kneels to read; the note is read in the guide's portrait, each line in quotes, one thought per box. Then he stands and control returns.
-> **Hero** [thinking]: Now what did he want me to see behind the tree?  
-> **Hero** [curious]: Ah. *(He kneels.)*  
+Shown as a cutscene after the fade (he stands on the ground the whole time, no falling pose). Nothing is drawn on the ground: the hero looking down is enough. He searches for it, desperate, scrambling around the roots, then finds it and kneels to read; the note is read in the guide's portrait, each line in quotes, one thought per box. Then he stands and control returns.
+> **Hero** [scared]: Where… where is it?  
+> **Hero** [scared]: The thing he left behind the tree…  
+> *(He scrambles around the roots: past the tree, back, a hop.)*  
+> **Hero** [sad]: Ah… *(He kneels.)*  
 > "Dear Me,"  
 > "If you're reading this… then I've kicked the bucket."  
 > "Don't make that face. I can see it from here."  

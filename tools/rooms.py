@@ -239,15 +239,13 @@ def old_tree(o, p):
 room('The old tree', [745, 53], 30, 17, 3, 'calm promise; return behind the tree for the note', old_tree)
 
 def end(o, p):
-    # Open floor wall to wall: you walk in on it (the vines close behind you) and the stag appears 7 tiles in.
-    o(1, 1, 38, 14); o(0, 13, 0, 14, 'V'); p(2, 14, 'P'); p(28, 14, 'B')
-    # Right shelf: solid down to the floor (nothing to hide under). A tunnel along its top ends at the plate that
-    # raises the stag's gate (game.js), and the way out is through the tunnel, past the plate.
-    o(33, 12, 38, 14, '#'); o(34, 10, 38, 10, '#'); p(38, 11, '_'); o(39, 11, 39, 11, 'V')
-room('The spectral stag', [775, 53], 40, 17, 3, 'final boss: gate plate (slide tunnel), antler sweep snags a floating soul, then a tug of war (mash Space)', end)
+    # An open plain (user, 2026-11-05): nowhere to camp; you jump over the stag. You walk in on the floor (the vines
+    # close behind you) and the stag appears 7 tiles in. A soul on the plate raises the gate (game.js) the gallop slams into.
+    o(1, 1, 38, 14); o(0, 13, 0, 14, 'V'); p(2, 14, 'P'); p(28, 14, 'B'); p(34, 14, '_'); o(39, 13, 39, 14, 'V')
+room('The spectral stag', [775, 53], 40, 17, 3, 'final boss: gate plate, antler sweep snags a floating soul, then a tug of war (mash Space)', end)
 
 def pyramid(o, p):
-    o(1, 1, 28, 14); o(0, 11, 0, 11); p(2, 14, 'P')  # open to the sky so the whole pyramid shows; you drop in from the stag's shelf tunnel
+    o(1, 1, 28, 14); o(0, 13, 0, 14); p(2, 14, 'P')  # open to the sky so the whole pyramid shows
 room('The pyramid entrance', [815, 53], 30, 17, 3, 'walk into floor one after reading the note', pyramid)
 
 out = []

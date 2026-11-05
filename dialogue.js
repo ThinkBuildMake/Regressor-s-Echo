@@ -153,10 +153,10 @@ const SCRIPT = {
     G("warm", "Me. It was always me."),
     W(1.1, 'stagRise'), // behind his back, the stag calls out and gets up
     W(0.9, 'stagCharge'), // and turns on him, a beam gathering in its mouth
-    G("warning", "LOOK OUT!"),
+    { ...G("warning", "LOOK OUT!"), listen: "scared" },
     W(2.6, 'lastBeam'), // the ghost throws himself into the shot: everything goes white
     W(0.9),
-    G("pained", "Ugh\u2026"),
+    { ...G("pained", "Ugh\u2026"), listen: "scared" },
     { ...G("pained", "*crack*"), cue: 'crack' },
     H("shouting", "NO\u2014!"),
     W(1),
@@ -183,29 +183,31 @@ const SCRIPT = {
     W(1.6, 'toNote'), // fade to black: next, he finds the note behind the old tree
   ],
   stagNote: [ // he finds it behind the old tree, kneels, and reads it in the ghost's voice (his portrait), in quotes
-    H("thinking", "Now what did he want me to see behind the tree?"),
-    H("curious", "Ah."),
-    G("warm", "\"Dear Me,\""),
-    G("warm", "\"If you're reading this\u2026 then I've kicked the bucket.\""),
-    G("wry", "\"Don't make that face. I can see it from here.\""),
-    G("wry", "\"Well. Could.\""),
+    H("scared", "Where\u2026 where is it?"),
+    H("scared", "The thing he left behind the tree\u2026"),
+    W(0.9), W(0.8), W(0.9), // he scrambles around the roots looking for it
+    H("sad", "Ah\u2026"),
+    G("solemn", "\"Dear Me,\""),
+    G("sad", "\"If you're reading this\u2026 then I've kicked the bucket.\""),
+    G("weary", "\"Don't make that face. I can see it from here.\""),
+    G("sad", "\"Well. Could.\""),
     G("solemn", "\"I guess it's time to come clean.\""),
     G("solemn", "\"You know how I said there was a limit?\""),
     G("sad", "\"That was a lie.\""),
-    G("wry", "\"Figured you'd be more careful if you thought you were running out.\""),
+    G("weary", "\"Figured you'd be more careful if you thought you were running out.\""),
     G("solemn", "\"The limit is when your spirit breaks.\""),
     G("sad", "\"And on floor ninety\u2026 mine did.\""),
     G("sad", "\"I just\u2026 stopped getting back up.\""),
     G("solemn", "\"So keep getting back up.\""),
     G("solemn", "\"No matter how hard it gets.\""),
-    G("warm", "\"No matter what.\""),
-    G("warm", "\"Thanks for putting up with me. I know I'm not great company.\""),
-    G("wry", "\"We'd know.\""),
-    G("warm", "\"And don't take my ending as yours.\""),
+    G("solemn", "\"No matter what.\""),
+    G("weary", "\"Thanks for putting up with me. I know I'm not great company.\""),
+    G("sad", "\"We'd know.\""),
+    G("solemn", "\"And don't take my ending as yours.\""),
     G("warm", "\"You're me, sure\u2026 but you were different from the start.\""),
     G("warm", "\"You'll get further than I ever could.\""),
     G("warm", "\"Trust me.\""),
-    G("warm", "\"\u2014 You\""),
+    G("sad", "\"\u2014 You\""),
     G("wry", "\"P.S. The amulet's still not worth anything. I checked.\""),
     H("sad", "\u2026"), // he stands up, quiet
   ],
@@ -446,13 +448,19 @@ stage('moth', 0, { walk: 9, face: 'right', speed: 22 });
 stage('moth', 1, { walk: 10, face: 'right', speed: 22 });
 stage('moth', 2, { walk: 11, face: 'right', speed: 22 });
 stage('stagPromise', 0, { walk: 20, guide: { x: 18, y: 13 }, face: 'guide' });
-stage('stagNote', 0, { walk: 19.5, face: 'left' });
-stage('stagNote', 1, { pose: 'kneel' }); // Ah. He bends down to read
+stage('stagNote', 0, { walk: 17.5, face: 'right' });
+stage('stagNote', 2, { walk: 22.5, face: 'right' }); // scrambling: past the tree, back, a hop over the roots
+stage('stagNote', 3, { walk: 18, face: 'left' });
+stage('stagNote', 4, { walk: 19.5, face: 'left', hop: true });
+stage('stagNote', 5, { pose: 'kneel' }); // Ah… He bends down to read
 stage('stagNote', SCRIPT.stagNote.length - 1, { pose: 'idle' });
 // The stag's fall: walk away from where it lies into the open clearing, back turned to it.
 const stagTile = (scene) => { const B = scene.bosses.find((b) => b.stag), r = scene.rooms[scene.index].rect; return ((B?.img ?? B?.r)?.x - r.x) / 32 || 25; };
 const awayFromStag = (scene) => (stagTile(scene) > (scene.player.x - scene.rooms[scene.index].rect.x) / 32 ? 'left' : 'right');
-stage('stagDown', 1, { walk: (scene) => { const t = stagTile(scene); return t > 20 ? Math.max(4, t - 11) : Math.min(35, t + 11); }, face: awayFromStag });
+const stagWalk = (scene) => { const t = stagTile(scene); return t > 20 ? Math.max(4, t - 11) : Math.min(35, t + 11); };
+// He walks away with his back to the stag; the ghost waits a little further on, so he faces the ghost as they talk.
+stage('stagDown', 1, { walk: stagWalk, face: awayFromStag,
+  guide: (scene) => { const x = stagWalk(scene); return { x: x + (stagTile(scene) > x ? -1.6 : 1.6), y: 13.3 }; } });
 for (const i of [2, 3, 4]) stage('stagDown', i, { face: awayFromStag });
 stage('stagDown', 7, { face: awayFromStag });
 stage('stagDown', 12, { hop: true, face: 'guide' }); // NO—!
@@ -597,6 +605,7 @@ const Dialogue = {
     // A walk mark or facing can be worked out when the line starts (e.g. away from where the stag fell).
     if (typeof l.walk === 'function') l.walk = l.walk(scene);
     if (typeof l.facing === 'function') l.facing = l.facing(scene);
+    if (typeof l.guide === 'function') l.guide = l.guide(scene);
     if (!skip) {
       scene.talk.motion = { elapsed: 0, feet: p.y + p.height / 2, height: p.height,
         mark: l.walk === undefined ? null : this.mark(scene, l.walk),
@@ -749,13 +758,16 @@ const Dialogue = {
       const speaking = t.line.who, other = speaking === 'hero' ? 'guide' : 'hero';
       t.name.setText(NAMES[speaking]);
       const pic = t[speaking];
-      if (pic.placeholder) pic.placeholder.setText(t.line.face);
-      else {
+      const setFace = (who, face) => {
+        const pic = t[who];
+        if (pic.placeholder) return pic.placeholder.setText(face);
         // Second-sheet face if that sheet exists, otherwise the closest face from the first sheet.
-        const face = t.line.face, key = `portrait-${speaking}`;
-        if (FACES2[speaking].includes(face) && scene.textures.exists(`${key}2`)) pic.setTexture(`${key}2`, FACES2[speaking].indexOf(face));
-        else pic.setTexture(key, Math.max(0, FACES[speaking].indexOf(FACES[speaking].includes(face) ? face : FALLBACK[face])));
-      }
+        const key = `portrait-${who}`;
+        if (FACES2[who].includes(face) && scene.textures.exists(`${key}2`)) pic.setTexture(`${key}2`, FACES2[who].indexOf(face));
+        else pic.setTexture(key, Math.max(0, FACES[who].indexOf(FACES[who].includes(face) ? face : FALLBACK[face])));
+      };
+      setFace(speaking, t.line.face);
+      if (t.line.listen) setFace(other, t.line.listen); // the greyed-out listener's reaction
       pic.setAlpha(1);
       t[other].setAlpha(0.3);
       return true;
