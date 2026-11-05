@@ -95,6 +95,10 @@ From docs/brainstorm/2026-11-03-bosses.md. The user wants these placeholders rep
 | Seed mortar burst → `assets/effects/mortar-burst.webp` | a yellow seed husk cracking open into a ring of thorns, 5 frames | 2 tiles | | | | | stand-in |
 | Root rake segment → `assets/effects/root.webp` | a yellow-tipped root bursting up out of the ground, 4 frames (rising) | 1 tile | | | | | stand-in |
 | Seal socket → `assets/effects/seal.webp` | a carved stone socket in the floor, 2 frames: empty and glowing (a soul fills it) | 1 tile | | | | | stand-in |
+| Stag mouth beam → `assets/effects/stag-beam.webp` (2026-11-04, user: last part; may use Veo) | a flowing violet-blue energy beam with a lavender core, a seamless horizontal loop, 6–8 frames; painted on BLACK so the code draws it with additive blending (black = invisible) and stretches it along the aim line | 1 tile tall, tiles along its length | | | | | code lines |
+| Stag gallop gate → `assets/effects/stag-gate.webp` | a carved dark sanctum-stone barrier: rising out of the floor (3 frames), standing (1), shattering into chunks when the gallop slams into it (4) | 1 × 3 tiles | | | | | code shape |
+| Stag antler sweep → `assets/effects/stag-sweep.webp` | a pale violet arc of light trailing the antlers through the marked band, 4 frames, on black (additive) | about 6 × 2 tiles | | | | | code lines |
+| Dizzy sparks (all bosses) → `assets/effects/dizzy.webp` | small pale-yellow stars and motes circling in a ring, 6-frame loop | about 2 × 1 tiles | | | | | code circles |
 
 **Made 2026-11-04:** every file above now exists in `assets/effects/` (pollen-cloud 4 frames 213x256, impact 4 x 114x128, shockwave 4 x 211x96, mortar-burst 5 x 117x128, root 4 x 70x128, falling-stone 5 x 64x64, seal 2 x 168x64; frame size in each .json). In the game since 2026-11-04 (sprite sheets): pollen-cloud (the moth's Loom and Curtain clouds), impact (moth dive, tree slam), shockwave (tree slam, visual), mortar-burst (seed pods landing), root (the tree's floor spikes). seal and falling-stone are not wired as sheets.
 
