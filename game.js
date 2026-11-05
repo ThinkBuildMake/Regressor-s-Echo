@@ -1089,7 +1089,7 @@ class Room extends Phaser.Scene {
               hazard(this.spikes.at(-1), 'spikes', T, 16, -3);
               break;
             case 'x': this.spikes.push(rect(x + 4, y + 2, T - 8, T - 4, 0x7a3550)); this.spikes.at(-1).audioVine = true; hazard(this.spikes.at(-1), 'thorns', T, T); break;
-            case '_': this.plates.push(Object.assign(rect(x + 1, y + T - 8, T - 2, 8, 0xffd700).setStrokeStyle(2, 0x8a6a00).setDepth(3), { room: ri })); hazard(this.plates.at(-1), 'plate', T, 16, -4); break; // drawn 16 tall so it reads at a glance (the trigger stays 8)
+            case '_': this.plates.push(Object.assign(rect(x + 1, y + T - 8, T - 2, 8, 0xffd700).setStrokeStyle(2, 0x8a6a00).setDepth(3), { room: ri })); hazard(this.plates.at(-1), 'plate', T, T, -12); break; // a square pedestal sheet, base on the floor (the trigger stays 8 tall)
             case 'D': { const d = Object.assign(rect(x, y, T, T, 0x8c6640), { room: ri }); this.statics.add(d); this.doors.push(d); break; }
             case 'e': case 'f': case 't': case 'w': case 'i': case 'b': this.walkerSpawns.push({ x, y, room: ri, kind: row[tx] }); break; // made on entry
             case 'o': case 'O': {

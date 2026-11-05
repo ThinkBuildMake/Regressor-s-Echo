@@ -85,8 +85,10 @@ const Art = {
         body.setFillStyle(0, 0);
       } else if (name === 'plate') {
         const held = weights.some((w) => hit(w, bounds(body)));
-        if (held) img.y += img.displayHeight * 0.6; // sinks so only its top edge peeks above the floor
-        img.setCrop(0, 0, img.frame.width, img.frame.height * (held ? 3 / 8 : 1));
+        // The pedestal fills rows 85-255 of its 256px sheet. Pressed, it sinks so only the rim and mark peek out.
+        const top = 85 / 256, pedestal = 171 / 256;
+        if (held) img.y += img.displayHeight * pedestal * 0.65;
+        img.setCrop(0, 0, img.frame.width, img.frame.height * (held ? top + pedestal * 0.35 : 1));
       } else if (name === 'spring') {
         const elapsed = scene.time.now - (body.launchArt ?? -1000);
         img.setFrame(elapsed < 65 ? 1 : elapsed < 200 ? 2 : 0);
