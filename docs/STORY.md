@@ -61,8 +61,8 @@ The characters hint at a move; a prompt at the bottom of the screen gives the ke
 | Wall jump | In the air against a wall: press Space again | after the wall-jump scene (Thornwood) |
 | Retry | Shift + R: retry the room | after "You've locked yourself out" |
 | Self-destruct | Hold K: let go | after the Let go scene (World 2) |
-| Recall | Q: take back your newest soul | entering Take it back (World 2) |
-| Swap | E: swap places with your newest soul | entering Two places (World 3) |
+| Recall | Q: take back your newest soul | after the Take it back scene (World 2) |
+| Swap | E: swap places with your newest soul | after the Two places scene (World 3) |
 
 ## Story spine
 
@@ -292,6 +292,11 @@ His first chosen death. Keys come from an on-screen prompt, not from the guide.
 > **Guide** [sad]: I know.  
 > **Guide** [wry]: It gets easier. That's the bad part.
 
+### Take it back — *on entry; his own soul plugs the tunnel*
+> **Hero** [annoyed]: Great. Now I'm in my own way.  
+> **Guide** [wry]: Then take yourself back. You're allowed to change your mind.  
+> **Hero** [thinking]: …First thing all week that lets me.
+
 ### 3. The carvings — *The ladder (room 3), beside its shrine*
 The wall behind the room is carved; it needs its own background art.
 > **Hero** [curious]: Hey. Look at the wall.  
@@ -352,7 +357,7 @@ The wall behind the room is carved; it needs its own background art.
 
 ## World 3 script: Sanctum
 
-The grounds outside the tribe's pyramid. Silent rooms: 2 In my own way, 3 Three jobs, 5 Reliquary. The guide is quieter here; his care shows a little more.
+The grounds outside the tribe's pyramid. Silent rooms: 3 Three jobs, 5 Reliquary. The guide is quieter here; his care shows a little more.
 
 ### 1. The pyramid — *Three high (room 1), a few steps in*
 The pyramid needs to be visible in the background, its top lost in cloud.
@@ -362,6 +367,12 @@ The pyramid needs to be visible in the background, its top lost in cloud.
 > **Hero** [thinking]: How many floors?  
 > **Guide** [wry]: More than ninety.  
 > **Hero** [determined]: …Then let's get to the front door.
+
+### Two places — *on entry (room 2), the first room with swap*
+> **Hero** [curious]: So I just… trade places? With me?  
+> **Guide** [wry]: You're both you. Nobody's going to complain.  
+> **Hero** [thinking]: Does the other one feel it?  
+> **Guide** [solemn]: …Best not to ask.
 
 ### 2. Almost competent — *Everything (room 4), at its shrine*
 > **Hero** [thinking]: You've been quiet.  

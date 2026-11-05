@@ -50,6 +50,19 @@ const SCRIPT = {
     G("thinking", "Because this time, nothing's going to do it for you."),
     W(0.1, 'keys:letGo'),
   ],
+  takeBack: [ // Take it back, on entry: his own soul plugs the tunnel
+    H('annoyed', "Great. Now I'm in my own way."),
+    G('wry', "Then take yourself back. You're allowed to change your mind."),
+    H('thinking', '…First thing all week that lets me.'),
+    W(0.1, 'keys:recall'),
+  ],
+  twoPlaces: [ // Two places, on entry: the first room with swap
+    H('curious', 'So I just… trade places? With me?'),
+    G('wry', "You're both you. Nobody's going to complain."),
+    H('thinking', 'Does the other one feel it?'),
+    G('solemn', "…Best not to ask."),
+    W(0.1, 'keys:swap'),
+  ],
   chosenDeath: [
     W(0.8), // A beat.
     H("sad", "…You were right. That's worse."),

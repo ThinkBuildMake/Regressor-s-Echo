@@ -542,7 +542,7 @@ const ROOMS = [
     '##############################',
     '##############################',
     '##############################',
-  ], [376, 107], { world: 2, keys: "recall" }],
+  ], [376, 107], { world: 2, enter: "takeBack" }],
   ["The ladder", [ // 7-high ledge: stack to 3, then run off your top soul holding K for a step beside it
     '##########################################',
     '#               #                        #',
@@ -700,7 +700,7 @@ const ROOMS = [
     '######^ #### C ###############',
     '##############################',
     '##############################',
-  ], [642, 73], { world: 3, keys: "swap" }],
+  ], [642, 73], { world: 3, enter: "twoPlaces" }],
   ["Three jobs", [ // plate, pit and a laser blocker at once; recall mistakes instead of dying over them
     '##############################',
     '##############################',
