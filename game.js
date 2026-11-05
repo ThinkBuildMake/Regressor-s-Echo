@@ -78,7 +78,6 @@ const KEY_PROMPTS = {
   retry: ['Shift + R:  retry the room', (s) => (s.retries ?? 0) > 0], // fades once you've used it
   letGo: ['Hold  K:  let go', (s) => s.charge > 0.2],
   recall: ['Q:  take back your newest soul', (s) => s.recalled],
-  recallFirst: ['Q:  take back your newest soul', (s) => s.recalled], // right after the moth grants it; Take it back shows it again
   swap: ['E:  swap places with your newest soul', (s) => s.swapped],
 };
 const SPRING = 873; // launch speed: 8.5 tiles high (a 9-high ledge needs a soul)

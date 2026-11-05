@@ -1,5 +1,5 @@
 // Dialogue: a panel at the top of the screen, the hero's portrait on the left and the guide's on the
-// right, a name, and text that types out. Space, Enter or E advances and settles the current action.
+// right, a name, and text that types out. Space, Enter or E first shows the whole line if it is still typing, then advances and settles the current action.
 // While open, the scene controls the hero. Each script plays once per session.
 //
 // Portraits: assets/portraits/hero.webp and guide.webp (8 faces each), cut from the expression
@@ -412,7 +412,6 @@ const SCRIPT = {
     G('wry', "Yourself. Trust me, it's worse when you choose it."),
     W(0.8),
     H('exhausted', '…Great. Something to look forward to.'),
-    W(0.1, 'keys:recallFirst'),
   ],
 };
 
@@ -789,7 +788,8 @@ const Dialogue = {
     }
     if (!t.line.text) { this.act(scene, t.line, true); t.line = null; return true; }
     const full = t.line.text.length;
-    if (advance) {
+    if (advance && t.shown < full) { t.shown = full; advance = false; } // first press shows the whole line, the next one moves on
+    else if (advance) {
       this.act(scene, t.line, true); t.line = null; return this.update(scene, 0, false);
     }
     const before = Math.floor(t.shown / 3);
