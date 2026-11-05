@@ -97,12 +97,12 @@ room('Take it back', [376, 107], 30, 17, 2, 'recall a tunnel plug; preserve the 
 def ladder(o, p):
     # Safe staircase, then bank the climb before dropping to the spike approach.
     o(1, 1, 9, 15); o(10, 1, 14, 8); p(12, 8, 'C')
-    o(15, 1, 23, 15); o(24, 1, 28, 8)
+    o(15, 1, 23, 15); o(24, 1, 40, 8)  # the last platform runs to col 41: the carved mural stands on it
     o(16, 1, 16, 11, '#')  # descend before approaching the spike stairs
     # Both offset souls are also the bridge; a third death removes the lower step.
     o(21, 16, 23, 16, '^')
-    o(0, 14, 0, 15); o(29, 7, 29, 8); p(1, 15, 'P')
-room('The ladder', [376, 99], 30, 17, 2, '7-high ledge: stack to 3, then run off your top soul holding K for a step beside it', ladder)
+    o(0, 14, 0, 15); o(41, 7, 41, 8); p(1, 15, 'P')
+room('The ladder', [376, 99], 42, 17, 2, '7-high ledge: stack to 3, then run off your top soul holding K for a step beside it', ladder)
 
 def beam(o, p):
     # A: the laser death is both the high step and the shield.
@@ -259,13 +259,14 @@ for name, pos, world, note, rows, extra in rooms:
     if name == 'Take it back': opts.update(keys='recall')
     if name == 'Two places': opts.update(keys='swap')
     if name == 'Thornwood': opts.update(spots=[[10, 'wallJump']])
-    if name == 'The ladder': opts.update(spots=[[12, 'carvings']])
+    if name == 'The ladder': opts.update(spots=[[26, 'carvings']])  # at the carved wall
     if name == 'Three high': opts.update(spots=[[4, 'pyramid']])
     if name == 'Everything': opts.update(shrineTalk='almostCompetent')
     if name == 'The old tree': opts.update(spots=[[18, 'stagPromise']])
     if name == 'The tree guardian': opts.update(boss='tree', spots=[[7, 'tree']], deathTalk={2: 'treeSlam', 25: 'treeSlam2'})
     if world == 3 or name == 'End of the greybox': pos = [pos[0] + 30, pos[1]]
     if name != 'Take it back' and (world == 3 or world == 2 and pos[0] >= 376): pos = [pos[0] + 30, pos[1]]
+    if name != 'The ladder' and pos[0] >= 436: pos = [pos[0] + 12, pos[1]]  # The ladder is 12 wider (the mural's platform)
     o = ', '.join(f"{k}: {json.dumps(v)}" for k, v in opts.items())
     out.append(f"  [{json.dumps(name)}, [ // {note}\n" + ''.join(f"    '{r}',\n" for r in rows) + f"  ], {json.dumps(pos)}{', { ' + o + ' }' if o else ''}],")
 open(sys.argv[1], 'w').write('\n'.join(out) + '\n')

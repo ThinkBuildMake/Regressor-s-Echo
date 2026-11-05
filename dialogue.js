@@ -388,10 +388,10 @@ stage('firstDeath', 4, { pose: 'idle', face: 'guide' });
 stage('soul', 0, { walk: 9, face: 'right' });
 for (const key of ['thorns', 'patrol', 'chain', 'shrineMark', 'carvings', 'pyramid', 'tree', 'stagArrival'])
   stage(key, 0, { face: 'right' });
-for (const [key, x] of [['thorns', 4], ['patrol', 4], ['chain', 4], ['tree', 8], ['pyramid', 5], ['carvings', 12.5]])
+for (const [key, x] of [['thorns', 4], ['patrol', 4], ['chain', 4], ['tree', 8], ['pyramid', 5], ['carvings', 27]])
   stage(key, 0, { walk: x });
-stage('carvings', 3, { walk: 13, face: 'right' });
-stage('carvings', 4, { walk: 13.5, face: 'right' });
+stage('carvings', 3, { walk: 31, face: 'right' });
+stage('carvings', 4, { walk: 36, face: 'right' });
 stage('moth', 0, { walk: 9, face: 'right', speed: 22 });
 stage('moth', 1, { walk: 10, face: 'right', speed: 22 });
 stage('moth', 2, { walk: 11, face: 'right', speed: 22 });

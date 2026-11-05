@@ -544,24 +544,24 @@ const ROOMS = [
     '##############################',
   ], [376, 107], { world: 2, keys: "recall" }],
   ["The ladder", [ // 7-high ledge: stack to 3, then run off your top soul holding K for a step beside it
-    '##############################',
-    '#               #            #',
-    '#               #            #',
-    '#               #            #',
-    '#               #            #',
-    '#               #            #',
-    '#               #            #',
-    '#               #             ',
-    '#           C   #             ',
-    '#         ##### #       ######',
-    '#         ##### #       ######',
-    '#         ##### #       ######',
-    '#         #####         ######',
-    '#         #####         ######',
-    '          #####         ######',
-    ' P        #####         ######',
-    '#####################^^^######',
-  ], [406, 99], { world: 2, spots: [[12, "carvings"]] }],
+    '##########################################',
+    '#               #                        #',
+    '#               #                        #',
+    '#               #                        #',
+    '#               #                        #',
+    '#               #                        #',
+    '#               #                        #',
+    '#               #                         ',
+    '#           C   #                         ',
+    '#         ##### #       ##################',
+    '#         ##### #       ##################',
+    '#         ##### #       ##################',
+    '#         #####         ##################',
+    '#         #####         ##################',
+    '          #####         ##################',
+    ' P        #####         ##################',
+    '#####################^^^##################',
+  ], [406, 99], { world: 2, spots: [[26, "carvings"]] }],
   ["The beam", [ // 8-high ledge: jump into the laser right next to its source; that death is the high step and leaves no beam
     '##############################',
     '#               #          D #',
@@ -580,7 +580,7 @@ const ROOMS = [
     '           ####        _ #####',
     ' P   i   # ####        # #####',
     '##############################',
-  ], [436, 92], { world: 2 }],
+  ], [448, 92], { world: 2 }],
   ["The spring", [ // 9-high ledge: hold during the launch so a soul hangs beside the spring, then land on it
     '##############################',
     '#               #            #',
@@ -599,7 +599,7 @@ const ROOMS = [
     '           ####          #####',
     ' P    s    ####    s     #####',
     '##############################',
-  ], [466, 84], { world: 2 }],
+  ], [478, 84], { world: 2 }],
   ["Wrong order", [ // step, plate, pit: in another order a soul you still need vanishes
     '##############################',
     '#             D             D#',
@@ -618,7 +618,7 @@ const ROOMS = [
     '              D             D ',
     ' P            DC   s        D ',
     '#######^^^^^^^########^^^^^^##',
-  ], [496, 75], { world: 2 }],
+  ], [508, 75], { world: 2 }],
   ["Sawmill", [ // SHOWCASE W2: spring + timed self-destruct jams a saw, plate soul as a shield, thrower, laser
     '############################################',
     '#              #############################',
@@ -642,7 +642,7 @@ const ROOMS = [
     ' P    s   ######################    #    e  ',
     '############################################',
     '############################################',
-  ], [526, 71], { world: 2 }],
+  ], [538, 71], { world: 2 }],
   ["The tree guardian", [ // lure the slam onto a spare soul to stick its hands; hide behind a soul from the burst
     '##############################',
     '#                           V#',
@@ -661,7 +661,7 @@ const ROOMS = [
     '                            V ',
     ' P                     B    V ',
     '##############################',
-  ], [570, 75], { world: 2, boss: "tree", spots: [[7, "tree"]], deathTalk: {"2": "treeSlam", "25": "treeSlam2"} }],
+  ], [582, 75], { world: 2, boss: "tree", spots: [[7, "tree"]], deathTalk: {"2": "treeSlam", "25": "treeSlam2"} }],
   // ---------------- World 3: Sanctum (greybox) ----------------
   ["Three high", [ // 12-high tower: a 3-soul staircase (run off your top soul while holding K)
     '##############################',
@@ -681,7 +681,7 @@ const ROOMS = [
     '          #####            ###',
     ' P        #####            ###',
     '##############################',
-  ], [600, 75], { world: 3, spots: [[4, "pyramid"]] }],
+  ], [612, 75], { world: 3, spots: [[4, "pyramid"]] }],
   ["Two places", [ // plug the shaft with a soul, then swap into the low tunnel at a run; exchange places under a falling spike to hold the exit plate
     '##############################',
     '##############################',
@@ -700,7 +700,7 @@ const ROOMS = [
     '######^ #### C ###############',
     '##############################',
     '##############################',
-  ], [630, 73], { world: 3, keys: "swap" }],
+  ], [642, 73], { world: 3, keys: "swap" }],
   ["Three jobs", [ // plate, pit and a laser blocker at once; recall mistakes instead of dying over them
     '##############################',
     '##############################',
@@ -719,7 +719,7 @@ const ROOMS = [
     '    ########### C _         D ',
     ' P  ###############~^^^^^^^~# ',
     '###################^#######^##',
-  ], [660, 67], { world: 3 }],
+  ], [672, 67], { world: 3 }],
   ["Everything", [ // slide bridge, shrine; plate, saw jam and spring step together; recall a bad step
     '#############################################',
     '###############################             #',
@@ -743,7 +743,7 @@ const ROOMS = [
     ' P             ##  _  #  o   #D   s  b ######',
     '#######^^^###################################',
     '#############################################',
-  ], [690, 63], { world: 3, shrineTalk: "almostCompetent" }],
+  ], [702, 63], { world: 3, shrineTalk: "almostCompetent" }],
   ["Reliquary", [ // SHOWCASE W3: flyers in a chimney, two saws to jam, plate, recall, crumbling descent
     '########################################',
     '########################################',
@@ -769,7 +769,7 @@ const ROOMS = [
     ' P      #######################xx    ~~ ',
     '################################^^^^^^^#',
     '########################################',
-  ], [735, 52], { world: 3 }],
+  ], [747, 52], { world: 3 }],
   ["The rehearsal", [ // aimed beams: protect a two-soul stair, shrine, sacrifice a corridor decoy
     '##############################',
     '##############################',
@@ -788,7 +788,7 @@ const ROOMS = [
     '                             #',
     '# P                          #',
     '##############################',
-  ], [775, 59], { world: 3 }],
+  ], [787, 59], { world: 3 }],
   ["The old tree", [ // calm promise; return behind the tree for the note
     '##############################',
     '##############################',
@@ -807,7 +807,7 @@ const ROOMS = [
     '  P                           ',
     '##############################',
     '##############################',
-  ], [805, 53], { world: 3, spots: [[18, "stagPromise"]] }],
+  ], [817, 53], { world: 3, spots: [[18, "stagPromise"]] }],
   ["The spectral stag", [ // final boss: swap out of a soul ram, stomp, restore three elevated seals
     '########################################',
     '#                                      #',
@@ -826,7 +826,7 @@ const ROOMS = [
     'V V V                             B    V',
     '########################################',
     '########################################',
-  ], [835, 53], { world: 3 }],
+  ], [847, 53], { world: 3 }],
   ["The pyramid entrance", [ // walk into floor one after reading the note
     '##############################',
     '##############################',
@@ -845,7 +845,7 @@ const ROOMS = [
     '  P                          #',
     '##############################',
     '##############################',
-  ], [875, 53], { world: 3 }],
+  ], [887, 53], { world: 3 }],
 ];
 const WORLD_NAMES = { 1: 'Forest Edge', 2: 'Overgrown Ruins', 3: 'Sanctum' }; // fades in when you enter a new world
 const WORLD_SOULS = { 1: 1, 2: 2, 3: 3 }; // souls allowed per world; rooms without a world keep 3
@@ -1055,9 +1055,9 @@ class Room extends Phaser.Scene {
       const room = { name, ...extra, rect: new Phaser.Geom.Rectangle(ox * T, oy * T, width * T, rows.length * T), spawns: [] };
       const world = extra.world ?? 1;
       const hazard = (body, name, w, h, dy) => Art.hazard(this, body, world, name, w, h, dy);
-      // The ladder's carved wall (STORY W2 §3): figures wearing the amulet, thinning to one, behind the shrine ledge.
+      // The ladder's carved wall (STORY W2 §3): figures wearing the amulet, thinning to one, standing on the last platform.
       if (name === 'The ladder' && this.textures.exists('carvings'))
-        this.add.image((ox + 8.5) * T, (oy + 9) * T, 'carvings').setOrigin(0.5, 1).setDisplaySize(14 * T, 14 * T * 1056 / 2508).setDepth(-2);
+        this.add.image((ox + 33) * T, (oy + 9) * T, 'carvings').setOrigin(0.5, 1).setDisplaySize(14 * T, 14 * T * 1056 / 2508).setDepth(-2);
       rows.forEach((row, ty) => {
         for (let tx = 0; tx < row.length; tx++) {
           const x = (ox + tx) * T, y = (oy + ty) * T;
