@@ -46,7 +46,7 @@ Key: ✅ done · 🟡 started · blank = to do · — = not needed (a single ima
 | Thrower | stands still and shoots seeds along the ground (souls block them); a red toadstool creature; idle + spit, 4 frames, plus a seed pellet | ✅ | | | | ✅ |
 | Bramble spider (W1) | hangs on a silk thread, drops on you, climbs back; a red spider; hang/shake, drop, climb, 3–4 frames, plus a thread drawn in code. See LEVELS.md "Enemies per world" | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Idol slider (W2) | a red carved-stone block on crab legs that slides while you're airborne or holding self-destruct; still, scuttle 2–3 frames | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Reliquary scarab (W3) | a flat red scarab that patrols floors and soul bridges; walk 2–3 frames, plus a falling pose | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Reliquary scarab (W3) | a flat red scarab that patrols floors and soul bridges; 8-frame Veo Lite walk (2026-11-05, source `raw/enemies/reliquary-scarab-walk.mp4`), plus the painted falling pose | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 ## Bosses
 

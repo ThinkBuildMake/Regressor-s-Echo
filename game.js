@@ -2116,9 +2116,9 @@ class Room extends Phaser.Scene {
       else if ((b.blocked.down || b.touching.down) && !solids.some((s) => s.contains(e.x + e.dir * 14, e.y + 14)))
         e.dir *= -1; // ledge ahead
       b.velocity.x = e.dir * (e.kind === 'b' ? SCARAB_SPEED : WALKER_SPEED);
-      if (e.kind === 'b') { // three walk poses; on its back (frame 3) while falling
-        const step = Math.floor((this.time.now / 1000) * 6), down = b.blocked.down || b.touching.down;
-        e.img?.setPosition(e.x, b.bottom + 3).setOrigin(0.5, 1).setFlipX(e.dir > 0).setFrame(down ? step % 3 : 3);
+      if (e.kind === 'b') { // an 8-frame walk; on its back (frame 8) while falling
+        const step = Math.floor((this.time.now / 1000) * 12), down = b.blocked.down || b.touching.down;
+        e.img?.setPosition(e.x, b.bottom + 3).setOrigin(0.5, 1).setFlipX(e.dir > 0).setFrame(down ? step % 8 : 8); // 8-frame Veo walk; frame 8: on its back
       } else if (e.img) {
         const step = Math.floor((this.time.now / 1000) * WALKER_FPS);
         e.img.setPosition(e.x, e.y + 12).setFlipX(e.dir > 0) // sheet faces left

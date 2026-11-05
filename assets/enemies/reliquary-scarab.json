@@ -1,22 +1,5 @@
 {
  "frameWidth": 256,
  "frameHeight": 137,
- "frames": [
-  {
-   "head": 132,
-   "feet": 246
-  },
-  {
-   "head": 132,
-   "feet": 212
-  },
-  {
-   "head": 132,
-   "feet": 247
-  },
-  {
-   "head": 132,
-   "feet": 251
-  }
- ]
+ "frames": []
 }
