@@ -1799,7 +1799,10 @@ class Room extends Phaser.Scene {
       else this.figure(g, c, { lying: c.lying, dir: c.dir, t, soul: true });
     }
     const grounded = b.blocked.down || b.touching.down;
-    if (grounded && !this.audioGrounded && this.dead <= 0) GameAudio.play('hero-land', 3);
+    // Land sound only after a real moment in the air (standing on an idol flickers 'grounded' every frame).
+    this.airTime = grounded ? 0 : (this.airTime ?? 0) + dt;
+    if (grounded && !this.audioGrounded && this.landAir > 0.12 && this.dead <= 0) GameAudio.play('hero-land', 3);
+    this.landAir = grounded ? 0 : this.airTime;
     this.audioGrounded = grounded;
     this.walk = (this.walk || 0) + (grounded ? Math.abs(b.velocity.x) * dt : 0);
     const step = Math.floor(this.walk / RUN_STEP) % RUN_FRAMES.length;
