@@ -100,6 +100,8 @@ From docs/brainstorm/2026-11-03-bosses.md. The user wants these placeholders rep
 | Stag antler sweep → `assets/effects/stag-sweep.webp` | a pale violet arc of light trailing the antlers through the marked band, 4 frames, on black (additive) | about 6 × 2 tiles | | | | | code lines |
 | Dizzy sparks (all bosses) → `assets/effects/dizzy.webp` | small pale-yellow stars and motes circling in a ring, 6-frame loop | about 2 × 1 tiles | | | | | code circles |
 
+**Stag effects made 2026-11-04 (approved):** stag-beam 8 x 256x64 (tiles left-right; on black: draw with ADD blend at ~60% alpha and no blue tint), stag-sweep 4 x 384x128 (on black, ADD ~60%), stag-gate 8 x 192x288 (rise 1–3, stand 4, shatter 5–8; block at x 50–141, floor at the cell bottom), dizzy 6 x 128x64 (loop). Frame sizes in each .json.
+
 **Made 2026-11-04:** every file above now exists in `assets/effects/` (pollen-cloud 4 frames 213x256, impact 4 x 114x128, shockwave 4 x 211x96, mortar-burst 5 x 117x128, root 4 x 70x128, falling-stone 5 x 64x64, seal 2 x 168x64; frame size in each .json). In the game since 2026-11-04 (sprite sheets): pollen-cloud (the moth's Loom and Curtain clouds), impact (moth dive, tree slam), shockwave (tree slam, visual), mortar-burst (seed pods landing), root (the tree's floor spikes). seal and falling-stone are not wired as sheets.
 
 ## Hazards and room objects
