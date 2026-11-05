@@ -215,7 +215,7 @@ const SCRIPT = {
     H("sad", "Ninety floors, huh?"),
     H("determined", "\u2026Don't worry. I'll get there in a flash."),
     H("determined", "And then I'm clearing this whole godforsaken temple. For both of us."),
-    H("cocky", "Watch me."),
+    H("determined", "Watch me."),
     W(2.2, 'doorOpen'), // the doors open and he walks into the light on his own
     W(1, 'theEnd')
   ],

@@ -478,7 +478,7 @@ Shown as a cutscene after the fade (he stands on the ground the whole time, no f
 > **Hero** [sad]: Ninety floors, huh?  
 > **Hero** [determined]: …Don't worry. I'll get there in a flash.  
 > **Hero** [determined]: And then I'm clearing this whole godforsaken temple. For both of us.  
-> **Hero** [cocky]: Watch me.  
+> **Hero** [determined]: Watch me.  
 > *(He walks in. Fade to the ending card.)*
 
 ## Content warning and ending card (in game)
