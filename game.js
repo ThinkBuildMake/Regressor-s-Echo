@@ -41,9 +41,14 @@ const MOTH_FRAMES = [...Array(12).keys()], MOTH_FPS = 16, MOTH_SCALE = 0.243 * M
 // Its intro: it bursts out of the right wall at these rows (top, bottom) of its room. The hole is only
 // painted; the wall keeps its colliders, so the arena stays closed.
 const MOTH_HOLE = [2, 9];
-// Tree: lumbers toward you; swing, seed pods, slam, burst. A slam that lands on a soul sticks its hands for TREE_STUCK s
-// (stomp the bowed mask); the soul is unharmed. The burst can't be dodged: only a soul between you and the tree blocks it.
-const TREE_GLOW = 2.05, TREE_BURST = 1.5, TREE_STUCK = 2.5, TREE_WALK = 40, TREE_LUNGE = 240, TREE_FIST = 40;
+// Tree: lumbers toward you; swing, seed pods, slam, spikes. A slam that lands on a soul sticks its hands for TREE_STUCK s
+// (stomp the bowed mask); the soul is unharmed. Spikes cover the whole floor for TREE_SPIKES_UP s (longer than a jump):
+// only standing on a soul is safe.
+// Tree art (assets/bosses/tree-v2-*.webp, 700 px cells, facing left) is drawn at 0.31 scale: TREE_ART is a cell's height on screen.
+// The mask hitbox sits on the painted mask (TREE_MASK: px ahead of the body's center, px above the floor), in jump reach from the
+// floor; plain stomps bounce, so only stuck hands open it. TREE_REACH: where the slam's fist lands, px ahead of the body's center.
+const TREE_ART = 217, TREE_MASK = [25, 80], TREE_REACH = 75, TREE_WAKE = 2;
+const TREE_GLOW = 2.05, TREE_SPIKES = 1.5, TREE_SPIKES_UP = 1.2, TREE_STUCK = 2.5, TREE_WALK = 40, TREE_LUNGE = 240, TREE_FIST = 40;
 // Self-destruct (World 2 on): hold K/X this long. You keep moving while it charges; letting go cancels.
 const SD_HOLD = 0.75;
 // Recall (World 3): Q takes back your newest soul. Holding keeps going, each gap shorter, down to RECALL_MIN.
@@ -643,7 +648,7 @@ const ROOMS = [
     '############################################',
     '############################################',
   ], [538, 71], { world: 2 }],
-  ["The tree guardian", [ // lure the slam onto a spare soul to stick its hands; hide behind a soul from the burst
+  ["The tree guardian", [ // get the slam to land on a soul to stick its hands; stand on a soul when the floor spikes
     '##############################',
     '#                           V#',
     '#                           V#',
@@ -856,6 +861,8 @@ const START_ROOM = ((q) => q == null ? ROOMS.findIndex((r) => r[0] === 'The clea
 // Overlap that ignores shared edges (standing next to something isn't touching it).
 const hit = (A, B) => A.x < B.right && A.right > B.x && A.y < B.bottom && A.bottom > B.y;
 const bounds = (o) => o.getBounds();
+// A shot's hit box: a moth cloud's (hw: half width) sits inside its soft edge; other shots use a small core for walls.
+const shotBox = (sh, h = sh.hw ?? 4) => new Phaser.Geom.Rectangle(sh.x - h, sh.y - h, 2 * h, 2 * h);
 
 const stats = { deaths: 0, stagDeaths: 0, mothFinished: false, treePower: false, stagFinished: false }; // run progress survives room restarts
 const FONT = { fontFamily: 'Georgia, serif', align: 'center' };
@@ -971,8 +978,8 @@ class Room extends Phaser.Scene {
     ]) if (!this.textures.exists(key)) this.load.spritesheet(key, `assets/${path}.webp`, { frameWidth: width, frameHeight: height });
     if (!this.textures.exists('seedShot')) this.load.image('seedShot', 'assets/enemies/seed-shot.webp');
     if (!this.textures.exists('walker')) this.load.image('walker', 'assets/enemies/walker.webp');
-    for (const effect of ['impact', 'mortar-burst', 'root'])
-      if (!this.textures.exists(effect)) this.load.image(effect, `assets/effects/${effect}.webp`);
+    for (const [effect, width, height] of [['impact', 114, 128], ['mortar-burst', 117, 128], ['root', 70, 128], ['shockwave', 211, 96], ['pollen-cloud', 213, 256]])
+      if (!this.textures.exists(effect)) this.load.spritesheet(effect, `assets/effects/${effect}.webp`, { frameWidth: width, frameHeight: height });
     if (this.bossArtRequested) return;
     this.bossArtRequested = true;
     if (!this.textures.exists('seal')) this.load.image('seal', 'assets/effects/seal.webp');
@@ -981,14 +988,13 @@ class Room extends Phaser.Scene {
       if (!this.cache.json.exists(`stag-${pose}-frames`)) this.load.json(`stag-${pose}-frames`, `assets/bosses/stag-${pose}.json`);
     }
     for (const kind of ['moth', 'tree', 'stag']) {
-      if (!this.textures.exists(`${kind}-fallen`)) this.load.image(`${kind}-fallen`, `assets/bosses/${kind}-fallen.webp`);
+      if (!this.textures.exists(`${kind}-fallen`)) this.load.image(`${kind}-fallen`, `assets/bosses/${kind === 'tree' ? 'tree-v2' : kind}-fallen.webp`);
     }
-    for (const pose of ['intro', 'idle', 'swing', 'slam', 'throw']) {
-      if (!this.textures.exists(`tree-${pose}`)) this.load.image(`tree-${pose}`, `assets/bosses/tree-${pose}.webp`);
-      if (!this.cache.json.exists(`tree-${pose}-frames`)) this.load.json(`tree-${pose}-frames`, `assets/bosses/tree-${pose}.json`);
+    for (const pose of ['dormant', 'wake', 'walk', 'swing', 'slam', 'throw', 'fall']) {
+      if (!this.textures.exists(`tree-${pose}`)) this.load.image(`tree-${pose}`, `assets/bosses/tree-v2-${pose}.webp`);
+      if (!this.cache.json.exists(`tree-${pose}-frames`)) this.load.json(`tree-${pose}-frames`, `assets/bosses/tree-v2-${pose}.json`);
     }
     if (!this.textures.exists('seedPod')) this.load.image('seedPod', 'assets/bosses/seed-pod.webp');
-    if (!this.textures.exists('mothImpact')) this.load.image('mothImpact', 'assets/effects/impact.webp');
     if (!this.textures.exists('mothDust')) this.load.image('mothDust', 'assets/bosses/moth-dust.webp');
     if (!this.textures.exists('mothFly')) this.load.image('mothFly', 'assets/bosses/moth-fly-12.webp'); // Veo: one full wingbeat in 12 frames
     if (!this.textures.exists('rocks')) this.load.image('rocks', 'assets/world1/rocks.webp'); // 6 earth chunks
@@ -1110,15 +1116,15 @@ class Room extends Phaser.Scene {
               } else if (extra.boss === 'tree') {
                 const B = this.bosses.at(-1);
                 Object.assign(B, { kind: 'tree', story: 'treeDown', hidden: !Dialogue.seen.has('tree'), phase: 'idle', timer: 4, attack: -1, pods: [], open: 0, x: x + 16, x0: x + 16, face: -1 });
-                B.r.setDisplaySize(64, 64).setPosition(x + 16, y + T - 96).setVisible(!B.hidden);
+                B.r.setSize(44, 36).setPosition(x + 16 - TREE_MASK[0], y + T - TREE_MASK[1]).setVisible(!B.hidden);
                 B.floor = y + T;
-                if (this.textures.exists('tree-idle')) {
-                  B.img = this.add.image(x + 0.5 * T, B.floor, 'tree-idle').setOrigin(0.5, 1).setDepth(4);
-                  this.bossPose(B, 'tree', 'idle', 224, 0.8, true); // one frame at game size, not the whole sheet
-                  B.img.setY(B.floor + (B.artFoot ?? 0)).setVisible(!B.hidden);
+                if (this.textures.exists('tree-dormant')) { // asleep in its ruins until the intro wakes it
+                  B.img = this.add.image(x + 0.5 * T, B.floor, 'tree-dormant').setOrigin(0.5, 1).setDepth(4);
+                  this.bossPose(B, 'tree', 'dormant', TREE_ART, 1); // one frame at game size, not the whole sheet
+                  B.img.setY(B.floor + (B.artFoot ?? 0));
                   B.r.setFillStyle(0, 0);
                 }
-                B.r.on('destroy', () => { B.img?.destroy(); B.pods.forEach((p) => p.r.destroy()); });
+                B.r.on('destroy', () => { B.img?.destroy(); B.roots?.forEach((r) => r.destroy()); B.pods.forEach((p) => p.r.destroy()); });
               } else if (this.textures.exists('mothFly')) {
                 const B = this.bosses.at(-1), tex = this.textures.get('mothFly'), src = tex.getSourceImage();
                 const fw = src.width / 6, fh = src.height / 2; // 12 frames in 2 rows of 6: one row would be 8256px, past many GPUs' 8192 limit
@@ -2022,8 +2028,9 @@ class Room extends Phaser.Scene {
       sh.x += sh.vx * dt;
       sh.y += (sh.vy ?? 0) * dt;
       sh.img?.setPosition(sh.x, sh.y);
-      if (sh.mothDust && sh.y >= R.bottom - T - 4) { sh.destroy(); return false; }
-      if (!solid(new Phaser.Geom.Rectangle(sh.x - 4, sh.y - 4, 8, 8)) && R.contains(sh.x, sh.y)) return true;
+      if (sh.hw && sh.texture?.key === 'pollen-cloud') sh.setFrame(Math.floor(t * 6 + sh.hw) % 4); // slow swirl
+      if (sh.mothDust && sh.y + (sh.hw ?? 0) >= R.bottom - T - 4) { sh.destroy(); return false; }
+      if (!solid(shotBox(sh)) && R.contains(sh.x, sh.y)) return true;
       sh.destroy();
       return false;
     });
@@ -2097,11 +2104,10 @@ class Room extends Phaser.Scene {
         g.fillStyle(0xf1f578, 0.25).fillRect(box.x, box.y, box.width, box.height);
       } else if (B.phase === 'throw') {
         for (const x of B.landings) g.lineStyle(2, 0xf1f578, 0.9).strokeEllipse(x, B.landingY + 4, 76, 12);
-      } else if (B.phase === 'burst') { // rings closing in on the mask; your shield soul lights up
-        const k = 1 - (t * 2 % 1);
-        g.lineStyle(3, 0x9dffb0, 0.9).strokeCircle(B.r.x, B.r.y, 30 + k * 90);
-        const shield = this.treeShield(B);
-        if (shield) g.lineStyle(2, 0x9dffb0, 1).strokeRect(bounds(shield).x - 3, bounds(shield).y - 3, shield.width + 6, shield.height + 6);
+      } else if (B.phase === 'spikes' || (B.phase === 'spikesUp' && !B.roots)) { // cracks across the floor, then spikes (triangles without the root art)
+        const R = this.rooms[B.room].rect, up = B.phase === 'spikesUp';
+        g.fillStyle(0xff8a6b, up ? 0.9 : 0.25 + 0.2 * Math.sin(t * 20));
+        for (let x = R.x + T; x < R.right - T; x += 16) up ? g.fillTriangle(x, B.floor, x + 8, B.floor - 18, x + 16, B.floor) : g.fillRect(x + 2, B.floor - 3, 12, 3);
       }
       if (B.open > 0) g.lineStyle(3, 0xf1f578, 1).strokeCircle(B.r.x, B.r.y, 42);
     }
@@ -2267,11 +2273,12 @@ class Room extends Phaser.Scene {
     if (this.dead > 0 || this.transit || this.talk.line || this.talk.queue.length) return;
     const gap = 1.2 * 0.8 ** (BOSS_HP - B.hp);
     const enter = (phase) => { B.phase = phase; B.clock = 0; };
-    const pod = (x, y, vx, vy) => {
-      const sh = this.textures.exists('mothDust') ? this.add.image(x, y, 'mothDust').setDisplaySize(16, 16)
-        : this.add.circle(x, y, 8, 0xffef72);
+    // One drifting pollen cloud (hw: its hit box's half width, inside the art's soft edge). Souls stop it.
+    const cloud = (x, y, vx, vy, hw) => {
+      const sh = this.textures.exists('pollen-cloud') ? this.add.image(x, y, 'pollen-cloud', 0).setDisplaySize(hw * 2.35, hw * 2.8)
+        : this.add.circle(x, y, hw, 0xffef72, 0.7);
       GameAudio.play('moth-wing-dust-shot');
-      this.shots.push(Object.assign(sh.setDepth(4), { vx, vy, mothDust: true }));
+      this.shots.push(Object.assign(sh.setDepth(4), { vx, vy, hw, mothDust: true }));
     };
     if (!B.phase) { enter('pause'); B.r.y = floor - 96; B.fired = 0; }
     B.clock += dt;
@@ -2289,10 +2296,10 @@ class Room extends Phaser.Scene {
       B.warn.strokeCircle(B.r.x, B.r.y, 40 + Math.sin(B.clock * 40) * 5);
       if (B.clock >= 0.6) { enter('loom'); B.fired = 0; }
     } else if (B.phase === 'loom') {
-      if (B.clock >= B.fired * 0.35) {
+      if (B.clock >= B.fired * 0.7) { // one slow cloud aimed at you; a second after hit two
         const a = Math.atan2(p.y - B.r.y - BOSS_H / 2, p.x - B.r.x);
-        pod(B.r.x, B.r.y + BOSS_H / 2, Math.cos(a) * 210, Math.sin(a) * 210);
-        if (++B.fired >= (B.hp === 1 ? 4 : 3)) enter('loomGap');
+        cloud(B.r.x, B.r.y + BOSS_H / 2, Math.cos(a) * 150, Math.sin(a) * 150, 28);
+        if (++B.fired >= (B.hp === 1 ? 2 : 1)) enter('loomGap');
       }
     } else if (B.phase === 'loomGap' && B.clock >= gap) {
       enter('diveApproach');
@@ -2308,11 +2315,7 @@ class Room extends Phaser.Scene {
       if (soul) {
         B.r.y = bounds(soul).top - BOSS_H / 2;
         enter('stunned'); B.open = true;
-        const flash = this.textures.exists('mothImpact')
-          ? this.add.image(B.r.x, bounds(soul).top, 'mothImpact').setDisplaySize(2 * T, 2 * T)
-          : this.add.star(B.r.x, bounds(soul).top, 8, 12, 32, 0xffef72);
-        flash.setDepth(5);
-        this.tweens.add({ targets: flash, alpha: 0, y: flash.y - 12, duration: 500, onComplete: () => flash.destroy() });
+        this.playFx('impact', B.r.x, bounds(soul).top, 2 * T, 2.25 * T, 500);
       } else if (B.clock >= 0.5) enter('diveGap');
     } else if (B.phase === 'stunned') {
       for (let i = 0; i < 3; i++) {
@@ -2330,7 +2333,7 @@ class Room extends Phaser.Scene {
       if (B.clock >= 1) { enter('curtain'); B.fired = 0; }
     } else if (B.phase === 'curtain') {
       if (B.clock >= B.fired * 0.45) {
-        for (let j = 0; j < 12; j++) pod(R.x + (3.25 + B.fired * 8 + j / 2) * T, R.y + T + 8, 0, 280); // just under the ceiling, or it dies inside it
+        for (const dx of [1.5, 4.5]) cloud(R.x + (3 + B.fired * 8 + dx) * T, R.y + T + 48, 0, 280, 1.5 * T - 2); // two clouds fill the 6-tile strip; under the ceiling, or it dies inside it
         if (++B.fired === 3) enter('curtainGap');
       }
     } else if (B.phase === 'curtainGap' && B.clock >= gap) {
@@ -2350,19 +2353,19 @@ class Room extends Phaser.Scene {
   }
 
   // Attack sheets start at the wind-up and hold their recovery frame.
-  bossPose(B, kind, pose, height, duration, loop = false) {
+  bossPose(B, kind, pose, height, duration, loop = false, last = Infinity) { // last: play frames 0..last, hold last
     const key = `${kind}-${pose}`;
     if (!B.img || !this.textures.exists(key)) return;
     const tex = this.textures.get(key), info = this.cache.json.get(`${key}-frames`);
     if (!info) return;
     const { frameWidth: fw, frameHeight: fh } = info, source = tex.getSourceImage();
-    const cols = Math.floor(source.width / fw), count = cols * Math.floor(source.height / fh);
-    if (!tex.has(0)) for (let i = 0; i < count; i++) tex.add(i, 0, (i % cols) * fw, Math.floor(i / cols) * fh, fw, fh);
+    const cols = Math.floor(source.width / fw), all = cols * Math.floor(source.height / fh), count = Math.min(all, last + 1);
+    if (!tex.has(0)) for (let i = 0; i < all; i++) tex.add(i, 0, (i % cols) * fw, Math.floor(i / cols) * fh, fw, fh);
     if (B.artPose !== key) { B.artPose = key; B.artStart = this.time.now; }
     const frame = Math.floor((this.time.now - B.artStart) / (duration * 1000) * count);
     const sourceHeight = kind === 'stag' ? { idle: 486, intro: 584, charge: 500, beam: 555, wave: 617, walk: 520 }[pose] : fh;
     const scale = height / sourceHeight;
-    B.artFoot = (fh - (kind === 'stag' ? { idle: 660, intro: 677, charge: 676, beam: 653, wave: 676, walk: 645 } : { idle: 657, intro: 659, swing: 660, slam: 662, throw: 648 })[pose]) * scale; // empty rows under the feet
+    B.artFoot = (fh - (kind === 'stag' ? { idle: 660, intro: 677, charge: 676, beam: 653, wave: 676, walk: 645 } : { dormant: 658, wake: 652, walk: 652, swing: 653, slam: 652, throw: 653, fall: 652 })[pose]) * scale; // empty rows under the feet
     B.img.setTexture(key, loop ? frame % count : Math.min(count - 1, frame)).setScale(scale);
     if (pose === 'idle') B.img.setFrame(0).setScale(scale, scale * (1 + Math.sin(this.time.now / 320) * 0.012));
   }
@@ -2370,6 +2373,16 @@ class Room extends Phaser.Scene {
   fallenBoss(B) {
     const kind = B.stag ? 'stag' : B.kind === 'tree' ? 'tree' : 'moth', key = `${kind}-fallen`;
     if (!this.textures.exists(key)) return;
+    if (kind === 'tree' && !B.fell && B.img && this.textures.exists('tree-fall')) { // topples over 3 frames, then lies there
+      B.fell = true;
+      for (let i = 0; i <= 3; i++) this.time.delayedCall(i * 180, () => {
+        if (!B.img?.active) return;
+        if (i === 3) return this.fallenBoss(B);
+        this.bossPose(B, 'tree', 'fall', TREE_ART, 0.54);
+        B.img.setPosition(B.x, B.floor + B.artFoot).clearTint().setVisible(true).setAlpha(1);
+      });
+      return;
+    }
     if (!B.img) {
       B.img = this.add.image(B.r.x, B.r.y, key).setDepth(4);
       B.r.on('destroy', () => B.img.destroy());
@@ -2377,30 +2390,54 @@ class Room extends Phaser.Scene {
     const floor = B.floor ?? (B.stag ? B.r.y + 32 : this.rooms[B.room].rect.bottom - T); // the stag's room has two floor rows
     const tex = this.textures.get(key);
     // Fallen paintings have wide transparent margins.
-    const [x, y, w, h] = { moth: [464, 310, 344, 104], tree: [512, 270, 250, 158], stag: [558, 306, 136, 86] }[kind];
+    const [x, y, w, h] = { moth: [464, 310, 344, 104], tree: [4, 234, 726, 437], stag: [558, 306, 136, 86] }[kind];
     if (!tex.has('pose')) tex.add('pose', 0, x, y, w, h);
-    B.img.setTexture(key, 'pose').setOrigin(0.5, 1).setVisible(true).setAlpha(1).clearTint().setFlipX(false);
-    B.img.setScale((kind === 'tree' ? 150 : kind === 'stag' ? 160 : 170) / w);
-    B.img.setPosition(B.r.x, kind === 'moth' ? B.r.y : floor);
+    B.img.setTexture(key, 'pose').setOrigin(0.5, 1).setVisible(true).setAlpha(1).clearTint().setFlipX(kind === 'tree' && B.face > 0);
+    B.img.setScale((kind === 'tree' ? TREE_ART / 700 * w : kind === 'stag' ? 160 : 170) / w);
+    B.img.setPosition(kind === 'tree' ? B.x : B.r.x, kind === 'moth' ? B.r.y : floor);
     B.r.setFillStyle(0, 0);
     B.antlers?.setVisible(false);
     if (kind === 'moth') this.tweens.add({ targets: B.img, y: floor, duration: 650, ease: 'Quad.easeIn' });
   }
 
-  treeImpact(x, y) {
+  // Plays an effect sheet (assets/effects) once at w x h, then removes it. Null when its art isn't loaded.
+  playFx(key, x, y, w, h, ms) {
+    if (!this.textures.exists(key)) return null;
+    const n = this.textures.get(key).frameTotal - 1, s = this.add.image(x, y, key, 0).setDisplaySize(w, h).setDepth(5);
+    this.tweens.addCounter({ from: 0, to: n, duration: ms, onUpdate: (tw) => s.active && s.setFrame(Math.min(n - 1, Math.floor(tw.getValue()))), onComplete: () => s.destroy() });
+    return s;
+  }
+
+  // The slam lands at the fist (on the soul's top when one catches it); harmless ripples run out along the floor.
+  treeImpact(B, y) {
     GameAudio.play('tree-slam');
-    const r = this.textures.exists('impact') ? this.add.image(x, y, 'impact').setDisplaySize(64, 32) : this.add.ellipse(x, y, 64, 16, 0xf1f578, 0.6);
-    this.tweens.add({ targets: r, alpha: 0, duration: 300, onComplete: () => r.destroy() });
+    const x = B.x + B.face * TREE_REACH;
+    this.playFx('impact', x, y - 24, 72, 80, 350);
+    for (const dir of [-1, 1]) {
+      const wave = this.playFx('shockwave', x + dir * 30, B.floor - 15, 70, 32, 500);
+      if (wave) this.tweens.add({ targets: wave.setFlipX(dir < 0).setDepth(3), x: x + dir * 130, duration: 500 });
+    }
   }
 
   updateTree(B, dt) {
     const R = this.rooms[B.room].rect, p = this.player, feet = p.y + p.height / 2;
-    const pose = B.open > 0 || B.phase === 'slam' ? 'slam' : { swing: 'swing', throw: 'throw', burst: 'intro', intro: 'intro' }[B.phase] ?? 'idle';
-    this.bossPose(B, 'tree', pose, 224, { slam: TREE_GLOW, burst: TREE_BURST }[B.phase] ?? 0.8, pose === 'idle');
-    // Hands stuck in a soul: the mask bows forward and down into jump reach from the floor.
-    B.r.setPosition(B.x + (B.open > 0 ? B.face * T : 0), B.floor - (B.open > 0 ? 48 : 96));
-    B.img?.setPosition(B.x, B.floor + B.artFoot).setFlipX(B.face > 0).setVisible(B.r.visible)
-      .setTint({ slam: 0x69cfff, burst: 0x9dffb0, swing: 0xf1f578, throw: 0xf1f578 }[B.phase] ?? 0xffffff);
+    // Attacks reach their strike frame as the tell ends (swing 8 of 10, throw 8 of 10); the slam and the spikes
+    // land the fist on frame 7 of 10 as the tell ends and hold it there, through the stuck hands too.
+    const moving = B.x !== B.lastX; B.lastX = B.x;
+    const ground = B.open > 0 || ['slam', 'spikes', 'spikesUp'].includes(B.phase);
+    const [pose, duration, last] = B.hidden ? ['dormant', 1] : B.phase === 'intro' ? ['wake', TREE_WAKE]
+      : ground ? ['slam', (B.phase === 'slam' ? TREE_GLOW : TREE_SPIKES) * 7 / 6, 6]
+      : B.phase === 'swing' ? ['swing', 1] : B.phase === 'throw' ? ['throw', 0.875]
+      : ['walk', 12 * 22 * (TREE_ART / 700) / TREE_WALK]; // 12 steps of ~22 px (sheet scale) per cycle, at walking speed
+    this.bossPose(B, 'tree', pose, TREE_ART, duration, pose === 'walk', last);
+    if (pose === 'walk' && !moving) B.img?.setFrame(0).setScale(B.img.scaleX, B.img.scaleX * (1 + Math.sin(this.time.now / 320) * 0.012)); // stands and breathes
+    B.r.setPosition(B.x + B.face * TREE_MASK[0], B.floor - TREE_MASK[1]);
+    const rising = B.phase === 'spikesUp' && !B.hidden; // roots burst up across the floor, behind the souls
+    if (rising && !B.roots && this.textures.exists('root'))
+      B.roots = Array.from({ length: Math.floor((R.width - 2 * T) / 14) }, (_, i) => this.add.image(R.x + T + 7 + i * 14, B.floor, 'root', 0).setOrigin(0.5, 1).setDisplaySize(17, 30).setDepth(1).setFlipX(i % 2 > 0));
+    B.roots?.forEach((r, i) => r.setVisible(rising).setFrame(Math.min(3, Math.floor((TREE_SPIKES_UP - B.timer) / 0.03 + (i % 3) / 2))));
+    B.img?.setPosition(B.x, B.floor + B.artFoot).setFlipX(B.face > 0)
+      .setTint({ slam: 0x69cfff, spikes: 0xff8a6b, spikesUp: 0xff8a6b, swing: 0xf1f578, throw: 0xf1f578 }[B.phase] ?? 0xffffff);
     if (B.hidden || this.dead > 0 || this.talk.line || this.talk.queue.length || this.transit) return;
     B.hurt -= dt;
     if (p.body.blocked.down || p.body.touching.down) B.stompReady = true;
@@ -2411,10 +2448,7 @@ class Room extends Phaser.Scene {
       const landed = pod.r.y >= B.floor - 8;
       if (!blocked && (hit(bounds(p), bounds(pod.r)) || landed && Math.abs(p.x - pod.r.x) < 38 && feet > B.floor - 28)) return this.die();
       if (blocked || landed) {
-        if (landed) {
-          const burst = this.textures.exists('mortar-burst') ? this.add.image(pod.r.x, B.floor - 12, 'mortar-burst').setDisplaySize(76, 32) : this.add.rectangle(pod.r.x, B.floor - 12, 76, 24, 0xf1f578, 0.6);
-          this.tweens.add({ targets: burst, alpha: 0, duration: 300, onComplete: () => burst.destroy() });
-        }
+        if (landed) this.playFx('mortar-burst', pod.r.x, B.floor - 36, 76, 83, 350); // spikes reach the burst's 38px
         GameAudio.play('tree-seed-pod-burst');
         pod.r.destroy(); B.pods.splice(B.pods.indexOf(pod), 1);
       }
@@ -2423,12 +2457,13 @@ class Room extends Phaser.Scene {
     if (B.phase === 'idle') { // lumber toward you
       B.face = Math.sign(p.x - B.x) || B.face;
       if (Math.abs(p.x - B.x) > 3 * T) walk(p.x, TREE_WALK);
-    } else if (B.phase === 'slam') walk(B.aimX - B.face * 2.5 * T, TREE_LUNGE); // reach the target in time
+    } else if (B.phase === 'slam') walk(B.aimX - B.face * TREE_REACH, TREE_LUNGE); // reach the target in time
+    if (B.phase === 'spikesUp' && feet > B.floor - 12) return this.die(); // on the floor, not on a soul
     if ((B.timer -= dt) > 0) return;
     if (B.phase === 'idle' || B.phase === 'intro') {
       B.attack = (B.attack + 1) % 4;
-      B.phase = ['swing', 'throw', 'slam', 'burst'][B.attack];
-      B.timer = [0.8, 0.7, TREE_GLOW, TREE_BURST][B.attack];
+      B.phase = ['swing', 'throw', 'slam', 'spikes'][B.attack];
+      B.timer = [0.8, 0.7, TREE_GLOW, TREE_SPIKES][B.attack];
       if (B.phase === 'throw') { B.landingY = feet - 8; B.landings = [-64, 0, 64].map((dx) => Phaser.Math.Clamp(p.x + dx, R.x + T, R.right - T)); }
       if (B.phase === 'slam') { B.aimX = p.x; B.face = Math.sign(B.aimX - B.x) || B.face; } // locks where you stand
       return;
@@ -2437,36 +2472,28 @@ class Room extends Phaser.Scene {
       GameAudio.play('tree-branch-swing');
       if (hit(bounds(p), this.treeSwingBox(B))) return this.die();
     } else if (B.phase === 'throw') {
+      const s = TREE_ART / 700, hx = B.x + B.face * (348 - 60) * s, y = B.floor - (653 - 380) * s; // the throwing hand (throw sheet)
       for (const x of B.landings) {
-        const y = B.floor - 6 * T, r = this.textures.exists('seedPod') ? this.add.image(B.x, y, 'seedPod').setDisplaySize(20, 20) : this.add.rectangle(B.x, y, 20, 20, 0xf1f578);
+        const r = this.textures.exists('seedPod') ? this.add.image(hx, y, 'seedPod').setDisplaySize(20, 20) : this.add.rectangle(hx, y, 20, 20, 0xf1f578);
         GameAudio.play('tree-seed-pod-launch');
-        B.pods.push({ r, vx: (x - B.x) / 0.9, vy: (B.landingY - y - 350 * 0.81) / 0.9 });
+        B.pods.push({ r, vx: (x - hx) / 0.9, vy: (B.landingY - y - 350 * 0.81) / 0.9 });
       }
     } else if (B.phase === 'slam') { // a soul where the fists land catches them: they stick, and you're spared
       const c = this.treeCatch(B);
-      this.treeImpact(B.aimX, c ? bounds(c).top : B.floor);
+      this.treeImpact(B, c ? bounds(c).top : B.floor);
       this.cameras.main.shake(180, 0.005);
       if (c) B.open = TREE_STUCK;
       else if (Math.abs(p.x - B.aimX) < TREE_FIST && feet > B.floor - 40) return this.die();
-    } else if (B.phase === 'burst') { // no dodging it: only a soul between you and the tree blocks it
-      GameAudio.play('tree-slam'); this.cameras.main.shake(300, 0.01);
-      const ring = this.add.circle(B.r.x, B.r.y, 40).setStrokeStyle(6, 0x9dffb0).setDepth(6);
-      this.tweens.add({ targets: ring, scale: 25, alpha: 0, duration: 450, onComplete: () => ring.destroy() });
-      if (!this.treeShield(B)) return this.die();
+    } else if (B.phase === 'spikes') { // spikes rise across the whole floor
+      GameAudio.play('tree-slam'); this.cameras.main.shake(TREE_SPIKES_UP * 1000, 0.006);
+      B.phase = 'spikesUp'; B.timer = TREE_SPIKES_UP; return;
     }
     B.timer = 1.6 * Math.pow(0.8, BOSS_HP - B.hp); B.phase = 'idle';
   }
 
   treeCatch(B) { return this.corpses.find((c) => !c.buried && Math.abs(c.x - B.aimX) < TREE_FIST + c.width / 2); }
 
-  treeSwingBox(B) { return new Phaser.Geom.Rectangle(B.face < 0 ? B.x - 4 * T : B.x, B.floor - 2.5 * T, 4 * T, 2.5 * T); }
-
-  // A soul shields you from the burst when it stands between you and the tree, beside you (not under your feet).
-  treeShield(B) {
-    const p = this.player, feet = p.y + p.height / 2;
-    return this.corpses.find((c) => !c.buried && c.x >= Math.min(B.x, p.x) && c.x <= Math.max(B.x, p.x) &&
-      bounds(c).bottom > p.y && bounds(c).top < feet - 4);
-  }
+  treeSwingBox(B) { return new Phaser.Geom.Rectangle(B.face < 0 ? B.x - 3.2 * T : B.x, B.floor - 2.8 * T, 3.2 * T, 2.8 * T); } // the arm's sweep, chest high
 
   // Use the previous feet position so a fast fall still counts as landing on top.
   touchBoss() {
@@ -2642,7 +2669,7 @@ class Room extends Phaser.Scene {
     }
     const sawBoxes = this.saws.filter((sw) => sw.room === this.index).map((sw) => new Phaser.Geom.Rectangle(sw.x - SAW_R + 3, sw.y - SAW_R + 3, SAW_R * 2 - 6, SAW_R * 2 - 6));
     const falling = this.droppers.filter((d) => d.room === this.index && d.state !== 'gone').map((d) => bounds(d.r));
-    const hazards = [...this.spikes.map(bounds), ...this.shots.map(bounds), ...sawBoxes, ...falling];
+    const hazards = [...this.spikes.map(bounds), ...this.shots.map((sh) => sh.hw ? shotBox(sh) : bounds(sh)), ...sawBoxes, ...falling];
     if (hazards.some((h) => hit(pb, h)) || this.laserHit()) {
       const spike = this.spikes.find(h => hit(pb, bounds(h)));
       if (spike) GameAudio.play(spike.audioVine ? 'hazards-vine-wall-touch' : 'hazards-spikes-impale');

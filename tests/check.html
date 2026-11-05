@@ -517,7 +517,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     key('keyup', 83); key('keyup', 39);
     await wait(120);
     const dust = new Set();
-    const blockedDust = () => [...dust].some((sh) => !sh.active && Math.abs(sh.x - soul.x) < soul.width / 2 + 8 && Math.abs(sh.y - soul.y) < soul.height / 2 + 8);
+    const blockedDust = () => [...dust].some((sh) => !sh.active && Math.abs(sh.x - soul.x) < soul.width / 2 + (sh.hw ?? 0) + 8 && Math.abs(sh.y - soul.y) < soul.height / 2 + (sh.hw ?? 0) + 8);
     key('keydown', 32); key('keydown', 39);
     await until(() => s.player.x >= soul.x, 1500);
     key('keyup', 39); key('keyup', 32);
@@ -533,7 +533,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
       if (trace.at(-1)?.phase !== M.phase) trace.push({phase:M.phase,hp:M.hp,x:((s.player.x-O().x)/T).toFixed(1),feet:((s.player.y+15-O().y)/T).toFixed(1)});
       phases.add(M.phase);
       // Every stomp hurts now, so hold damage off until this hp's attacks have all been seen.
-      if (!(M.hp === 3 ? phases.has('curtain') : M.hp === 2 ? phases.has('skimmer') : loomCounts.has(4))) M.hurt = Math.max(M.hurt, 0.05);
+      if (!(M.hp === 3 ? phases.has('curtain') : M.hp === 2 ? phases.has('skimmer') : loomCounts.has(2))) M.hurt = Math.max(M.hurt, 0.05);
       if (M.phase === 'loomGap') loomCounts.add(M.fired);
       if (M.phase === 'stunned' && M.clock > 0.05) check(M.img?.angle === 25 || !M.img, 'moth: stunned wings visibly droop');
       const grounded = s.player.body.blocked.down || s.player.body.touching.down;
@@ -557,7 +557,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
       else { key(s.player.x > target ? 'keydown' : 'keyup', 37); key(s.player.x < target ? 'keydown' : 'keyup', 39); }
       s.shots.filter((sh) => sh.mothDust).forEach((sh) => {
         dust.add(sh);
-        if (sh.vx === 0 && sh.vy === 280) curtainColumns.add((sh.x - O().x) / T);
+        if (sh.vx === 0 && sh.vy === 280) curtainColumns.add(`${(sh.x - sh.hw - O().x) / T}-${(sh.x + sh.hw - O().x) / T}`);
       });
       const closedFall = !M.open && s.player.body.velocity.y > 0;
       await wait(20);
@@ -569,8 +569,8 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     key('keyup', 32); key('keyup', 37); key('keyup', 39);
     check(phases.has('curtain') && phases.has('skimmer'), `moth: loop (${JSON.stringify(trace.slice(-6))}, hp=${M.hp}, deaths=${stats.deaths-fightDeaths}, x=${(s.player.x-O().x)/T}, y=${(s.player.y-O().y)/T})`);
     check(sideJump, 'moth: jumping into the stunned side is harmless');
-    check([0, 1, 2].every((i) => curtainColumns.has(3.25 + i * 8) && curtainColumns.has(8.75 + i * 8)), 'moth: curtain dust fills exactly the told columns');
-    check(loomCounts.has(3) && loomCounts.has(4), 'moth: Loom adds its fourth aimed pod after hit two');
+    check(curtainColumns.size === 6 && [...curtainColumns].every((c) => [0, 1, 2].some((i) => { const [a, b] = c.split('-').map(Number); return a >= 3 + i * 8 && b <= 9 + i * 8 && b - a > 2.8; })), `moth: curtain clouds fill exactly the told columns (${[...curtainColumns]})`);
+    check(loomCounts.has(1) && loomCounts.has(2), 'moth: Loom adds a second aimed cloud after hit two');
     check(plainBounce || M.hp <= 0, 'moth: a stomp hurts it even when it is not stunned');
     check(bounceCleared, 'moth: real stomp bounce clears the back and continues to the next stomp');
     check(stats.deaths === deaths + 1 && s.corpses[0] === soul, `three stomps keep the same thorn soul without dying (${JSON.stringify(trace.slice(-6))})`);
@@ -786,7 +786,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     const floor = () => O().y + 16 * 32;
     s = await cleanSolveRoom('The tree guardian');
     let B = s.boss;
-    check(!B.img || B.img.x === B.r.x, 'tree: painted face and mask share the same column');
+    check(!B.img || B.r.x === B.img.x + B.face * TREE_MASK[0], 'tree: the mask hitbox sits on the painted mask');
     const x0 = B.x; B.timer = 5; at(3); await wait(1000);
     check(B.x < x0 - 20 && B.face === -1, `tree: lumbers toward you between attacks (moved ${((x0 - B.x) / 32).toFixed(1)} tiles)`);
     s.player.body.reset(B.r.x, bounds(B.r).top - 14); s.player.body.velocity.y = 10; s.bossPreviousFeet = bounds(B.r).top; B.stompReady = true;
@@ -805,23 +805,25 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     check(B.phase === 'slam' && s.treeCatch(B) === soul, 'tree: the slam aims at you and your soul beside you will catch it');
     at(6); await until(() => B.open > 0 || s.dead > 0, 4000, 'hands stuck'); await wait(50);
     check(stats.deaths === 1 && !soul.buried && s.corpses.includes(soul), 'tree: the soul catches the fists and is not removed');
-    check(bounds(B.r).top > floor() - 3 * 32, `tree: stuck hands bow the mask into jump reach (top ${((floor() - bounds(B.r).top) / 32).toFixed(1)} up)`);
+    check(bounds(B.r).top > floor() - 3.2 * 32, `tree: the stuck mask is in jump reach from the floor (top ${((floor() - bounds(B.r).top) / 32).toFixed(1)} up)`);
     const maskTx = (B.r.x - O().x - 16) / 32;
-    await walkTo(maskTx - 3); await jumpTo(maskTx);
+    await walkTo(maskTx - 3);
+    key('keydown', 32); await walkTo(maskTx); await until(() => B.hp < 3 || s.dead > 0, 2000, 'stomp lands'); key('keyup', 32);
     check(B.hp === 2 && stats.deaths === 1, 'tree: a stomp from the floor lands on the stuck mask');
     // Slam with no soul in play lands on you.
     s = await cleanSolveRoom('The tree guardian'); B = s.boss;
     at(12); await wait(100); attack(2); await settle();
     check(stats.deaths === 1 && B.open === 0, 'tree: a slam with no soul lands on you and sticks nothing');
-    // Burst: no dodging it; only a soul between you and the tree blocks it.
+    // Spikes: the whole floor, longer than a jump; only standing on a soul is safe.
     s = await cleanSolveRoom('The tree guardian'); B = s.boss;
     at(8); await wait(100); attack(3); await settle();
-    check(stats.deaths === 1, 'tree: the burst kills you in the open');
+    check(stats.deaths === 1, 'tree: the spikes kill you on the floor');
+    await alive(); at(5); await wait(100); attack(3); await until(() => B.phase === 'spikesUp', 3000, 'spikes rise');
+    key('keydown', 32); await wait(300); key('keyup', 32); await settle();
+    check(stats.deaths === 2, 'tree: the spikes outlast a jump');
     await alive(); await place(8, 0); await wait(100); B.x = B.x0;
-    at(6); await wait(100); attack(3); await settle();
-    check(stats.deaths === 2, 'tree: a soul between you and the tree shields the burst');
     at(8, 1); await wait(150); attack(3); await settle();
-    check(stats.deaths === 3, 'tree: standing on the soul leaves you exposed to the burst');
+    check(stats.deaths === 3 && B.phase === 'idle', 'tree: standing on a soul rides out the spikes');
     // Three stuck-hand stomps win.
     s = await cleanSolveRoom('The tree guardian'); B = s.boss;
     Dialogue.seen.delete('treeDown'); Dialogue.seen.delete('guideCrack');
