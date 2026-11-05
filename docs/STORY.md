@@ -227,14 +227,14 @@ The hero works it out himself; the key prompt that follows confirms it.
 > *(The moth bursts in through the right wall.)*  
 > **Guide** [wry]: …that.
 
-### 14. Too high — *after his 2nd death in the fight*
+### 14. Too high — *after his 20th death in the fight*
 The moth flies higher than a jump; a soul is the step that reaches it (taught at the thorn wall), so the guide only nudges here. Dying heals the moth, but nobody says so; the player sees it.
 > **Hero** [annoyed]: Ugh. I can't get high enough to stomp on it.  
 > **Guide** [thinking]: I made it past here. There's a way.  
 > **Hero** [annoyed]: Then tell me!  
 > **Guide** [amused]: Where's the fun in that?
 
-*After about 25 deaths there (each try costs about two, since dying heals the moth), one more nudge:*
+*After 40 deaths there (each try costs about two, since dying heals the moth), one more nudge:*
 > **Guide** [thinking]: Remember the thorn wall? You needed a little extra height there, too.
 
 ### 15. The moth falls — *on the last stomp*

@@ -337,13 +337,13 @@ const SCRIPT = {
     G('surprised', "Oh shoot, it's been so long that I forgot. Be careful! Watch out for…"),
     { ...G('wry', '…that.'), cue: 'moth' },
   ],
-  dust: [ // 2nd death in the fight: it flies too high to reach
+  dust: [ // 20th death in the fight: it flies too high to reach
     H('annoyed', "Ugh. I can't get high enough to stomp on it."),
     G('thinking', "I made it past here. There's a way."),
     H('annoyed', 'Then tell me!'),
     G('amused', "Where's the fun in that?"),
   ],
-  dust2: [G('thinking', 'Remember the thorn wall? You needed a little extra height there, too.')], // 25th death (each try costs about two deaths)
+  dust2: [G('thinking', 'Remember the thorn wall? You needed a little extra height there, too.')], // 40th death (each try costs about two deaths)
   tree: [
     H('thinking', 'Big tree. Old tree. Very… still tree.'),
     G('warning', "Don't."), H('annoyed', "Don't what?"),

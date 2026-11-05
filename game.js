@@ -493,7 +493,7 @@ const ROOMS = [
     'V                            V',
     'VP            xB             V',
     '##############################',
-  ], [286, 104], { world: 1, spots: [[7, 'moth']], deathTalk: { 2: 'dust', 25: 'dust2' } }], // the shaking starts 7 tiles in
+  ], [286, 104], { world: 1, spots: [[7, 'moth']], deathTalk: { 20: 'dust', 40: 'dust2' } }], // the shaking starts 7 tiles in
   // ---------------- World 2: Overgrown Ruins (greybox) ----------------
   ["Let go", [ // hold K: two souls stacked reach a 5-high ledge
     '##############################',
