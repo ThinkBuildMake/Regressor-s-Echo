@@ -475,9 +475,9 @@ Shown as a cutscene after the fade (he stands on the ground the whole time, no f
 > **Hero** [sad]: … *(He stands.)*
 
 ### 9. Floor one — *the pyramid's entrance; the game ends*
-> **Hero** [sad]: …Idiot.  
-> **Hero** [determined]: Ninety floors, huh.  
-> **Hero** [determined]: Then I'm not stopping at ninety.  
+> **Hero** [determined]: Ninety floors, huh? Don't worry. I'll get there in a flash.  
+> **Hero** [determined]: And then… clear this godforsaken temple. For both you and I.  
+> **Hero** [determined]: Watch me.  
 > *(He walks in. Fade to the ending card.)*
 
 ## Content warning and ending card (in game)

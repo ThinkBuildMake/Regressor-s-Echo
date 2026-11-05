@@ -212,9 +212,9 @@ const SCRIPT = {
     H("sad", "\u2026"), // he stands up, quiet
   ],
   floorOne: [
-    H("sad", "\u2026Idiot."),
-    H("determined", "Ninety floors, huh."),
-    H("determined", "Then I'm not stopping at ninety."),
+    H("determined", "Ninety floors, huh? Don't worry. I'll get there in a flash."),
+    H("determined", "And then\u2026 clear this godforsaken temple. For both you and I."),
+    H("determined", "Watch me."),
     W(2.2, 'doorOpen'), // the doors open and he walks into the light on his own
     W(1, 'theEnd')
   ],
