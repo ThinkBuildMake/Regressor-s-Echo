@@ -666,9 +666,9 @@ const ROOMS = [
     '#                           V#',
     '#                           V#',
     '#                           V#',
-    '                            V ',
-    '                            V ',
-    ' P                     B    V ',
+    'V                           V ',
+    'V                           V ',
+    'VP                     B    V ',
     '##############################',
   ], [582, 75], { world: 2, boss: "tree", spots: [[7, "tree"]], deathTalk: {"2": "treeSlam", "25": "treeSlam2"} }],
   // ---------------- World 3: Sanctum (greybox) ----------------
@@ -1148,7 +1148,7 @@ class Room extends Phaser.Scene {
             case 'V': if (name.startsWith('Climb: stack') && Dialogue.seen.has('amulet')) break; // the first room's vines part once he has the amulet
               this.gates.push(Object.assign(rect(x, y, T, T, 0x4a6b3a), { room: ri })); this.statics.add(this.gates.at(-1));
               hazard(this.gates.at(-1), 'vine-barrier', T, T);
-              if ((name === 'The spectral stag' || name === 'The moth') && tx === 0) this.gates.at(-1).body.enable = false;
+              if (tx === 0) this.gates.at(-1).setAlpha(0).body.enable = false; // a boss room's entrance vines grow shut once you're in
               break;
             case 'a': {
               rect(x, y, T, T, 0x539bd6);
@@ -1452,6 +1452,14 @@ class Room extends Phaser.Scene {
 
   // Staging cues fired by dialogue lines (see `cue` in dialogue.js).
   // A key prompt at the bottom of the screen, once per run. It stays until you do the move (or 25s pass).
+  // The room's vines all shut; ones that were open grow in (the art copies the gate's alpha).
+  closeGates(room) {
+    for (const g of this.gates) if (g.active && g.room === room && !g.body.enable) {
+      g.body.enable = true;
+      this.tweens.add({ targets: g, alpha: 1, duration: 350 });
+    }
+  }
+
   // On the floor, or standing on an idol (the collider only reports touching.down on the frames it pushes him out).
   onGround(b) {
     return b.blocked.down || b.touching.down || (b.velocity.y >= 0 && this.enemies.some((o) => o.kind === 'i' && o.body
@@ -1618,7 +1626,7 @@ class Room extends Phaser.Scene {
     if (name === 'shake') this.cameras.main.shake(1400, 0.006);
     if (name === 'moth' && this.boss?.hidden) { // bursts out of the wall, flies to its patrol spot, screams
       const B = this.boss, { x, y } = B.r, h = this.breakWall(B, true);
-      this.gates.filter((g) => g.room === B.room).forEach((g) => { g.body.enable = true; });
+      this.closeGates(B.room);
       B.dir = -1;
       B.r.setVisible(true).setPosition(h.x, h.y);
       B.img?.setScale(MOTH_SCALE * 0.5);
@@ -2329,7 +2337,7 @@ class Room extends Phaser.Scene {
       B.tugText.setPosition(bx, by - 34).setScale(1 + 0.08 * Math.sin(B.clock * 16));
     }
     if (this.dead > 0 || this.transit || this.talk.line || this.talk.queue.length) return;
-    if (p.x > R.x + 1.5 * T) this.gates.filter((g) => g.active && g.room === B.room).forEach((g) => { g.body.enable = true; });
+    if (p.x > R.x + 1.5 * T) this.closeGates(B.room);
     if (!Dialogue.seen.has('stagArrival')) { Dialogue.play(this, 'stagArrival'); return; }
     if (B.hidden) return;
     B.hurt -= dt; B.clock += dt;
@@ -2419,7 +2427,7 @@ class Room extends Phaser.Scene {
     if (!B || B.hidden) return;
     if (B.story === 'mothDown') {
       if (this.player.x > this.rooms[B.room].rect.x + 1.5 * T)
-        this.gates.filter((g) => g.room === B.room).forEach((g) => { g.body.enable = true; });
+        this.closeGates(B.room);
       if ((B.resetWait = Math.max(0, (B.resetWait ?? 0) - dt)) > 0) return;
       return this.updateMoth(B, dt);
     }
@@ -2527,7 +2535,7 @@ class Room extends Phaser.Scene {
     const scale = height / sourceHeight;
     B.artFoot = (fh - (kind === 'stag' ? { idle: 660, intro: 677, charge: 676, beam: 653, wave: 676, walk: 645 } : { dormant: 658, wake: 652, stand: 652, settle: 652, walk: 652, swing: 653, slam: 652, throw: 653, fall: 652 })[pose]) * scale; // empty rows under the feet
     B.img.setTexture(key, loop ? frame % count : Math.min(count - 1, frame)).setScale(scale);
-    if (pose === 'idle') B.img.setFrame(0).setScale(scale, scale * (1 + Math.sin(this.time.now / 320) * 0.012));
+    if (pose === 'idle') B.img.setFrame(1).setScale(scale, scale * (1 + Math.sin(this.time.now / 320) * 0.012));
   }
 
   fallenBoss(B) {

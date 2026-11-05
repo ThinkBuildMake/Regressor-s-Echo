@@ -152,7 +152,7 @@ def sawmill(o, p):
 room('Sawmill', [496, 71], 44, 22, 2, 'SHOWCASE W2: spring + timed self-destruct jams a saw, plate soul as a shield, thrower, laser', sawmill)
 
 def tree_guardian(o, p):
-    o(1, 1, 28, 15); o(0, 13, 0, 15); o(29, 13, 29, 15)
+    o(1, 1, 28, 15); o(0, 13, 0, 15, 'V'); o(29, 13, 29, 15)   # entrance vines close behind you
     p(1, 15, 'P'); p(23, 15, 'B'); o(28, 1, 28, 15, 'V')
 room('The tree guardian', [540, 75], 30, 17, 2, 'get the slam to land on a soul to stick its hands; stand on a soul when the floor spikes', tree_guardian)
 
