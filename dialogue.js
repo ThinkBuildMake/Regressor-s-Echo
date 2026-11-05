@@ -185,7 +185,7 @@ const SCRIPT = {
   stagNote: [ // he finds it behind the old tree, kneels, and reads it in the ghost's voice (his portrait), in quotes
     H("scared", "Where\u2026 where is it?"),
     H("scared", "The thing he left behind the tree\u2026"),
-    W(0.9), W(0.8), W(0.9), // he scrambles around the roots looking for it
+    W(0.2), W(0.2), W(0.4), // he runs back and forth past the tree looking for it (each beat lasts until he gets there)
     H("sad", "Ah\u2026"),
     G("solemn", "\"Dear Me,\""),
     G("sad", "\"If you're reading this\u2026 then I've kicked the bucket.\""),
@@ -451,9 +451,9 @@ stage('moth', 1, { walk: 10, face: 'right', speed: 22 });
 stage('moth', 2, { walk: 11, face: 'right', speed: 22 });
 stage('stagPromise', 0, { walk: 20, guide: { x: 18, y: 13 }, face: 'guide' });
 stage('stagNote', 0, { walk: 17.5, face: 'right' });
-stage('stagNote', 2, { walk: 22.5, face: 'right' }); // scrambling: past the tree, back, a hop over the roots
-stage('stagNote', 3, { walk: 18, face: 'left' });
-stage('stagNote', 4, { walk: 19.5, face: 'left', hop: true });
+stage('stagNote', 2, { walk: 23, speed: 190 }); // scrambling: running past the tree and back
+stage('stagNote', 3, { walk: 17, speed: 190 });
+stage('stagNote', 4, { walk: 19.5, speed: 150, face: 'left' });
 stage('stagNote', 5, { pose: 'kneel' }); // Ah… He bends down to read
 stage('stagNote', SCRIPT.stagNote.length - 1, { pose: 'idle' });
 // The stag's fall: walk away from where it lies into the open clearing, back turned to it.
@@ -782,7 +782,9 @@ const Dialogue = {
     }
     if (t.line.wait) {
       t.line.wait = Math.max(0, t.line.wait - dt);
-      if (!t.line.wait) { this.act(scene, t.line, true); t.line = null; }
+      // A silent beat with a walk lasts until he gets there (a short beat used to cut the walk off and snap him to the mark).
+      const walking = t.motion.mark && Math.abs(t.motion.mark.x - scene.player.x) > 2 && t.motion.elapsed < 6;
+      if (!t.line.wait && !walking) { this.act(scene, t.line, true); t.line = null; }
       return true;
     }
     if (!t.line.text) { this.act(scene, t.line, true); t.line = null; return true; }

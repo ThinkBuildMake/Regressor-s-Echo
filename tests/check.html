@@ -1654,6 +1654,11 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   }
   if (matches('The spectral stag')) {
     s = await cleanSolveRoom('The spectral stag');
+    // A soul left in the doorway before the vines grow shut can't be used to swap out through them.
+    s.player.body.reset(O().x + 0.5 * 32, O().y + 15 * 32 - 16); s.die(); await alive(); await wait(100);
+    key('keydown', 69); await wait(30); key('keyup', 69); await wait(200);
+    check(s.player.x > O().x + 32 && s.rooms[s.index].name === 'The spectral stag', 'The spectral stag: no swapping out through the closed entrance vines');
+    s = await cleanSolveRoom('The spectral stag');
     await sacrifice();
     s = await shiftR(); await wait(200); await alive();
     check(s.boss.deaths === 1, 'The spectral stag: the death count survives Shift+R');

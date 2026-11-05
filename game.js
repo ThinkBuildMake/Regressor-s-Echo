@@ -2884,9 +2884,13 @@ class Room extends Phaser.Scene {
     }
     if (swap && ((this.rooms[this.index].world ?? 0) >= 3 || this.treePower)) {
       const c = this.corpses.at(-1);
-      if (c) {
+      const sink = c?.lying ? p.body.bottom - p.y - c.height / 2 : 0; // a flat soul is shorter than you: meet it feet to feet, not inside the floor
+      // Never swap into closed vines or a door (a soul left in a doorway before its vines grew shut would push you out the far side).
+      const dest = c && new Phaser.Geom.Rectangle(c.x - p.body.width / 2 + 1, c.y - sink - p.body.height / 2 + 1, p.body.width - 2, p.body.height - 2);
+      const blocked = dest && [...this.gates, ...this.doors].some((g) => g.active && g.body?.enable && Phaser.Geom.Rectangle.Overlaps(dest, bounds(g)));
+      if (blocked) GameAudio.play('amulet-refuses');
+      else if (c) {
         const x = p.x, y = p.y, vx = p.body.velocity.x;
-        const sink = c.lying ? p.body.bottom - p.y - c.height / 2 : 0; // a flat soul is shorter than you: meet it feet to feet, not inside the floor
         p.body.reset(c.x, c.y - sink); p.body.setVelocity(vx, 0);
         c.setPosition(x, y + sink); c.body.updateFromGameObject(); c.vy = 0;
         c.sprites?.forEach((sp) => sp.setPosition(c.x, c.y + c.height / 2));
