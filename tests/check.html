@@ -2406,6 +2406,8 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     game.scene.stop('room'); game.scene.start('end');
     await wait(12500);
     key('keydown', 13); await wait(50); key('keyup', 13);
+    await until(() => game.scene.isActive('title'), 5000, 'ending card back to the title');
+    await wait(300); game.scene.getScene('title').start(); // press Start (the menu reads e.code, which synthetic keys lack)
     await until(() => game.scene.isActive('room') && room().player?.body, 15000, 'play again');
     s = room(); Dialogue.skip(s); await wait(300);
     const deaths = stats.deaths;

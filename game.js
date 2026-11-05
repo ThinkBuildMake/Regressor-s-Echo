@@ -925,16 +925,20 @@ class End extends Phaser.Scene {
     t(350, 'Thank you for playing.', '20px', '#dfe8e2', 9600);
     t(400, 'A game by Michael Chuang · Made for Game Week', '14px', '#a8b8ad', 10400);
     t(422, 'Art, music and sound made with generative AI tools', '13px', '#7f9086', 10400);
-    const again = t(490, 'Press any key to play again', '14px', '#e8b44a', 12000);
-    this.time.delayedCall(12000, () => this.input.keyboard.once('keydown', () => {
+    const again = t(490, 'Click or press any key to continue', '14px', '#e8b44a', 12000);
+    const toTitle = () => { // a fresh run starts from the title screen
+      if (this.leaving) return;
+      this.leaving = true;
       GameAudio.ending = false;
       GameAudio.play('ui-menu-select');
       stats.deaths = stats.stagDeaths = 0; stats.treePower = false; stats.mothFinished = false; stats.stagFinished = false;
       rules.selfDestruct = rules.recall = false; // the moth grants these again on the next run
       Dialogue.seen.clear();
       NAMES.guide = '???';
-      this.scene.start('room', { index: START_ROOM });
-    }));
+      this.scene.start('title');
+    };
+    this.leaving = false;
+    this.time.delayedCall(12000, () => { this.input.keyboard.once('keydown', toTitle); this.input.once('pointerdown', toTitle); });
     again.setDepth(1);
   }
 }
