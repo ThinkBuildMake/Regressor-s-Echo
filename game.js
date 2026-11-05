@@ -943,7 +943,8 @@ class End extends Phaser.Scene {
       Dialogue.seen.clear();
       NAMES.guide = '???';
       UI.resumeIndex = undefined; // a fresh run starts from the first room
-      this.scene.start('title');
+      this.cameras.main.fadeOut(1000, 0, 0, 0); // darken, then the title fades in
+      this.cameras.main.once('camerafadeoutcomplete', () => this.scene.start('title', { fadeIn: true }));
     };
     this.leaving = false;
     this.time.delayedCall(12000, () => { this.input.keyboard.once('keydown', toTitle); this.input.once('pointerdown', toTitle); });

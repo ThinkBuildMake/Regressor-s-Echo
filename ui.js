@@ -106,6 +106,7 @@ class Title extends Phaser.Scene {
       { label: 'Controls', act: () => this.open('controls') },
     ], 310);
     this.add.text(480, 528, 'Click or use ↑ ↓ and Enter', { ...FONT, fontSize: '13px', color: '#a8b8ad' }).setOrigin(0.5);
+    if (this.sys.settings.data?.fadeIn) this.cameras.main.fadeIn(900, 0, 0, 0); // from the ending card
   }
   open(page) { this.scene.pause(); this.scene.launch('menu', { page, back: 'title' }); }
   // The title (under its loading screen) stays up until the game has built the world, so there's no blank gap.
