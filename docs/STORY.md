@@ -52,7 +52,7 @@ Let each line respond to what the other just said or did. Give them room to hesi
 
 ## Key prompts (on screen, never spoken)
 
-The characters hint at a move; a prompt at the bottom of the screen gives the key. Each shows once per run, right after its scene (or on entering the room), and fades once the player does the move.
+The characters hint at a move; a prompt at the bottom of the screen gives the key. Each shows once per run, right after its scene (or on entering the room), and fades once the player does the move, after 25 seconds, or when the player leaves the room.
 
 | Move | Prompt | When |
 |---|---|---|
@@ -426,34 +426,50 @@ A cutscene: the game takes over. The two walk away from the fallen stag into the
 > **Guide** [pained]: Ugh…  
 > **Guide** [pained]: \*crack\*  
 > **Hero** [shouting]: NO—!  
-> *(From here he is breaking apart: fainter with every line, his words more broken, small cracks as he goes. The hero's lines stay whole.)*  
+> *(From here he is breaking apart: fainter with every line, his words more broken, small cracks as he goes. The hero's lines stay whole. Short lines, one thought per box, so each one lands. The guide's sheet has no pained face yet; [pained] shows his weary one.)*  
 > **Guide** [pained]: I knew… it would come to this.  
-> **Guide** [weary]: Same thing… happened last time. My guide… did exactly this.  
+> **Guide** [weary]: Same thing… happened last time.  
+> **Guide** [sad]: My guide… did exactly this.  
 > **Hero** [shouting]: You KNEW? Then why would you—  
 > **Guide** [warm]: Because… I knew.  
 > **Hero** [sad]: …  
-> **Guide** [warm]: I've watched over you… You're already doing better than I did… You'll get further.  
-> **Guide** [solemn]: Just remember… the deaths… aren't free. Count… every one.  
+> **Guide** [warm]: I've watched over you…  
+> **Guide** [warm]: You're already doing better than I did…  
+> **Guide** [warm]: You'll get further.  
+> **Guide** [solemn]: Just remember… the deaths… aren't free.  
+> **Guide** [solemn]: Count… every one.  
 > **Hero** [sad]: Don't— you can't just—  
 > **Guide** [wry]: …Hey.  
-> **Guide** [warm]: I was never… alive in the first place… right?  
+> **Guide** [warm]: I was never… alive in the first place…  
+> **Guide** [warm]: …right?  
 > *(He breaks apart and is gone. Fade to black; the next scene is the note.)*
 
 ### 8. The note — *behind the tree*
-Shown as a cutscene after the fade: he walks to the note and kneels; it's read in the guide's portrait, each line in quotes. Then control returns.
-*(He keeps his promise. Behind the tree, a patch of earth has been smoothed flat, and words are scratched into it in his own handwriting.)*
-> If you're reading this… then it must mean I've kicked the bucket.  
-> Don't make that face. I can see it from here. Well. Could.  
-> Well, I guess it's time to come clean.  
-> You know how I said there was a limit? That was a lie. Figured you'd be more careful if you thought you were running out.  
-> The limit is when your spirit breaks. On floor ninety, mine did, and I just… stopped getting back up.  
-> So keep getting back up. No matter how hard it gets. No matter what.  
-> Thanks for putting up with me. I know I'm not great company. I'd know.  
-> And don't take my ending as yours. You're me, sure, but you were different from the start.  
-> You'll get further than I ever could.  
-> Trust me.  
-> — You  
-> P.S. The amulet's still not worth anything. I checked.
+Shown as a cutscene after the fade (he stands on the ground the whole time, no falling pose). Nothing is drawn on the ground: the hero looking down is enough. He walks to the spot, wonders aloud, then kneels to read; the note is read in the guide's portrait, each line in quotes, one thought per box. Then he stands and control returns.
+> **Hero** [thinking]: Now what did he want me to see behind the tree?  
+> **Hero** [curious]: Ah. *(He kneels.)*  
+> "Dear Me,"  
+> "If you're reading this… then I've kicked the bucket."  
+> "Don't make that face. I can see it from here."  
+> "Well. Could."  
+> "I guess it's time to come clean."  
+> "You know how I said there was a limit?"  
+> "That was a lie."  
+> "Figured you'd be more careful if you thought you were running out."  
+> "The limit is when your spirit breaks."  
+> "And on floor ninety… mine did."  
+> "I just… stopped getting back up."  
+> "So keep getting back up."  
+> "No matter how hard it gets."  
+> "No matter what."  
+> "Thanks for putting up with me. I know I'm not great company."  
+> "I'd know."  
+> "And don't take my ending as yours."  
+> "You're me, sure… but you were different from the start."  
+> "You'll get further than I ever could."  
+> "Trust me."  
+> "— You"  
+> "P.S. The amulet's still not worth anything. I checked."
 
 ### 9. Floor one — *the pyramid's entrance; the game ends*
 > **Hero** [sad]: …Idiot.  

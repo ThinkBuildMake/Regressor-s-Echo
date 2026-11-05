@@ -110,6 +110,7 @@ From docs/brainstorm/2026-11-03-bosses.md. The user wants these placeholders rep
 |---|---|---|---|---|---|---|
 | Spikes (tileable strip) | — | | | — | | ✅ W1–3 |
 | Spiky vine wall (the `x` tile) | — (static, tileable) | | | — | | ✅ W1–3 |
+| Aimed relic turret (W3 `a` tile, The rehearsal; requested 2026-11-05, now a plain blue square) | two pieces on magenta: a carved dark-stone **base** flush to a wall tile (32px drawn, the amulet's three-ray mark worn in), and a round stone **head** with a pale-blue crystal lens, painted facing right, pivot at its center (~28px drawn) so code rotates it to aim; optional charged head (lens glowing blue-white). Files `raw/world3/relic-base.png`, `relic-head.png`, `relic-head-charged.png` | | | — | | |
 | Pressure plate: up / down | — up: `raw/world1/plate.jpg` approved. Down: no new art; when pressed the code sinks the plate so only a thin sliver of its top edge peeks above the ground | | | — | | ✅ W1–3 |
 | Gate (held open by a pressure plate) | — one image per world: W1 root gate ✅, W2 stone slab, W3 carved shrine door; slides open in code | ✅ | 🟡 W1 | — | | |
 | Vine barrier (`V`, opens when the room's boss is beaten) | — `raw/world1/vine-barrier.jpg` approved; draw it **thinner** (about one tile wide) when sizing; it withers open in code | | | — | | ✅ W1–3 |
@@ -129,6 +130,7 @@ Script: [STORY.md](STORY.md); § = the scene each asset serves. Done in priority
 | Asset | Notes | Prompt | Ref | Sheet | Sized | In game |
 |---|---|---|---|---|---|---|
 | Hero expressions 2 → `assets/portraits/hero2.webp` | curious, annoyed, excited, scared, shouting, cocky (= `FACES2.hero` order in dialogue.js). Attach `hero.jpg` + the first sheet (`raw/portraits/hero-faces.jpg`) so face and framing match. Cut: `sheet.mjs <raw> <out> --grid --frames=3 --rows=2 --height=192` | ✅ PROMPTS item 3 | — | ✅ | ✅ | ✅ |
+| Guide **pained** face (requested 2026-11-05: his last-stand lines ask for it; until then they show his weary face) | one more guide portrait matching the first sheet: hurt, wincing, eyes half shut, breaking apart | | | | | |
 | Guide expressions 2 → `assets/portraits/guide2.webp` | smug, mischievous, teasing, exasperated, warning, surprised (= `FACES2.guide`). Attach the first guide sheet so the ghost look matches. Same cut | ✅ PROMPTS item 4 | — | ✅ | ✅ | ✅ |
 
 **Priority 2: World 1 scene sounds** (in the game now, silent). Prompts in the Audio section below.
@@ -152,7 +154,7 @@ Script: [STORY.md](STORY.md); § = the scene each asset serves. Done in priority
 | Carved wall relief | W2 §6 | reads left to right: a crowd of figures, each with a gold circle on its chest; then fewer; then a handful; then one. Ruins stone, as a background layer behind room 7 | ✅ | | | |
 | Pyramid backdrop | W3 §1 | a huge stepped pyramid, its top lost in cloud; a far parallax layer for the Sanctum | ✅ | | | |
 | The old tree | W3 §5 | by the stag's arena, with a hiding spot behind it (where the note is) | ✅ | | ✅ | ✅ |
-| The guide's note | written in the DIRT behind the old tree, not on paper (user): a blank smoothed patch of earth, the words scratched in by code | a folded, worn paper, for a close-up the note's text sits on | ✅ | | | |
+| The guide's note | not drawn (user, 2026-11-05: nothing on the ground; the hero kneeling and looking down is enough). Read as dialogue in the guide's portrait | a folded, worn paper, for a close-up the note's text sits on | ✅ | | | |
 | Sound: the guide cracking like glass as the beam hits him | W3 §8 | sad, not violent | | — | | |
 | Music: the last-stand cue | W3 §8 | later | | — | | |
 

@@ -1750,7 +1750,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
       key('keyup', direction); key('keyup', 32); s.player.body.velocity.x = 0;
     };
     await until(() => s.rooms[s.index].name === 'The old tree' && Dialogue.seen.has('stagNote') && !s.transit, 5000, 'fade to the note behind the old tree');
-    check(s.stagWriting.visible && !s.guide.on, 'The spectral stag: the cutscene brings you to the note, without the guide');
+    check(!s.guide.on, 'The spectral stag: the cutscene brings you to the note, without the guide');
     Dialogue.skip(s); await wait(300);
     let unseen = 0;
     await walkTo('The pyramid entrance', 2, 39, 25000, () => { if (!s.transit && s.rooms[s.index].name === 'The spectral stag' && !s.cameras.main.worldView.contains(s.player.x, s.player.y)) unseen++; });
@@ -1769,7 +1769,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     s = await go(ROOMS.findIndex(([n]) => n === 'The pyramid entrance'));
     check(!s.bosses.some(b => b.stag) && s.stagFinished, 'The pyramid entrance: restart keeps the return route open');
     s = await go(ROOMS.findIndex(([n]) => n === 'The old tree')); await wait(100);
-    check(s.stagWriting.visible, 'The old tree: note remains readable after restart');
+    check(s.stagFinished, 'The old tree: the win holds after restart');
 
   }
 

@@ -18,6 +18,7 @@ const FACES2 = {
 };
 const FALLBACK = {
   curious: 'thinking', annoyed: 'determined', excited: 'relieved', scared: 'startled', shouting: 'pained', cocky: 'neutral',
+  pained: 'weary', // the ghost's sheet has no pained face
   smug: 'amused', mischievous: 'wry', teasing: 'amused', exasperated: 'weary', warning: 'solemn', surprised: 'skeptical',
 };
 const NAMES = { hero: 'You', guide: '???' };
@@ -161,34 +162,51 @@ const SCRIPT = {
     W(1),
     // He is breaking apart: each line fainter (fade = his opacity), his words more broken; small cracks as he goes.
     { ...G("pained", "I knew\u2026 it would come to this."), fade: 0.62 },
-    { ...G("weary", "Same thing\u2026 happened last time. My guide\u2026 did exactly this."), fade: 0.55, cue: 'crackle' },
+    { ...G("weary", "Same thing\u2026 happened last time."), fade: 0.58, cue: 'crackle' },
+    { ...G("sad", "My guide\u2026 did exactly this."), fade: 0.55 },
     H("shouting", "You KNEW? Then why would you\u2014"),
     W(0.6),
     { ...G("warm", "Because\u2026 I knew."), fade: 0.48 },
     W(1.2),
     H("sad", "\u2026"),
-    { ...G("warm", "I've watched over you\u2026 You're already doing better than I did\u2026 You'll get further."), fade: 0.4, cue: 'crackle' },
-    { ...G("solemn", "Just remember\u2026 the deaths\u2026 aren't free. Count\u2026 every one."), fade: 0.32 },
+    { ...G("warm", "I've watched over you\u2026"), fade: 0.42, cue: 'crackle' },
+    { ...G("warm", "You're already doing better than I did\u2026"), fade: 0.38 },
+    { ...G("warm", "You'll get further."), fade: 0.35 },
+    { ...G("solemn", "Just remember\u2026 the deaths\u2026 aren't free."), fade: 0.3 },
+    { ...G("solemn", "Count\u2026 every one."), fade: 0.27 },
     H("sad", "Don't\u2014 you can't just\u2014"),
     W(0.8),
-    { ...G("wry", "\u2026Hey."), fade: 0.24, cue: 'crackle' },
-    { ...G("warm", "I was never\u2026 alive in the first place\u2026 right?"), fade: 0.16 },
+    { ...G("wry", "\u2026Hey."), fade: 0.22, cue: 'crackle' },
+    { ...G("warm", "I was never\u2026 alive in the first place\u2026"), fade: 0.18 },
+    { ...G("warm", "\u2026right?"), fade: 0.14 },
     W(2, 'guideBreak'), // after his last word, he shatters
     W(1.6, 'toNote'), // fade to black: next, he finds the note behind the old tree
   ],
-  stagNote: [ // read in his voice (the ghost's portrait), in quotes
-    G("warm", "\"If you're reading this\u2026 then it must mean I've kicked the bucket.\""),
-    G("warm", "\"Don't make that face. I can see it from here. Well. Could.\""),
-    G("warm", "\"Well, I guess it's time to come clean.\""),
-    G("warm", "\"You know how I said there was a limit? That was a lie. Figured you'd be more careful if you thought you were running out.\""),
-    G("warm", "\"The limit is when your spirit breaks. On floor ninety, mine did, and I just\u2026 stopped getting back up.\""),
-    G("warm", "\"So keep getting back up. No matter how hard it gets. No matter what.\""),
-    G("warm", "\"Thanks for putting up with me. I know I'm not great company. I'd know.\""),
-    G("warm", "\"And don't take my ending as yours. You're me, sure, but you were different from the start.\""),
+  stagNote: [ // he finds it behind the old tree, kneels, and reads it in the ghost's voice (his portrait), in quotes
+    H("thinking", "Now what did he want me to see behind the tree?"),
+    H("curious", "Ah."),
+    G("warm", "\"Dear Me,\""),
+    G("warm", "\"If you're reading this\u2026 then I've kicked the bucket.\""),
+    G("wry", "\"Don't make that face. I can see it from here.\""),
+    G("wry", "\"Well. Could.\""),
+    G("solemn", "\"I guess it's time to come clean.\""),
+    G("solemn", "\"You know how I said there was a limit?\""),
+    G("sad", "\"That was a lie.\""),
+    G("wry", "\"Figured you'd be more careful if you thought you were running out.\""),
+    G("solemn", "\"The limit is when your spirit breaks.\""),
+    G("sad", "\"And on floor ninety\u2026 mine did.\""),
+    G("sad", "\"I just\u2026 stopped getting back up.\""),
+    G("solemn", "\"So keep getting back up.\""),
+    G("solemn", "\"No matter how hard it gets.\""),
+    G("warm", "\"No matter what.\""),
+    G("warm", "\"Thanks for putting up with me. I know I'm not great company.\""),
+    G("wry", "\"I'd know.\""),
+    G("warm", "\"And don't take my ending as yours.\""),
+    G("warm", "\"You're me, sure\u2026 but you were different from the start.\""),
     G("warm", "\"You'll get further than I ever could.\""),
     G("warm", "\"Trust me.\""),
     G("warm", "\"\u2014 You\""),
-    G("wry", "\"P.S. The amulet's still not worth anything. I checked.\"")
+    G("wry", "\"P.S. The amulet's still not worth anything. I checked.\""),
   ],
   floorOne: [
     H("sad", "\u2026Idiot."),
@@ -427,8 +445,9 @@ stage('moth', 0, { walk: 9, face: 'right', speed: 22 });
 stage('moth', 1, { walk: 10, face: 'right', speed: 22 });
 stage('moth', 2, { walk: 11, face: 'right', speed: 22 });
 stage('stagPromise', 0, { walk: 20, guide: { x: 18, y: 13 }, face: 'guide' });
-stage('stagNote', 0, { walk: 19.5, face: 'left', pose: 'kneel' });
-stage('stagNote', 11, { pose: 'idle' });
+stage('stagNote', 0, { walk: 19.5, face: 'left' });
+stage('stagNote', 1, { pose: 'kneel' }); // Ah. He bends down to read
+stage('stagNote', SCRIPT.stagNote.length - 1, { pose: 'idle' });
 // The stag's fall: walk away from where it lies into the open clearing, back turned to it.
 const stagTile = (scene) => { const B = scene.bosses.find((b) => b.stag), r = scene.rooms[scene.index].rect; return ((B?.img ?? B?.r)?.x - r.x) / 32 || 25; };
 const awayFromStag = (scene) => (stagTile(scene) > (scene.player.x - scene.rooms[scene.index].rect.x) / 32 ? 'left' : 'right');
@@ -437,7 +456,7 @@ for (const i of [2, 3, 4]) stage('stagDown', i, { face: awayFromStag });
 stage('stagDown', 7, { face: awayFromStag });
 stage('stagDown', 12, { hop: true, face: 'guide' }); // NO—!
 stage('stagDown', 13, { pose: 'slump' });
-stage('stagDown', 21, { pose: 'idle', face: 'guide' });
+stage('stagDown', 22, { pose: 'idle', face: 'guide' });
 stage('floorOne', 0, { walk: 5, face: 'right' });
 stage('floorOne', 3, { walk: 15, face: 'right' }); // into the doorway (game.js draws it at 15)
 // The nap: the game walks him in, he lies down, full dark, and he gets up at dawn.
@@ -734,7 +753,7 @@ const Dialogue = {
         // Second-sheet face if that sheet exists, otherwise the closest face from the first sheet.
         const face = t.line.face, key = `portrait-${speaking}`;
         if (FACES2[speaking].includes(face) && scene.textures.exists(`${key}2`)) pic.setTexture(`${key}2`, FACES2[speaking].indexOf(face));
-        else pic.setTexture(key, Math.max(0, FACES[speaking].indexOf(FALLBACK[face] ?? face)));
+        else pic.setTexture(key, Math.max(0, FACES[speaking].indexOf(FACES[speaking].includes(face) ? face : FALLBACK[face])));
       }
       pic.setAlpha(1);
       t[other].setAlpha(0.3);

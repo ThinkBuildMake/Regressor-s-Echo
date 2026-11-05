@@ -1462,7 +1462,8 @@ class Room extends Phaser.Scene {
 
   // On the floor, or standing on an idol (the collider only reports touching.down on the frames it pushes him out).
   onGround(b) {
-    return b.blocked.down || b.touching.down || (b.velocity.y >= 0 && this.enemies.some((o) => o.kind === 'i' && o.body
+    return !b.moves || b.blocked.down || b.touching.down || // held still by a cutscene: standing, not falling
+      (b.velocity.y >= 0 && this.enemies.some((o) => o.kind === 'i' && o.body
       && Math.abs(b.bottom - o.body.top) < 3 && b.right > o.body.left && b.left < o.body.right));
   }
 
@@ -2238,9 +2239,6 @@ class Room extends Phaser.Scene {
       this.add.rectangle(R.x + 21 * T, R.y + 13 * T, 26, 128, 0x655d60).setDepth(1);
       this.add.circle(R.x + 21 * T, R.y + 9 * T, 65, 0x526672).setDepth(1);
     }
-    this.stagWriting = this.add.text(R.x + 16.5 * T, R.y + 13 * T, SCRIPT.stagNote.map((l) => l.text).join('\n'), {
-      fontFamily: 'cursive', fontSize: '14px', color: '#382b23', fontStyle: 'italic', wordWrap: { width: 600 }
-    }).setScale(0.28, 0.14).setAngle(-4).setDepth(2).setVisible(false);
     const P = this.rooms.find((r) => r.name === 'The pyramid entrance').rect;
     if (this.textures.exists('pyramid')) // the pyramid rising over the jungle, its base on the floor at the room's far end
       this.add.image(P.x + 15 * T, P.y + 15 * T + 6, 'pyramid').setOrigin(0.5, 1).setDisplaySize(880, 491).setDepth(0.5);
@@ -2822,7 +2820,6 @@ class Room extends Phaser.Scene {
     // Look into drops in every tall room, including drops after a shrine.
     this.cameras.main.setFollowOffset(0, this.rooms[this.index].rect.height > this.cameras.main.height ? -this.cameras.main.height * 0.4 : 0);
     if (this.transit) return;
-    this.stagWriting.setVisible(this.stagFinished);
     if (this.stagFinished && !this.talk.line && !this.talk.queue.length) {
       const R = this.rooms[this.index];
       if (R.name === 'The old tree' && p.x > R.rect.x + 18 * T && p.x < R.rect.x + 20 * T)
