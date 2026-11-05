@@ -41,7 +41,7 @@ Key: ✅ done · 🟡 started · blank = to do · — = not needed (a single ima
 
 | Asset | Sheet (animations) | Prompt | Ref | Sheet | Sized | In game |
 |---|---|---|---|---|---|---|
-| Walker (red beetle) | walk (2 poses + code bob) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Walker (red beetle) | walk: 8-frame Veo Lite scuttle (2026-11-05; source `raw/enemies/walker-walk.mp4`) | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Flyer | flies over soul walls; a small red flying beetle (the walker's family); wing-buzz loop, 4 frames | ✅ | | | | ✅ |
 | Thrower | stands still and shoots seeds along the ground (souls block them); a red toadstool creature; idle + spit, 4 frames, plus a seed pellet | ✅ | | | | ✅ |
 | Bramble spider (W1) | hangs on a silk thread, drops on you, climbs back; a red spider; hang/shake, drop, climb, 3–4 frames, plus a thread drawn in code. See LEVELS.md "Enemies per world" | ✅ | ✅ | ✅ | ✅ | ✅ |

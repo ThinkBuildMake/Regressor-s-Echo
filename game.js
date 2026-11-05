@@ -28,8 +28,8 @@ const BODY_STAND = [30, 32], BODY_LYING = [62, 16];    // body left behind
 
 // Enemies: walkers patrol, turn at walls/bodies/ledges, kill on touch, die when a falling body lands on them.
 const WALKER_SPEED = 60;
-// Painted walker (assets/enemies/walker.webp, 6 frames facing left): loops two leg poses with a small bob.
-const WALKER_FRAMES = [0, 1], WALKER_FPS = 8, WALKER_HEIGHT = 26, WALKER_SRC = 56; // SRC = sheet.mjs --height
+// Walker (assets/enemies/walker.webp, facing left): an 8-frame Veo scuttle loop (source assets/raw/enemies/walker-walk.mp4).
+const WALKER_COUNT = 8, WALKER_FRAMES = [0, 1, 2, 3, 4, 5, 6, 7], WALKER_FPS = 10, WALKER_HEIGHT = 26, WALKER_SRC = 56; // SRC = sheet.mjs --height
 // Boss: floats back and forth too high to reach from the floor. Stomp its top from a body (1 high is
 // right, 2 high puts you in its path). Speeds up per hit. Heals to full whenever you die.
 const BOSS_HP = 3, BOSS_SPEED = 100, BOSS_SPEEDUP = 50;
@@ -1364,8 +1364,8 @@ class Room extends Phaser.Scene {
       if (kind === 'i') e.body.pushable = false; // you stand on it without pressing it into the floor
       e.dir = -1;
       if (kind === 'e' && this.textures.exists('walker')) {
-        const tex = this.textures.get('walker'), img = tex.getSourceImage(), fw = img.width / 6;
-        if (!tex.has(0)) for (let i = 0; i < 6; i++) tex.add(i, 0, i * fw, 0, fw, img.height);
+        const tex = this.textures.get('walker'), img = tex.getSourceImage(), fw = img.width / WALKER_COUNT;
+        if (!tex.has(0)) for (let i = 0; i < WALKER_COUNT; i++) tex.add(i, 0, i * fw, 0, fw, img.height);
         e.setFillStyle(0, 0); // hitbox only
         e.img = this.add.image(e.x, e.y, 'walker', 0).setOrigin(0.5, 1).setScale(WALKER_HEIGHT / WALKER_SRC);
         e.on('destroy', () => e.img.destroy());
@@ -2121,7 +2121,7 @@ class Room extends Phaser.Scene {
         e.img?.setPosition(e.x, b.bottom + 3).setOrigin(0.5, 1).setFlipX(e.dir > 0).setFrame(down ? step % 3 : 3);
       } else if (e.img) {
         const step = Math.floor((this.time.now / 1000) * WALKER_FPS);
-        e.img.setPosition(e.x, e.y + 12 - (step % 2)).setFlipX(e.dir > 0) // sheet faces left; 1px bob
+        e.img.setPosition(e.x, e.y + 12).setFlipX(e.dir > 0) // sheet faces left
           .setFrame(WALKER_FRAMES[step % WALKER_FRAMES.length]);
       }
     }
