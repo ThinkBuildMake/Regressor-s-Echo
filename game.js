@@ -976,7 +976,7 @@ class Room extends Phaser.Scene {
     if (this.bossArtRequested) return;
     this.bossArtRequested = true;
     if (!this.textures.exists('seal')) this.load.image('seal', 'assets/effects/seal.webp');
-    for (const pose of ['intro', 'idle', 'charge', 'beam', 'wave']) {
+    for (const pose of ['intro', 'idle', 'charge', 'beam', 'wave', 'walk']) {
       if (!this.textures.exists(`stag-${pose}`)) this.load.image(`stag-${pose}`, `assets/bosses/stag-${pose}.webp`);
       if (!this.cache.json.exists(`stag-${pose}-frames`)) this.load.json(`stag-${pose}-frames`, `assets/bosses/stag-${pose}.json`);
     }
@@ -2149,8 +2149,9 @@ class Room extends Phaser.Scene {
       this.fx.fillStyle(0x65baff, 0.9).fillCircle(B.beam.x, B.beam.y, 8);
     }
     const pose = this.time.now < B.introUntil ? 'intro' : B.phase === 'beam' ? 'beam'
-      : B.phase === 'bell' ? 'wave' : B.phase === 'charge' ? 'charge' : 'idle';
-    this.bossPose(B, 'stag', pose, 180, pose === 'wave' || pose === 'intro' ? 1 : 0.7, pose === 'charge' || pose === 'idle');
+      : B.phase === 'bell' ? 'wave' : B.phase === 'charge' ? 'charge' : B.phase === 'return' ? 'walk' : 'idle';
+    this.bossPose(B, 'stag', pose, 180, pose === 'wave' || pose === 'intro' ? 1 : pose === 'walk' ? 1.1 : 0.7, pose === 'charge' || pose === 'idle' || pose === 'walk');
+    B.img?.setFlipX(B.phase === 'return' && B.r.x < R.x + 25 * T); // the sheets face left; walking home to the right turns it
     B.img?.setPosition(B.r.x, B.r.y + 32 + (B.artFoot ?? 0)).setVisible(B.r.visible).setTint(B.phase === 'bell' ? 0xdf89ff : B.phase === 'beam' ? 0x65baff : 0xffffff);
     const seals = this.stagSeals(B);
     if (!B.sealArt && this.textures.exists('seal')) B.sealArt = seals.map(socket => {
@@ -2196,8 +2197,14 @@ class Room extends Phaser.Scene {
         B.stomped = false; next(B.rammed ? 'dazed' : 'miss');
       }
     } else if ((B.phase === 'dazed' && B.clock >= 2) || (B.phase === 'miss' && B.clock >= gap)) {
-      B.r.x = R.x + 25 * T; next('beam');
-      B.beam = { x: B.r.x, y: R.y + 5 * T, angle: Math.PI, clock: 0, stag: true };
+      next('return');
+    } else if (B.phase === 'return') { // walks back to its spot (the Veo walk), then calls the beam
+      const home = R.x + 25 * T;
+      B.r.x += Math.sign(home - B.r.x) * Math.min(Math.abs(home - B.r.x), 260 * dt);
+      if (Math.abs(home - B.r.x) <= 1) {
+        next('beam');
+        B.beam = { x: B.r.x, y: R.y + 5 * T, angle: Math.PI, clock: 0, stag: true };
+      }
     } else if (B.phase === 'beam') {
       if (B.beam.clock < 1.98) this.updateAimedBeam(B.beam, dt);
       if (B.clock >= 1.98 + gap) next('procession');
@@ -2345,9 +2352,9 @@ class Room extends Phaser.Scene {
     if (!tex.has(0)) for (let i = 0; i < count; i++) tex.add(i, 0, (i % cols) * fw, Math.floor(i / cols) * fh, fw, fh);
     if (B.artPose !== key) { B.artPose = key; B.artStart = this.time.now; }
     const frame = Math.floor((this.time.now - B.artStart) / (duration * 1000) * count);
-    const sourceHeight = kind === 'stag' ? { idle: 486, intro: 584, charge: 500, beam: 555, wave: 617 }[pose] : fh;
+    const sourceHeight = kind === 'stag' ? { idle: 486, intro: 584, charge: 500, beam: 555, wave: 617, walk: 520 }[pose] : fh;
     const scale = height / sourceHeight;
-    B.artFoot = (fh - (kind === 'stag' ? { idle: 660, intro: 677, charge: 676, beam: 653, wave: 676 } : { idle: 657, intro: 659, swing: 660, slam: 662, throw: 648 })[pose]) * scale; // empty rows under the feet
+    B.artFoot = (fh - (kind === 'stag' ? { idle: 660, intro: 677, charge: 676, beam: 653, wave: 676, walk: 645 } : { idle: 657, intro: 659, swing: 660, slam: 662, throw: 648 })[pose]) * scale; // empty rows under the feet
     B.img.setTexture(key, loop ? frame % count : Math.min(count - 1, frame)).setScale(scale);
     if (pose === 'idle') B.img.setFrame(0).setScale(scale, scale * (1 + Math.sin(this.time.now / 320) * 0.012));
   }
@@ -2463,6 +2470,7 @@ class Room extends Phaser.Scene {
     if (!falling || (this.bossPreviousFeet ?? p.body.prev.y + p.body.height) > top + 1) {
       if (B.kind === 'tree') return false;
       if (B.story === 'mothDown' && (B.phase === 'stunned' || B.phase?.endsWith('Approach'))) return false;
+      if (B.stag && B.phase === 'return') return false; // walking home: brushing past it is harmless
       this.die(); return true;
     }
     p.body.reset(p.x, top - p.height / 2);

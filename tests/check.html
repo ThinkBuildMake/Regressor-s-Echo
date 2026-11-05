@@ -1714,6 +1714,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
       key('keyup', 32); key('keyup', 39); key('keyup', 37); await wait(20);
       if (stats.deaths !== deaths) throw new Error('stag survival failed: hp=' + hp + ', ' + JSON.stringify(survival));
 
+      await until(() => B.phase === 'windup', 8000, 'stag winds up'); // it walks home before each cycle now
       if (s.player.y + 15 < O().y + 14 * 32) {
         key('keydown', 39); key('keydown', 32);
         await until(() => s.player.x >= O().x + 8 * 32, 1800, 'bait charge on floor');
