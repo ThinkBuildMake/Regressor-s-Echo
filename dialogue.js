@@ -412,6 +412,7 @@ const SCRIPT = {
     G('wry', "Yourself. Trust me, it's worse when you choose it."),
     W(0.8),
     H('exhausted', '…Great. Something to look forward to.'),
+    W(0.1, 'keys:recallFirst'),
   ],
 };
 

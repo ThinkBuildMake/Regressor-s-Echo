@@ -78,6 +78,7 @@ const KEY_PROMPTS = {
   retry: ['Shift + R:  retry the room', (s) => (s.retries ?? 0) > 0], // fades once you've used it
   letGo: ['Hold  K:  let go', (s) => s.charge > 0.2],
   recall: ['Q:  take back your newest soul', (s) => s.recalled],
+  recallFirst: ['Q:  take back your newest soul', (s) => s.recalled], // right after the moth grants it; Take it back shows it again
   swap: ['E:  swap places with your newest soul', (s) => s.swapped],
 };
 const SPRING = 873; // launch speed: 8.5 tiles high (a 9-high ledge needs a soul)
@@ -2443,7 +2444,10 @@ class Room extends Phaser.Scene {
     const B = this.boss;
     if (B?.hp <= 0) return;
     if (B?.stag) return this.updateStag(B, dt);
-    if (B?.kind === 'tree') return this.updateTree(B, dt);
+    if (B?.kind === 'tree') { // its entrance vines shut once you're in, as in the other boss rooms
+      if (this.player.x > this.rooms[B.room].rect.x + 1.5 * T) this.closeGates(B.room);
+      return this.updateTree(B, dt);
+    }
     if (B?.img) B.img.setPosition(B.r.x, B.r.y).setVisible(B.r.visible).setAlpha(B.r.alpha).setFlipX(B.dir > 0) // sheet faces left
       .setFrame(B.pose ?? MOTH_FRAMES[Math.floor((this.time.now / 1000) * MOTH_FPS) % MOTH_FRAMES.length]);
     if (!B || B.hidden) return;
