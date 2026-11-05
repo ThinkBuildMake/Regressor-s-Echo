@@ -50,6 +50,7 @@ const MOTH_HOLE = [2, 9];
 const TREE_ART = 217, TREE_MASK = [25, 80], TREE_REACH = 75, TREE_WAKE = 2;
 // Intro after waking: it stands up tall and roars (14 frames; mouth opens on frame 7), then settles back (10 frames).
 const TREE_STAND = 1.75, TREE_SETTLE = 1.25, TREE_INTRO = TREE_WAKE + TREE_STAND + TREE_SETTLE;
+const TREE_WAVE_SPEED = 250, TREE_WAVE_RANGE = 150; // the slam's shockwave along the floor (px/s, px each way)
 const TREE_GLOW = 2.05, TREE_SPIKES = 1.5, TREE_SPIKES_UP = 1.2, TREE_STUCK = 2.5, TREE_WALK = 40, TREE_LUNGE = 240, TREE_FIST = 40;
 // Self-destruct (World 2 on): hold K/X this long. You keep moving while it charges; letting go cancels.
 const SD_HOLD = 0.75;
@@ -1727,7 +1728,7 @@ class Room extends Phaser.Scene {
     this.dead = RESPAWN_DELAY;
     if (this.boss) { this.boss.hp = BOSS_HP; this.boss.hurt = 0;
       if (this.boss.stag) { this.boss.deaths = ++stats.stagDeaths; this.boss.phase = 'setup'; this.boss.clock = 0; this.boss.bells = 0; this.boss.beam = null; this.boss.pulse = -1; this.boss.r.x = this.rooms[this.boss.room].rect.right - 5 * T; }
-      if (this.boss.kind === 'tree') { this.boss.phase = 'idle'; this.boss.timer = 4; this.boss.attack = -1; this.boss.open = 0; this.boss.x = this.boss.x0; this.boss.face = -1; this.boss.pods.forEach((p) => p.r.destroy()); this.boss.pods = []; }
+      if (this.boss.kind === 'tree') { this.boss.phase = 'idle'; this.boss.timer = 4; this.boss.attack = -1; this.boss.open = 0; this.boss.x = this.boss.x0; this.boss.face = -1; this.boss.pods.forEach((p) => p.r.destroy()); this.boss.pods = []; this.boss.waves?.forEach((w) => w.img?.destroy()); this.boss.waves = []; }
     } // your death heals the boss
     if (this.boss?.story === 'mothDown' && !this.boss.hidden) {
       this.boss.r.setSize(BOSS_W, BOSS_H); this.boss.phase = null; this.boss.open = false; this.boss.warn?.clear();
@@ -2421,15 +2422,32 @@ class Room extends Phaser.Scene {
     return s;
   }
 
-  // The slam lands at the fist (on the soul's top when one catches it); harmless ripples run out along the floor.
-  treeImpact(B, y) {
+  // The slam lands at the fist (on the soul's top when one catches it). On the floor it also sends a shockwave
+  // each way along the ground: a moving hitbox (jump it; a soul in its path stops it). Returns the fist's x.
+  treeImpact(B, y, waves) {
     GameAudio.play('tree-slam');
     const x = B.x + B.face * TREE_REACH;
     this.playFx('impact', x, y - 24, 72, 80, 350);
-    for (const dir of [-1, 1]) {
-      const wave = this.playFx('shockwave', x + dir * 40, B.floor - 22, 106, 48, 600);
-      if (wave) this.tweens.add({ targets: wave.setFlipX(dir < 0).setDepth(4.4), x: x + dir * 150, duration: 600 });
+    if (waves) for (const dir of [-1, 1]) {
+      const img = this.textures.exists('shockwave') ? this.add.image(x, B.floor - 22, 'shockwave', 0).setDisplaySize(106, 48).setFlipX(dir < 0).setDepth(4.4) : null;
+      (B.waves ??= []).push({ x: x + dir * 24, dir, left: TREE_WAVE_RANGE, img });
     }
+    return x;
+  }
+
+  // Shockwaves roll outward; touching one on the floor kills, a soul or wall stops it.
+  updateTreeWaves(B, dt) {
+    const p = this.player, feet = p.y + p.height / 2;
+    for (const w of B.waves ?? []) {
+      const step = Math.min(w.left, TREE_WAVE_SPEED * dt);
+      w.x += w.dir * step; w.left -= step;
+      const box = new Phaser.Geom.Rectangle(w.x - 20, B.floor - 22, 40, 22);
+      const blocked = this.corpses.some((c) => hit(bounds(c), box)) || !this.rooms[B.room].rect.contains(w.x, B.floor - 8);
+      w.img?.setPosition(w.x, B.floor - 22).setFrame(Math.floor(this.time.now / 90) % 4).setAlpha(Math.min(1, w.left / 40));
+      if (blocked || w.left <= 0) { w.img?.destroy(); w.done = true; continue; }
+      if (p.visible && this.dead <= 0 && hit(bounds(p), box) && feet > B.floor - 22) return this.die();
+    }
+    if (B.waves) B.waves = B.waves.filter((w) => !w.done);
   }
 
   updateTree(B, dt) {
@@ -2454,6 +2472,8 @@ class Room extends Phaser.Scene {
     B.img?.setPosition(B.x, B.floor + B.artFoot).setFlipX(B.face > 0)
       .setTint({ slam: 0x69cfff, spikes: 0xff8a6b, spikesUp: 0xff8a6b, swing: 0xf1f578, throw: 0xf1f578 }[B.phase] ?? 0xffffff);
     if (B.hidden || this.dead > 0 || this.talk.line || this.talk.queue.length || this.transit) return;
+    this.updateTreeWaves(B, dt);
+    if (this.dead > 0) return; // a wave got you
     B.hurt -= dt;
     if (p.body.blocked.down || p.body.touching.down) B.stompReady = true;
     const walk = (to, speed) => { B.x += Phaser.Math.Clamp(Phaser.Math.Clamp(to, R.x + 3 * T, R.right - 3 * T) - B.x, -speed * dt, speed * dt); };
@@ -2507,10 +2527,10 @@ class Room extends Phaser.Scene {
       }
     } else if (B.phase === 'slam') { // a soul where the fists land catches them: they stick, and you're spared
       const c = this.treeCatch(B);
-      this.treeImpact(B, c ? bounds(c).top : B.floor);
+      const fist = this.treeImpact(B, c ? bounds(c).top : B.floor, !c); // a caught slam sends no wave
       this.cameras.main.shake(180, 0.005);
       if (c) B.open = TREE_STUCK;
-      else if (Math.abs(p.x - B.aimX) < TREE_FIST && feet > B.floor - 40) return this.die();
+      else if (Math.abs(p.x - fist) < TREE_FIST && feet > B.floor - 40) return this.die(); // the fist itself
     } else if (B.phase === 'spikes') { // spikes rise across the whole floor
       GameAudio.play('tree-slam'); this.cameras.main.shake(TREE_SPIKES_UP * 1000, 0.006);
       B.phase = 'spikesUp'; B.timer = TREE_SPIKES_UP; return;
