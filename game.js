@@ -691,13 +691,13 @@ const ROOMS = [
     ' P        #####            ###',
     '##############################',
   ], [612, 75], { world: 3, spots: [[4, "pyramid"]] }],
-  ["Two places", [ // plug the shaft with a soul, then swap into the low tunnel at a run; exchange places under a falling spike to hold the exit plate
+  ["Two places", [ // plug the shaft with a soul, then swap into the low tunnel at a run; die on the exit plate and swap out to keep it held
     '##############################',
     '##############################',
     '#################     ########',
     '#      #####    #     ########',
     '#      #####    #     ########',
-    '#      #####    # !   #      #',
+    '#      #####    #     #      #',
     '#      #####    #     #      #',
     '#      #####    #     #      #',
     '       #####    D     D       ',

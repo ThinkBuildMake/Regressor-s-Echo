@@ -2131,11 +2131,10 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
       await until(() => s.player.x >= O().x + 18.3 * 32, 1000, 'jump to exit plate');
       key('keyup', 32); key('keyup', 39); key('keydown', 37);
       await until(() => s.player.body.velocity.x <= 0, 1000, 'brake on plate'); key('keyup', 37);
-      await until(() => s.player.body.blocked.down, 1000, 'land under falling spike');
+      await until(() => s.player.body.blocked.down, 1000, 'land on the plate');
     };
     await approachPlate();
-    const spikeDeaths = stats.deaths;
-    await until(() => stats.deaths > spikeDeaths, 2000, 'spike leaves a plate soul'); await alive();
+    key('keydown', 75); await until(() => s.dead > 0, 1200, 'die on the plate'); key('keyup', 75); await alive();
     key('keydown', 39); await wait(1500); key('keyup', 39);
     check(s.player.x < O().x + 16 * 32,
       'Two places: dying on the plate closes the approach behind it');
@@ -2154,8 +2153,8 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
       'Two places: swap leaves the plate held and reaches the exit side');
     const escapeDeaths = stats.deaths;
     await wait(1000);
-    check(stats.deaths === escapeDeaths && s.droppers.find(d => d.room === s.index).state === 'gone',
-      'Two places: the exchanged soul holds the plate and catches the falling spike');
+    check(stats.deaths === escapeDeaths && s.doors.filter(d => d.room === s.index && d.x > O().x + 22 * 32).every(d => !d.body.enable),
+      'Two places: the exchanged soul keeps holding the plate');
     key('keydown', 39);
     await until(() => s.player.x > O().x + 28 * 32, 1500, 'walk to exit'); key('keyup', 39);
 

@@ -172,10 +172,10 @@ def own_way(o, p):
     o(0, 8, 0, 9); o(1, 3, 6, 9); p(1, 9, 'P')
     o(6, 10, 6, 13); p(6, 14, '^'); o(7, 13, 11, 13); o(7, 14, 7, 14)
     o(12, 3, 15, 14); p(13, 14, 'C'); o(15, 12, 15, 14, '#')
-    # Swap out from under a falling spike, leaving the exit plate held.
-    o(17, 2, 21, 9); o(16, 8, 16, 9, 'D'); p(18, 9, '_'); p(18, 5, '!')
+    # Hold K to die on the exit plate, then swap out with E, leaving it held.
+    o(17, 2, 21, 9); o(16, 8, 16, 9, 'D'); p(18, 9, '_')
     o(22, 8, 22, 9, 'D'); o(23, 5, 28, 9); o(29, 8, 29, 9)
-room('Two places', [570, 73], 30, 17, 3, 'plug the shaft with a soul, then swap into the low tunnel at a run; exchange places under a falling spike to hold the exit plate', own_way)
+room('Two places', [570, 73], 30, 17, 3, 'plug the shaft with a soul, then swap into the low tunnel at a run; die on the exit plate and swap out to keep it held', own_way)
 
 def three_jobs(o, p):
     # Climb to the safe three-job setup, then drop to the shrine.
