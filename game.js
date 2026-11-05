@@ -2552,7 +2552,9 @@ class Room extends Phaser.Scene {
     if (!tex.has(0)) for (let i = 0; i < all; i++) tex.add(i, 0, (i % cols) * fw, Math.floor(i / cols) * fh, fw, fh);
     if (B.artPose !== key) { B.artPose = key; B.artStart = this.time.now; }
     const frame = Math.floor((this.time.now - B.artStart) / (duration * 1000) * count);
-    const sourceHeight = kind === 'stag' ? { idle: 486, intro: 584, charge: 500, beam: 555, wave: 617, walk: 520 }[pose] : fh;
+    // The stag's intro, wave and beam sheets draw it at the idle's size; scaling their taller outlines (rearing, raised antlers) to
+    // the same height shrank it, so they share the idle's scale. The Veo walk and charge cells are sized differently.
+    const sourceHeight = kind === 'stag' ? { idle: 486, intro: 486, charge: 500, beam: 486, wave: 486, walk: 520 }[pose] : fh;
     const scale = height / sourceHeight;
     B.artFoot = (fh - (kind === 'stag' ? { idle: 660, intro: 677, charge: 676, beam: 653, wave: 676, walk: 645 } : { dormant: 658, wake: 652, stand: 652, settle: 652, walk: 652, swing: 653, slam: 652, throw: 653, fall: 652 })[pose]) * scale; // empty rows under the feet
     B.img.setTexture(key, loop ? frame % count : Math.min(count - 1, frame)).setScale(scale);
