@@ -449,8 +449,8 @@ stage('moth', 0, { walk: 9, face: 'right', speed: 22 });
 stage('moth', 1, { walk: 10, face: 'right', speed: 22 });
 stage('moth', 2, { walk: 11, face: 'right', speed: 22 });
 stage('stagPromise', 0, { walk: 20, guide: { x: 18, y: 13 }, face: 'guide' });
-stage('stagNote', 0, { walk: 17.5, face: 'right' });
-stage('stagNote', 2, { walk: 23, speed: 190 }); // scrambling: running past the tree and back
+stage('stagNote', 0, { face: 'right' }); // he says it where he stands; the search is the silent run that follows
+stage('stagNote', 2, { walk: 23, speed: 190 }); // scrambling: running past the tree and back (silent beats: Space doesn't cut them short)
 stage('stagNote', 3, { walk: 17, speed: 190 });
 stage('stagNote', 4, { walk: 19.5, speed: 150, face: 'left' });
 stage('stagNote', 5, { pose: 'kneel' }); // Ah… He bends down to read
@@ -745,6 +745,7 @@ const Dialogue = {
       }
       t.line = t.queue.shift();
       t.shown = 0;
+      t.waitLeft = t.line.wait ?? 0; // a silent beat's timer (kept off the script, so a replay waits again)
       this.act(scene, t.line);
       scene.player.body.setVelocityX(0);
       this.move(scene, 0);
@@ -774,16 +775,17 @@ const Dialogue = {
       return true;
     }
     this.move(scene, dt);
-    if (advance && (t.motion.mark && Math.abs(t.motion.mark.x - scene.player.x) > 2 || t.line.wait)) {
+    if (!t.line.text && t.motion.mark) advance = false; // a silent walk plays out (Space used to snap him to its end); Esc still skips the scene
+    if (advance && (t.motion.mark && Math.abs(t.motion.mark.x - scene.player.x) > 2 || t.line.wait !== undefined)) {
       this.act(scene, t.line, true);
       t.line = null;
       return this.update(scene, 0, false);
     }
-    if (t.line.wait) {
-      t.line.wait = Math.max(0, t.line.wait - dt);
+    if (t.line.wait !== undefined) { // stays a beat after its timer runs out, until a walk in it arrives
+      t.waitLeft = Math.max(0, t.waitLeft - dt);
       // A silent beat with a walk lasts until he gets there (a short beat used to cut the walk off and snap him to the mark).
       const walking = t.motion.mark && Math.abs(t.motion.mark.x - scene.player.x) > 2 && t.motion.elapsed < 6;
-      if (!t.line.wait && !walking) { this.act(scene, t.line, true); t.line = null; }
+      if (!t.waitLeft && !walking) { this.act(scene, t.line, true); t.line = null; }
       return true;
     }
     if (!t.line.text) { this.act(scene, t.line, true); t.line = null; return true; }
