@@ -382,9 +382,11 @@ The pyramid needs to be visible in the background, its top lost in cloud.
 > **Guide** [warm]: …More than I was.
 
 ### 3. The breaking beam — *The rehearsal (room 6), after the beam first breaks a soul*
-> **Hero** [startled]: It broke it! It broke my soul!  
-> **Guide** [solemn]: Those beams don't push. They break. Whatever they hit doesn't come back.  
-> **Hero** [scared]: Whatever?
+> **Hero** [startled]: Hold up. It destroyed my soul? MY soul?  
+> **Guide** [solemn]: Yeah. Ancient technology. Souls aren't supposed to break… but somehow they found a way.  
+> **Hero** [annoyed]: Who's 'they'?  
+> **Guide** [wry]: Whoever built this place. They didn't leave notes.  
+> **Hero** [scared]: Great. Soul-breaking antiques. Love that for me.
 
 ### 4. The promise — *by an old tree before the stag's arena*
 > *(The guide stops. The hero walks a few steps before noticing.)*  

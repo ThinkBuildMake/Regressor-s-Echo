@@ -115,9 +115,11 @@ const SCRIPT = {
     G("warm", "…More than I was."),
   ],
   breakingBeam: [
-    H("startled", "It broke it! It broke my soul!"),
-    G("solemn", "Those beams don't push. They break. Whatever they hit doesn't come back."),
-    H("scared", "Whatever?"),
+    H("startled", "Hold up. It destroyed my soul? MY soul?"),
+    G("solemn", "Yeah. Ancient technology. Souls aren't supposed to break… but somehow they found a way."),
+    H("annoyed", "Who's 'they'?"),
+    G("wry", "Whoever built this place. They didn't leave notes."),
+    H("scared", "Great. Soul-breaking antiques. Love that for me."),
   ],
 
   stagPromise: [
