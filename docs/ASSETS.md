@@ -82,11 +82,13 @@ bottom-left corner. The name card is text drawn in code, not an asset.
 | All bosses: death | 1 painted **fallen pose** each (moth on the ground wings drooped; tree slumped, mask dark; stag lying down), then code: white glow → dissolves into motes that stream into the hero → he flashes (STORY.md W1 §13) | ✅ | | — | | ✅ |
 
 ## Boss attack effects (requested 2026-11-03, fun pass)
-From docs/brainstorm/2026-11-03-bosses.md. Paint physical objects; beams, lanes, warnings and rings are drawn in code. Attacks are **lemon yellow** (kept apart from the amulet's gold); the code adds the blue and violet glows. The game already loads each file below if it exists and draws a stand-in shape until then.
+From docs/brainstorm/2026-11-03-bosses.md. The user wants these placeholders replaced with real art (2026-11-04). Paint physical objects; beams, lanes, warnings and rings are drawn in code. Attacks are **lemon yellow** (kept apart from the amulet's gold); the code adds the blue and violet glows. The game already loads each file below if it exists and draws a stand-in shape until then.
 
 | Asset → file | Sheet (animations) | Size in game | Prompt | Ref | Sheet | Sized | In game |
 |---|---|---|---|---|---|---|---|
-| Moth dust pod → `assets/bosses/moth-dust.webp` | a puff of glowing lemon-yellow moth scales, spinning, 4 frames | ½ tile | | | | | stand-in |
+| Moth pollen cloud → `assets/effects/pollen-cloud.webp` (user, 2026-11-04: replaces the many small dust shots) | ONE big, dense, drifting cloud of glowing lemon-yellow moth scales and pollen, 4 frames of slow swirl (loop). Code: the wing-dust attack becomes one large cloud hazard instead of many 16 px shots | 3–4 tiles | | | | | stand-in |
+| Moth dust pod → `assets/bosses/moth-dust.webp` (superseded by the pollen cloud) | a puff of glowing lemon-yellow moth scales, spinning, 4 frames | ½ tile | | | | | stand-in |
+| Tree slam shockwave → `assets/effects/shockwave.webp` (new, for the moving tree's slam) | a low ripple of cracking earth and stone chips running along the ground, lemon-yellow at its crest, 4 frames; code moves it outward from the fist | 1 tile tall, 2–3 wide | | | | | |
 | Falling stone → `assets/effects/falling-stone.webp` | a grey ruin stone with cracks and a faint yellow danger rim; 1 intact frame + 4 breaking apart | 1 tile | | | | | stand-in |
 | Impact burst / stun stars → `assets/effects/impact.webp` | yellow-white burst with little circling motes, for a boss getting hit or stunned, 4 frames | 1 tile | | | | | stand-in |
 | Seed mortar burst → `assets/effects/mortar-burst.webp` | a yellow seed husk cracking open into a ring of thorns, 5 frames | 2 tiles | | | | | stand-in |
