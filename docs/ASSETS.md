@@ -130,7 +130,7 @@ Script: [STORY.md](STORY.md); § = the scene each asset serves. Done in priority
 | Asset | Notes | Prompt | Ref | Sheet | Sized | In game |
 |---|---|---|---|---|---|---|
 | Hero expressions 2 → `assets/portraits/hero2.webp` | curious, annoyed, excited, scared, shouting, cocky (= `FACES2.hero` order in dialogue.js). Attach `hero.jpg` + the first sheet (`raw/portraits/hero-faces.jpg`) so face and framing match. Cut: `sheet.mjs <raw> <out> --grid --frames=3 --rows=2 --height=192` | ✅ PROMPTS item 3 | — | ✅ | ✅ | ✅ |
-| Guide **pained** face (requested 2026-11-05: his last-stand lines ask for it; until then they show his weary face) | one more guide portrait matching the first sheet: hurt, wincing, eyes half shut, breaking apart | | | | | |
+| Guide **pained** face → 7th frame of `assets/portraits/guide2.webp` (index 6) | hurt, wincing, eyes squeezed, teeth gritted; his last-stand lines (until "pained" points to it they show his weary face) | ✅ PROMPTS portraits item 5 | — | ✅ | ✅ | ✅ |
 | Guide expressions 2 → `assets/portraits/guide2.webp` | smug, mischievous, teasing, exasperated, warning, surprised (= `FACES2.guide`). Attach the first guide sheet so the ghost look matches. Same cut | ✅ PROMPTS item 4 | — | ✅ | ✅ | ✅ |
 
 **Priority 2: World 1 scene sounds** (in the game now, silent). Prompts in the Audio section below.

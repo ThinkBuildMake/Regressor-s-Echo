@@ -337,6 +337,10 @@ One image per character with every expression in a grid, so the face stays consi
 4. **The guide, extra faces → `guide-faces-2.png`** (same style block, attach the guide sheet so the ghost look matches)
    > An expression sheet of the attached translucent blue-white ghost (the same character, playful and mischievous), 6 portraits in a grid of 3 columns and 2 rows, in this order: 1. a smug grin; 2. mischievous, a scheming grin with narrowed eyes; 3. teasing, a playful wink; 4. exasperated, rolling his eyes; 5. a serious warning, stern, no smile; 6. genuinely surprised, eyes wide. Wide 3:2.
 
+5. **The guide, pained → `guide-pained.png`** (Flow, Nano Banana 2.1, 1:1; same style block; attach the first guide sheet `raw/portraits/guide-faces.jpg` so the ghost look matches). One face, cut to a 171×192 cell and appended to `guide2.webp` as its 7th frame.
+   > One single portrait of the ghost from the attached expression sheet: exactly the same character, the same translucent blue-white ghost, face, hair, scarf, framing and size as one cell of the sheet. Expression: hurt and breaking apart, wincing with brows pulled together, eyes squeezed half shut, mouth tight and slightly open in pain, head tilted a little down. No cracks, no fragments, no effects painted on. Only one portrait in the image, not a sheet; do not include the attached sheet itself.
+   Cut: the raw padded with magenta to 2300×2400 (centred), then `art.mjs --key --crop=214,112,1824,2048 --height=192` lines its face, eyes and brooch up with the other cells; appended as frame 7.
+
 ## Drawn in code
 
 The souls (the hero's frames tinted blue, with flames), the ghost guide, light beams and glows.
