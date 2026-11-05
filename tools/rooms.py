@@ -234,22 +234,20 @@ def rehearsal(o, p):
 room('The rehearsal', [715, 59], 30, 17, 3, 'aimed beams: protect a two-soul stair, shrine, sacrifice a corridor decoy', rehearsal)
 
 def old_tree(o, p):
-    o(1, 7, 28, 14); o(0, 13, 0, 14); o(29, 10, 29, 14)
+    o(1, 7, 28, 14); o(0, 13, 0, 14); o(29, 13, 29, 14)
     p(2, 14, 'P')
 room('The old tree', [745, 53], 30, 17, 3, 'calm promise; return behind the tree for the note', old_tree)
 
 def end(o, p):
-    o(1, 1, 38, 14); o(0, 13, 0, 14); o(39, 13, 39, 14)
-    p(3, 11, 'P'); o(3, 12, 6, 12, '#')
-    o(4, 13, 4, 14, 'V'); p(2, 14, 'V'); p(28, 14, 'B')
-    # Right shelf: a slide-only tunnel along its top ends at the plate that raises the stag's gate (game.js).
-    o(33, 12, 38, 12, '#'); o(34, 10, 38, 10, '#'); p(38, 11, '_')
-    # The wall seal is above the floor doorway; leave a walk back from its soul.
-    o(0, 10, 0, 14, 'V'); o(39, 13, 39, 14, 'V')
+    # Open floor wall to wall: you walk in on it (the vines close behind you) and the stag appears 7 tiles in.
+    o(1, 1, 38, 14); o(0, 13, 0, 14, 'V'); p(2, 14, 'P'); p(28, 14, 'B')
+    # Right shelf: solid down to the floor (nothing to hide under). A tunnel along its top ends at the plate that
+    # raises the stag's gate (game.js), and the way out is through the tunnel, past the plate.
+    o(33, 12, 38, 14, '#'); o(34, 10, 38, 10, '#'); p(38, 11, '_'); o(39, 11, 39, 11, 'V')
 room('The spectral stag', [775, 53], 40, 17, 3, 'final boss: gate plate (slide tunnel), antler sweep snags a floating soul, then a tug of war (mash Space)', end)
 
 def pyramid(o, p):
-    o(1, 1, 28, 14); o(0, 13, 0, 14); p(2, 14, 'P')  # open to the sky so the whole pyramid shows
+    o(1, 1, 28, 14); o(0, 11, 0, 11); p(2, 14, 'P')  # open to the sky so the whole pyramid shows; you drop in from the stag's shelf tunnel
 room('The pyramid entrance', [815, 53], 30, 17, 3, 'walk into floor one after reading the note', pyramid)
 
 out = []
@@ -264,6 +262,7 @@ for name, pos, world, note, rows, extra in rooms:
     if name == 'Three high': opts.update(spots=[[4, 'pyramid']])
     if name == 'Everything': opts.update(shrineTalk='almostCompetent')
     if name == 'The old tree': opts.update(spots=[[18, 'stagPromise']])
+    if name == 'The spectral stag': opts.update(spots=[[7, 'stagArrival']])
     if name == 'The tree guardian': opts.update(boss='tree', spots=[[7, 'tree']], deathTalk={20: 'treeSlam', 40: 'treeSlam2'})
     if world == 3 or name == 'End of the greybox': pos = [pos[0] + 30, pos[1]]
     if name != 'Take it back' and (world == 3 or world == 2 and pos[0] >= 376): pos = [pos[0] + 30, pos[1]]

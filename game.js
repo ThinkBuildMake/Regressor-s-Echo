@@ -51,7 +51,7 @@ const TREE_ART = 217, TREE_MASK = [25, 80], TREE_REACH = 75, TREE_WAKE = 2;
 // Intro after waking: it stands up tall and roars (14 frames; mouth opens on frame 7), then settles back (10 frames).
 const TREE_STAND = 1.75, TREE_SETTLE = 1.25, TREE_INTRO = TREE_WAKE + TREE_STAND + TREE_SETTLE;
 const TREE_WAVE_SPEED = 250, TREE_WAVE_RANGE = 150; // the slam's shockwave along the floor (px/s, px each way)
-const STAG_WALK = 130, STAG_GALLOP = 650, STAG_DAZE = 3, STAG_SWEEP = 1, STAG_TUG_PULL = 0.15, STAG_TUG_PRESS = 0.06; // tug of war: the stag pulls the bar down per second; each Space press pushes it up
+const STAG_WALK = 130, STAG_GALLOP = 650, STAG_DAZE = 3, STAG_SWEEP = 1, STAG_TUG_PULL = 0.15, STAG_TUG_PRESS = 0.12; // tug of war: the stag pulls the bar down per second; each Space press pushes it up
 const TREE_GLOW = 2.05, TREE_SPIKES = 1.5, TREE_SPIKES_UP = 1.2, TREE_STUCK = 2.5, TREE_WALK = 40, TREE_LUNGE = 240, TREE_FIST = 40;
 // Self-destruct (World 2 on): hold K/X this long. You keep moving while it charges; letting go cancels.
 const SD_HOLD = 0.75;
@@ -809,9 +809,9 @@ const ROOMS = [
     '#                            #',
     '#                            #',
     '#                            #',
-    '#                             ',
-    '#                             ',
-    '#                             ',
+    '#                            #',
+    '#                            #',
+    '#                            #',
     '                              ',
     '  P                           ',
     '##############################',
@@ -828,14 +828,14 @@ const ROOMS = [
     '#                                      #',
     '#                                      #',
     '#                                      #',
-    'V                                 ######',
-    'V  P                                  _#',
-    'V  ####                          #######',
-    'V   V                                  V',
-    'V V V                       B          V',
+    '#                                 ######',
+    '#                                     _V',
+    '#                                #######',
+    'V                                #######',
+    'V P                         B    #######',
     '########################################',
     '########################################',
-  ], [847, 53], { world: 3 }],
+  ], [847, 53], { world: 3, spots: [[7, "stagArrival"]] }],
   ["The pyramid entrance", [ // walk into floor one after reading the note
     '##############################',
     '#                            #',
@@ -848,10 +848,10 @@ const ROOMS = [
     '#                            #',
     '#                            #',
     '#                            #',
-    '#                            #',
-    '#                            #',
     '                             #',
-    '  P                          #',
+    '#                            #',
+    '#                            #',
+    '# P                          #',
     '##############################',
     '##############################',
   ], [887, 53], { world: 3 }],
@@ -1509,20 +1509,29 @@ class Room extends Phaser.Scene {
       stagAt(B, 'intro', 1);
       this.tweens.addCounter({ from: 0, to: 1, duration: 1000, onUpdate: () => B.img?.active && stagAt(B, 'intro', 1) });
     }
-    if (name === 'stagCharge' && this.boss?.stag) { // gallops in and holds, still a few tiles off, while the ghost shouts
-      const B = this.boss, stop = p.x + Math.sign(B.r.x - p.x) * 7 * T;
-      GameAudio.play('stag-charge');
-      this.tweens.add({ targets: B.r, x: stop, duration: 900, ease: 'Quad.easeIn', onUpdate: () => B.img?.active && stagAt(B, 'charge', 0.37, true) });
+    if (name === 'stagCharge' && this.boss?.stag) { // turns on him, opens its mouth, and a beam gathers there while the ghost shouts
+      const B = this.boss;
+      stagAt(B, 'beam', 0.7);
+      GameAudio.play('stag-beam');
+      const side = B.img?.flipX ? -1 : 1, scale = B.img?.scaleX ?? 0; // the mouth on the beam sheet (585x700 cells, mouth at 43,395)
+      const mx = B.img ? B.img.x + side * (43 - 585 / 2) * scale : B.r.x + Math.sign(p.x - B.r.x) * 60, my = B.img ? B.img.y - (700 - 395) * scale : B.r.y - 30;
+      B.chargeOrb = this.add.circle(mx, my, 10, 0xbfe6ff).setBlendMode(Phaser.BlendModes.ADD).setDepth(6).setScale(0.2);
+      B.r.once('destroy', () => B.chargeOrb?.destroy()); // a skipped scene doesn't leave it glowing
+      this.tweens.add({ targets: B.chargeOrb, scale: 2.4, duration: 2600, ease: 'Quad.easeIn' });
+      this.tweens.add({ targets: B.chargeOrb, alpha: 0.55, duration: 120, yoyo: true, repeat: -1 });
+      this.cameras.main.shake(2600, 0.0015);
     }
     if (name === 'lastBeam' && this.boss?.stag) { // he steps into the shot; everything goes white; the stag is spent
       const B = this.boss, between = (p.x + B.r.x) / 2;
       g.on = true; g.inTalk = true;
       this.tweens.add({ targets: g, x: between, duration: 220, onComplete: () => { g.hoverY = p.y - 20; } });
       g.setAlpha(0.9);
-      stagAt(B, 'beam', 0.7);
+      const orb = B.chargeOrb, from = orb ? [orb.x, orb.y] : [B.r.x - Math.sign(B.r.x - p.x) * 40, B.r.y - 30];
       this.time.delayedCall(250, () => {
-        GameAudio.play('stag-beam');
-        const beam = this.add.line(0, 0, B.r.x - Math.sign(B.r.x - p.x) * 40, B.r.y - 30, between, p.y - 20, 0x9bdfff).setOrigin(0).setLineWidth(9).setDepth(6);
+        orb?.destroy(); B.chargeOrb = null;
+        GameAudio.play('hazards-laser-blocked-by-soul');
+        this.cameras.main.shake(300, 0.01);
+        const beam = this.add.line(0, 0, ...from, between, p.y - 20, 0x9bdfff).setOrigin(0).setLineWidth(14).setDepth(6);
         this.time.delayedCall(500, () => beam.destroy());
       });
       const white = this.add.rectangle(480, 272, 960, 544, 0xffffff).setScrollFactor(0).setDepth(38).setAlpha(0);
@@ -2316,7 +2325,7 @@ class Room extends Phaser.Scene {
       B.sweepArt ??= this.add.image(0, 0, 'fx-stag-sweep', 0).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.6).setDepth(6);
       if (!B.sweepArt.hooked) { B.sweepArt.hooked = true; B.r.on('destroy', () => B.sweepArt.destroy()); }
       B.sweepArt.setVisible(B.phase === 'sweep');
-      if (B.phase === 'sweep') B.sweepArt.setPosition(band.centerX, band.centerY).setDisplaySize(band.width * 1.2, band.width * 0.4).setFlipX(B.face > 0)
+      if (B.phase === 'sweep') B.sweepArt.setPosition(band.centerX, band.centerY).setDisplaySize(band.width * 1.2, band.width * 0.4).setFlipX(B.face < 0) // painted sweeping left to right
         .setFrame(Math.min(3, Math.floor(B.clock / 0.3 * 4)));
     }
     B.tugText ??= this.add.text(0, 0, 'Press  SPACE', { fontFamily: 'Georgia, serif', fontSize: '22px', color: '#f1e3b8', backgroundColor: '#000000aa', padding: { x: 14, y: 8 } }).setOrigin(0.5).setDepth(46);
@@ -2338,24 +2347,22 @@ class Room extends Phaser.Scene {
     }
     if (this.dead > 0 || this.transit || this.talk.line || this.talk.queue.length) return;
     if (p.x > R.x + 1.5 * T) this.closeGates(B.room);
-    if (!Dialogue.seen.has('stagArrival')) { Dialogue.play(this, 'stagArrival'); return; }
-    if (B.hidden) return;
+    if (B.hidden) return; // it appears in its arrival talk, 7 tiles in
     B.hurt -= dt; B.clock += dt;
-    if (B.phase === 'setup') {
-      if (p.x < R.x + 7 * T && p.y + 15 > R.y + 12 * T) { B.clock = 0; return; }
-      if (B.clock < 8 && p.x < R.x + 7 * T) return;
+    if (B.phase === 'setup') { // a moment after it appears, then the first gallop
+      if (B.clock < 1.5) return;
       B.phase = 'windup'; B.clock = 0;
     }
     const gap = 3 * Math.pow(0.8, 3 - B.hp);
     const next = (phase) => { B.phase = phase; B.clock = 0; };
     const daze = () => { B.stomped = false; next('dazed'); this.cameras.main.shake(200, 0.01); };
-    // The gallop runs wall to wall: from the vines under the left platform to the right shelf.
+    // The gallop runs wall to wall: from the entrance wall to the right shelf.
     const lane = (to) => new Phaser.Geom.Rectangle(Math.min(B.r.x, to) - B.r.width / 2, B.r.y - B.r.height / 2, Math.abs(to - B.r.x) + B.r.width, B.r.height);
     const tell = B.again ? 0.6 : 0.9, lock = tell - 0.4;
     if (B.phase === 'windup') {
       if (B.clock < lock) {
         B.face = p.x > B.r.x ? 1 : -1;
-        B.aimX = B.face > 0 ? R.x + 33 * T - B.r.width / 2 : R.x + 5 * T + B.r.width / 2;
+        B.aimX = B.face > 0 ? R.x + 33 * T - B.r.width / 2 : R.x + T + B.r.width / 2;
       }
       const L = lane(B.aimX);
       this.fx.fillStyle(0xf5f582, B.clock >= lock ? 0.3 : 0.12).fillRect(L.x, L.y, L.width, L.height);

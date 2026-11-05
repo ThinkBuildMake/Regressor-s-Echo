@@ -151,7 +151,7 @@ const SCRIPT = {
     H("cocky", "{next}. But who's counting?"),
     G("warm", "Me. It was always me."),
     W(1.1, 'stagRise'), // behind his back, the stag calls out and gets up
-    W(0.9, 'stagCharge'), // and lowers its antlers to charge
+    W(0.9, 'stagCharge'), // and turns on him, a beam gathering in its mouth
     G("warning", "LOOK OUT!"),
     W(2.6, 'lastBeam'), // the ghost throws himself into the shot: everything goes white
     W(0.9),

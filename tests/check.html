@@ -183,7 +183,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     const opening = (rows, x, y) => rows.flatMap((row, r) =>
       row[x] !== undefined && row[x] !== '#' ? [y + r] : []);
     const exit = opening(a, width - 1, ay), entrance = opening(b, 0, by);
-    check(j === i + 1 && ax + width === bx && exit.length >= 2 &&
+    check(j === i + 1 && ax + width === bx && exit.length >= 1 &&
       JSON.stringify(exit) === JSON.stringify(entrance), `${from} → ${to}: consecutive rooms with matching doorways`);
   }
   for (const [name, world] of [['Thornwood', 1], ['Sawmill', 2], ['Reliquary', 3]]) {
@@ -1628,7 +1628,8 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   }
   if (matches('The old tree') || only.some((part) => 'the spectral stag'.includes(part))) {
     s = await cleanSolveRoom('The old tree');
-    Dialogue.seen.delete('stagPromise'); Dialogue.seen.delete('stagNote');
+    Dialogue.seen.delete('stagPromise'); Dialogue.seen.delete('stagNote'); Dialogue.seen.delete('stagArrival');
+    { const SB = s.bosses.find((b) => b.stag); SB.hidden = true; SB.r.setVisible(false); } // as on a first visit
     key('keydown', 39);
     await until(() => Dialogue.seen.has('stagPromise'), 8000, 'promise by old tree');
     key('keyup', 39);
@@ -1637,22 +1638,11 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     Dialogue.skip(s);
     key('keydown', 39);
     await until(() => s.rooms[s.index].name === 'The spectral stag', 7000, 'walk into arena');
-    key('keyup', 39); await until(() => !s.transit, 2000, 'arena entrance');
-    await wait(9000);
-    check(s.boss.phase === 'setup', 'The old tree: waiting in the entrance pocket cannot start the fight');
-    key('keydown', 39);
-    await until(() => s.player.x >= O().x + 1.5 * 32, 1200, 'wide entrance opening');
-    key('keyup', 39); key('keydown', 37);
-    await until(() => s.player.body.velocity.x <= 0, 500, 'brake in opening'); key('keyup', 37); await wait(30);
-    key('keydown', 39); key('keydown', 32);
-    await until(() => s.player.x >= O().x + 2.5 * 32, 1200, 'entrance step');
-    key('keyup', 39); key('keydown', 37);
-    await until(() => s.player.body.velocity.x <= 0, 500, 'brake on entrance step'); key('keyup', 37);
-    await until(() => s.player.body.blocked.down, 1200, 'land on entrance step'); key('keyup', 32); await wait(30);
-    key('keydown', 39); key('keydown', 32);
-    await until(() => s.player.x >= O().x + 3.5 * 32 && s.player.y + 15 < O().y + 12 * 32, 1800, 'climb onto arena platform');
-    key('keyup', 39); await until(() => s.player.body.blocked.down, 1200, 'land on arena platform'); key('keyup', 32);
-    check(s.player.y + 15 <= O().y + 12.1 * 32, 'The old tree: the wide opening reaches the platform with a normal jump');
+    await until(() => !s.transit, 2000, 'arena entrance');
+    check(s.boss.hidden, 'The old tree: the stag is not there as you walk in');
+    await until(() => Dialogue.seen.has('stagArrival'), 4000, 'stag arrives 7 tiles in'); key('keyup', 39);
+    check(s.player.x > O().x + 6 * 32 && s.gates.filter((g) => g.room === s.index && g.x < O().x + 32).every((g) => g.body.enable),
+      'The old tree: the stag appears once you walk in, and the vines close behind you');
   }
   if (matches('The clearing')) {
     s = await cleanSolveRoom('The clearing');
@@ -1677,19 +1667,18 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     check(view.x <= O().x && view.right >= O().right, 'The spectral stag: the camera frames the whole arena');
     B.r.x = O().x + 6.5 * 32; B.phase = 'miss'; B.clock = -10;
     const plainDeaths = stats.deaths;
-    key('keydown', 39);
-    await until(() => s.player.x >= O().x + 7.4 * 32, 2000, 'plain stomp approach');
-    key('keyup', 39);
+    s.player.body.reset(O().x + 6.5 * 32, O().y + 9 * 32); // drop onto its back
     await until(() => s.player.body.velocity.y < 0, 1000, 'plain stomp bounce');
     check(B.hp === 3 && stats.deaths === plainDeaths, 'The spectral stag: plain stomp bounces without damage');
     s = await cleanSolveRoom('The spectral stag'); B = s.boss;
-    const onPlatform = () => s.player.body.reset(O().x + 5.5 * 32, O().y + 12 * 32 - 15.5);
+    const inTunnel = () => s.player.body.reset(O().x + 36.5 * 32, O().y + 12 * 32 - 15.5); // in the shelf tunnel, above the gallop
+    const behindGate = () => s.player.body.reset(O().x + 5.5 * 32, O().y + 15 * 32 - 15.5); // on the floor, the gate between you and it
     // A soul in the gallop's path is trampled flat, not a trip: only the gate stops it now.
-    await place(20, 0, 15); onPlatform(); await wait(100);
+    await place(20, 0, 15); inTunnel(); await wait(100);
     let deaths = stats.deaths;
-    B.r.x = O().x + 28 * 32; B.phase = 'windup'; B.clock = 0;
+    B.r.x = O().x + 8 * 32; B.phase = 'windup'; B.clock = 0;
     await until(() => B.phase === 'miss', 4000, 'gallop over a waiting soul');
-    check(B.hp === 3 && s.corpses[0].lying && stats.deaths === deaths && B.r.x === O().x + 8 * 32,
+    check(B.hp === 3 && s.corpses[0].lying && stats.deaths === deaths && B.r.x === O().x + 33 * 32 - 96,
       'The spectral stag: the gallop tramples a soul in its lane and runs on to the wall');
     s = await cleanSolveRoom('The spectral stag'); B = s.boss;
     Dialogue.seen.delete('stagDown');
@@ -1704,7 +1693,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     };
     const swap = async () => { key('keydown', 69); await wait(30); key('keyup', 69); };
     // Hit 1: a soul on the plate at the end of the shelf tunnel raises the gate; the gallop slams into it.
-    await place(38, 0, 12); await place(11, 4, 15); onPlatform(); await wait(150); // the plate soul, then a floating swap partner mid-arena
+    await place(38, 0, 12); await place(11, 4, 15); behindGate(); await wait(150); // the plate soul, then a floating swap partner mid-arena
     deaths = stats.deaths;
     check(B.gate.visible && B.gate.body.enable, 'The spectral stag: a soul on the tunnel plate raises the gate');
     B.r.x = O().x + 28 * 32; B.phase = 'windup'; B.clock = 0;

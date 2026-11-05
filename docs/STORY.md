@@ -419,7 +419,7 @@ A cutscene: the game takes over. The two walk away from the fallen stag into the
 > **Guide** [amused]: You died eleven times.  
 > **Hero** [cocky]: Twelve. But who's counting?  
 > **Guide** [warm]: Me. It was always me.  
-> *(Behind his back, the stag calls out, rises and lowers its antlers to charge.)*  
+> *(Behind his back, the stag calls out, rises and turns on him: a beam gathers in its mouth.)*  
 > **Guide** [warning]: LOOK OUT!  
 > *(The guide throws himself in front and takes the shot. A soul is a soul: his blocks it, but this beam breaks souls.)*  
 > *(The screen goes white for a couple of seconds. When the light fades, the stag is gone.)*  
