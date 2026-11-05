@@ -179,6 +179,7 @@ const SCRIPT = {
     H("sad", "\u2026Idiot."),
     H("determined", "Ninety floors, huh."),
     H("determined", "Then I'm not stopping at ninety."),
+    W(2.2), // he walks into the doorway on his own
     W(1, 'theEnd')
   ],
   clearing: [
@@ -412,8 +413,8 @@ stage('moth', 2, { walk: 11, face: 'right', speed: 22 });
 stage('stagPromise', 0, { walk: 20, guide: { x: 18, y: 13 }, face: 'guide' });
 stage('stagNote', 0, { walk: 19.5, face: 'left', pose: 'kneel' });
 stage('stagNote', 11, { pose: 'idle' });
-stage('floorOne', 0, { walk: 23, face: 'right' });
-stage('floorOne', 3, { walk: 26, face: 'right' });
+stage('floorOne', 0, { walk: 5, face: 'right' });
+stage('floorOne', 3, { walk: 15, face: 'right' }); // into the doorway (game.js draws it at 15)
 // The nap: the game walks him in, he lies down, full dark, and he gets up at dawn.
 stage('letGo', 0, { walk: 4, face: 'right' });
 stage('letGo', 2, { pose: 'sleep' });
@@ -459,8 +460,8 @@ stage('stagPromise', 7, { walk: 20, face: 'guide' });
 stage('stagDown', 5, { hop: true, face: 'guide' });
 stage('stagDown', 6, { pose: 'slump' });
 stage('stagDown', 13, { pose: 'idle', face: 'guide' });
-stage('floorOne', 1, { walk: 23.5, face: 'right' });
-stage('floorOne', 2, { walk: 24, face: 'right' });
+stage('floorOne', 1, { walk: 8, face: 'right' });
+stage('floorOne', 2, { walk: 11, face: 'right' });
 
 const Dialogue = {
   seen: new Set(), // survives room restarts, so lines don't repeat

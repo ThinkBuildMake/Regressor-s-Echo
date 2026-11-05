@@ -365,7 +365,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   for (const [name, script, mark] of [
     ['The clearing', 'amulet', 11.5], ['First death', 'firstPit', 9],
     ['The moth', 'moth', 11], ['The old tree', 'stagNote', 19.5],
-    ['The pyramid entrance', 'floorOne', 26],
+    ['The pyramid entrance', 'floorOne', 15],
   ]) if (matches(name)) {
     for (const skip of [false, true]) {
       Object.keys(SCRIPT).forEach((k) => Dialogue.seen.add(k));

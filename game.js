@@ -836,13 +836,13 @@ const ROOMS = [
   ], [847, 53], { world: 3 }],
   ["The pyramid entrance", [ // walk into floor one after reading the note
     '##############################',
-    '##############################',
-    '##############################',
-    '##############################',
-    '##############################',
-    '##############################',
-    '##############################',
-    '##############################',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
+    '#                            #',
     '#                            #',
     '#                            #',
     '#                            #',
@@ -955,7 +955,7 @@ class Room extends Phaser.Scene {
     for (const [key, path] of [
       ['amulet', 'world1/amulet'], ['ghost', 'world1/ghost'], ['old-tree', 'world3/old-tree'],
       ...[1, 2, 3].flatMap((n) => [[`amulet-rune${n}`, `world1/amulet-rune${n}`], [`shrine${n}`, `world${n}/shrine`], [`shrineLit${n}`, `world${n}/shrine-lit`], [`gate${n}`, `world${n}/gate`]]),
-      ['uiSoulFull', 'ui/soul-full'], ['uiSoulEmpty', 'ui/soul-empty'], ['carvings', 'world2/carvings'], ['laserEmitter', 'world2/laser'],
+      ['uiSoulFull', 'ui/soul-full'], ['uiSoulEmpty', 'ui/soul-empty'], ['carvings', 'world2/carvings'], ['pyramid', 'world3/pyramid'], ['laserEmitter', 'world2/laser'],
     ]) if (!this.textures.exists(key)) this.load.image(key, `assets/${path}.webp`);
     if (!this.textures.exists('heroSheet')) {
       this.load.image('heroSheet', 'assets/hero/sheet.webp'); // 8 frames: run 0-5, jump 6, fall 7
@@ -1484,6 +1484,7 @@ class Room extends Phaser.Scene {
     if (name === 'wear') this.wearing = true;
     if (name === 'flash') this.cameras.main.flash(600, 255, 215, 120);
     if (name === 'theEnd') { // he walks into the pyramid: fade out to the ending card
+      this.tweens.add({ targets: this.heroSprite, alpha: 0, duration: 700 }); // swallowed by the dark doorway
       this.cameras.main.fadeOut(1500, 0, 0, 0);
       this.cameras.main.once('camerafadeoutcomplete', () => this.scene.start('end'));
     }
@@ -2142,8 +2143,10 @@ class Room extends Phaser.Scene {
       fontFamily: 'cursive', fontSize: '14px', color: '#382b23', fontStyle: 'italic', wordWrap: { width: 600 }
     }).setScale(0.28, 0.14).setAngle(-4).setDepth(2).setVisible(false);
     const P = this.rooms.find((r) => r.name === 'The pyramid entrance').rect;
-    this.add.triangle(P.x + 22 * T, P.y + 10 * T, 0, 160, 120, 0, 240, 160, 0x708292).setDepth(1);
-    this.add.rectangle(P.x + 22 * T, P.y + 14 * T, 40, 64, 0x101923).setDepth(2);
+    if (this.textures.exists('pyramid')) // the pyramid rising over the jungle, its base on the floor at the room's far end
+      this.add.image(P.x + 15 * T, P.y + 15 * T + 6, 'pyramid').setOrigin(0.5, 1).setDisplaySize(880, 491).setDepth(0.5);
+    else this.add.triangle(P.x + 22 * T, P.y + 10 * T, 0, 160, 120, 0, 240, 160, 0x708292).setDepth(1);
+    this.add.rectangle(P.x + 15 * T, P.y + 14 * T, 40, 64, 0x101923).setDepth(2); // the doorway at the pyramid's base: he walks into it
   }
 
   stagSeals(B) {
@@ -2639,7 +2642,7 @@ class Room extends Phaser.Scene {
       const R = this.rooms[this.index];
       if (R.name === 'The old tree' && p.x > R.rect.x + 18 * T && p.x < R.rect.x + 20 * T)
         Dialogue.play(this, 'stagNote');
-      if (R.name === 'The pyramid entrance' && Dialogue.seen.has('stagNote') && p.x > R.rect.x + 22 * T)
+      if (R.name === 'The pyramid entrance' && Dialogue.seen.has('stagNote') && p.x > R.rect.x + 2 * T) // starts as you arrive; he walks in on his own
         Dialogue.play(this, 'floorOne');
     }
     // Spots: [column, script, after] plays a script once you walk past that column (after another script, if given).

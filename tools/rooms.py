@@ -247,7 +247,7 @@ def end(o, p):
 room('The spectral stag', [775, 53], 40, 17, 3, 'final boss: swap out of a soul ram, stomp, restore three elevated seals', end)
 
 def pyramid(o, p):
-    o(1, 8, 28, 14); o(0, 13, 0, 14); p(2, 14, 'P')
+    o(1, 1, 28, 14); o(0, 13, 0, 14); p(2, 14, 'P')  # open to the sky so the whole pyramid shows
 room('The pyramid entrance', [815, 53], 30, 17, 3, 'walk into floor one after reading the note', pyramid)
 
 out = []
