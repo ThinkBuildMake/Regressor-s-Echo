@@ -14,11 +14,10 @@ const FACES = {
 // these faces borrows the closest face from the first sheet.
 const FACES2 = {
   hero: ['curious', 'annoyed', 'excited', 'scared', 'shouting', 'cocky'],
-  guide: ['smug', 'mischievous', 'teasing', 'exasperated', 'warning', 'surprised'],
+  guide: ['smug', 'mischievous', 'teasing', 'exasperated', 'warning', 'surprised', 'pained'],
 };
 const FALLBACK = {
   curious: 'thinking', annoyed: 'determined', excited: 'relieved', scared: 'startled', shouting: 'pained', cocky: 'neutral',
-  pained: 'weary', // the ghost's sheet has no pained face
   smug: 'amused', mischievous: 'wry', teasing: 'amused', exasperated: 'weary', warning: 'solemn', surprised: 'skeptical',
 };
 const NAMES = { hero: 'You', guide: '???' };

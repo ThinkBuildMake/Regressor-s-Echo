@@ -426,7 +426,7 @@ A cutscene: the game takes over. The two walk away from the fallen stag into the
 > **Guide** [pained]: Ugh…  
 > **Guide** [pained]: \*crack\*  
 > **Hero** [shouting]: NO—!  
-> *(From here he is breaking apart: fainter with every line, his words more broken, small cracks as he goes. The hero's lines stay whole. Short lines, one thought per box, so each one lands. The guide's sheet has no pained face yet; [pained] shows his weary one.)*  
+> *(From here he is breaking apart: fainter with every line, his words more broken, small cracks as he goes. The hero's lines stay whole. Short lines, one thought per box, so each one lands.)*  
 > **Guide** [pained]: I knew… it would come to this.  
 > **Guide** [weary]: Same thing… happened last time.  
 > **Guide** [sad]: My guide… did exactly this.  
