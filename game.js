@@ -1460,13 +1460,14 @@ class Room extends Phaser.Scene {
       .setOrigin(0.5).setScrollFactor(0).setDepth(46).setAlpha(0);
     this.keyPrompt.done = KEY_PROMPTS[id][1];
     this.keyPrompt.until = this.time.now + 25000;
+    this.keyPrompt.room = this.index; // it fades once he walks on to another room
     this.tweens.add({ targets: this.keyPrompt, alpha: 1, duration: 400 });
   }
 
   updateKeyPrompt() {
     const k = this.keyPrompt;
     if (!k || k.leaving || this.talk?.line || this.talk?.queue?.length) return;
-    if (k.done(this) || this.time.now > k.until) {
+    if (k.done(this) || this.time.now > k.until || this.index !== k.room) {
       k.leaving = true;
       this.tweens.add({ targets: k, alpha: 0, duration: 600, delay: 400, onComplete: () => k.destroy() });
       this.keyPrompt = null;
