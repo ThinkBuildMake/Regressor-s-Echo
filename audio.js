@@ -72,12 +72,15 @@ const GameAudio = {
   },
   mix(dt, talking = false) {
     const master = this.muted ? 0 : this.master;
+    // Music changes fade the old track out (1.2 s) first, then fade the new one in from its start (2 s).
+    const fading = [...this.tracks].some(([key, t]) => key !== this.musicKey && t.gain > 0);
     for (const [key, t] of this.tracks) {
-      const target = key === this.musicKey ? 1 : 0;
-      t.gain += Math.sign(target - t.gain) * Math.min(Math.abs(target - t.gain), dt);
+      const target = key === this.musicKey && !fading ? 1 : 0;
+      const rate = target > t.gain ? 1 / 2 : 1 / 1.2;
+      t.gain += Math.sign(target - t.gain) * Math.min(Math.abs(target - t.gain), dt * rate);
       t.a.volume = master * 0.28 * (talking ? 0.4 : 1) * t.gain;
       if (target && (!t.a.ended || t.a.loop)) this.start(t.a);
-      else if (!t.gain) t.a.pause();
+      else if (!t.gain && !t.a.paused) { t.a.pause(); try { t.a.currentTime = 0; } catch {} }
     }
     for (const pool of this.effects.values()) for (const a of pool) a.volume = master * a.level;
     for (const [source, e] of this.loops) {
