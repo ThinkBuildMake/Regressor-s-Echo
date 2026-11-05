@@ -2133,7 +2133,7 @@ class Room extends Phaser.Scene {
   drawStagGrounds() {
     const R = this.rooms.find((r) => r.name === 'The old tree').rect;
     if (this.textures.exists('old-tree'))
-      this.add.image(R.x + 21 * T, R.y + 15 * T, 'old-tree').setOrigin(0.5, 1).setScale(0.5).setDepth(1);
+      this.add.image(R.x + 21 * T, R.y + 15 * T + 12, 'old-tree').setOrigin(0.5, 1).setScale(0.5).setDepth(1); // roots sunk into the grass lip
     else {
       this.add.rectangle(R.x + 21 * T, R.y + 13 * T, 26, 128, 0x655d60).setDepth(1);
       this.add.circle(R.x + 21 * T, R.y + 9 * T, 65, 0x526672).setDepth(1);
