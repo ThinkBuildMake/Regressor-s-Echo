@@ -48,6 +48,8 @@ const MOTH_HOLE = [2, 9];
 // The mask hitbox sits on the painted mask (TREE_MASK: px ahead of the body's center, px above the floor), in jump reach from the
 // floor; plain stomps bounce, so only stuck hands open it. TREE_REACH: where the slam's fist lands, px ahead of the body's center.
 const TREE_ART = 217, TREE_MASK = [25, 80], TREE_REACH = 75, TREE_WAKE = 2;
+// Intro after waking: it stands up tall and roars (14 frames; mouth opens on frame 7), then settles back (10 frames).
+const TREE_STAND = 1.75, TREE_SETTLE = 1.25, TREE_INTRO = TREE_WAKE + TREE_STAND + TREE_SETTLE;
 const TREE_GLOW = 2.05, TREE_SPIKES = 1.5, TREE_SPIKES_UP = 1.2, TREE_STUCK = 2.5, TREE_WALK = 40, TREE_LUNGE = 240, TREE_FIST = 40;
 // Self-destruct (World 2 on): hold K/X this long. You keep moving while it charges; letting go cancels.
 const SD_HOLD = 0.75;
@@ -990,7 +992,7 @@ class Room extends Phaser.Scene {
     for (const kind of ['moth', 'tree', 'stag']) {
       if (!this.textures.exists(`${kind}-fallen`)) this.load.image(`${kind}-fallen`, `assets/bosses/${kind === 'tree' ? 'tree-v2' : kind}-fallen.webp`);
     }
-    for (const pose of ['dormant', 'wake', 'walk', 'swing', 'slam', 'throw', 'fall']) {
+    for (const pose of ['dormant', 'wake', 'stand', 'settle', 'walk', 'swing', 'slam', 'throw', 'fall']) {
       if (!this.textures.exists(`tree-${pose}`)) this.load.image(`tree-${pose}`, `assets/bosses/tree-v2-${pose}.webp`);
       if (!this.cache.json.exists(`tree-${pose}-frames`)) this.load.json(`tree-${pose}-frames`, `assets/bosses/tree-v2-${pose}.json`);
     }
@@ -1478,7 +1480,7 @@ class Room extends Phaser.Scene {
       this.tweens.add({ targets: g, alpha: 0, duration: 1500, onComplete: () => { g.on = false; } });
     }
     if (name === 'stagGone' && this.boss?.stag) { this.bossDefeated(this.boss); this.stagFinished = true; }
-    if (name === 'tree' && this.boss?.kind === 'tree') { this.boss.hidden = false; this.boss.r.setVisible(true); this.boss.phase = 'intro'; this.boss.timer = 3; }
+    if (name === 'tree' && this.boss?.kind === 'tree') { this.boss.hidden = false; this.boss.r.setVisible(true); this.boss.phase = 'intro'; this.boss.timer = TREE_INTRO; this.boss.screamed = false; }
     if (name === 'wear') this.wearing = true;
     if (name === 'flash') this.cameras.main.flash(600, 255, 215, 120);
     if (name === 'theEnd') { // he walks into the pyramid: fade out to the ending card
@@ -2366,7 +2368,7 @@ class Room extends Phaser.Scene {
     const frame = Math.floor((this.time.now - B.artStart) / (duration * 1000) * count);
     const sourceHeight = kind === 'stag' ? { idle: 486, intro: 584, charge: 500, beam: 555, wave: 617, walk: 520 }[pose] : fh;
     const scale = height / sourceHeight;
-    B.artFoot = (fh - (kind === 'stag' ? { idle: 660, intro: 677, charge: 676, beam: 653, wave: 676, walk: 645 } : { dormant: 658, wake: 652, walk: 652, swing: 653, slam: 652, throw: 653, fall: 652 })[pose]) * scale; // empty rows under the feet
+    B.artFoot = (fh - (kind === 'stag' ? { idle: 660, intro: 677, charge: 676, beam: 653, wave: 676, walk: 645 } : { dormant: 658, wake: 652, stand: 652, settle: 652, walk: 652, swing: 653, slam: 652, throw: 653, fall: 652 })[pose]) * scale; // empty rows under the feet
     B.img.setTexture(key, loop ? frame % count : Math.min(count - 1, frame)).setScale(scale);
     if (pose === 'idle') B.img.setFrame(0).setScale(scale, scale * (1 + Math.sin(this.time.now / 320) * 0.012));
   }
@@ -2426,7 +2428,9 @@ class Room extends Phaser.Scene {
     // land the fist on frame 7 of 10 as the tell ends and hold it there, through the stuck hands too.
     const moving = B.x !== B.lastX; B.lastX = B.x;
     const ground = B.open > 0 || ['slam', 'spikes', 'spikesUp'].includes(B.phase);
-    const [pose, duration, last] = B.hidden ? ['dormant', 1] : B.phase === 'intro' ? ['wake', TREE_WAKE]
+    const intro = TREE_INTRO - B.timer; // seconds into the intro: wake, stand and roar, settle
+    const [pose, duration, last] = B.hidden ? ['dormant', 1] : B.phase === 'intro'
+        ? (intro < TREE_WAKE ? ['wake', TREE_WAKE] : intro < TREE_WAKE + TREE_STAND ? ['stand', TREE_STAND] : ['settle', TREE_SETTLE])
       : ground ? ['slam', (B.phase === 'slam' ? TREE_GLOW : TREE_SPIKES) * 7 / 6, 6]
       : B.phase === 'swing' ? ['swing', 1] : B.phase === 'throw' ? ['throw', 0.875]
       : ['walk', 12 * 22 * (TREE_ART / 700) / TREE_WALK]; // 12 steps of ~22 px (sheet scale) per cycle, at walking speed
@@ -2453,6 +2457,18 @@ class Room extends Phaser.Scene {
         GameAudio.play('tree-seed-pod-burst');
         pod.r.destroy(); B.pods.splice(B.pods.indexOf(pod), 1);
       }
+    }
+    if (B.phase === 'intro' && !B.screamed && !B.hidden && intro >= TREE_WAKE + TREE_STAND * 7 / 14) { // the mouth opens: ROAR
+      B.screamed = true;
+      GameAudio.play('tree-scream');
+      this.cameras.main.shake(900, 0.008);
+      for (let i = 0; i < 6; i++) this.time.delayedCall(i * 160, () => { // sound-wave rings from the mask, like the moth's
+        for (const [w, col, a] of [[10, 0x2a2018, 0.35], [4, 0xffffff, 0.95]]) {
+          const ring = this.add.circle(B.r.x, B.r.y, 40).setStrokeStyle(w, col, a).setDepth(5.9);
+          this.tweens.add({ targets: ring, radius: 420, duration: 900, ease: 'Cubic.easeOut', onComplete: () => ring.destroy() });
+          this.tweens.add({ targets: ring, alpha: 0, duration: 900, ease: 'Quad.easeIn' });
+        }
+      });
     }
     if (B.open > 0) { B.open = Math.max(0, B.open - dt); return; }
     if (B.phase === 'idle') { // lumber toward you
