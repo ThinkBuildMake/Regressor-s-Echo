@@ -241,10 +241,12 @@ room('The old tree', [745, 53], 30, 17, 3, 'calm promise; return behind the tree
 def end(o, p):
     o(1, 1, 38, 14); o(0, 13, 0, 14); o(39, 13, 39, 14)
     p(3, 11, 'P'); o(3, 12, 6, 12, '#')
-    o(4, 13, 4, 14, 'V'); p(2, 14, 'V'); p(34, 14, 'B')
+    o(4, 13, 4, 14, 'V'); p(2, 14, 'V'); p(28, 14, 'B')
+    # Right shelf: a slide-only tunnel along its top ends at the plate that raises the stag's gate (game.js).
+    o(33, 12, 38, 12, '#'); o(34, 10, 38, 10, '#'); p(38, 11, '_')
     # The wall seal is above the floor doorway; leave a walk back from its soul.
     o(0, 10, 0, 14, 'V'); o(39, 13, 39, 14, 'V')
-room('The spectral stag', [775, 53], 40, 17, 3, 'final boss: swap out of a soul ram, stomp, restore three elevated seals', end)
+room('The spectral stag', [775, 53], 40, 17, 3, 'final boss: gate plate (slide tunnel), antler sweep snags a floating soul, then a tug of war (mash Space)', end)
 
 def pyramid(o, p):
     o(1, 1, 28, 14); o(0, 13, 0, 14); p(2, 14, 'P')  # open to the sky so the whole pyramid shows

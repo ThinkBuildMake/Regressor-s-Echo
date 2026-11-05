@@ -51,6 +51,7 @@ const TREE_ART = 217, TREE_MASK = [25, 80], TREE_REACH = 75, TREE_WAKE = 2;
 // Intro after waking: it stands up tall and roars (14 frames; mouth opens on frame 7), then settles back (10 frames).
 const TREE_STAND = 1.75, TREE_SETTLE = 1.25, TREE_INTRO = TREE_WAKE + TREE_STAND + TREE_SETTLE;
 const TREE_WAVE_SPEED = 250, TREE_WAVE_RANGE = 150; // the slam's shockwave along the floor (px/s, px each way)
+const STAG_WALK = 130, STAG_GALLOP = 650, STAG_DAZE = 3, STAG_SWEEP = 1, STAG_TUG_PULL = 0.15, STAG_TUG_PRESS = 0.06; // tug of war: the stag pulls the bar down per second; each Space press pushes it up
 const TREE_GLOW = 2.05, TREE_SPIKES = 1.5, TREE_SPIKES_UP = 1.2, TREE_STUCK = 2.5, TREE_WALK = 40, TREE_LUNGE = 240, TREE_FIST = 40;
 // Self-destruct (World 2 on): hold K/X this long. You keep moving while it charges; letting go cancels.
 const SD_HOLD = 0.75;
@@ -816,7 +817,7 @@ const ROOMS = [
     '##############################',
     '##############################',
   ], [817, 53], { world: 3, spots: [[18, "stagPromise"]] }],
-  ["The spectral stag", [ // final boss: swap out of a soul ram, stomp, restore three elevated seals
+  ["The spectral stag", [ // final boss: gate plate (slide tunnel), antler sweep snags a floating soul, then a tug of war (mash Space)
     '########################################',
     '#                                      #',
     '#                                      #',
@@ -827,11 +828,11 @@ const ROOMS = [
     '#                                      #',
     '#                                      #',
     '#                                      #',
-    'V                                      #',
-    'V  P                                   #',
-    'V  ####                                #',
+    'V                                 ######',
+    'V  P                                  _#',
+    'V  ####                          #######',
     'V   V                                  V',
-    'V V V                             B    V',
+    'V V V                       B          V',
     '########################################',
     '########################################',
   ], [847, 53], { world: 3 }],
@@ -990,7 +991,6 @@ class Room extends Phaser.Scene {
       if (!this.textures.exists(effect)) this.load.spritesheet(effect, `assets/effects/${effect}.webp`, { frameWidth: width, frameHeight: height });
     if (this.bossArtRequested) return;
     this.bossArtRequested = true;
-    if (!this.textures.exists('seal')) this.load.image('seal', 'assets/effects/seal.webp');
     for (const pose of ['intro', 'idle', 'charge', 'beam', 'wave', 'walk']) {
       if (!this.textures.exists(`stag-${pose}`)) this.load.image(`stag-${pose}`, `assets/bosses/stag-${pose}.webp`);
       if (!this.cache.json.exists(`stag-${pose}-frames`)) this.load.json(`stag-${pose}-frames`, `assets/bosses/stag-${pose}.json`);
@@ -1112,7 +1112,7 @@ class Room extends Phaser.Scene {
               this.bosses.at(-1).r.setVisible(!this.bosses.at(-1).hidden);
               if (name === 'The spectral stag') {
                 const B = this.bosses.at(-1);
-                Object.assign(B, { stag: true, hidden: !Dialogue.seen.has('stagArrival'), story: 'stagDown', phase: 'setup', clock: 0, bells: 0, deaths: stats.stagDeaths }); // the whole run's deaths here, across Shift+R
+                Object.assign(B, { stag: true, face: -1, hidden: !Dialogue.seen.has('stagArrival'), story: 'stagDown', phase: 'setup', clock: 0, deaths: stats.stagDeaths }); // the whole run's deaths here, across Shift+R
                 B.r.setVisible(!B.hidden).setSize(192, 64).setPosition(x, (oy + 14) * T).setFillStyle(0xbceaff);
                 B.antlers = this.add.graphics().setDepth(5);
                 B.r.on('destroy', () => B.antlers.destroy());
@@ -1781,7 +1781,7 @@ class Room extends Phaser.Scene {
     p.body.moves = false; // Gravity must pause with the enemies during respawn.
     this.dead = RESPAWN_DELAY;
     if (this.boss) { this.boss.hp = BOSS_HP; this.boss.hurt = 0;
-      if (this.boss.stag) { this.boss.deaths = ++stats.stagDeaths; this.boss.phase = 'setup'; this.boss.clock = 0; this.boss.bells = 0; this.boss.beam = null; this.boss.pulse = -1; this.boss.r.x = this.rooms[this.boss.room].rect.right - 5 * T; }
+      if (this.boss.stag) { this.boss.deaths = ++stats.stagDeaths; this.boss.phase = 'setup'; this.boss.clock = 0; this.boss.beam = null; this.boss.again = false; this.boss.gateBroken = false; this.boss.snag = null; }
       if (this.boss.kind === 'tree') { this.boss.phase = 'idle'; this.boss.timer = 4; this.boss.attack = -1; this.boss.open = 0; this.boss.x = this.boss.x0; this.boss.face = -1; this.boss.pods.forEach((p) => p.r.destroy()); this.boss.pods = []; this.boss.waves?.forEach((w) => w.img?.destroy()); this.boss.waves = []; }
     } // your death heals the boss
     if (this.boss?.story === 'mothDown' && !this.boss.hidden) {
@@ -2175,7 +2175,7 @@ class Room extends Phaser.Scene {
         g.fillStyle(0xff8a6b, up ? 0.9 : 0.25 + 0.2 * Math.sin(t * 20));
         for (let x = R.x + T; x < R.right - T; x += 16) up ? g.fillTriangle(x, B.floor, x + 8, B.floor - 18, x + 16, B.floor) : g.fillRect(x + 2, B.floor - 3, 12, 3);
       }
-      if (B.open > 0) g.lineStyle(3, 0xf1f578, 1).strokeCircle(B.r.x, B.r.y, 42);
+      if (B.open > 0) this.dizzy(B.r.x, B.r.y - 40, 40);
     }
     for (const sw of this.saws) {
       if (sw.room !== this.index) continue;
@@ -2210,105 +2210,153 @@ class Room extends Phaser.Scene {
       : this.add.rectangle(P.x + 15 * T, P.y + 14 * T, 40, 64, 0x101923).setDepth(2);
   }
 
-  stagSeals(B) {
-    const R = this.rooms[B.room].rect;
-    return [[1.5, 11.5], [37.5, 11.5], [5.5, 11.5]].map(([x, y]) => ({
-      x: R.x + x * T, y: R.y + y * T
-    }));
+  // Every boss shows this while it can be stomped: sparks circling over its head.
+  dizzy(x, y, w) {
+    for (let i = 0; i < 4; i++) {
+      const a = this.time.now / 200 + i * Math.PI / 2, sx = x + Math.cos(a) * w, sy = y + Math.sin(a) * w * 0.24;
+      this.fx.fillStyle(0xffef72, 0.95).fillCircle(sx, sy, 8).fillStyle(0xffffff, 1).fillCircle(sx, sy, 3.5);
+    }
   }
 
+  // Three hits, three tricks: the plate's gate (once), a soul floating in the antler sweep (2 HP), and at 1 HP a tug of war: the antlers hold the snagged soul, and mashing Space wins it back and topples the stag.
   updateStag(B, dt) {
-    const R = this.rooms[B.room].rect, p = this.player;
+    const R = this.rooms[B.room].rect, p = this.player, floor = R.y + 15 * T;
+    const moved = B.moved; B.moved = false; // walking last frame; dialogue and respawn freeze it in place
+    const walkTo = (x, speed) => {
+      const d = x - B.r.x;
+      if (d) { B.face = Math.sign(d); B.moved = true; B.r.x = Math.abs(d) <= speed * dt ? x : B.r.x + Math.sign(d) * speed * dt; }
+      return B.r.x === x;
+    };
     const cam = this.cameras.main;
     cam.setZoom(Math.min(1, cam.width / R.width)); cam.stopFollow(); cam.centerOn(R.centerX, R.centerY);
-    B.antlers.setVisible(B.r.visible && !B.img).clear().lineStyle(B.phase === 'bell' ? 7 : 3, B.phase === 'bell' ? 0xdf89ff : 0xd9f3ff);
+    B.antlers.setVisible(B.r.visible && !B.img).clear().lineStyle(3, 0xd9f3ff);
     for (const dx of [-28, 28]) {
       B.antlers.lineBetween(B.r.x + dx, B.r.y - 32, B.r.x + dx, B.r.y - 66);
       B.antlers.lineBetween(B.r.x + dx, B.r.y - 48, B.r.x + dx + Math.sign(dx) * 17, B.r.y - 62);
     }
-    const pose = this.time.now < B.introUntil ? 'intro' : B.phase === 'beam' ? 'beam'
-      : B.phase === 'bell' ? 'wave' : B.phase === 'charge' ? 'charge' : B.phase === 'return' ? 'walk' : 'idle';
-    this.bossPose(B, 'stag', pose, 180, pose === 'wave' || pose === 'intro' ? 1 : pose === 'walk' ? 1.1 : 0.7, pose === 'charge' || pose === 'idle' || pose === 'walk');
-    B.img?.setFlipX(B.phase === 'return' && B.r.x < R.x + 25 * T); // the sheets face left; walking home to the right turns it
-    B.img?.setPosition(B.r.x, B.r.y + 32 + (B.artFoot ?? 0)).setVisible(B.r.visible).setTint(B.phase === 'bell' ? 0xdf89ff : B.phase === 'beam' ? 0x65baff : 0xffffff);
+    // The gate: a stone pillar in the gallop lane that rises while anything weighs on the plate at the end of the shelf tunnel.
+    if (!B.gate) {
+      B.plate = this.plates.find((pl) => pl.room === B.room);
+      B.gate = this.add.rectangle(R.x + 13.5 * T, floor - T, T, 2 * T, 0x9aa9b8).setStrokeStyle(3, 0xd9f3ff).setDepth(4);
+      this.statics.add(B.gate); B.r.on('destroy', () => B.gate.destroy());
+    }
+    const held = !!B.plate && [p, ...this.corpses].some((w) => w.body?.enable !== false && hit(bounds(w), bounds(B.plate)));
+    B.gateUp = held && !B.gateBroken;
+    B.gate.setVisible(B.gateUp); B.gate.body.enable = B.gateUp;
+    const pose = this.time.now < B.introUntil ? 'intro' : ['sweepTell', 'sweep', 'tug'].includes(B.phase) ? 'wave' : B.phase === 'beam' ? 'beam'
+      : B.phase === 'charge' ? 'charge' : moved ? 'walk' : 'idle';
+    // Loop times match the hooves to the ground: walk 23 and gallop 55 px of cell per frame, at STAG_WALK and STAG_GALLOP.
+    this.bossPose(B, 'stag', pose, 180, pose === 'intro' ? 1 : pose === 'wave' ? STAG_SWEEP : pose === 'walk' ? 0.73 : pose === 'charge' ? 0.37 : 0.7, pose === 'charge' || pose === 'idle' || pose === 'walk');
+    // The sheets face left and place the body off-center by a different amount each (pixel mass center, cell px); line the bodies up on B.r.x.
+    const shift = ({ idle: 55, intro: 55, charge: -79, beam: 25, wave: 30, walk: -28 }[pose] ?? 0) * (B.img?.scaleX ?? 0);
+    B.img?.setFlipX(B.face > 0).setPosition(B.r.x + B.face * shift, B.r.y + 32 + (B.artFoot ?? 0)).setVisible(B.r.visible)
+      .setTint(B.phase === 'beam' ? 0x65baff : B.phase === 'dazed' ? 0xb8b8d0 : 0xffffff)
+      .setAngle(B.phase === 'dazed' ? Math.sin(B.clock * 5) * 7 : B.phase === 'tug' ? -B.face * (4 + Math.sin(B.clock * 30) * 1.5) : 0); // dazed: it reels; tug: it leans back, straining
     if (B.phase === 'beam' && B.beam && B.img) { // the beam comes from its open mouth (beam sheet: 585x700 cells, mouth at 43,395)
       const scale = B.img.scaleX, side = B.img.flipX ? -1 : 1;
       B.beam.x = B.img.x + side * (43 - 585 / 2) * scale;
       B.beam.y = B.img.y - (700 - 395) * scale;
       this.fx.fillStyle(0x65baff, 0.9).fillCircle(B.beam.x, B.beam.y, 6);
     }
-    const seals = this.stagSeals(B);
-    if (!B.sealArt && this.textures.exists('seal')) B.sealArt = seals.map(socket => {
-      const art = this.add.image(socket.x, socket.y, 'seal').setDisplaySize(T, T).setDepth(2);
-      B.r.on('destroy', () => art.destroy()); return art;
-    });
-    for (const [i, socket] of seals.entries()) {
-      const filled = this.corpses.some(c => Math.abs(c.x - socket.x) < 25 && Math.abs(c.y - socket.y) < 25);
-      B.sealArt?.[i].setTint(filled ? 0xbbeeff : 0xdf89ff);
-      this.fx.lineStyle(3, filled ? 0xbbeeff : 0xdf89ff, 0.9).strokeCircle(socket.x, socket.y, 14);
+    // The antler sweep's band: in front of it, above your head; a soul floating there snags the antlers.
+    const band = new Phaser.Geom.Rectangle(B.face > 0 ? B.r.x + 2 * T : B.r.x - 7 * T, floor - 6 * T, 5 * T, 4 * T);
+    if (B.phase === 'sweepTell') {
+      this.fx.fillStyle(0xbfe6ff, 0.28 + 0.12 * Math.sin(B.clock * 18)).fillRect(band.x, band.y, band.width, band.height);
+      this.fx.lineStyle(3, 0xbfe6ff, 0.8).beginPath()
+        .arc(B.r.x + B.face * T, floor - 2 * T, 5.5 * T, B.face > 0 ? -1.4 : Math.PI + 1.4, B.face > 0 ? -0.2 : Math.PI + 0.2, B.face < 0).strokePath();
+    }
+    if (B.phase === 'dazed') this.dizzy(B.r.x + B.face * 40, B.r.y + 32 - 215, 50);
+    B.tugText ??= this.add.text(0, 0, 'Press  SPACE', { fontFamily: 'Georgia, serif', fontSize: '22px', color: '#f1e3b8', backgroundColor: '#000000aa', padding: { x: 14, y: 8 } }).setOrigin(0.5).setDepth(46);
+    if (!B.tugText.hooked) { B.tugText.hooked = true; B.r.on('destroy', () => B.tugText.destroy()); }
+    const tugging = B.phase === 'tug' && this.corpses.includes(B.snag);
+    B.tugText.setVisible(tugging);
+    if (tugging) { // a strained tether from the antler tips to the soul
+      const ax = B.r.x + B.face * 70, ay = floor - 5 * T, jx = Math.sin(B.clock * 47) * 3;
+      this.fx.lineStyle(7, 0xbfe6ff, 0.35).lineBetween(ax, ay, B.snag.x + jx, B.snag.y);
+      this.fx.lineStyle(3, 0xffffff, 0.95).lineBetween(ax, ay, B.snag.x + jx, B.snag.y);
+      // The bar: your side (blue, from the soul's end) against the stag's (pale gold).
+      const bx = (ax + B.snag.x) / 2, by = Math.min(ay, B.snag.y) - 70, w = 220, mine = Phaser.Math.Clamp(B.tug, 0, 1) * w;
+      const left = B.snag.x < ax; // which end of the bar is yours
+      this.fx.fillStyle(0x000000, 0.6).fillRect(bx - w / 2 - 4, by - 10, w + 8, 20);
+      this.fx.fillStyle(0xf1e3b8, 0.9).fillRect(bx - w / 2, by - 6, w, 12);
+      this.fx.fillStyle(0x69cfff, 1).fillRect(left ? bx - w / 2 : bx + w / 2 - mine, by - 6, mine, 12);
+      this.fx.lineStyle(2, 0xffffff, 0.9).lineBetween(bx, by - 10, bx, by + 10);
+      B.tugText.setPosition(bx, by - 34).setScale(1 + 0.08 * Math.sin(B.clock * 16));
     }
     if (this.dead > 0 || this.transit || this.talk.line || this.talk.queue.length) return;
     if (p.x > R.x + 1.5 * T) this.gates.filter((g) => g.active && g.room === B.room).forEach((g) => { g.body.enable = true; });
     if (!Dialogue.seen.has('stagArrival')) { Dialogue.play(this, 'stagArrival'); return; }
     if (B.hidden) return;
     B.hurt -= dt; B.clock += dt;
-    B.r.setFillStyle(B.phase === 'bell' ? 0xdf89ff : B.phase === 'beam' ? 0x65baff : B.phase === 'windup' ? 0xffda75 : 0xbceaff);
     if (B.phase === 'setup') {
-      B.r.x = R.x + 25 * T;
       if (p.x < R.x + 7 * T && p.y + 15 > R.y + 12 * T) { B.clock = 0; return; }
       if (B.clock < 8 && p.x < R.x + 7 * T) return;
       B.phase = 'windup'; B.clock = 0;
     }
     const gap = 3 * Math.pow(0.8, 3 - B.hp);
     const next = (phase) => { B.phase = phase; B.clock = 0; };
+    const daze = () => { B.stomped = false; next('dazed'); this.cameras.main.shake(200, 0.01); };
+    // The gallop runs wall to wall: from the vines under the left platform to the right shelf.
+    const lane = (to) => new Phaser.Geom.Rectangle(Math.min(B.r.x, to) - B.r.width / 2, B.r.y - B.r.height / 2, Math.abs(to - B.r.x) + B.r.width, B.r.height);
+    const tell = B.again ? 0.6 : 0.9, lock = tell - 0.4;
     if (B.phase === 'windup') {
-      if (B.clock < 0.5) B.aimX = p.x;
-      this.fx.lineStyle(3, 0xf5f582, 0.6).lineBetween(B.r.x, R.y + 14.5 * T, B.aimX, R.y + 14.5 * T);
-      this.fx.fillStyle(0xf5f582, 0.22).fillRect(B.aimX - 16, R.y + 13 * T, 32, 2 * T);
-      if (B.clock >= 0.9) { B.rammed = false; next('charge'); }
+      if (B.clock < lock) {
+        B.face = p.x > B.r.x ? 1 : -1;
+        B.aimX = B.face > 0 ? R.x + 33 * T - B.r.width / 2 : R.x + 5 * T + B.r.width / 2;
+      }
+      const L = lane(B.aimX);
+      this.fx.fillStyle(0xf5f582, B.clock >= lock ? 0.3 : 0.12).fillRect(L.x, L.y, L.width, L.height);
+      if (B.clock >= tell) next('charge');
     } else if (B.phase === 'charge') {
-      B.r.x -= Math.sign(B.r.x - B.aimX) * Math.min(Math.abs(B.r.x - B.aimX), 650 * dt);
-      const c = this.corpses.find(c => c.body.enable && hit(bounds(c), bounds(B.r)));
-      if (c) {
-        const bottom = c.y + c.height / 2;
+      walkTo(B.aimX, STAG_GALLOP);
+      for (const c of this.corpses.filter((c) => c.body.enable && !c.lying && hit(bounds(c), bounds(B.r)))) {
+        const bottom = c.y + c.height / 2; // trampled flat, never destroyed; flat souls stay walk-through here
         c.lying = true; c.setSize(...BODY_LYING); c.y = bottom - BODY_LYING[1] / 2;
         c.body.setSize(...BODY_LYING); c.body.updateFromGameObject();
         c.sprites?.forEach(sp => sp.destroy()); c.sprites = [];
         c.setFillStyle(0x7399d9, 0.6);
-        B.rammed = true;
       }
-      if (B.rammed || Math.abs(B.r.x - B.aimX) < 1) {
-        B.stomped = false; next(B.rammed ? 'dazed' : 'miss');
+      if (B.gateUp && hit(bounds(B.gate), bounds(B.r))) { // slams into the risen gate, which shatters
+        B.r.x = B.gate.x - B.face * (T / 2 + B.r.width / 2);
+        B.gateBroken = true; B.again = false; B.gate.setVisible(false); B.gate.body.enable = false;
+        this.playFx('impact', B.gate.x, floor - T, 3 * T, 3.4 * T, 500);
+        daze();
+      } else if (B.r.x === B.aimX) next('miss');
+    } else if (B.phase === 'miss' && B.clock >= 0.5) {
+      B.again = B.hp === 1 && !B.again; // its last stand: gallops back at once
+      if (B.again) next('windup');
+      else if (B.hp === 3) next('recovery');
+      else if (B.hp === 2) next('stalk');
+      else { // 1 HP: dodge the beam, then the sweep
+        next('beam'); B.face = p.x > B.r.x ? 1 : -1; B.beam = { x: B.r.x, y: B.r.y, angle: B.face > 0 ? 0 : Math.PI, clock: 0, stag: true };
       }
-    } else if ((B.phase === 'dazed' && B.clock >= 2) || (B.phase === 'miss' && B.clock >= gap)) {
-      next('return');
-    } else if (B.phase === 'return') { // walks back to its spot (the Veo walk), then calls the beam
-      const home = R.x + 25 * T;
-      B.r.x += Math.sign(home - B.r.x) * Math.min(Math.abs(home - B.r.x), 260 * dt);
-      if (Math.abs(home - B.r.x) <= 1) {
-        next('beam');
-        B.beam = { x: B.r.x, y: R.y + 5 * T, angle: Math.PI, clock: 0, stag: true };
-      }
+    } else if (B.phase === 'stalk') { // walks up to you, then rears for the antler sweep
+      const close = Math.abs(p.x - B.r.x) < 6 * T;
+      if (!close) walkTo(Phaser.Math.Clamp(p.x, R.x + 8 * T, R.x + 30 * T), STAG_WALK);
+      if (close || B.clock >= 3) { B.face = p.x > B.r.x ? 1 : -1; next('sweepTell'); }
+    } else if (B.phase === 'sweepTell' && B.clock >= STAG_SWEEP) {
+      next('sweep');
+      const snag = this.corpses.find((c) => c.body.enable && hit(bounds(c), band));
+      if (snag) { // antlers snag the soul: at 2 HP it crashes down; at 1 HP it holds on and pulls
+        this.playFx('impact', snag.x, snag.y, 2 * T, 2.25 * T, 500);
+        if (B.hp === 1) { B.snag = snag; B.tug = 0.5; this.tugPresses = 0; next('tug'); } else daze();
+      } else if (hit(bounds(p), band)) return this.die();
+    } else if (B.phase === 'tug') { // your Space presses (counted in the controls, which the tug takes over) against its pull
+      B.tug += (this.tugPresses ?? 0) * STAG_TUG_PRESS - STAG_TUG_PULL * dt; this.tugPresses = 0;
+      if (!this.corpses.includes(B.snag) || B.tug <= 0) { B.snag = null; next('recovery'); } // it wins: shakes the soul loose
+      else if (B.tug >= 1) { B.snag = null; this.cameras.main.flash(200, 190, 230, 255); daze(); } // you win: the tether snaps, it topples backward
+    } else if (B.phase === 'sweep' && B.clock >= 0.3) {
+      next('recovery');
+    } else if (B.phase === 'dazed' && B.clock >= STAG_DAZE) {
+      if (B.hp === 3 && B.gateBroken) { B.gateBroken = false; this.playFx('impact', B.gate.x, floor - T, 2 * T, 2.25 * T, 400); } // missed the stomp: the gate grows back
+      next('recovery');
     } else if (B.phase === 'beam') {
       if (B.beam.clock < 1.98) this.updateAimedBeam(B.beam, dt);
-      if (B.clock >= 1.98 + gap) next('procession');
-    } else if (B.phase === 'procession') {
-      const pulse = Math.floor(B.clock / 1.2), t = B.clock % 1.2;
-      if (pulse < 3) {
-        if (B.pulse !== pulse) { B.pulse = pulse; B.pulseX = p.x; }
-        this.fx.fillStyle(0xf5f582, t < 0.6 ? 0.25 : 0.9).fillRect(B.pulseX - T, R.y + 14.7 * T, 2 * T, 0.3 * T);
-        if (t >= 0.6 && Math.abs(p.x - B.pulseX) < T + 10 && p.y + 15 > R.y + 14.7 * T) return this.die();
-      }
-      if (B.clock >= 3.6 + gap) { B.pulse = -1; next('bell'); }
-    } else if (B.phase === 'bell') {
-      for (let i = 0; i < 3; i++) this.fx.lineStyle(3, 0xdf89ff, 0.9).strokeCircle(p.x, p.y, Math.max(2, (3 - B.clock) * 24 + i * 14));
-      if (B.clock >= 3) {
-        B.bells++;
-        this.cameras.main.flash(150, 180, 100, 230);
-        if (!seals.every(socket => this.corpses.some(c => c.body.enable && Math.abs(c.x - socket.x) < 25 && Math.abs(c.y - socket.y) < 25))) return this.die();
-        next('recovery');
-      }
-    } else if (B.phase === 'recovery' && B.clock >= gap) next('windup');
+      else next('stalk');
+    } else if (B.phase === 'recovery') { // walks toward you (the Veo walk), then winds up
+      if (Math.abs(p.x - B.r.x) > 8 * T) walkTo(Phaser.Math.Clamp(p.x, R.x + 8 * T, R.x + 30 * T), STAG_WALK);
+      if (B.clock >= gap) { B.again = false; next('windup'); }
+    }
     if (B.deaths >= 10) Dialogue.play(this, 'stagNudge');
   }
 
@@ -2388,11 +2436,7 @@ class Room extends Phaser.Scene {
         this.playFx('impact', B.r.x, bounds(soul).top, 2 * T, 2.25 * T, 500);
       } else if (B.clock >= 0.5) enter('diveGap');
     } else if (B.phase === 'stunned') {
-      for (let i = 0; i < 3; i++) {
-        const a = B.clock * 5 + i * Math.PI * 2 / 3;
-        const sx = B.r.x + Math.cos(a) * 34, sy = B.r.y - BOSS_H / 2 - 14 + Math.sin(a) * 8; // dizzy sparks: it's open
-        B.warn.fillStyle(0xffef72, 0.95).fillCircle(sx, sy, 6).fillStyle(0xffffff, 1).fillCircle(sx, sy, 2.5);
-      }
+      this.dizzy(B.r.x, B.r.y - BOSS_H / 2 - 14, 40);
       if (B.clock >= 2) { B.open = false; enter('diveGap'); }
     } else if (B.phase === 'diveGap' && B.clock >= gap) {
       enter('curtainApproach');
@@ -2608,7 +2652,7 @@ class Room extends Phaser.Scene {
     if (!falling || (this.bossPreviousFeet ?? p.body.prev.y + p.body.height) > top + 1) {
       if (B.kind === 'tree') return false;
       if (B.story === 'mothDown' && (B.phase === 'stunned' || B.phase?.endsWith('Approach'))) return false;
-      if (B.stag && B.phase === 'return') return false; // walking home: brushing past it is harmless
+      if (B.stag && B.phase !== 'charge') return false; // only the gallop hurts
       this.die(); return true;
     }
     p.body.reset(p.x, top - p.height / 2);
@@ -2752,12 +2796,18 @@ class Room extends Phaser.Scene {
       p.body.velocity.x = 0;
       return;
     }
+    if (this.boss?.phase === 'tug') { // the tug of war takes over: Space pulls, nothing else moves you
+      if (rawSpace) this.tugPresses = (this.tugPresses ?? 0) + 1;
+      p.body.velocity.x = 0;
+      return;
+    }
     if (swap && ((this.rooms[this.index].world ?? 0) >= 3 || this.treePower)) {
       const c = this.corpses.at(-1);
       if (c) {
         const x = p.x, y = p.y, vx = p.body.velocity.x;
-        p.body.reset(c.x, c.y); p.body.setVelocity(vx, 0);
-        c.setPosition(x, y); c.body.updateFromGameObject(); c.vy = 0;
+        const sink = c.lying ? p.body.bottom - p.y - c.height / 2 : 0; // a flat soul is shorter than you: meet it feet to feet, not inside the floor
+        p.body.reset(c.x, c.y - sink); p.body.setVelocity(vx, 0);
+        c.setPosition(x, y + sink); c.body.updateFromGameObject(); c.vy = 0;
         c.sprites?.forEach((sp) => sp.setPosition(c.x, c.y + c.height / 2));
         this.swapped = true;
       }

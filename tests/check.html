@@ -1681,63 +1681,62 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     await until(() => s.player.body.velocity.y < 0, 1000, 'plain stomp bounce');
     check(B.hp === 3 && stats.deaths === plainDeaths, 'The spectral stag: plain stomp bounces without damage');
     s = await cleanSolveRoom('The spectral stag'); B = s.boss;
-    B.phase = 'bell'; B.clock = 0; B.hp = 1;
-    const missingDeaths = stats.deaths;
-    await until(() => stats.deaths > missingDeaths, 4000, 'unfilled seals blast');
-    check(B.hp === 3 && s.corpses.length === 1, 'The spectral stag: missing seals kill and death heals');
+    const onPlatform = () => s.player.body.reset(O().x + 5.5 * 32, O().y + 12 * 32 - 15.5);
+    // A soul in the gallop's path is trampled flat, not a trip: only the gate stops it now.
+    await place(20, 0, 15); onPlatform(); await wait(100);
+    let deaths = stats.deaths;
+    B.r.x = O().x + 28 * 32; B.phase = 'windup'; B.clock = 0;
+    await until(() => B.phase === 'miss', 4000, 'gallop over a waiting soul');
+    check(B.hp === 3 && s.corpses[0].lying && stats.deaths === deaths && B.r.x === O().x + 8 * 32,
+      'The spectral stag: the gallop tramples a soul in its lane and runs on to the wall');
     s = await cleanSolveRoom('The spectral stag'); B = s.boss;
     Dialogue.seen.delete('stagDown');
-    // Setup uses real deaths; all subsequent motion uses ordinary inputs.
-    for (const [x, floor] of [[1, 12], [37, 12], [5, 12]]) await place(x, 0, floor);
-    const deaths = stats.deaths;
-    B.phase = 'bell'; B.clock = 0;
-    await until(() => B.phase === 'recovery', 4000, 'three seals');
-    check(stats.deaths === deaths && s.corpses.length === 3, 'The spectral stag: filled seals survive without consuming souls');
-    await until(() => B.phase === 'miss', 6000, 'socket-only charge misses');
-    check(B.hp === 3, 'The spectral stag: standing behind the platform seal cannot daze the charge');
-    for (let hp = 3; hp > 0; hp--) {
-      const survival = [];
-      for (let t = 0; t < 25000 && B.phase !== 'windup' && stats.deaths === deaths; t += 20) {
-        if (survival.at(-1)?.phase !== B.phase) survival.push({phase:B.phase,x:(s.player.x-O().x)/32,feet:(s.player.y+15-O().y)/32});
-        if (B.phase === 'beam' && B.beam.clock >= 1.4 && B.beam.clock < 2.1) key('keydown', 32);
-        else key('keyup', 32);
-        const pulse = B.phase === 'procession' && B.clock < 3.6 && s.player.y + 15 > O().y + 14.7 * 32;
-        const returnToLane = ['bell', 'recovery'].includes(B.phase) && Math.abs(s.player.x - (O().x + 8 * 32)) > 6;
-        const direction = pulse && Math.abs(s.player.x - B.pulseX) < 60 ? (B.pulseX < O().x + 10 * 32 ? 1 : -1) : returnToLane ? Math.sign(O().x + 8 * 32 - s.player.x) : 0;
-        key(direction > 0 ? 'keydown' : 'keyup', 39); key(direction < 0 ? 'keydown' : 'keyup', 37);
+    const stomp = async (hp) => { // run at it and jump from close in, like a player
+      key('keydown', 39);
+      for (let t = 0; t < 3000 && B.hp === hp && stats.deaths === deaths; t += 20) {
+        if (s.player.body.blocked.down && s.player.x > B.r.x - 96 - 2.5 * 32) key('keydown', 32);
         await wait(20);
       }
-      key('keyup', 32); key('keyup', 39); key('keyup', 37); await wait(20);
-      if (stats.deaths !== deaths) throw new Error('stag survival failed: hp=' + hp + ', ' + JSON.stringify(survival));
-
-      await until(() => B.phase === 'windup', 8000, 'stag winds up'); // it walks home before each cycle now
-      if (s.player.y + 15 < O().y + 14 * 32) {
-        key('keydown', 39); key('keydown', 32);
-        await until(() => s.player.x >= O().x + 8 * 32, 1800, 'bait charge on floor');
-        key('keyup', 39); key('keyup', 32);
-        await until(() => s.player.body.blocked.down, 1200, 'land in the charge lane');
-      } else await until(() => B.clock >= 0.55, 1000, 'lock the floor lane');
-      await wait(100);
-      key('keydown', 69); await wait(30); key('keyup', 69);
-      await until(() => B.phase === 'dazed', 2500, 'soul ram');
-      await until(() => s.player.body.blocked.down, 500, 'plant feet before stomp jump');
-      key('keydown', 39); key('keydown', 32);
-      for (let t = 0; t < 1500 && B.hp === hp && stats.deaths === deaths; t += 20) await wait(20);
-      if (B.hp !== hp - 1) throw new Error('stomp failed: ' + JSON.stringify({expected:hp,hp:B.hp,phase:B.phase,bx:(B.r.x-O().x)/32,x:(s.player.x-O().x)/32,feet:(s.player.y+15-O().y)/32,deaths:stats.deaths-deaths}));
-      key('keyup', 39); key('keydown', 37);
-      await until(() => B.hp < hp, 2000, 'stomp damage');
-      check(B.hp === hp - 1 && s.corpses.length === 3, 'The spectral stag: swap, soul ram and stomp preserve the souls');
-      if (hp > 1) {
-        await until(() => s.player.x <= O().x + 5.5 * 32, 2000, 'return to platform socket');
-        key('keyup', 37); key('keydown', 39);
-        await until(() => s.player.body.velocity.x >= 0, 1000, 'brake at socket'); key('keyup', 39);
-        await until(() => s.player.body.blocked.down, 2000, 'land at socket'); key('keyup', 32);
-        if (s.player.y + 15 > O().y + 12.1 * 32) throw new Error('stag stomp return missed platform: ' + (s.player.x-O().x)/32);
-        key('keydown', 69); await wait(30); key('keyup', 69);
-        await until(() => B.phase !== 'dazed', 3000, 'finish damage window');
-      } else { key('keyup', 37); key('keyup', 32); }
-    }
-    check(stats.deaths === deaths && B.bells >= 3, 'The spectral stag: survive repeated bells and win without dying');
+      key('keyup', 39); key('keyup', 32);
+      if (B.hp !== hp - 1) throw new Error('stag stomp failed: ' + JSON.stringify({ hp, now: B.hp, phase: B.phase, bx: (B.r.x - O().x) / 32, x: (s.player.x - O().x) / 32, feet: (s.player.y + 15 - O().y) / 32, deaths: stats.deaths - deaths }));
+    };
+    const swap = async () => { key('keydown', 69); await wait(30); key('keyup', 69); };
+    // Hit 1: a soul on the plate at the end of the shelf tunnel raises the gate; the gallop slams into it.
+    await place(38, 0, 12); await place(11, 4, 15); onPlatform(); await wait(150); // the plate soul, then a floating swap partner mid-arena
+    deaths = stats.deaths;
+    check(B.gate.visible && B.gate.body.enable, 'The spectral stag: a soul on the tunnel plate raises the gate');
+    B.r.x = O().x + 28 * 32; B.phase = 'windup'; B.clock = 0;
+    await until(() => B.phase === 'dazed', 4000, 'gallop into the gate');
+    check(B.gateBroken && !B.gate.visible && B.r.x - 96 > B.gate.x, 'The spectral stag: the gallop slams into the gate, which shatters, and it reels ' + JSON.stringify({ broken: B.gateBroken, vis: B.gate.visible, bx: (B.r.x - O().x) / 32, gx: (B.gate.x - O().x) / 32, phase: B.phase }));
+    await until(() => B.phase === 'recovery', 4000, 'daze ends without a stomp'); await wait(50);
+    check(!B.gateBroken && B.gate.visible, 'The spectral stag: missing the first stomp grows the gate back');
+    B.r.x = O().x + 28 * 32; B.phase = 'windup'; B.clock = 0;
+    await until(() => B.phase === 'dazed', 4000, 'gallop into the regrown gate');
+    await stomp(3);
+    check(B.gateBroken && !B.gate.visible, 'The spectral stag: after the first hit the gate stays broken');
+    // Hit 2: jump into the antler band and swap out, leaving a soul floating there; swap back to land on it.
+    await until(() => !s.talk.line && B.hurt <= 0, 2000, 'after the first stomp');
+    s.player.body.reset(O().x + 10.5 * 32, O().y + 15 * 32 - 16); await wait(300);
+    B.r.x = O().x + 20 * 32; B.face = -1; B.phase = 'sweepTell'; B.clock = 0;
+    s.player.body.reset(O().x + 15 * 32, O().y + 11 * 32); await swap(); // mid-jump in the band
+    check(s.corpses.at(-1).x === O().x + 15 * 32 && Math.abs(s.player.x - (O().x + 11.5 * 32)) < 4, 'The spectral stag: swapping mid-air leaves the soul floating in the band');
+    await until(() => B.phase !== 'sweepTell', 1500, 'antler sweep');
+    check(B.phase === 'dazed' && stats.deaths === deaths, 'The spectral stag: the antler sweep snags the floating soul');
+    await swap(); await stomp(2);
+    // Hit 3: the antlers snag the soul and hold on; mash Space to win the tug of war and the stag topples backward.
+    await until(() => B.hurt <= 0, 2000, 'after the second stomp');
+    s.player.body.reset(O().x + 10.5 * 32, O().y + 15 * 32 - 16); await wait(200);
+    B.r.x = O().x + 20 * 32; B.face = -1; B.phase = 'sweepTell'; B.clock = 0;
+    s.player.body.reset(O().x + 15 * 32, O().y + 11 * 32); await swap();
+    await until(() => B.phase !== 'sweepTell', 1500, 'antler sweep at 1 HP'); await wait(500);
+    check(B.phase === 'tug' && B.snag && B.tugText.visible && B.tug < 0.5 && stats.deaths === deaths, 'The spectral stag: at 1 HP the antlers hold the soul and pull; the screen says press Space');
+    const px = s.player.x;
+    for (let t = 0; t < 4000 && B.phase === 'tug'; t += 120) { key('keydown', 32); await wait(40); key('keyup', 32); await wait(80); } // about 8 presses a second
+    check(B.phase === 'dazed' && !B.tugText.visible && s.corpses.length === 2 && Math.abs(s.player.x - px) < 1,
+      'The spectral stag: mashing Space wins the tug (no jumping meanwhile), and it topples');
+    await until(() => s.player.body.blocked.down, 1000, 'stand before the last stomp');
+    await stomp(1);
+    check(stats.deaths === deaths && B.hp === 0, 'The spectral stag: gate, antlers and beam win without dying');
     Dialogue.skip(s);
     check(!s.boss && s.stagFinished && !s.guide.on, 'The spectral stag: last stand removes guide and opens entrance');
     Dialogue.seen.delete('stagNote'); Dialogue.seen.delete('floorOne');
@@ -1764,7 +1763,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     await until(() => Dialogue.seen.has('stagNote'), 2000, 'note behind the old tree');
     check(s.stagWriting.visible && !s.guide.on, 'The spectral stag: return to the dirt note without the guide');
     Dialogue.skip(s);
-    await walkTo('The pyramid entrance', 22, 39, 20000);
+    await walkTo('The pyramid entrance', 2, 39, 20000); // the floor-one scene starts as you arrive, and he walks on into the pyramid himself
     await until(() => Dialogue.seen.has('floorOne'), 2000, 'pyramid entrance scene');
     Dialogue.skip(s);
     await until(() => game.scene.isActive('end'), 4000, 'ending card after pyramid fade');
