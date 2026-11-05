@@ -85,7 +85,7 @@ const Art = {
         body.setFillStyle(0, 0);
       } else if (name === 'plate') {
         const held = weights.some((w) => hit(w, bounds(body)));
-        if (held) img.y += 5;
+        if (held) img.y += img.displayHeight * 0.6; // sinks so only its top edge peeks above the floor
         img.setCrop(0, 0, img.frame.width, img.frame.height * (held ? 3 / 8 : 1));
       } else if (name === 'spring') {
         const elapsed = scene.time.now - (body.launchArt ?? -1000);

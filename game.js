@@ -51,7 +51,7 @@ const RECALL_GAP = 0.35, RECALL_MIN = 0.08;
 // Wall jump: slide down a wall (or a soul) while pushing into it, jump to kick off. Hold jump for the full
 // kick; let go early and both the height and the push away are cut short. You can't kick off the same
 // side twice in a row (touch the ground or the other wall first), so one wall can't be climbed.
-const WALL_SLIDE = 70, WALL_KICK = 170, WALL_JUMP = 420, KICK_LOCK = 0.3;
+const WALL_SLIDE = 70, WALL_KICK = 170, WALL_JUMP = 500, KICK_LOCK = 0.3; // a kick climbs ~2.8 tiles (was 420: ~2)
 // Hazards and enemies
 const SAW_SPEED = 90, SAW_R = 13;               // saws run along a row or column; a soul in the way jams them
 const CRUMBLE_TIME = 0.45, CRUMBLE_BACK = 2.5;  // crumbling blocks break this long after you land, return later
@@ -451,10 +451,10 @@ const ROOMS = [
     '############   #####       ####   ############',
     '############   #####       ####   ############',
     '############   #####^^^^^^^####   ############',
-    '############   x###############   ############',
-    '############   x###############   ############',
-    '############   x###############   ############',
-    '############   x###############   ############',
+    '############   ################   ############',
+    '############   ################   ############',
+    '############   ################   ############',
+    '############   ################   ############',
     '############   ################   ############',
     '############   ################   ############',
     '############   ################      ######   ',
@@ -946,7 +946,7 @@ class Room extends Phaser.Scene {
     for (const [key, path] of [
       ['amulet', 'world1/amulet'], ['ghost', 'world1/ghost'], ['old-tree', 'world3/old-tree'],
       ...[1, 2, 3].flatMap((n) => [[`amulet-rune${n}`, `world1/amulet-rune${n}`], [`shrine${n}`, `world${n}/shrine`], [`shrineLit${n}`, `world${n}/shrine-lit`], [`gate${n}`, `world${n}/gate`]]),
-      ['uiSoulFull', 'ui/soul-full'], ['uiSoulEmpty', 'ui/soul-empty'], ['carvings', 'world2/carvings'], ['notePatch', 'world3/note'], ['laserEmitter', 'world2/laser'],
+      ['uiSoulFull', 'ui/soul-full'], ['uiSoulEmpty', 'ui/soul-empty'], ['carvings', 'world2/carvings'], ['laserEmitter', 'world2/laser'],
     ]) if (!this.textures.exists(key)) this.load.image(key, `assets/${path}.webp`);
     if (!this.textures.exists('heroSheet')) {
       this.load.image('heroSheet', 'assets/hero/sheet.webp'); // 8 frames: run 0-5, jump 6, fall 7
@@ -1077,7 +1077,7 @@ class Room extends Phaser.Scene {
               hazard(this.spikes.at(-1), 'spikes', T, 16, -3);
               break;
             case 'x': this.spikes.push(rect(x + 4, y + 2, T - 8, T - 4, 0x7a3550)); this.spikes.at(-1).audioVine = true; hazard(this.spikes.at(-1), 'thorns', T, T); break;
-            case '_': this.plates.push(Object.assign(rect(x + 1, y + T - 8, T - 2, 8, 0xffd700).setStrokeStyle(2, 0x8a6a00).setDepth(3), { room: ri })); hazard(this.plates.at(-1), 'plate', T, 8); break;
+            case '_': this.plates.push(Object.assign(rect(x + 1, y + T - 8, T - 2, 8, 0xffd700).setStrokeStyle(2, 0x8a6a00).setDepth(3), { room: ri })); hazard(this.plates.at(-1), 'plate', T, 16, -4); break; // drawn 16 tall so it reads at a glance (the trigger stays 8)
             case 'D': { const d = Object.assign(rect(x, y, T, T, 0x8c6640), { room: ri }); this.statics.add(d); this.doors.push(d); break; }
             case 'e': case 'f': case 't': case 'w': case 'i': case 'b': this.walkerSpawns.push({ x, y, room: ri, kind: row[tx] }); break; // made on entry
             case 'o': case 'O': {
@@ -1501,14 +1501,23 @@ class Room extends Phaser.Scene {
     if (name === 'absorb' && B) { // dissolves into motes that stream into the hero, who flashes white
       if (!this.textures.exists('spark'))
         this.make.graphics({ add: false }).fillStyle(0xffffff).fillCircle(3, 3, 3).generateTexture('spark', 6, 6).destroy();
-      const em = this.add.particles(B.r.x, B.r.y, 'spark', {
-        x: { min: -48, max: 48 }, y: { min: -24, max: 24 }, moveToX: p.x, moveToY: p.y, lifespan: 900,
-        scale: { start: 1.2, end: 0.4 }, tint: [0xffffff, 0xcfeaff], blendMode: 'ADD', emitting: false,
+      // The fallen body fades while a stream of motes flows from it into him (normal blend: additive vanished
+      // on bright fog); when it lands he glows white for a moment.
+      const from = B.img?.visible ? B.img : B.r, fx = from.x, fy = from.y - (from === B.img ? from.displayHeight * 0.3 : 0);
+      const em = this.add.particles(0, 0, 'spark', {
+        x: { min: fx - 50, max: fx + 50 }, y: { min: fy - 30, max: fy + 30 }, moveToX: p.x, moveToY: p.y - 6,
+        lifespan: 800, frequency: 12, quantity: 2, scale: { start: 1.8, end: 0.7 }, tint: [0xffffff, 0xfff2c0, 0xcfeaff],
       }).setDepth(6);
-      em.explode(60);
-      this.time.delayedCall(1200, () => em.destroy());
-      this.time.delayedCall(850, () => this.cameras.main.flash(350, 255, 255, 255));
-      this.bossDefeated(B);
+      this.tweens.killTweensOf([B.img, B.r].filter(Boolean)); // stop the glow pulse, then fade (the moth copies r's alpha to its image)
+      this.tweens.add({ targets: [B.img, B.r].filter(Boolean), alpha: 0, duration: 1100 });
+      this.time.delayedCall(1000, () => em.stop());
+      this.time.delayedCall(1900, () => em.destroy());
+      this.time.delayedCall(800, () => {
+        this.heroSprite?.setTintFill(0xffffff);
+        this.cameras.main.flash(250, 255, 255, 255);
+        this.time.delayedCall(700, () => this.heroSprite?.clearTint());
+      });
+      this.time.delayedCall(1150, () => this.bossDefeated(B));
     }
     if (name === 'lookaround' && g) { // surveys the clearing, then settles on the hero
       g.looking = true;
@@ -2117,9 +2126,6 @@ class Room extends Phaser.Scene {
       this.add.rectangle(R.x + 21 * T, R.y + 13 * T, 26, 128, 0x655d60).setDepth(1);
       this.add.circle(R.x + 21 * T, R.y + 9 * T, 65, 0x526672).setDepth(1);
     }
-    if (this.textures.exists('notePatch')) // the dirt patch he writes the note in, ringed with roots and stones
-      this.add.image(R.x + 19 * T, R.y + 14 * T, 'notePatch').setDisplaySize(220, 74).setDepth(1); // flattened to lie on the ground
-    else this.add.ellipse(R.x + 19 * T, R.y + 14 * T, 200, 68, 0x705a43).setDepth(1);
     this.stagWriting = this.add.text(R.x + 16.5 * T, R.y + 13 * T, SCRIPT.stagNote.map((l) => l.text).join('\n'), {
       fontFamily: 'cursive', fontSize: '14px', color: '#382b23', fontStyle: 'italic', wordWrap: { width: 600 }
     }).setScale(0.28, 0.14).setAngle(-4).setDepth(2).setVisible(false);
@@ -2144,15 +2150,17 @@ class Room extends Phaser.Scene {
       B.antlers.lineBetween(B.r.x + dx, B.r.y - 32, B.r.x + dx, B.r.y - 66);
       B.antlers.lineBetween(B.r.x + dx, B.r.y - 48, B.r.x + dx + Math.sign(dx) * 17, B.r.y - 62);
     }
-    if (B.phase === 'beam' && B.beam) {
-      this.fx.lineStyle(2, 0x65baff, 0.6).lineBetween(B.r.x, B.r.y - 2 * T, B.beam.x, B.beam.y);
-      this.fx.fillStyle(0x65baff, 0.9).fillCircle(B.beam.x, B.beam.y, 8);
-    }
     const pose = this.time.now < B.introUntil ? 'intro' : B.phase === 'beam' ? 'beam'
       : B.phase === 'bell' ? 'wave' : B.phase === 'charge' ? 'charge' : B.phase === 'return' ? 'walk' : 'idle';
     this.bossPose(B, 'stag', pose, 180, pose === 'wave' || pose === 'intro' ? 1 : pose === 'walk' ? 1.1 : 0.7, pose === 'charge' || pose === 'idle' || pose === 'walk');
     B.img?.setFlipX(B.phase === 'return' && B.r.x < R.x + 25 * T); // the sheets face left; walking home to the right turns it
     B.img?.setPosition(B.r.x, B.r.y + 32 + (B.artFoot ?? 0)).setVisible(B.r.visible).setTint(B.phase === 'bell' ? 0xdf89ff : B.phase === 'beam' ? 0x65baff : 0xffffff);
+    if (B.phase === 'beam' && B.beam && B.img) { // the beam comes from its open mouth (beam sheet: 585x700 cells, mouth at 43,395)
+      const scale = B.img.scaleX, side = B.img.flipX ? -1 : 1;
+      B.beam.x = B.img.x + side * (43 - 585 / 2) * scale;
+      B.beam.y = B.img.y - (700 - 395) * scale;
+      this.fx.fillStyle(0x65baff, 0.9).fillCircle(B.beam.x, B.beam.y, 6);
+    }
     const seals = this.stagSeals(B);
     if (!B.sealArt && this.textures.exists('seal')) B.sealArt = seals.map(socket => {
       const art = this.add.image(socket.x, socket.y, 'seal').setDisplaySize(T, T).setDepth(2);

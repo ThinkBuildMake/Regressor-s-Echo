@@ -583,7 +583,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
       'the thorn soul blocks yellow wing dust and survives');
     check(M.hidden && s.talk.queue.length > 0, 'the last stomp starts the moth ending scene');
     Dialogue.skip(s);                                  // skipping still dissolves it
-    await wait(200);
+    await wait(1400);                                  // the win lands when the absorb motes reach him
     check(rules.max === 2 && rules.selfDestruct, 'absorption grants the second rune and self-destruct');
     check(!s.boss && s.gates.every((g) => !g.active || g.room !== mi), `beating the moth opens the vines (hp ${M.hp})`);
     await until(() => s.player.body.blocked.down || s.player.body.touching.down, 2000, 'land after the victory bounce');
@@ -831,7 +831,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
       s.touchBoss();
     }
     check(B.hp === 0 && B.hidden, `tree: three stuck-hand stomps win (hp ${B.hp})`);
-    Dialogue.skip(s); await wait(200);
+    Dialogue.skip(s); await wait(1400); // the absorb cue grants the win after its motes land
     check(stats.treePower && !s.boss, 'tree: victory grants the third soul');
     s = await cleanSolveRoom('The tree guardian');
     Dialogue.seen.delete('treeSlam');
@@ -990,21 +990,15 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
   }
   if (matches('Thornwood')) {
     s = await cleanSolveRoom('Thornwood');
-    // A: stomp the walker, climb into the thorns (the soul hangs where the arc meets them), then kick off it.
+    // A: stomp the walker, then wall-jump straight up the 3-wide chimney (no thorns since 2026-11-04) to shrine 1.
     check(await stompNearest(), 'Thornwood: stomp the first walker');
     await runTo(13.5); await frames(20);
-    await climb(1, () => stats.deaths > 0 || feet() < 6, true);
-    await alive();
-    const anchor = s.corpses[0];
-    check(stats.deaths === 1 && anchor && anchor.x > O().x + 14 * T, 'Thornwood: the chimney climb dies on the thorns and leaves an anchor soul');
-    check(await stompNearest(), 'Thornwood: stomp the walker again after the respawn');
-    await runTo(13.5); await frames(20);
-    await climb(1, () => stats.deaths > 1 || tx() > 15.3);
+    await climb(1, () => stats.deaths > 0 || tx() > 15.3);
     await runTo(17.6); await frames(20);
-    check(stats.deaths === 1 && s.start.x > O().x + 17 * T, 'Thornwood: kicking off the anchor soul climbs past the thorns to shrine 1');
+    check(stats.deaths === 0 && s.start.x > O().x + 17 * T, `Thornwood: the chimney wall-jump climb reaches shrine 1 with no deaths (${stats.deaths} deaths)`);
     // B: keep running over the crumbling bridge under the falling spikes.
     await runTo(28.6); await frames(30);
-    check(stats.deaths === 1 && s.start.x > O().x + 28 * T, 'Thornwood: the crumbling bridge run reaches shrine 2');
+    check(stats.deaths === 0 && s.start.x > O().x + 28 * T, 'Thornwood: the crumbling bridge run reaches shrine 2');
     // C: the saw never reaches the exit shaft, so following it can't skip the jam.
     const saw = s.saws.find((w) => w.room === s.index);
     let far = 0;
@@ -1822,19 +1816,12 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
       direction(1); key('keydown', 32);
       let ok = await moveUntil(() => s.wallSide() === 1 && s.player.body.velocity.y >= -50);
       if (ok) { await kick(1); ok = await moveUntil(() => s.wallSide() === -1); }
-      if (ok) { await kick(-1); ok = await moveUntil(() => s.wallSide() === 1); }
-      if (ok) {
-        direction(1);
-        ok = await moveUntil(() => feet() >= 15.8 && s.player.body.velocity.y > 0);
-        if (ok) {
-          key('keyup', 32); await wait(80); key('keydown', 32); await wait(40);
-          direction(-1); key('keyup', 32);
-          ok = await moveUntil(() => ground(17));
-        }
-      }
+      // One kick (about 2.8 tiles) carries him above the low ledge on the left wall: let go and slide down onto it.
+      if (ok) { key('keyup', 32); direction(-1); ok = await moveUntil(() => ground(17)); }
+      if (ok) { direction(1); ok = await moveUntil(() => s.player.x >= O().x + 5.75 * 32); direction(0); await wait(100); }
       if (ok) ok = await launch(1, 17);
       if (ok) { await kick(1); ok = await moveUntil(() => s.wallSide() === -1 && feet() < 13); }
-      if (ok) { await kick(-1); ok = await moveUntil(() => ground(11)); }
+      if (ok) { await kick(-1); ok = await moveUntil(() => s.player.body.blocked.down && feet() < 11.1); } // the ledge, or the wall top after a flyer stomp
       // The top ledge hugs the right wall: jump up it once the flyer above is heading left, out of his way,
       // then kick off the right wall at the top of the jump and off the left wall into the doorway.
       if (ok) {
@@ -1843,11 +1830,10 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
         if (flyer) ok = await moveUntil(() => flyer.dir < 0 && flyer.x < O().x + 7 * 32 && flyer.x > O().x + 6.2 * 32);
         if (ok) { direction(1); key('keydown', 32); ok = await moveUntil(() => feet() < 9 && s.player.body.velocity.y >= -50); }
       }
-      // The last kick needs every pixel: let go of jump on the way over (after the kick lock, past the top),
-      // so he kicks off the left wall the moment he touches it.
-      if (ok) { await kick(1); ok = await moveUntil(() => s.kick <= 0 && s.player.body.velocity.y >= 0); }
-      if (ok) { key('keyup', 32); ok = await moveUntil(() => s.wallSide() === -1); }
-      if (ok) { key('keydown', 32); await wait(80); direction(1); ok = await moveUntil(() => s.start.x > O().x + 9 * 32); }
+      // The kick now climbs ~2.8 tiles, so the last one off the left wall would bonk the ceiling and fall short
+      // of the doorway: slide down the left wall to about 7 tiles first, so he is still rising as he crosses.
+      if (ok) { await kick(1); ok = await moveUntil(() => s.wallSide() === -1 && feet() >= 7.1); }
+      if (ok) { await kick(-1); ok = await moveUntil(() => s.start.x > O().x + 9 * 32); }
       climbed = ok && s.start.x > O().x + 9 * 32;
       direction(0); key('keyup', 32);
       if (!climbed) {

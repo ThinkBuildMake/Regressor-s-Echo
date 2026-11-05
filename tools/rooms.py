@@ -50,11 +50,10 @@ def gatehouse(o, p):
 room('The gatehouse', [210, 108], 30, 17, 1, 'get killed on the plate so the walker ends up on the right side', gatehouse)
 
 def thornwood(o, p):
-    # A: stomp or dodge the walker, then wall-jump up a 3-wide chimney. Thorns replace the right wall for 4 rows,
-    #    more than any kick sequence can cross. Your first death on them leaves a soul right where your arc meets
-    #    them; next time kick off that soul (it leaves a 2-wide gap) to get past.
+    # A: stomp or dodge the walker, then wall-jump up a 3-wide chimney (no thorns since 2026-11-04: playtesters
+    #    struggled; the kick also climbs higher now, about 2.8 tiles per kick).
     o(0, 21, 0, 22); o(1, 18, 10, 22); p(1, 22, 'P'); p(8, 22, 'e')
-    o(11, 20, 11, 22); o(12, 3, 14, 22); o(15, 11, 15, 14, 'x')
+    o(11, 20, 11, 22); o(12, 3, 14, 22)
     # B: shrine, then a crumbling bridge over spikes under falling spikes: keep running.
     o(15, 3, 30, 5); p(17, 5, 'C'); o(20, 6, 26, 6, '~'); o(20, 7, 26, 9); o(20, 10, 26, 10, '^')
     for x in (21, 23, 25): p(x, 3, '!')
