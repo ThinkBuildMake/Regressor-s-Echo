@@ -157,19 +157,20 @@ const SCRIPT = {
     { ...G("pained", "*crack*"), cue: 'crack' },
     H("shouting", "NO\u2014!"),
     W(1),
-    G("pained", "I knew it would come to this."),
-    G("weary", "Same thing happened last time. My guide did exactly this."),
+    // He is breaking apart: each line fainter (fade = his opacity), his words more broken; small cracks as he goes.
+    { ...G("pained", "I knew\u2026 it would come to this."), fade: 0.62 },
+    { ...G("weary", "Same thing\u2026 happened last time. My guide\u2026 did exactly this."), fade: 0.55, cue: 'crackle' },
     H("shouting", "You KNEW? Then why would you\u2014"),
     W(0.6),
-    G("warm", "Because I knew."),
+    { ...G("warm", "Because\u2026 I knew."), fade: 0.48 },
     W(1.2),
     H("sad", "\u2026"),
-    G("warm", "I've watched over you. You're already doing better than I did. You'll get further."),
-    G("solemn", "Just remember\u2026 the deaths aren't free. Count every one."),
+    { ...G("warm", "I've watched over you\u2026 You're already doing better than I did\u2026 You'll get further."), fade: 0.4, cue: 'crackle' },
+    { ...G("solemn", "Just remember\u2026 the deaths\u2026 aren't free. Count\u2026 every one."), fade: 0.32 },
     H("sad", "Don't\u2014 you can't just\u2014"),
     W(0.8),
-    G("wry", "Hey."),
-    { ...G("warm", "I was never alive in the first place, right?"), cue: 'guideBreak' },
+    { ...G("wry", "\u2026Hey."), fade: 0.24, cue: 'crackle' },
+    { ...G("warm", "I was never\u2026 alive in the first place\u2026 right?"), fade: 0.16, cue: 'guideBreak' },
     W(2),
     W(1.6, 'toNote'), // fade to black: next, he finds the note behind the old tree
   ],
@@ -579,6 +580,7 @@ const Dialogue = {
         guideX: g.x, guideTarget: l.guide ? r.x + l.guide.x * 32 : g.x + (l.guideBy || 0) * 32 };
     }
     const m = scene.talk.motion;
+    if (l.fade !== undefined) g.maxAlpha = l.fade; // the ghost fading as he breaks apart
     if (l.lookAround) g.looking = !skip;
     if (l.guide && g) g.hoverY = r.y + l.guide.y * 32;
     if (skip && (l.guide || l.guideBy)) g.x = m?.guideTarget ??

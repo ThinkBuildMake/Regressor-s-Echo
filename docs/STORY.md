@@ -410,28 +410,34 @@ The pyramid needs to be visible in the background, its top lost in cloud.
 > **Guide** [thinking]: You did this an hour ago. Lead it away.
 
 ### 7. The guide's last stand — *on the last stomp*
+A cutscene: the game takes over. The two walk away from the fallen stag into the middle of the clearing, the hero's back to it.
 "Eleven" and "Twelve" use the real death count for this fight (the guide's number, then one more).
 > **Hero** [excited]: We did it! Did you see that? Three stomps, and I barely—  
 > **Guide** [amused]: You died eleven times.  
 > **Hero** [cocky]: Twelve. But who's counting?  
 > **Guide** [warm]: Me. It was always me.  
-> *(The stag's remains flicker blue. A beam gathers.)*  
+> *(Behind his back, the stag calls out, rises and lowers its antlers to charge.)*  
 > **Guide** [warning]: LOOK OUT!  
-> *(The guide throws himself in front. A soul is a soul: his blocks it, but this beam breaks souls. He cracks like glass.)*  
+> *(The guide throws himself in front and takes the shot. A soul is a soul: his blocks it, but this beam breaks souls.)*  
+> *(The screen goes white for a couple of seconds. When the light fades, the stag is gone.)*  
+> **Guide** [pained]: Ugh…  
+> **Guide** [pained]: \*crack\*  
 > **Hero** [shouting]: NO—!  
-> **Guide** [pained]: Ugh… I knew it would come to this.  
-> **Guide** [weary]: Same thing happened last time. My guide did exactly this.  
+> *(From here he is breaking apart: fainter with every line, his words more broken, small cracks as he goes. The hero's lines stay whole.)*  
+> **Guide** [pained]: I knew… it would come to this.  
+> **Guide** [weary]: Same thing… happened last time. My guide… did exactly this.  
 > **Hero** [shouting]: You KNEW? Then why would you—  
-> **Guide** [warm]: Because I knew.  
+> **Guide** [warm]: Because… I knew.  
 > **Hero** [sad]: …  
-> **Guide** [warm]: I've watched over you. You're already doing better than I did. You'll get further.  
-> **Guide** [solemn]: Just remember… the deaths aren't free. Count every one.  
+> **Guide** [warm]: I've watched over you… You're already doing better than I did… You'll get further.  
+> **Guide** [solemn]: Just remember… the deaths… aren't free. Count… every one.  
 > **Hero** [sad]: Don't— you can't just—  
-> **Guide** [wry]: Hey.  
-> **Guide** [warm]: I was never alive in the first place, right?  
-> *(He fades.)*
+> **Guide** [wry]: …Hey.  
+> **Guide** [warm]: I was never… alive in the first place… right?  
+> *(He breaks apart and is gone. Fade to black; the next scene is the note.)*
 
 ### 8. The note — *behind the tree*
+Shown as a cutscene after the fade: he walks to the note and kneels; it's read in the guide's portrait, each line in quotes. Then control returns.
 *(He keeps his promise. Behind the tree, a patch of earth has been smoothed flat, and words are scratched into it in his own handwriting.)*
 > If you're reading this… then it must mean I've kicked the bucket.  
 > Don't make that face. I can see it from here. Well. Could.  

@@ -1437,7 +1437,8 @@ class Room extends Phaser.Scene {
         g.x += (home.x - g.x) * s; g.hoverY += (home.y - g.hoverY) * s;
         if (d < 8) g.drifting = false;
       }
-      g.setAlpha(Math.min(0.7, g.alpha + dt * 1.2));
+      const cap = g.maxAlpha ?? 0.7; // lowered line by line as he fades out at the end
+      g.setAlpha(g.alpha > cap ? Math.max(cap, g.alpha - dt * 0.6) : Math.min(cap, g.alpha + dt * 1.2));
       g.away = 0;
       if (!g.looking) g.setFlipX(g.x > p.x);
     } else if (g.alpha > 0 && (g.away += dt) > 0.6) g.setAlpha(Math.max(0, g.alpha - dt * 0.9)); // lingers, then fades
@@ -1509,6 +1510,7 @@ class Room extends Phaser.Scene {
       this.time.delayedCall(800, () => { if (this.boss?.stag) this.bossDefeated(this.boss); this.stagFinished = true; }); // gone under the light
       this.tweens.add({ targets: white, alpha: 0, duration: 800, delay: 1900, onComplete: () => white.destroy() });
     }
+    if (name === 'crackle') { GameAudio.play('story-guide-cracking-like-glass', 0, 0.35); this.cameras.main.flash(120, 170, 220, 255); } // smaller cracks as he goes
     if (name === 'crack') { // the ghost cracks like glass
       GameAudio.play('story-guide-cracking-like-glass');
       this.cameras.main.shake(250, 0.004);
