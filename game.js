@@ -1082,6 +1082,7 @@ class Room extends Phaser.Scene {
             case 'e': case 'f': case 't': case 'w': case 'i': case 'b': this.walkerSpawns.push({ x, y, room: ri, kind: row[tx] }); break; // made on entry
             case 'o': case 'O': {
               const sw = { room: ri, x: x + T / 2, y: y + T / 2, dx: row[tx] === 'o' ? 1 : 0, dy: row[tx] === 'O' ? 1 : 0, dir: 1 };
+              sw.x0 = sw.x; sw.y0 = sw.y; // Shift+R puts it back here
               const key = Art.hazardKey(this, world, 'saw');
               if (key) sw.img = this.add.image(sw.x, sw.y, key).setDisplaySize(36, 36).setDepth(3);
               this.saws.push(sw);
@@ -1589,6 +1590,25 @@ class Room extends Phaser.Scene {
   buildArtSome(budgetMs) {
     const end = performance.now() + budgetMs;
     for (const q of this.platQueue) while (q.length) { Art.platform(this, ...q.shift()); if (performance.now() > end) return; }
+  }
+
+  // Shift+R outside boss fights: reset this room in place, like a death that also clears your souls and
+  // puts enemies, saws, crumbling floors and falling spikes back. Rebuilding the whole world took ~0.5s.
+  retryRoom() {
+    const i = this.index, p = this.player;
+    this.corpses.forEach((c) => c.destroy());
+    this.corpses = [];
+    this.spawnWalkers(i);
+    for (const sw of this.saws) if (sw.room === i) { sw.x = sw.x0; sw.y = sw.y0; sw.dir = 1; sw.jam = false; }
+    this.start = this.rooms[i].spawns[0];
+    this.dead = this.charge = this.slide = this.kick = this.buffer = 0;
+    this.roomDeaths = 0;
+    this.setLying(false);
+    p.setVisible(true);
+    p.body.moves = true;
+    p.body.reset(this.start.x, this.start.y);
+    this.retries = (this.retries ?? 0) + 1;
+    this.cameras.main.flash(200, 0, 0, 0);
   }
 
   enterRoom(i) {
@@ -2494,7 +2514,10 @@ class Room extends Phaser.Scene {
     this.bossPreviousFeet = this.bossFeet;
     this.bossFeet = p.y + p.height / 2;
 
-    if (JD(k.R) && k.SHIFT.isDown) return this.scene.restart({ index: this.index, retry: true }); // Shift+R: retry the room (if you've trapped yourself)
+    if (JD(k.R) && k.SHIFT.isDown) { // Shift+R: retry the room (if you've trapped yourself)
+      if (this.boss || this.talk.active || this.transit) return this.scene.restart({ index: this.index, retry: true }); // boss fights rebuild fully
+      return this.retryRoom();
+    }
     if (DEV && JD(k.N)) return this.scene.restart({ index: this.index + 1 });
     if (DEV && JD(k.ONE)) rules.freeze = !rules.freeze;
     if (DEV && JD(k.TWO)) rules.snap = !rules.snap;

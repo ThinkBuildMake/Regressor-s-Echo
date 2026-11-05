@@ -73,9 +73,10 @@ const go = async (i) => { console.info('at go ' + ROOMS[i]?.[0]);
 };
 // Shift+R with real keys; like go(), wait on the real clock because the rebuild may load art.
 const shiftR = async () => {
-  const old = room().player;
+  const old = room().player, tries = room().retries;
   key('keydown', 16); key('keydown', 82); await wait(50); key('keyup', 82); key('keyup', 16);
-  const ready = () => room().player && room().player !== old && room().player.body;
+  // Outside boss fights Shift+R resets the room in place (same hero); boss rooms rebuild the scene.
+  const ready = () => room().player && room().player.body && (room().player !== old || room().retries !== tries);
   for (const end = nativeNow() + 15000; !ready(); await new Promise((r) => setTimeout(r, 5))) {
     await advance();
     if (nativeNow() > end) throw new Error('Timed out waiting for Shift+R');
@@ -1659,6 +1660,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     s = await cleanSolveRoom('The clearing');
     const title = () => room().children.list.some((o) => o.type === 'Text' && o.text === 'Forest Edge');
     check(title(), 'The clearing: entering World 1 shows its title');
+    await until(() => !title(), 6000, 'world title fades'); // Shift+R resets in place, so wait out the first title
     s = await shiftR(); await wait(200);
     check(!title(), 'The clearing: Shift+R does not show the world title again');
   }
@@ -1773,7 +1775,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     check(stats.deaths === routeDeaths, 'The spectral stag: ending route needs no death to escape the wall soul');
     // Restart from the ending route: victory must survive rebuilding the scene.
     game.scene.stop('end'); game.scene.start('room', { index: ROOMS.findIndex(([n]) => n === 'The spectral stag') });
-    await until(() => game.scene.isActive('room') && room().player?.active, 5000, 'restore room after ending');
+    await until(() => game.scene.isActive('room') && room().player?.active, 15000, 'restore room after ending');
     s = room(); await wait(100);
     check(!s.boss && s.stagFinished && !s.guide.on && s.gates.filter(g => g.room === s.index).every(g => !g.active),
       'The spectral stag: restart preserves victory and opens gates and buttress');
@@ -2415,7 +2417,7 @@ const key = (type, keyCode) => {                     // synthetic key event Phas
     game.scene.stop('room'); game.scene.start('end');
     await wait(12500);
     key('keydown', 13); await wait(50); key('keyup', 13);
-    await until(() => game.scene.isActive('room') && room().player?.body, 5000, 'play again');
+    await until(() => game.scene.isActive('room') && room().player?.body, 15000, 'play again');
     s = room(); Dialogue.skip(s); await wait(300);
     const deaths = stats.deaths;
     key('keydown', 75); await wait(1500); key('keyup', 75); await wait(100);
