@@ -212,9 +212,10 @@ const SCRIPT = {
     H("sad", "\u2026"), // he stands up, quiet
   ],
   floorOne: [
-    H("determined", "Ninety floors, huh? Don't worry. I'll get there in a flash."),
-    H("determined", "And then\u2026 clear this godforsaken temple. For both you and I."),
-    H("determined", "Watch me."),
+    H("sad", "Ninety floors, huh?"),
+    H("determined", "\u2026Don't worry. I'll get there in a flash."),
+    H("determined", "And then I'm clearing this whole godforsaken temple. For both of us."),
+    H("cocky", "Watch me."),
     W(2.2, 'doorOpen'), // the doors open and he walks into the light on his own
     W(1, 'theEnd')
   ],
@@ -467,7 +468,7 @@ stage('stagDown', 12, { hop: true, face: 'guide' }); // NO—!
 stage('stagDown', 13, { pose: 'slump' });
 stage('stagDown', 22, { pose: 'idle', face: 'guide' });
 stage('floorOne', 0, { walk: 5, face: 'right' });
-stage('floorOne', 3, { walk: 15, face: 'right' }); // into the doorway (game.js draws it at 15)
+stage('floorOne', 4, { walk: 15, face: 'right' }); // into the doorway (game.js draws it at 15)
 // The nap: the game walks him in, he lies down, full dark, and he gets up at dawn.
 stage('letGo', 0, { walk: 4, face: 'right' });
 stage('letGo', 2, { pose: 'sleep' });
