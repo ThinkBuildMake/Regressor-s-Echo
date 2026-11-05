@@ -200,7 +200,7 @@ const SCRIPT = {
     G("solemn", "\"No matter how hard it gets.\""),
     G("warm", "\"No matter what.\""),
     G("warm", "\"Thanks for putting up with me. I know I'm not great company.\""),
-    G("wry", "\"I'd know.\""),
+    G("wry", "\"We'd know.\""),
     G("warm", "\"And don't take my ending as yours.\""),
     G("warm", "\"You're me, sure\u2026 but you were different from the start.\""),
     G("warm", "\"You'll get further than I ever could.\""),

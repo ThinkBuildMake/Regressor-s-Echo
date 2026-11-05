@@ -463,7 +463,7 @@ Shown as a cutscene after the fade (he stands on the ground the whole time, no f
 > "No matter how hard it gets."  
 > "No matter what."  
 > "Thanks for putting up with me. I know I'm not great company."  
-> "I'd know."  
+> "We'd know."  
 > "And don't take my ending as yours."  
 > "You're me, sure… but you were different from the start."  
 > "You'll get further than I ever could."  
