@@ -184,7 +184,9 @@ const SCRIPT = {
     H("scared", "Where\u2026 where is it?"),
     H("scared", "The thing he left behind the tree\u2026"),
     W(0.2), W(0.2), W(0.4), // he runs back and forth past the tree looking for it (each beat lasts until he gets there)
+    W(0.9), // he stops, and sees it
     H("sad", "Ah\u2026"),
+    W(1), // he kneels down to read
     G("solemn", "\"Dear Me,\""),
     G("sad", "\"If you're reading this\u2026 then I've kicked the bucket.\""),
     G("weary", "\"Don't make that face. I can see it from here.\""),
@@ -452,7 +454,7 @@ stage('stagNote', 0, { face: 'right' }); // he says it where he stands; the sear
 stage('stagNote', 2, { walk: 23, speed: 190 }); // scrambling: running past the tree and back (silent beats: Space doesn't cut them short)
 stage('stagNote', 3, { walk: 17, speed: 190 });
 stage('stagNote', 4, { walk: 19.5, speed: 150, face: 'left' });
-stage('stagNote', 5, { pose: 'kneel' }); // Ah… He bends down to read
+stage('stagNote', 7, { pose: 'kneel' }); // after "Ah…", he bends down to read
 stage('stagNote', SCRIPT.stagNote.length - 1, { pose: 'idle' });
 // The stag's fall: walk away from where it lies into the open clearing, back turned to it.
 const stagTile = (scene) => { const B = scene.bosses.find((b) => b.stag), r = scene.rooms[scene.index].rect; return ((B?.img ?? B?.r)?.x - r.x) / 32 || 25; };

@@ -449,7 +449,9 @@ Shown as a cutscene after the fade (he stands on the ground the whole time, no f
 > **Hero** [scared]: Where… where is it?  
 > **Hero** [scared]: The thing he left behind the tree…  
 > *(He scrambles around the roots: past the tree, back, a hop.)*  
-> **Hero** [sad]: Ah… *(He kneels.)*  
+> *(He stops, and sees it.)*  
+> **Hero** [sad]: Ah…  
+> *(He kneels to read.)*  
 > "Dear Me,"  
 > "If you're reading this… then I've kicked the bucket."  
 > "Don't make that face. I can see it from here."  
