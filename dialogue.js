@@ -453,8 +453,8 @@ stage('stagPromise', 0, { walk: 20, guide: { x: 18, y: 13 }, face: 'guide' });
 stage('stagNote', 0, { face: 'right' }); // he says it where he stands; the search is the silent run that follows
 stage('stagNote', 2, { walk: 23, speed: 190 }); // scrambling: running past the tree and back (silent beats: Space doesn't cut them short)
 stage('stagNote', 3, { walk: 17, speed: 190 });
-stage('stagNote', 4, { walk: 19.5, speed: 150, face: 'left' });
-stage('stagNote', 7, { pose: 'kneel' }); // after "Ah…", he bends down to read
+stage('stagNote', 4, { walk: 19.5, speed: 150, face: 'right' });
+stage('stagNote', 7, { pose: 'kneel', face: 'right' }); // after "Ah…", he bends down to read
 stage('stagNote', SCRIPT.stagNote.length - 1, { pose: 'idle' });
 // The stag's fall: walk away from where it lies into the open clearing, back turned to it.
 const stagTile = (scene) => { const B = scene.bosses.find((b) => b.stag), r = scene.rooms[scene.index].rect; return ((B?.img ?? B?.r)?.x - r.x) / 32 || 25; };
