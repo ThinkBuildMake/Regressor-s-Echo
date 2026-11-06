@@ -159,7 +159,7 @@ const SCRIPT = {
     H("shouting", "NO\u2014!"),
     W(1),
     // He is breaking apart: each line fainter (fade = his opacity), his words more broken; small cracks as he goes.
-    { ...G("pained", "I knew\u2026 it would come to this."), fade: 0.62 },
+    { ...G("weary", "I knew\u2026 it would come to this."), fade: 0.62 },
     { ...G("weary", "Same thing\u2026 happened last time."), fade: 0.58, cue: 'crackle' },
     { ...G("sad", "My guide\u2026 did exactly this."), fade: 0.55 },
     H("shouting", "You KNEW? Then why would you\u2014"),
