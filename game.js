@@ -2891,16 +2891,8 @@ class Room extends Phaser.Scene {
       if (blocked) GameAudio.play('amulet-refuses');
       else if (c) {
         const x = p.x, y = p.y, vx = p.body.velocity.x;
-        // Each lands clear of walls: a flat soul (62 wide) or a sliding hero by a wall would overlap it, and the
-        // physics would shove the body back out (the hero rubber-banded when swapping with a trampled soul by the wall).
-        const walls = this.statics.getChildren().filter((st) => st.body.enable && !this.corpses.includes(st)).map(bounds);
-        const clear = (cx, cy, w, h) => {
-          for (const r of walls) if (cy + h / 2 > r.y + 1 && cy - h / 2 < r.bottom - 1 && cx + w / 2 > r.x && cx - w / 2 < r.right)
-            cx = cx < r.centerX ? r.x - w / 2 : r.right + w / 2;
-          return cx;
-        };
-        p.body.reset(clear(c.x, c.y - sink, p.body.width, p.body.height), c.y - sink); p.body.setVelocity(vx, 0);
-        c.setPosition(clear(x, y + sink, c.width, c.height), y + sink); c.body.updateFromGameObject(); c.vy = 0;
+        p.body.reset(c.x, c.y - sink); p.body.setVelocity(vx, 0);
+        c.setPosition(x, y + sink); c.body.updateFromGameObject(); c.vy = 0;
         c.sprites?.forEach((sp) => sp.setPosition(c.x, c.y + c.height / 2));
         this.swapped = true;
       }
